@@ -14,7 +14,6 @@ import java.util.Map;
 public final class Rest {
 
     private String urlString;
-    private RequestType requestType;
     private final Map<String, String> parameters = new HashMap<String, String>();
     private final Map<String, String> headers = new HashMap<String, String>();
 
@@ -28,29 +27,17 @@ public final class Rest {
         return this;
     }
 
-    public final Rest type(final RequestType requestType) {
-        this.requestType = requestType;
-        return this;
-    }
-
     public final Rest header(final String name, final String value) {
         this.headers.put(name, value);
         return this;
     }
 
-    public final Response execute() throws RestException {
+    public Response get() throws RestException {
         if (urlString == null) {
             throw new RestException("No URL is set");
         }
-        if (requestType == null || requestType == RequestType.GET) {
-            return doGet();
-        } else {
-            return doPost();
-        }
-    }
-
-    private Response doGet() throws RestException {
         if (!parameters.isEmpty()) {
+            // Append parameters to existing query string, or create one
             if (urlString.indexOf('?') == -1) {
                 urlString = urlString + "?" + parametersToQueryString();
             } else {
@@ -58,6 +45,7 @@ public final class Rest {
             }
         }
         try {
+            // Initialize HTTP connection, and set any header values
             final URL url = new URL(urlString);
             final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
@@ -65,31 +53,32 @@ public final class Rest {
                 connection.setRequestProperty(header.getKey(), header.getValue());
             }
 
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder body = new StringBuilder();
-            String line;
-            while ( (line = reader.readLine()) != null ) {
-                body.append(line);
-            }
-            reader.close();
-
+            // Download and parse response
             final int statusCode = connection.getResponseCode();
             final String mimeType = connection.getContentType();
-            return new Response(statusCode, mimeType, body.toString());
+            final String body = responseBodyToString(connection);
+            return new Response(statusCode, mimeType, body);
         } catch (IOException e) {
             throw new RestException(e);
         }
     }
 
-    private Response doPost() throws RestException {
+    public Response post() throws RestException {
+        if (urlString == null) {
+            throw new RestException("No URL is set");
+        }
         try {
+            // Initialize HTTP connection, and set any header values
             final URL url = new URL(urlString);
             final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             for (final Map.Entry<String, String> header : headers.entrySet()) {
                 connection.setRequestProperty(header.getKey(), header.getValue());
             }
+
             if (!parameters.isEmpty()) {
+                // Write any parameters in the request body (NOTE: There can *also* be parameters set via the URL
+                // query string.  This logic does not append or remove anything from the request URL).
                 connection.setDoOutput(true);
                 final DataOutputStream dataOutputStream = new DataOutputStream(connection.getOutputStream());
                 dataOutputStream.writeBytes(parametersToQueryString());
@@ -97,17 +86,11 @@ public final class Rest {
                 dataOutputStream.close();
             }
 
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder body = new StringBuilder();
-            String line;
-            while ( (line = reader.readLine()) != null ) {
-                body.append(line);
-            }
-            reader.close();
-
+            // Download and parse response
             final int statusCode = connection.getResponseCode();
             final String mimeType = connection.getContentType();
-            return new Response(statusCode, mimeType, body.toString());
+            final String body = responseBodyToString(connection);
+            return new Response(statusCode, mimeType, body);
         } catch (IOException e) {
             throw new RestException(e);
         }
@@ -123,6 +106,17 @@ public final class Rest {
             queryString.append(params.get(index).getKey()).append("=").append(params.get(index).getValue());
         }
         return queryString.toString();
+    }
+
+    private String responseBodyToString(final HttpURLConnection connection) throws IOException {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        StringBuilder body = new StringBuilder();
+        String line;
+        while ( (line = reader.readLine()) != null ) {
+            body.append(line);
+        }
+        reader.close();
+        return body.toString();
     }
 
 }
