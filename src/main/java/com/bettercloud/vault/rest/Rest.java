@@ -17,17 +17,17 @@ public final class Rest {
     private final Map<String, String> parameters = new HashMap<String, String>();
     private final Map<String, String> headers = new HashMap<String, String>();
 
-    public final Rest url(final String urlString) {
+    public Rest url(final String urlString) {
         this.urlString = urlString;
         return this;
     }
 
-    public final Rest parameter(final String name, final String value) {
+    public Rest parameter(final String name, final String value) {
         this.parameters.put(name, value);
         return this;
     }
 
-    public final Rest header(final String name, final String value) {
+    public Rest header(final String name, final String value) {
         this.headers.put(name, value);
         return this;
     }
@@ -96,21 +96,32 @@ public final class Rest {
         }
     }
 
+    public Response put() throws RestException {
+        // TODO: Implement
+        throw new UnsupportedOperationException();
+    }
+
+    public Response delete() throws RestException {
+        // TODO: Implement
+        throw new UnsupportedOperationException();
+    }
+
+
     private String parametersToQueryString() {
         final StringBuilder queryString = new StringBuilder();
         final List<Map.Entry<String, String>> params = new ArrayList<Map.Entry<String, String>>(parameters.entrySet());
         for (int index = 0; index < params.size(); index++) {
             if (index > 0) {
-                queryString.append("&");
+                queryString.append('&');
             }
-            queryString.append(params.get(index).getKey()).append("=").append(params.get(index).getValue());
+            queryString.append(params.get(index).getKey()).append('=').append(params.get(index).getValue());
         }
         return queryString.toString();
     }
 
     private String responseBodyToString(final HttpURLConnection connection) throws IOException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        StringBuilder body = new StringBuilder();
+        final StringBuilder body = new StringBuilder();
         String line;
         while ( (line = reader.readLine()) != null ) {
             body.append(line);
