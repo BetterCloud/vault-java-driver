@@ -15,8 +15,8 @@ public final class Rest {
 
     private String urlString;
     private RequestType requestType;
-    private Map<String, String> parameters = new HashMap<String, String>();
-    private Map<String, String> headers = new HashMap<String, String>();
+    private final Map<String, String> parameters = new HashMap<String, String>();
+    private final Map<String, String> headers = new HashMap<String, String>();
 
     public final Rest url(final String urlString) {
         this.urlString = urlString;
@@ -90,6 +90,7 @@ public final class Rest {
                 connection.setRequestProperty(header.getKey(), header.getValue());
             }
             if (!parameters.isEmpty()) {
+                connection.setDoOutput(true);
                 final DataOutputStream dataOutputStream = new DataOutputStream(connection.getOutputStream());
                 dataOutputStream.writeBytes(parametersToQueryString());
                 dataOutputStream.flush();
