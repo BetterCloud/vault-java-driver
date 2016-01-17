@@ -15,7 +15,9 @@ public class RestTests {
 
     @Test
     public void testGet_Plain() throws RestException {
-        final Response response = new Rest().url("https://httpbin.org/get").type(RequestType.GET).execute();
+        // Request type should default to `RequestType.GET` if not set.  This URL only accepts GET requests, so
+        // the request should fail if this default doesn't happen.
+        final Response response = new Rest().url("https://httpbin.org/get").execute();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
@@ -58,6 +60,28 @@ public class RestTests {
         assertEquals("cold", args.getString("hot", null));
         assertEquals("bar", args.getString("foo", null));
         assertEquals("oranges", args.getString("apples", null));
+    }
+
+    @Test
+    public void testGet_WithHeaders() throws RestException {
+        final Response response = new Rest()
+                .url("https://httpbin.org/get")
+                .type(RequestType.GET)
+                .header("black", "white")
+                .header("day", "night")
+                .header("two-part", "Header names can't have spaces, but values can")
+                .execute();
+        assertEquals(200, response.getStatus());
+        assertEquals("application/json", response.getMimeType());
+
+        final JsonObject jsonObject = Json.parse(response.getBody()).asObject();
+        assertEquals("https://httpbin.org/get", jsonObject.getString("url", null));
+        final JsonObject headers = jsonObject.get("headers").asObject();
+        // Note that even though our header names where all-lowercase, the round trip process converts them to
+        // camel case.  Header values should remain unmodified.
+        assertEquals("white", headers.getString("Black", null));
+        assertEquals("night", headers.getString("Day", null));
+        assertEquals("Header names can't have spaces, but values can", headers.getString("Two-Part", null));
     }
 
 
