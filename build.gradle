@@ -5,6 +5,8 @@ apply plugin: 'java'
 
 //noinspection GroovyUnusedAssignment
 sourceCompatibility = 1.6
+//noinspection GroovyUnusedAssignment
+targetCompatibility = 1.6
 
 repositories {
     mavenCentral()
