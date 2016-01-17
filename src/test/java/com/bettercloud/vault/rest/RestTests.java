@@ -10,14 +10,12 @@ public class RestTests {
 
     @Test(expected = RestException.class)
     public void testFailsOnNoUrl() throws RestException {
-        new Rest().execute();
+        new Rest().get();
     }
 
     @Test
     public void testGet_Plain() throws RestException {
-        // Request type should default to `RequestType.GET` if not set.  This URL only accepts GET requests, so
-        // the request should fail if this default doesn't happen.
-        final Response response = new Rest().url("https://httpbin.org/get").execute();
+        final Response response = new Rest().url("https://httpbin.org/get").get();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
@@ -29,10 +27,9 @@ public class RestTests {
     public void testGet_InsertParams() throws RestException {
         final Response response = new Rest()
                 .url("https://httpbin.org/get")
-                .type(RequestType.GET)
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
-                .execute();
+                .get();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
@@ -47,10 +44,9 @@ public class RestTests {
     public void testGet_UpdateParams() throws RestException {
         final Response response = new Rest()
                 .url("https://httpbin.org/get?hot=cold")
-                .type(RequestType.GET)
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
-                .execute();
+                .get();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
@@ -66,11 +62,10 @@ public class RestTests {
     public void testGet_WithHeaders() throws RestException {
         final Response response = new Rest()
                 .url("https://httpbin.org/get")
-                .type(RequestType.GET)
                 .header("black", "white")
                 .header("day", "night")
                 .header("two-part", "Header names can't have spaces, but values can")
-                .execute();
+                .get();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
@@ -88,8 +83,7 @@ public class RestTests {
     public void testPost_Plain() throws RestException {
         final Response response = new Rest()
                 .url("https://httpbin.org/post")
-                .type(RequestType.POST)
-                .execute();
+                .post();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
@@ -101,10 +95,9 @@ public class RestTests {
     public void testPost_InsertParams() throws RestException {
         final Response response = new Rest()
                 .url("https://httpbin.org/post")
-                .type(RequestType.POST)
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
-                .execute();
+                .post();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
@@ -124,10 +117,9 @@ public class RestTests {
     public void testPost_UpdateParams() throws RestException {
         final Response response = new Rest()
                 .url("https://httpbin.org/post?hot=cold")
-                .type(RequestType.POST)
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
-                .execute();
+                .post();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
@@ -144,11 +136,10 @@ public class RestTests {
     public void testPost_WithHeaders() throws RestException {
         final Response response = new Rest()
                 .url("https://httpbin.org/post")
-                .type(RequestType.POST)
                 .header("black", "white")
                 .header("day", "night")
                 .header("two-part", "Header names can't have spaces, but values can")
-                .execute();
+                .post();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
