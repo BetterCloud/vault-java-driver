@@ -5,12 +5,20 @@ import com.bettercloud.vault.json.JsonObject;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Unit tests relating the REST client processing of POST requests.
+ */
 public class PostTests {
 
+    /**
+     * Verify a basic POST request, with no parameters or headers.
+     *
+     * @throws RestException
+     * @throws UnsupportedEncodingException If there's a problem parsing the response JSON as UTF-8
+     */
     @Test
     public void testPost_Plain() throws RestException, UnsupportedEncodingException {
         final Response response = new Rest()
@@ -24,6 +32,14 @@ public class PostTests {
         assertEquals("https://httpbin.org/post", jsonObject.getString("url", null));
     }
 
+    /**
+     * Verify a POST request that has no query string on the base URL, but does have additional
+     * parameters passed.  The base URL should remain unmodified, and the parameters should be
+     * sent with the request body.
+     *
+     * @throws RestException
+     * @throws UnsupportedEncodingException If there's a problem parsing the response JSON as UTF-8
+     */
     @Test
     public void testPost_InsertParams() throws RestException, UnsupportedEncodingException {
         final Response response = new Rest()
@@ -37,8 +53,6 @@ public class PostTests {
 
         final String jsonString = new String(response.getBody(), "UTF-8");
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
-        // Note that with a POST (as with a PUT), the parameters are written with the request body... and URL
-        // is *not* re-written to insert them as a query string.
         assertEquals("https://httpbin.org/post", jsonObject.getString("url", null));
 
         // Note that with a POST (as with a PUT) to this "httpbin.org" test service, parameters are returned
@@ -49,6 +63,14 @@ public class PostTests {
         assertEquals("this parameter has whitespace in its name and value", form.getString("multi part", null));
     }
 
+    /**
+     * Verify a POST request that already has a query string on the base URL, but also has additional
+     * parameters passed.  The base URL should remain unmodified, and the parameters should be
+     * sent with the request body.
+     *
+     * @throws RestException
+     * @throws UnsupportedEncodingException If there's a problem parsing the response JSON as UTF-8
+     */
     @Test
     public void testPost_UpdateParams() throws RestException, UnsupportedEncodingException {
         final Response response = new Rest()
@@ -71,6 +93,15 @@ public class PostTests {
         assertEquals("this parameter has whitespace in its name and value", form.getString("multi part", null));
     }
 
+    /**
+     * <p>Verify a POST request that passes HTTP headers.</p>
+     *
+     * <p>Note that even though our header names are all lowercase, the round-trip process
+     * converts them to camel case (e.g. <code>two-part</code> to <code>Two-Part</code>).</p>
+     *
+     * @throws RestException
+     * @throws UnsupportedEncodingException If there's a problem parsing the response JSON as UTF-8
+     */
     @Test
     public void testPost_WithHeaders() throws RestException, UnsupportedEncodingException {
         final Response response = new Rest()
