@@ -4,6 +4,9 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+
 import static org.junit.Assert.assertEquals;
 
 public class GetTests {
@@ -14,17 +17,18 @@ public class GetTests {
     }
 
     @Test
-    public void testGet_Plain() throws RestException {
+    public void testGet_Plain() throws RestException, UnsupportedEncodingException {
         final Response response = new Rest().url("https://httpbin.org/get").get();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
-        final JsonObject jsonObject = Json.parse(response.getBody()).asObject();
+        final String jsonString = new String(response.getBody(), "UTF-8");
+        final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/get", jsonObject.getString("url", null));
     }
 
     @Test
-    public void testGet_InsertParams() throws RestException {
+    public void testGet_InsertParams() throws RestException, UnsupportedEncodingException {
         final Response response = new Rest()
                 .url("https://httpbin.org/get")
                 .parameter("foo", "bar")
@@ -34,7 +38,8 @@ public class GetTests {
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
-        final JsonObject jsonObject = Json.parse(response.getBody()).asObject();
+        final String jsonString = new String(response.getBody(), "UTF-8");
+        final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/get?apples=oranges&foo=bar&multi+part=this+parameter+has+whitespace+in+its+name+and+value",
                 jsonObject.getString("url", null));
         final JsonObject args = jsonObject.get("args").asObject();
@@ -44,7 +49,7 @@ public class GetTests {
     }
 
     @Test
-    public void testGet_UpdateParams() throws RestException {
+    public void testGet_UpdateParams() throws RestException, UnsupportedEncodingException {
         final Response response = new Rest()
                 .url("https://httpbin.org/get?hot=cold")
                 .parameter("foo", "bar")
@@ -54,7 +59,8 @@ public class GetTests {
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
-        final JsonObject jsonObject = Json.parse(response.getBody()).asObject();
+        final String jsonString = new String(response.getBody(), "UTF-8");
+        final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/get?hot=cold&apples=oranges&foo=bar&multi+part=this+parameter+has+whitespace+in+its+name+and+value",
                 jsonObject.getString("url", null));
         final JsonObject args = jsonObject.get("args").asObject();
@@ -65,7 +71,7 @@ public class GetTests {
     }
 
     @Test
-    public void testGet_WithHeaders() throws RestException {
+    public void testGet_WithHeaders() throws RestException, UnsupportedEncodingException {
         final Response response = new Rest()
                 .url("https://httpbin.org/get")
                 .header("black", "white")
@@ -75,7 +81,8 @@ public class GetTests {
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
-        final JsonObject jsonObject = Json.parse(response.getBody()).asObject();
+        final String jsonString = new String(response.getBody(), "UTF-8");
+        final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/get", jsonObject.getString("url", null));
         final JsonObject headers = jsonObject.get("headers").asObject();
         // Note that even though our header names where all-lowercase, the round trip process converts them to camel case.

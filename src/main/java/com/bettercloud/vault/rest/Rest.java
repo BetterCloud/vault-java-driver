@@ -1,8 +1,8 @@
 package com.bettercloud.vault.rest;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * A simple client for issuing HTTP requests.
+ */
 public final class Rest {
 
     private String urlString;
@@ -66,7 +69,7 @@ public final class Rest {
             // Download and parse response
             final int statusCode = connection.getResponseCode();
             final String mimeType = connection.getContentType();
-            final String body = responseBodyToString(connection);
+            final byte[] body = responseBodyBytes(connection);
             return new Response(statusCode, mimeType, body);
         } catch (IOException e) {
             throw new RestException(e);
@@ -81,7 +84,7 @@ public final class Rest {
         return postOrPutImpl(false);
     }
 
-    private Response postOrPutImpl(boolean doPost) throws RestException {
+    private Response postOrPutImpl(final boolean doPost) throws RestException {
         if (urlString == null) {
             throw new RestException("No URL is set");
         }
@@ -105,7 +108,7 @@ public final class Rest {
                 connection.setRequestProperty("Accept-Charset", "UTF-8");
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
 
-                OutputStream outputStream = connection.getOutputStream();
+                final OutputStream outputStream = connection.getOutputStream();
                 outputStream.write(parametersToQueryString().getBytes("UTF-8"));
                 outputStream.close();
             }
@@ -113,7 +116,7 @@ public final class Rest {
             // Download and parse response
             final int statusCode = connection.getResponseCode();
             final String mimeType = connection.getContentType();
-            final String body = responseBodyToString(connection);
+            final byte[] body = responseBodyBytes(connection);
             return new Response(statusCode, mimeType, body);
         } catch (IOException e) {
             throw new RestException(e);
@@ -140,15 +143,16 @@ public final class Rest {
         return queryString.toString();
     }
 
-    private String responseBodyToString(final HttpURLConnection connection) throws IOException {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        final StringBuilder body = new StringBuilder();
-        String line;
-        while ( (line = reader.readLine()) != null ) {
-            body.append(line);
+    private byte[] responseBodyBytes(final HttpURLConnection connection) throws IOException {
+        final InputStream inputStream = connection.getInputStream();
+        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        int bytesRead;
+        byte[] bytes = new byte[16384];
+        while ((bytesRead = inputStream.read(bytes, 0, bytes.length)) != -1) {
+            byteArrayOutputStream.write(bytes, 0, bytesRead);
         }
-        reader.close();
-        return body.toString();
+        byteArrayOutputStream.flush();
+        return byteArrayOutputStream.toByteArray();
     }
 
 }

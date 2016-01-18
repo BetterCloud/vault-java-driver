@@ -4,24 +4,28 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+
 import static org.junit.Assert.assertEquals;
 
 public class PutTests {
 
     @Test
-    public void testPut_Plain() throws RestException {
+    public void testPut_Plain() throws RestException, UnsupportedEncodingException {
         final Response response = new Rest()
                 .url("https://httpbin.org/put")
                 .put();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
-        final JsonObject jsonObject = Json.parse(response.getBody()).asObject();
+        final String jsonString = new String(response.getBody(), "UTF-8");
+        final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/put", jsonObject.getString("url", null));
     }
 
     @Test
-    public void testPut_InsertParams() throws RestException {
+    public void testPut_InsertParams() throws RestException, UnsupportedEncodingException {
         final Response response = new Rest()
                 .url("https://httpbin.org/put")
                 .parameter("foo", "bar")
@@ -31,7 +35,8 @@ public class PutTests {
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
-        final JsonObject jsonObject = Json.parse(response.getBody()).asObject();
+        final String jsonString = new String(response.getBody(), "UTF-8");
+        final JsonObject jsonObject = Json.parse(jsonString).asObject();
         // Note that with a PUT (as with a POST), the parameters are written with the request
         // body... and URL is *not* re-written to insert them as a query string.
         assertEquals("https://httpbin.org/put", jsonObject.getString("url", null));
@@ -46,7 +51,7 @@ public class PutTests {
     }
 
     @Test
-    public void testPut_UpdateParams() throws RestException {
+    public void testPut_UpdateParams() throws RestException, UnsupportedEncodingException {
         final Response response = new Rest()
                 .url("https://httpbin.org/put?hot=cold")
                 .parameter("foo", "bar")
@@ -56,7 +61,8 @@ public class PutTests {
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
-        final JsonObject jsonObject = Json.parse(response.getBody()).asObject();
+        final String jsonString = new String(response.getBody(), "UTF-8");
+        final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/put?hot=cold", jsonObject.getString("url", null));
         final JsonObject args = jsonObject.get("args").asObject();
         assertEquals("cold", args.getString("hot", null));
@@ -67,7 +73,7 @@ public class PutTests {
     }
 
     @Test
-    public void testPut_WithHeaders() throws RestException {
+    public void testPut_WithHeaders() throws RestException, UnsupportedEncodingException {
         final Response response = new Rest()
                 .url("https://httpbin.org/put")
                 .header("black", "white")
@@ -77,7 +83,8 @@ public class PutTests {
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
-        final JsonObject jsonObject = Json.parse(response.getBody()).asObject();
+        final String jsonString = new String(response.getBody(), "UTF-8");
+        final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/put", jsonObject.getString("url", null));
         final JsonObject headers = jsonObject.get("headers").asObject();
         assertEquals("white", headers.getString("Black", null));

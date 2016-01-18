@@ -4,9 +4,9 @@ public class Response {
 
     private int status;
     private String mimeType;
-    private String body;
+    private byte[] body;
 
-    public Response(final int status, final String mimeType, final String body) {
+    public Response(final int status, final String mimeType, final byte[] body) {
         this.status = status;
         this.mimeType = mimeType;
         this.body = body;
@@ -28,11 +28,11 @@ public class Response {
         this.mimeType = mimeType;
     }
 
-    public String getBody() {
+    public byte[] getBody() {
         return body;
     }
 
-    public void setBody(final String body) {
+    public void setBody(byte[] body) {
         this.body = body;
     }
 
