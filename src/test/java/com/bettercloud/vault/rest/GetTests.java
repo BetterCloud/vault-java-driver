@@ -29,15 +29,18 @@ public class GetTests {
                 .url("https://httpbin.org/get")
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
+                .parameter("multi part", "this parameter has whitespace in its name and value")
                 .get();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
         final JsonObject jsonObject = Json.parse(response.getBody()).asObject();
-        assertEquals("https://httpbin.org/get?foo=bar&apples=oranges", jsonObject.getString("url", null));
+        assertEquals("https://httpbin.org/get?apples=oranges&foo=bar&multi+part=this+parameter+has+whitespace+in+its+name+and+value",
+                jsonObject.getString("url", null));
         final JsonObject args = jsonObject.get("args").asObject();
         assertEquals("bar", args.getString("foo", null));
         assertEquals("oranges", args.getString("apples", null));
+        assertEquals("this parameter has whitespace in its name and value", args.getString("multi part", null));
     }
 
     @Test
@@ -46,16 +49,19 @@ public class GetTests {
                 .url("https://httpbin.org/get?hot=cold")
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
+                .parameter("multi part", "this parameter has whitespace in its name and value")
                 .get();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
         final JsonObject jsonObject = Json.parse(response.getBody()).asObject();
-        assertEquals("https://httpbin.org/get?hot=cold&foo=bar&apples=oranges", jsonObject.getString("url", null));
+        assertEquals("https://httpbin.org/get?hot=cold&apples=oranges&foo=bar&multi+part=this+parameter+has+whitespace+in+its+name+and+value",
+                jsonObject.getString("url", null));
         final JsonObject args = jsonObject.get("args").asObject();
         assertEquals("cold", args.getString("hot", null));
         assertEquals("bar", args.getString("foo", null));
         assertEquals("oranges", args.getString("apples", null));
+        assertEquals("this parameter has whitespace in its name and value", args.getString("multi part", null));
     }
 
     @Test
@@ -64,7 +70,7 @@ public class GetTests {
                 .url("https://httpbin.org/get")
                 .header("black", "white")
                 .header("day", "night")
-                .header("two-part", "Header names can't have spaces, but values can")
+                .header("two-part", "Note that headers are send in url-encoded format")
                 .get();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
@@ -72,11 +78,10 @@ public class GetTests {
         final JsonObject jsonObject = Json.parse(response.getBody()).asObject();
         assertEquals("https://httpbin.org/get", jsonObject.getString("url", null));
         final JsonObject headers = jsonObject.get("headers").asObject();
-        // Note that even though our header names where all-lowercase, the round trip process converts them to
-        // camel case.  Header values should remain unmodified.
+        // Note that even though our header names where all-lowercase, the round trip process converts them to camel case.
         assertEquals("white", headers.getString("Black", null));
         assertEquals("night", headers.getString("Day", null));
-        assertEquals("Header names can't have spaces, but values can", headers.getString("Two-Part", null));
+        assertEquals("Note+that+headers+are+send+in+url-encoded+format", headers.getString("Two-Part", null));
     }
 
 }

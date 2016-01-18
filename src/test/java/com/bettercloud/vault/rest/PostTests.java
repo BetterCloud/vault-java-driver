@@ -26,20 +26,22 @@ public class PostTests {
                 .url("https://httpbin.org/post")
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
+                .parameter("multi part", "this parameter has whitespace in its name and value")
                 .post();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
 
         final JsonObject jsonObject = Json.parse(response.getBody()).asObject();
-        // Note that with a POST, the parameters are written with the request body... and URL is *not* re-written to
-        // insert them as a query string.
+        // Note that with a POST (as with a PUT), the parameters are written with the request body... and URL
+        // is *not* re-written to insert them as a query string.
         assertEquals("https://httpbin.org/post", jsonObject.getString("url", null));
 
-        // Note that with a POST (to this "httpbin.org" test service), parameters are returned within a JSON object
-        // called "form", unlike it's "args" counterpart when doing a GET.
+        // Note that with a POST (as with a PUT) to this "httpbin.org" test service, parameters are returned
+        // within a JSON object called "form", unlike it's "args" counterpart when doing a GET.
         final JsonObject form = jsonObject.get("form").asObject();
         assertEquals("bar", form.getString("foo", null));
         assertEquals("oranges", form.getString("apples", null));
+        assertEquals("this parameter has whitespace in its name and value", form.getString("multi part", null));
     }
 
     @Test
@@ -48,6 +50,7 @@ public class PostTests {
                 .url("https://httpbin.org/post?hot=cold")
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
+                .parameter("multi part", "this parameter has whitespace in its name and value")
                 .post();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
@@ -59,6 +62,7 @@ public class PostTests {
         final JsonObject form = jsonObject.get("form").asObject();
         assertEquals("bar", form.getString("foo", null));
         assertEquals("oranges", form.getString("apples", null));
+        assertEquals("this parameter has whitespace in its name and value", form.getString("multi part", null));
     }
 
     @Test
@@ -67,7 +71,7 @@ public class PostTests {
                 .url("https://httpbin.org/post")
                 .header("black", "white")
                 .header("day", "night")
-                .header("two-part", "Header names can't have spaces, but values can")
+                .header("two-part", "Note that headers are send in url-encoded format")
                 .post();
         assertEquals(200, response.getStatus());
         assertEquals("application/json", response.getMimeType());
@@ -77,7 +81,7 @@ public class PostTests {
         final JsonObject headers = jsonObject.get("headers").asObject();
         assertEquals("white", headers.getString("Black", null));
         assertEquals("night", headers.getString("Day", null));
-        assertEquals("Header names can't have spaces, but values can", headers.getString("Two-Part", null));
+        assertEquals("Note+that+headers+are+send+in+url-encoded+format", headers.getString("Two-Part", null));
     }
 
 }
