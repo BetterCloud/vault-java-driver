@@ -134,51 +134,51 @@ public final class VaultConfig {
         return this;
     }
 
-    protected String getAddress() {
+    public String getAddress() {
         return address;
     }
 
-    protected String getToken() {
+    public String getToken() {
         return token;
     }
 
-    protected String getProxyAddress() {
+    public String getProxyAddress() {
         return proxyAddress;
     }
 
-    protected String getProxyPort() {
+    public String getProxyPort() {
         return proxyPort;
     }
 
-    protected String getProxyUsername() {
+    public String getProxyUsername() {
         return proxyUsername;
     }
 
-    protected String getProxyPassword() {
+    public String getProxyPassword() {
         return proxyPassword;
     }
 
-    protected String getSslPemFile() {
+    public String getSslPemFile() {
         return sslPemFile;
     }
 
-    protected Boolean getSslVerify() {
+    public Boolean getSslVerify() {
         return sslVerify;
     }
 
-    protected Integer getTimeout() {
+    public Integer getTimeout() {
         return timeout;
     }
 
-    protected Integer getSslTimeout() {
+    public Integer getSslTimeout() {
         return sslTimeout;
     }
 
-    protected Integer getOpenTimeout() {
+    public Integer getOpenTimeout() {
         return openTimeout;
     }
 
-    protected Integer getReadTimeout() {
+    public Integer getReadTimeout() {
         return readTimeout;
     }
 

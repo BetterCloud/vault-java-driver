@@ -1,5 +1,8 @@
-package com.bettercloud.vault;
+package com.bettercloud.vault.api;
 
+import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultConfig;
+import com.bettercloud.vault.VaultException;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
@@ -11,7 +14,7 @@ import static junit.framework.TestCase.assertEquals;
  * TODO: Ensure that these tests are not run as part of the regular unit test suite.
  * TODO: Strategy for dynamically setting the token prior to execution.
  */
-public class VaultTests {
+public class LogicalTests {
 
     /**
      * Write a secret and verify that it can be read.
@@ -25,9 +28,9 @@ public class VaultTests {
 
         final VaultConfig config = new VaultConfig("http://127.0.0.1:8200", "c5543320-1ce3-9511-7c76-b7269e2c56e3");
         final Vault vault = new Vault(config);
-        vault.write(path, value);
+        vault.logical().write(path, value);
 
-        assertEquals(value, vault.read(path));
+        assertEquals(value, vault.logical().read(path));
     }
 
 }
