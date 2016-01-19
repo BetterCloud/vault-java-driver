@@ -21,8 +21,6 @@ public class Logical {
     /**
      * Basic read operation to retrieve a secret.
      *
-     * TODO: This will almost certainly need refactoring as the rest of the API functionality is implemented.
-     * TODO: Break this into multiple service classes, perhaps divided by API endpoint, rather than putting all methods in one big class.
      * TODO: Perhaps devise a complex return type, capturing the value read along with all metadata, rather than just returning the value as a plain string.
      *
      * @param path The path on which the secret is stored (e.g. <code>secret/hello</code>)
@@ -64,7 +62,7 @@ public class Logical {
     /**
      * Basic operation to store a secret.
      *
-     * TODO: See TODO's for the "read()" method.
+     * TODO: Determine the best return type for this method
      *
      * @param path The path on which the secret is to be stored (e.g. <code>secret/hello</code>)
      * @param value The secret value to be stored
