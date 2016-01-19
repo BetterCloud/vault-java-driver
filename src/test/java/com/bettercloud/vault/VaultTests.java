@@ -13,11 +13,21 @@ import static junit.framework.TestCase.assertEquals;
  */
 public class VaultTests {
 
+    /**
+     * Write a secret and verify that it can be read.
+     *
+     * @throws VaultException
+     */
     @Test
-    public void testRead() throws VaultException {
-        final VaultConfig config = new VaultConfig("http://127.0.0.1:8200", "0aa56b6b-c7fe-72ab-47e1-1d6753d786a8");
+    public void testWriteAndRead() throws VaultException {
+        final String path = "secret/hello";
+        final String value = "world";
+
+        final VaultConfig config = new VaultConfig("http://127.0.0.1:8200", "c5543320-1ce3-9511-7c76-b7269e2c56e3");
         final Vault vault = new Vault(config);
-        assertEquals("world", vault.read("secret/hello"));
+        vault.write(path, value);
+
+        assertEquals(value, vault.read(path));
     }
 
 }

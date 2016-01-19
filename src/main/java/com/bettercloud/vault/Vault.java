@@ -56,11 +56,36 @@ public class Vault {
 
             // Parse JSON
             final JsonObject jsonObject = Json.parse(jsonString).asObject();
-            final String value = jsonObject.get("data").asObject().getString("value", "");  // TODO: Return missing values as null or empty-string?
-            return value;
+            // TODO: Return missing values as null or empty-string?
+            return jsonObject.get("data").asObject().getString("value", "");
         } catch (RestException e) {
             throw new VaultException(e);
         }
+    }
+
+    /**
+     * Basic operation to store a secret.
+     *
+     * TODO: See TODO's for the "read()" method.
+     *
+     * @param path The path on which the secret is to be stored (e.g. <code>secret/hello</code>)
+     * @param value The secret value to be stored
+     * @throws VaultException
+     */
+    public void write(final String path, final String value) throws VaultException {
+        try {
+            final Response response = new Rest()
+                    .url(config.getAddress() + "/v1/" + path)
+                    .body(Json.object().add("value", value).toString().getBytes("UTF-8"))
+                    .header("X-Vault-Token", config.getToken())
+                    .post();
+            // response.getStatus() == 204 (success)
+        } catch (RestException e) {
+            throw new VaultException(e);
+        } catch (UnsupportedEncodingException e) {
+            throw new VaultException(e);
+        }
+
     }
 
 }
