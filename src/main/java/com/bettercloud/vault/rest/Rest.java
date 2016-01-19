@@ -47,6 +47,7 @@ import java.util.TreeMap;
 public final class Rest {
 
     private String urlString;
+    private byte[] body;
     private final Map<String, String> parameters = new TreeMap<String, String>();
     private final Map<String, String> headers = new TreeMap<String, String>();
 
@@ -65,6 +66,17 @@ public final class Rest {
      */
     public Rest url(final String urlString) {
         this.urlString = urlString;
+        return this;
+    }
+
+    /**
+     * TODO: Document, and add unit test coverage.
+     *
+     * @param body The payload to send with a POST or PUT request (e.g. a JSON string)
+     * @return The <code>Rest</code> instance itself
+     */
+    public Rest body(final byte[] body) {
+        this.body = body;
         return this;
     }
 
@@ -218,13 +230,17 @@ public final class Rest {
                 connection.setRequestProperty(header.getKey(), header.getValue());
             }
 
-            if (!parameters.isEmpty()) {
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Accept-Charset", "UTF-8");
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+            // TODO: This needs a bit more thought.  Do we even need to support at all the possibility of body params for POST or PUT requests?
+            if (body != null) {
+                final OutputStream outputStream = connection.getOutputStream();
+                outputStream.write(body);
+                outputStream.close();
+            } else if (!parameters.isEmpty()) {
                 // Write any parameters in the request body (NOTE: There can *also* be parameters set via the URL
                 // query string.  This logic does not append or remove anything from the request URL).
-                connection.setDoOutput(true);
-                connection.setRequestProperty("Accept-Charset", "UTF-8");
-                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
-
                 final OutputStream outputStream = connection.getOutputStream();
                 outputStream.write(parametersToQueryString().getBytes("UTF-8"));
                 outputStream.close();
@@ -267,18 +283,21 @@ public final class Rest {
      *
      * @param connection An active HTTP connection
      * @return The body payload, downloaded from the HTTP connection response
-     * @throws IOException
      */
-    private byte[] responseBodyBytes(final HttpURLConnection connection) throws IOException {
-        final InputStream inputStream = connection.getInputStream();
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        int bytesRead;
-        final byte[] bytes = new byte[16384];
-        while ((bytesRead = inputStream.read(bytes, 0, bytes.length)) != -1) {
-            byteArrayOutputStream.write(bytes, 0, bytesRead);
+    private byte[] responseBodyBytes(final HttpURLConnection connection) {
+        try {
+            final InputStream inputStream = connection.getInputStream();
+            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            int bytesRead;
+            final byte[] bytes = new byte[16384];
+            while ((bytesRead = inputStream.read(bytes, 0, bytes.length)) != -1) {
+                byteArrayOutputStream.write(bytes, 0, bytesRead);
+            }
+            byteArrayOutputStream.flush();
+            return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            return new byte[0];
         }
-        byteArrayOutputStream.flush();
-        return byteArrayOutputStream.toByteArray();
     }
 
 }
