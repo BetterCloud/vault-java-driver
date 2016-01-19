@@ -20,3 +20,52 @@ dependencies {
 task wrapper(type: Wrapper) {
     gradleVersion = '2.6'
 }
+
+
+
+//
+// Separate unit tests from integration tests.  The latter require a Vault server instance
+// up and running, and appropriate "VAULT_ADDR" and "VAULT_TOKEN" JVM properties set.  E.g.:
+//
+// gradlew integrationTest -DVAULT_ADDR=http://127.0.0.1:8200 -DVAULT_TOKEN=eace6676-4d78-c687-4e54-03cad00e3abf
+//
+
+configurations {
+    unitTestsCompile.extendsFrom testCompile
+    unitTestsRuntime.extendsFrom testRuntime
+    integrationTestsCompile.extendsFrom testCompile
+    integrationTestsRuntime.extendsFrom testRuntime
+}
+
+sourceSets {
+    unitTests {
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+        java.srcDir file('src/test/java')
+    }
+    integrationTests {
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+        java.srcDir file('src/test-integration/java')
+    }
+}
+
+task unitTest(type: Test) {
+    testClassesDir = sourceSets.unitTests.output.classesDir
+    classpath = sourceSets.unitTests.runtimeClasspath
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+task integrationTest(type: Test) {
+    testClassesDir = sourceSets.integrationTests.output.classesDir
+    classpath = sourceSets.integrationTests.runtimeClasspath
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    systemProperties = [
+        VAULT_ADDR: System.getProperty("VAULT_ADDR"),
+        VAULT_TOKEN: System.getProperty("VAULT_TOKEN")
+    ]
+}

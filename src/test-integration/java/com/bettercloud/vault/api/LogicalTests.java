@@ -6,6 +6,7 @@ import com.bettercloud.vault.VaultException;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNotNull;
 
 /**
  * These tests are effectively integration tests rather that unit tests, as they require a Vault server to
@@ -23,10 +24,15 @@ public class LogicalTests {
      */
     @Test
     public void testWriteAndRead() throws VaultException {
+        final String address = System.getProperty("VAULT_ADDR");
+        assertNotNull(address);
+        final String token = System.getProperty("VAULT_TOKEN");
+        assertNotNull(token);
+
         final String path = "secret/hello";
         final String value = "world";
 
-        final VaultConfig config = new VaultConfig("http://127.0.0.1:8200", "c5543320-1ce3-9511-7c76-b7269e2c56e3");
+        final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
         vault.logical().write(path, value);
 
