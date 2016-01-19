@@ -1,7 +1,40 @@
 package com.bettercloud.vault;
 
+/**
+ * <p>A container for the configuration settings needed to initialize a <code>Vault</code> driver instance.</p>
+ *
+ * <p>There are two ways to create and setup a <code>VaultConfig</code> instance.  The full-featured approach
+ * uses a builder pattern, calling setter methods for each value and then terminating with a call to <code>build()</code>:</p>
+ *
+ * <blockquote>
+ * <pre>{@code
+ * final VaultConfig config = new VaultConfig()
+ *                              .address("http://127.0.0.1:8200")
+ *                              .token("eace6676-4d78-c687-4e54-03cad00e3abf")
+ *                              .sslVerify(true)
+ *                              .timeout(30)
+ *                              .build();
+ * }</pre>
+ * </blockquote>
+ *
+ * <p>If the only values that you need to set are <code>address</code> and <code>token</code>, then as a
+ * shortcut there is also a constructor method taking those two values:</p>
+ *
+ * <blockquote>
+ * <pre>{@code
+ * final VaultConfig config = new VaultConfig("http://127.0.0.1:8200", "eace6676-4d78-c687-4e54-03cad00e3abf");
+ * }</pre>
+ * </blockquote>
+ *
+ * <p>Note that when using the shorthand convenience constructor, you should NOT set additional properties on the
+ * same instance afterward.</p>
+ */
 public final class VaultConfig {
 
+    /**
+     * <p>The code used to load environment variables is encapsulated within an inner class,
+     * so that a mock version of that environment loader can be used by unit tests.</p>
+     */
     protected static class EnvironmentLoader {
         public String loadVariable(final String name) {
             return System.getenv(name);
@@ -22,13 +55,45 @@ public final class VaultConfig {
     private Integer openTimeout;
     private Integer readTimeout;
 
+    /**
+     * <p>Default constructor.  Should be used in conjunction with the builder pattern, calling additional
+     * property setter methods and ultimately finishing with a call to <code>build()</code>.</p>
+     *
+     * <p>Note that when using this builder pattern approach, you must either set <code>address</code>
+     * and <code>token</code> explicitly, or else have them available as runtime environment variables.</p>
+     */
     public VaultConfig() {
     }
 
+    /**
+     * <p>A convenience constructor, for quickly creating a <code>VaultConfig</code> instance with its
+     * <code>address</code> and <code>token</code> fields populated.</p>
+     *
+     * <p>Although <code>address</code> and <code>token</code> are the only two properties explicitly
+     * passed, the constructor will still look to the runtime environment variables to populate any
+     * other fields when values are present.</p>
+     *
+     * <p>When using this approach to creating a <code>VaultConfig</code> instance, you should NOT
+     * make additional setter method calls after construction.  If you need other properties set
+     * explicitly, then use the builder pattern approach.</p>
+     *
+     * @param address The URL of the target Vault server
+     * @param token The access token to enable Vault access
+     * @throws VaultException
+     */
     public VaultConfig(final String address, final String token) throws VaultException {
         this(address, token, new EnvironmentLoader());
     }
 
+    /**
+     * An overloaded version of the normal convenience constructor, used by unit tests to inject
+     * a mock environment variable loader and validate that loading logic.
+     *
+     * @param address The URL of the target Vault server
+     * @param token The access token to enable Vault access
+     * @param environmentLoader A (mock) environment loader implementation
+     * @throws VaultException
+     */
     protected VaultConfig(final String address, final String token, final EnvironmentLoader environmentLoader) throws VaultException {
         this.address = address;
         this.token = token;
@@ -122,6 +187,7 @@ public final class VaultConfig {
                 throw new VaultException("No token is set");
             }
         }
+
 
         // TODO: Check the environment variables to populate null VAULT_PROXY_ADDRESS
         // TODO: Check the environment variables to populate null VAULT_PROXY_PORT

@@ -9,11 +9,13 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
 /**
- * These tests are effectively integration tests rather that unit tests, as they require a Vault server to
- * be up and running.
+ * Integration tests for the basic (i.e. "logical") Vault API operations.
  *
- * TODO: Ensure that these tests are not run as part of the regular unit test suite.
- * TODO: Strategy for dynamically setting the token prior to execution.
+ * These tests require a Vault server to be up and running.  A server address and token
+ * should be passed as JVM properties.  E.g.:
+ *
+ * <code>gradle integrationTest -DVAULT_ADDR=http://127.0.0.1:8200 -DVAULT_TOKEN=eace6676-4d78-c687-4e54-03cad00e3abf</code>
+ *
  */
 public class LogicalTests {
 
