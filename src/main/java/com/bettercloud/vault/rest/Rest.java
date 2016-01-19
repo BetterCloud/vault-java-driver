@@ -269,16 +269,20 @@ public final class Rest {
      * @return The body payload, downloaded from the HTTP connection response
      * @throws IOException
      */
-    private byte[] responseBodyBytes(final HttpURLConnection connection) throws IOException {
-        final InputStream inputStream = connection.getInputStream();
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        int bytesRead;
-        final byte[] bytes = new byte[16384];
-        while ((bytesRead = inputStream.read(bytes, 0, bytes.length)) != -1) {
-            byteArrayOutputStream.write(bytes, 0, bytesRead);
+    private byte[] responseBodyBytes(final HttpURLConnection connection) {
+        try {
+            final InputStream inputStream = connection.getInputStream();
+            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            int bytesRead;
+            final byte[] bytes = new byte[16384];
+            while ((bytesRead = inputStream.read(bytes, 0, bytes.length)) != -1) {
+                byteArrayOutputStream.write(bytes, 0, bytesRead);
+            }
+            byteArrayOutputStream.flush();
+            return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            return new byte[0];
         }
-        byteArrayOutputStream.flush();
-        return byteArrayOutputStream.toByteArray();
     }
 
 }

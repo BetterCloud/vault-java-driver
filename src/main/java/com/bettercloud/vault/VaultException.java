@@ -6,4 +6,8 @@ public class VaultException extends Exception {
         super(message);
     }
 
+    public VaultException(final Throwable t) {
+        super(t);
+    }
+
 }
