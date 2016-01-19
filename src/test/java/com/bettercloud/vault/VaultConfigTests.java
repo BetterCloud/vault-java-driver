@@ -2,15 +2,25 @@ package com.bettercloud.vault;
 
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static junit.framework.TestCase.assertEquals;
 
 public class VaultConfigTests {
 
     class MockEnvironmentLoader extends VaultConfig.EnvironmentLoader {
+        final Map<String, String> overrides = new HashMap<String, String>();
+
+        public void override(final String name, final String value) {
+            this.overrides.put(name, value);
+        }
+
         @Override
         public String loadVariable(final String name) {
-            return "mock";
+            return overrides.get(name);
         }
+
     }
 
     @Test
@@ -22,7 +32,11 @@ public class VaultConfigTests {
 
     @Test
     public void testConfigConstructor_LoadFromEnv() throws VaultException {
-        final VaultConfig config = new VaultConfig(null, null, new MockEnvironmentLoader());
+        final MockEnvironmentLoader mock = new MockEnvironmentLoader();
+        mock.override("VAULT_ADDR", "mock");
+        mock.override("VAULT_TOKEN", "mock");
+
+        final VaultConfig config = new VaultConfig(null, null, mock);
         assertEquals("mock", config.getAddress());
         assertEquals("mock", config.getToken());
     }
@@ -45,8 +59,12 @@ public class VaultConfigTests {
 
     @Test
     public void testConfigBuilder_LoadFromEnv() throws VaultException {
+        final MockEnvironmentLoader mock = new MockEnvironmentLoader();
+        mock.override("VAULT_ADDR", "mock");
+        mock.override("VAULT_TOKEN", "mock");
+
         final VaultConfig config = new VaultConfig()
-                .environmentLoader(new MockEnvironmentLoader())
+                .environmentLoader(mock)
                 .build();
         assertEquals("mock", config.getAddress());
         assertEquals("mock", config.getToken());
