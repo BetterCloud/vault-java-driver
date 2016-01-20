@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNull;
+import static junit.framework.TestCase.assertTrue;
 
 /**
  * Unit tests for the <code>VaultConfig</code> settings loader.
@@ -67,12 +69,32 @@ public class VaultConfigTests {
     @Test
     public void testConfigConstructor_LoadFromEnv() throws VaultException {
         final MockEnvironmentLoader mock = new MockEnvironmentLoader();
-        mock.override("VAULT_ADDR", "mock");
-        mock.override("VAULT_TOKEN", "mock");
+        // Required
+        mock.override("VAULT_ADDR", "http://127.0.0.1:8200");
+        mock.override("VAULT_TOKEN", "c24e2469-298a-6c64-6a71-5b47c9ba459a");
+        // Optional
+        mock.override("VAULT_PROXY_ADDRESS", "localhost");
+        mock.override("VAULT_PROXY_PORT", "80");
+        mock.override("VAULT_PROXY_USERNAME", "scott");
+        mock.override("VAULT_PROXY_PASSWORD", "tiger");
+        mock.override("VAULT_SSL_CERT", "mycert.pem");
+        mock.override("VAULT_SSL_VERIFY", "true");
+        mock.override("VAULT_TIMEOUT", "30");
 
         final VaultConfig config = new VaultConfig(null, null, mock);
-        assertEquals("mock", config.getAddress());
-        assertEquals("mock", config.getToken());
+        assertEquals("http://127.0.0.1:8200", config.getAddress());
+        assertEquals("c24e2469-298a-6c64-6a71-5b47c9ba459a", config.getToken());
+        assertEquals("localhost", config.getProxyAddress());
+        assertTrue(80 == config.getProxyPort());
+        assertEquals("scott", config.getProxyUsername());
+        assertEquals("tiger", config.getProxyPassword());
+        assertEquals("mycert.pem", config.getSslPemFile());
+        assertTrue(config.isSslVerify());
+        assertTrue(30 == config.getTimeout());
+        // Properties that do NOT default to environment variables
+        assertNull(config.getSslTimeout());
+        assertNull(config.getOpenTimeout());
+        assertNull(config.getReadTimeout());
     }
 
     /**
@@ -113,14 +135,32 @@ public class VaultConfigTests {
     @Test
     public void testConfigBuilder_LoadFromEnv() throws VaultException {
         final MockEnvironmentLoader mock = new MockEnvironmentLoader();
-        mock.override("VAULT_ADDR", "mock");
-        mock.override("VAULT_TOKEN", "mock");
+        mock.override("VAULT_ADDR", "http://127.0.0.1:8200");
+        mock.override("VAULT_TOKEN", "c24e2469-298a-6c64-6a71-5b47c9ba459a");
+        mock.override("VAULT_PROXY_ADDRESS", "localhost");
+        mock.override("VAULT_PROXY_PORT", "80");
+        mock.override("VAULT_PROXY_USERNAME", "scott");
+        mock.override("VAULT_PROXY_PASSWORD", "tiger");
+        mock.override("VAULT_SSL_CERT", "mycert.pem");
+        mock.override("VAULT_SSL_VERIFY", "true");
+        mock.override("VAULT_TIMEOUT", "30");
 
         final VaultConfig config = new VaultConfig()
                 .environmentLoader(mock)
                 .build();
-        assertEquals("mock", config.getAddress());
-        assertEquals("mock", config.getToken());
+        assertEquals("http://127.0.0.1:8200", config.getAddress());
+        assertEquals("c24e2469-298a-6c64-6a71-5b47c9ba459a", config.getToken());
+        assertEquals("localhost", config.getProxyAddress());
+        assertTrue(80 == config.getProxyPort());
+        assertEquals("scott", config.getProxyUsername());
+        assertEquals("tiger", config.getProxyPassword());
+        assertEquals("mycert.pem", config.getSslPemFile());
+        assertTrue(config.isSslVerify());
+        assertTrue(30 == config.getTimeout());
+        // Properties that do NOT default to environment variables
+        assertNull(config.getSslTimeout());
+        assertNull(config.getOpenTimeout());
+        assertNull(config.getReadTimeout());
     }
 
     /**
