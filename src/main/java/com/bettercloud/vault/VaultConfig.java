@@ -1,5 +1,8 @@
 package com.bettercloud.vault;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * <p>A container for the configuration settings needed to initialize a <code>Vault</code> driver instance.</p>
  *
@@ -54,6 +57,8 @@ public final class VaultConfig {
     private Integer sslTimeout;
     private Integer openTimeout;
     private Integer readTimeout;
+    private Map<Class<? extends Exception>, Map<Integer, Integer>> retryOptions
+            = new HashMap<Class<? extends Exception>, Map<Integer, Integer>>();
 
     /**
      * <p>Default constructor.  Should be used in conjunction with the builder pattern, calling additional
@@ -166,6 +171,18 @@ public final class VaultConfig {
         return this;
     }
 
+    /**
+     * TODO: document...
+     *
+     * @param exception
+     * @param maxRetries
+     */
+    protected void retryOption(final Class<? extends Exception> exception, final int maxRetries, final int retryInterval) {
+        final Map<Integer, Integer> maxAndInterval = new HashMap<Integer, Integer>();
+        maxAndInterval.put(maxRetries, retryInterval);
+        this.retryOptions.put(exception, maxAndInterval);
+    }
+
 
     public VaultConfig build() throws VaultException {
         if (this.environmentLoader == null) {
@@ -267,6 +284,24 @@ public final class VaultConfig {
 
     public Integer getReadTimeout() {
         return readTimeout;
+    }
+
+    public int getMaxRetriesForException(final Class<? extends Exception> exception) {
+        for (final Class<? extends Exception> key : retryOptions.keySet()) {
+            if (exception.isAssignableFrom(key)) {
+                return retryOptions.get(exception).entrySet().iterator().next().getKey();
+            }
+        }
+        return 0;
+    }
+
+    public int getRetryIntervalForException(final Class<? extends Exception> exception) {
+        for (final Class<? extends Exception> key : retryOptions.keySet()) {
+            if (exception.isAssignableFrom(key)) {
+                return retryOptions.get(exception).entrySet().iterator().next().getValue();
+            }
+        }
+        return 0;
     }
 
 }

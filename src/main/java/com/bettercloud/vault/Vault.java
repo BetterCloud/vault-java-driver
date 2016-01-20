@@ -19,21 +19,29 @@ import com.bettercloud.vault.api.Logical;
  * ...
  * vault.logical().write("secret/hello", "world");
  * ...
- * final String value = vault.logical().read("secret/hello");
+ * final String value = vault
+ *      .withRetries(RestException.class, 5, 10)
+ *      .logical()
+ *      .read("secret/hello");
  * }</pre>
  * </blockquote>
  */
 public final class Vault {
 
-    private final Logical logical;
+    private final VaultConfig vaultConfig;
 
     /**
      * Construct a Vault driver instance with the provided config settings.
      *
-     * @param config Configuration settings for Vault interaction (e.g. server address, token, etc)
+     * @param vaultConfig Configuration settings for Vault interaction (e.g. server address, token, etc)
      */
-    public Vault(final VaultConfig config) {
-        this.logical = new Logical(config);
+    public Vault(final VaultConfig vaultConfig) {
+        this.vaultConfig = vaultConfig;
+    }
+
+    public Vault withRetries(final Class<? extends Exception> exception, final int maxRetries, final int retryInterval) {
+        this.vaultConfig.retryOption(exception, maxRetries, retryInterval);
+        return this;
     }
 
     /**
@@ -42,7 +50,7 @@ public final class Vault {
      * @return The implementing class for Vault's core/logical operations (e.g. read, write)
      */
     public Logical logical() {
-        return logical;
+        return new Logical(vaultConfig);
     }
 
 }

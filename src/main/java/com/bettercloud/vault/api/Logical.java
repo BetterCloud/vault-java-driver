@@ -55,6 +55,9 @@ public class Logical {
             // TODO: Return missing values as null or empty-string?
             return jsonObject.get("data").asObject().getString("value", "");
         } catch (RestException e) {
+            // TODO: Turn this into retry loop(s)...
+            final int maxRetries = config.getMaxRetriesForException(e.getClass());
+            final int retryInterval = config.getRetryIntervalForException(e.getClass());
             throw new VaultException(e);
         }
     }
