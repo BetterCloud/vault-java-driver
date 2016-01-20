@@ -45,7 +45,7 @@ public final class VaultConfig {
     private String address;
     private String token;
     private String proxyAddress;
-    private String proxyPort;
+    private Integer proxyPort;
     private String proxyUsername;
     private String proxyPassword;
     private String sslPemFile;
@@ -121,7 +121,7 @@ public final class VaultConfig {
         return this;
     }
 
-    public VaultConfig proxyPort(final String proxyPort) {
+    public VaultConfig proxyPort(final Integer proxyPort) {
         this.proxyPort = proxyPort;
         return this;
     }
@@ -187,16 +187,37 @@ public final class VaultConfig {
                 throw new VaultException("No token is set");
             }
         }
-
-
-        // TODO: Check the environment variables to populate null VAULT_PROXY_ADDRESS
-        // TODO: Check the environment variables to populate null VAULT_PROXY_PORT
-        // TODO: Check the environment variables to populate null VAULT_PROXY_USERNAME
-        // TODO: Check the environment variables to populate null VAULT_PROXY_PASSWORD
-        // TODO: Check the environment variables to populate null VAULT_SSL_CERT
-        // TODO: Check the environment variables to populate null VAULT_SSL_VERIFY
-        // TODO: Check the environment variables to populate null VAULT_TIMEOUT
-
+        if (this.proxyAddress == null && environmentLoader.loadVariable("VAULT_PROXY_ADDRESS") != null) {
+            this.proxyAddress = environmentLoader.loadVariable("VAULT_PROXY_ADDRESS");
+        }
+        if (this.proxyPort== null && environmentLoader.loadVariable("VAULT_PROXY_PORT") != null) {
+            try {
+                this.proxyPort = Integer.valueOf(environmentLoader.loadVariable("VAULT_PROXY_PORT"));
+            } catch (NumberFormatException e) {
+                System.err.printf("The \"VAULT_PROXY_PORT\" environment variable contains value \"%s\", which cannot be parsed as an integer port number.\n",
+                        environmentLoader.loadVariable("VAULT_PROXY_PORT"));
+            }
+        }
+        if (this.proxyUsername == null && environmentLoader.loadVariable("VAULT_PROXY_USERNAME") != null) {
+            this.proxyUsername = environmentLoader.loadVariable("VAULT_PROXY_USERNAME");
+        }
+        if (this.proxyPassword == null && environmentLoader.loadVariable("VAULT_PROXY_PASSWORD") != null) {
+            this.proxyPassword = environmentLoader.loadVariable("VAULT_PROXY_PASSWORD");
+        }
+        if (this.sslPemFile == null && environmentLoader.loadVariable("VAULT_SSL_CERT") != null) {
+            this.sslPemFile = environmentLoader.loadVariable("VAULT_SSL_CERT");
+        }
+        if (this.sslVerify == null && environmentLoader.loadVariable("VAULT_SSL_VERIFY") != null) {
+            this.sslVerify = Boolean.valueOf(environmentLoader.loadVariable("VAULT_SSL_VERIFY"));
+        }
+        if (this.timeout == null && environmentLoader.loadVariable("VAULT_TIMEOUT") != null) {
+            try {
+                this.timeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_TIMEOUT"));
+            } catch (NumberFormatException e) {
+                System.err.printf("The \"VAULT_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.\n",
+                        environmentLoader.loadVariable("VAULT_TIMEOUT"));
+            }
+        }
         return this;
     }
 
@@ -212,7 +233,7 @@ public final class VaultConfig {
         return proxyAddress;
     }
 
-    public String getProxyPort() {
+    public Integer getProxyPort() {
         return proxyPort;
     }
 
@@ -228,7 +249,7 @@ public final class VaultConfig {
         return sslPemFile;
     }
 
-    public Boolean getSslVerify() {
+    public Boolean isSslVerify() {
         return sslVerify;
     }
 
