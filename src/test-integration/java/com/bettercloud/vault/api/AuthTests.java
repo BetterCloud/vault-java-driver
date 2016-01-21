@@ -36,7 +36,6 @@ public class AuthTests {
         final String path = "app-id/login";
         final String app_id = "foo";
         final String user_id = "bar";
-
         final VaultConfig config = new VaultConfig(address);
         final Vault vault = new Vault(config);
 
