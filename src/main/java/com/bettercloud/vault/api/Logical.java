@@ -9,6 +9,8 @@ import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestException;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Logical {
 
@@ -28,37 +30,48 @@ public class Logical {
      * @throws VaultException
      */
     public String read(final String path) throws VaultException {
-        try {
-            // HTTP request to Vault
-            final Response response = new Rest()
-                    .url(config.getAddress() + "/v1/" + path)
-                    .header("X-Vault-Token", config.getToken())
-                    .get();
-
-            // Validate response
-            if (response.getStatus() != 200) {
-                throw new VaultException("Vault responded with HTTP status code: " + response.getStatus());
-            }
-            final String mimeType = response.getMimeType() == null ? "null" : response.getMimeType();
-            if (!mimeType.equals("application/json")) {
-                throw new VaultException("Vault responded with MIME type: " + mimeType);
-            }
-            String jsonString;
+        final Map<Class<? extends Exception>, Integer> retryCounts = new HashMap<Class<? extends Exception>, Integer>();
+        while (true) {
             try {
-                jsonString = new String(response.getBody(), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
+                // HTTP request to Vault
+                final Response response = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/" + path)
+                        .header("X-Vault-Token", config.getToken())
+                        .get();
+
+                // Validate response
+                if (response.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + response.getStatus());
+                }
+                final String mimeType = response.getMimeType() == null ? "null" : response.getMimeType();
+                if (!mimeType.equals("application/json")) {
+                    throw new VaultException("Vault responded with MIME type: " + mimeType);
+                }
+                String jsonString;
+                try {
+                    jsonString = new String(response.getBody(), "UTF-8");//NOPMD
+                } catch (UnsupportedEncodingException e) {
+                    throw new VaultException(e);
+                }
+
+                // Parse JSON
+                final JsonObject jsonObject = Json.parse(jsonString).asObject();
+                return jsonObject.get("data").asObject().getString("value", "");
+            } catch (RestException e) {
+                final int maxRetries = config.getMaxRetriesForException(e.getClass());
+                final int currentRetries = retryCounts.get(e.getClass()) == null ? 0 : retryCounts.get(e.getClass());
+                if (currentRetries + 1 < maxRetries) {
+                    retryCounts.put(e.getClass(), currentRetries + 1);
+                    final int retryInterval = config.getRetryIntervalForException(e.getClass());
+                    try {
+                        Thread.sleep(retryInterval * 1000);
+                        continue;
+                    } catch (InterruptedException e1) {
+                        throw new VaultException(e1);
+                    }
+                }
                 throw new VaultException(e);
             }
-
-            // Parse JSON
-            final JsonObject jsonObject = Json.parse(jsonString).asObject();
-            // TODO: Return missing values as null or empty-string?
-            return jsonObject.get("data").asObject().getString("value", "");
-        } catch (RestException e) {
-            // TODO: Turn this into retry loop(s)...
-            final int maxRetries = config.getMaxRetriesForException(e.getClass());
-            final int retryInterval = config.getRetryIntervalForException(e.getClass());
-            throw new VaultException(e);
         }
     }
 
