@@ -1,5 +1,6 @@
 package com.bettercloud.vault;
 
+import com.bettercloud.vault.api.Auth;
 import com.bettercloud.vault.api.Logical;
 
 /**
@@ -52,5 +53,7 @@ public final class Vault {
     public Logical logical() {
         return new Logical(vaultConfig);
     }
+
+    public Auth auth() { return new Auth(vaultConfig); }
 
 }

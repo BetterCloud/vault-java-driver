@@ -106,7 +106,7 @@ public class VaultConfigTests {
      */
     @Test(expected = VaultException.class)
     public void testConfigConstructor_FailToLoad() throws VaultException {
-        final VaultConfig config = new VaultConfig(null, null);
+        final VaultConfig config = new VaultConfig(null);
     }
 
     /**
