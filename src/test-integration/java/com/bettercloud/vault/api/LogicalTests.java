@@ -33,12 +33,17 @@ public class LogicalTests {
 
         final String path = "secret/hello";
         final String value = "world";
+        final String valueNew = "worldnew";
 
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
         vault.logical().write(path, value);
 
         assertEquals(value, vault.logical().read(path));
+
+        String clientToken = vault.auth().loginByAppID("app-id/login","foo","bar").getAuth_client_token();
+        new Vault(new VaultConfig(address,clientToken)).logical().write(path,valueNew);
+        assertEquals(valueNew, vault.logical().read(path));
     }
 
 }

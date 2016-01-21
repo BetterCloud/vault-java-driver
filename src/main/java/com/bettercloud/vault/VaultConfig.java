@@ -34,6 +34,8 @@ import java.util.Map;
  */
 public final class VaultConfig {
 
+
+
     /**
      * <p>The code used to load environment variables is encapsulated within an inner class,
      * so that a mock version of that environment loader can be used by unit tests.</p>
@@ -91,6 +93,21 @@ public final class VaultConfig {
     }
 
     /**
+     * <p>A convenience constructor, for quickly creating a <code>VaultConfig</code> instance with its
+     * <code>address</code> and <code>token</code> fields populated.</p>
+     *
+     * <p>When using this approach to creating a <code>VaultConfig</code> instance, you should NOT
+     * make additional setter method calls after construction.  If you need other properties set
+     * explicitly, then use the builder pattern approach.</p>
+     *
+     * @param address The URL of the target Vault server
+     * @throws VaultException
+     */
+    public VaultConfig(final String address) throws VaultException {
+        this(address, new EnvironmentLoader());
+    }
+
+    /**
      * An overloaded version of the normal convenience constructor, used by unit tests to inject
      * a mock environment variable loader and validate that loading logic.
      *
@@ -102,6 +119,20 @@ public final class VaultConfig {
     protected VaultConfig(final String address, final String token, final EnvironmentLoader environmentLoader) throws VaultException {
         this.address = address;
         this.token = token;
+        this.environmentLoader = environmentLoader;
+        build();
+    }
+
+    /**
+     * An overloaded version of the normal convenience constructor, used by unit tests to inject
+     * a mock environment variable loader and validate that loading logic.
+     *
+     * @param address The URL of the target Vault server
+     * @param environmentLoader A (mock) environment loader implementation
+     * @throws VaultException
+     */
+    protected VaultConfig(final String address, final EnvironmentLoader environmentLoader) throws VaultException {
+        this.address = address;
         this.environmentLoader = environmentLoader;
         build();
     }
@@ -196,13 +227,8 @@ public final class VaultConfig {
                 throw new VaultException("No address is set");
             }
         }
-        if (this.token == null) {
-            final String tokenFromEnv = environmentLoader.loadVariable("VAULT_TOKEN");
-            if (tokenFromEnv != null) {
-                this.token = tokenFromEnv;
-            } else {
-                throw new VaultException("No token is set");
-            }
+        if (this.token == null && environmentLoader.loadVariable("VAULT_TOKEN") != null) {
+            this.token = environmentLoader.loadVariable("VAULT_TOKEN");
         }
         if (this.proxyAddress == null && environmentLoader.loadVariable("VAULT_PROXY_ADDRESS") != null) {
             this.proxyAddress = environmentLoader.loadVariable("VAULT_PROXY_ADDRESS");
