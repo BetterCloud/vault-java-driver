@@ -9,6 +9,8 @@ import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.rest.Rest;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Logical {
 
@@ -30,30 +32,32 @@ public class Logical {
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                final RestResponse restRestResponse = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
                         .header("X-Vault-Token", config.getToken())
                         .get();
 
                 // Validate response
-                if (restRestResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restRestResponse.getStatus());
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
                 }
-                final String mimeType = restRestResponse.getMimeType() == null ? "null" : restRestResponse.getMimeType();
+                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType);
                 }
                 String jsonString;
                 try {
-                    jsonString = new String(restRestResponse.getBody(), "UTF-8");//NOPMD
+                    jsonString = new String(restResponse.getBody(), "UTF-8");//NOPMD
                 } catch (UnsupportedEncodingException e) {
                     throw new VaultException(e);
                 }
 
                 // Parse JSON
-                final JsonObject jsonObject = Json.parse(jsonString).asObject();
-                final String value = jsonObject.get("data").asObject().getString("value", "");
-                return new LogicalResponse(value, retryCount);
+                final Map<String, String> data = new HashMap<String, String>();
+                for (final JsonObject.Member member : Json.parse(jsonString).asObject().get("data").asObject()) {
+                    data.put(member.getName(), member.getValue().asString());
+                }
+                return new LogicalResponse(restResponse, retryCount, data);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -83,13 +87,13 @@ public class Logical {
         int retryCount = 0;
         while (true) {
             try {
-                final RestResponse restRestResponse = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
                         .body(Json.object().add("value", value).toString().getBytes("UTF-8"))
                         .header("X-Vault-Token", config.getToken())
                         .post();
-                if (restRestResponse.getStatus() != 204) {
-                    throw new VaultException("Expecting HTTP status 204, but instead receiving " + restRestResponse.getStatus());
+                if (restResponse.getStatus() != 204) {
+                    throw new VaultException("Expecting HTTP status 204, but instead receiving " + restResponse.getStatus());
                 }
                 return new LogicalResponse(null, retryCount);
             } catch (Exception e) {

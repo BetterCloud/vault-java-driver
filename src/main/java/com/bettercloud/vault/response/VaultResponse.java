@@ -4,14 +4,11 @@ import com.bettercloud.vault.rest.RestResponse;
 
 public class VaultResponse {
 
-    protected int retries;
     protected RestResponse restResponse;
+    protected int retries;
 
-    public int getRetries() {
-        return retries;
-    }
-
-    public void setRetries(final int retries) {
+    public VaultResponse(final RestResponse restResponse, final int retries) {
+        this.restResponse = restResponse;
         this.retries = retries;
     }
 
@@ -21,6 +18,14 @@ public class VaultResponse {
 
     public void setRestResponse(RestResponse restResponse) {
         this.restResponse = restResponse;
+    }
+
+    public int getRetries() {
+        return retries;
+    }
+
+    public void setRetries(int retries) {
+        this.retries = retries;
     }
 
 }

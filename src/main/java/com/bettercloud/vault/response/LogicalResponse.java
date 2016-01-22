@@ -1,23 +1,35 @@
 package com.bettercloud.vault.response;
 
-public class LogicalResponse extends VaultResponse {
+import com.bettercloud.vault.rest.RestResponse;
 
-    /**
-     * TODO: This is just a temporary placeholder.  We need to store all fields found in the "data" object within the response.
-     */
-    private String value;
+import java.util.HashMap;
+import java.util.Map;
 
-    public LogicalResponse(final String value, final int retries) {
-        this.value = value;
-        this.retries = retries;
+/**
+ * TODO: Document...
+ */
+public final class LogicalResponse extends VaultResponse {
+
+    private Map<String, String> data = new HashMap<String, String>();
+
+    public LogicalResponse(final RestResponse restResponse, final int retries) {
+        super(restResponse, retries);
     }
 
-    public String getValue() {
-        return value;
+    public LogicalResponse(
+            final RestResponse restResponse,
+            final int retries,
+            final Map<String, String> data
+    ) {
+        super(restResponse, retries);
+        this.data.putAll(data);
     }
 
-    public void setValue(final String value) {
-        this.value = value;
+    public Map<String, String> getData() {
+        return data;
     }
 
+    public void setData(final Map<String, String> data) {
+        this.data = data;
+    }
 }
