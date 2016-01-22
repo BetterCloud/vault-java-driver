@@ -5,7 +5,7 @@ import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.response.LogicalResponse;
-import com.bettercloud.vault.rest.Response;
+import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.rest.Rest;
 
 import java.io.UnsupportedEncodingException;
@@ -30,22 +30,22 @@ public class Logical {
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                final Response restResponse = new Rest()//NOPMD
+                final RestResponse restRestResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
                         .header("X-Vault-Token", config.getToken())
                         .get();
 
                 // Validate response
-                if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                if (restRestResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restRestResponse.getStatus());
                 }
-                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+                final String mimeType = restRestResponse.getMimeType() == null ? "null" : restRestResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType);
                 }
                 String jsonString;
                 try {
-                    jsonString = new String(restResponse.getBody(), "UTF-8");//NOPMD
+                    jsonString = new String(restRestResponse.getBody(), "UTF-8");//NOPMD
                 } catch (UnsupportedEncodingException e) {
                     throw new VaultException(e);
                 }
@@ -83,13 +83,13 @@ public class Logical {
         int retryCount = 0;
         while (true) {
             try {
-                final Response restResponse = new Rest()//NOPMD
+                final RestResponse restRestResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
                         .body(Json.object().add("value", value).toString().getBytes("UTF-8"))
                         .header("X-Vault-Token", config.getToken())
                         .post();
-                if (restResponse.getStatus() != 204) {
-                    throw new VaultException("Expecting HTTP status 204, but instead receiving " + restResponse.getStatus());
+                if (restRestResponse.getStatus() != 204) {
+                    throw new VaultException("Expecting HTTP status 204, but instead receiving " + restRestResponse.getStatus());
                 }
                 return new LogicalResponse(null, retryCount);
             } catch (Exception e) {

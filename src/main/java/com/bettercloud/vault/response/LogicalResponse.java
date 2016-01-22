@@ -1,6 +1,6 @@
 package com.bettercloud.vault.response;
 
-public class LogicalResponse extends AbstractResponse {
+public class LogicalResponse extends VaultResponse {
 
     /**
      * TODO: This is just a temporary placeholder.  We need to store all fields found in the "data" object within the response.

@@ -4,7 +4,7 @@ package com.bettercloud.vault.rest;
  * This class contains the metadata and data that was downloaded by <code>Rest</code>
  * from an HTTP response.
  */
-public class Response {
+public class RestResponse {
 
     private int status;
     private String mimeType;
@@ -16,7 +16,7 @@ public class Response {
      * @param mimeType The MIME type for the body contents (e.g. <code>application/json</code>).
      * @param body The binary payload of the response body.
      */
-    public Response(final int status, final String mimeType, final byte[] body) {
+    public RestResponse(final int status, final String mimeType, final byte[] body) {
         this.status = status;
         this.mimeType = mimeType;
         this.body = body;
