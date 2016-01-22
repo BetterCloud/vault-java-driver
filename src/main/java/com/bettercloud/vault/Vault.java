@@ -40,8 +40,16 @@ public final class Vault {
         this.vaultConfig = vaultConfig;
     }
 
-    public Vault withRetries(final Class<? extends Exception> exception, final int maxRetries, final int retryInterval) {
-        this.vaultConfig.retryOption(exception, maxRetries, retryInterval);
+    /**
+     * TODO: Document...
+     *
+     * @param maxRetries
+     * @param retryIntervalMilliseconds
+     * @return
+     */
+    public Vault withRetries(final int maxRetries, final int retryIntervalMilliseconds) {
+        this.vaultConfig.setMaxRetries(maxRetries);
+        this.vaultConfig.setRetryIntervalMilliseconds(retryIntervalMilliseconds);
         return this;
     }
 

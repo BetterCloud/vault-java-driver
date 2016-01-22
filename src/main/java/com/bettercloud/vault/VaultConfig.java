@@ -1,8 +1,5 @@
 package com.bettercloud.vault;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * <p>A container for the configuration settings needed to initialize a <code>Vault</code> driver instance.</p>
  *
@@ -34,8 +31,6 @@ import java.util.Map;
  */
 public final class VaultConfig {
 
-
-
     /**
      * <p>The code used to load environment variables is encapsulated within an inner class,
      * so that a mock version of that environment loader can be used by unit tests.</p>
@@ -59,8 +54,8 @@ public final class VaultConfig {
     private Integer sslTimeout;
     private Integer openTimeout;
     private Integer readTimeout;
-    private Map<Class<? extends Exception>, Map<Integer, Integer>> retryOptions
-            = new HashMap<Class<? extends Exception>, Map<Integer, Integer>>();
+    private int maxRetries;
+    private int retryIntervalMilliseconds;
 
     /**
      * <p>Default constructor.  Should be used in conjunction with the builder pattern, calling additional
@@ -99,6 +94,8 @@ public final class VaultConfig {
      * <p>When using this approach to creating a <code>VaultConfig</code> instance, you should NOT
      * make additional setter method calls after construction.  If you need other properties set
      * explicitly, then use the builder pattern approach.</p>
+     *
+     * TODO: Figure out how to deal with populating "token" after-the-fact.  All the validation is in "build()", and this constructor bypasses that.
      *
      * @param address The URL of the target Vault server
      * @throws VaultException
@@ -203,15 +200,21 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: document...
+     * TODO: Document...
      *
-     * @param exception
      * @param maxRetries
      */
-    protected void retryOption(final Class<? extends Exception> exception, final int maxRetries, final int retryInterval) {
-        final Map<Integer, Integer> maxAndInterval = new HashMap<Integer, Integer>();
-        maxAndInterval.put(maxRetries, retryInterval);
-        this.retryOptions.put(exception, maxAndInterval);
+    protected void setMaxRetries(final int maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
+    /**
+     * TODO: Document...
+     *
+     * @param retryIntervalMilliseconds
+     */
+    protected void setRetryIntervalMilliseconds(final int retryIntervalMilliseconds) {
+        this.retryIntervalMilliseconds = retryIntervalMilliseconds;
     }
 
 
@@ -312,22 +315,12 @@ public final class VaultConfig {
         return readTimeout;
     }
 
-    public int getMaxRetriesForException(final Class<? extends Exception> exception) {
-        for (final Class<? extends Exception> key : retryOptions.keySet()) {
-            if (exception.isAssignableFrom(key)) {
-                return retryOptions.get(exception).entrySet().iterator().next().getKey();
-            }
-        }
-        return 0;
+    public int getMaxRetries() {
+        return maxRetries;
     }
 
-    public int getRetryIntervalForException(final Class<? extends Exception> exception) {
-        for (final Class<? extends Exception> key : retryOptions.keySet()) {
-            if (exception.isAssignableFrom(key)) {
-                return retryOptions.get(exception).entrySet().iterator().next().getValue();
-            }
-        }
-        return 0;
+    public int getRetryIntervalMilliseconds() {
+        return retryIntervalMilliseconds;
     }
 
 }

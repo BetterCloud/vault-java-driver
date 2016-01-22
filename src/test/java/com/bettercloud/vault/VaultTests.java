@@ -1,57 +1,53 @@
 package com.bettercloud.vault;
 
-import org.eclipse.jetty.server.Request;
+import com.bettercloud.vault.response.LogicalResponse;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.Test;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import static org.junit.Assert.assertEquals;
 
+/**
+ * TODO: Document...
+ */
 public class VaultTests {
 
     @Test
-    public void testRetries() throws Exception {
+    public void testRetries_Read() throws Exception {
         final Server server = new Server(8999);
-        server.setHandler(new MockVault(5));
+        server.setHandler( new MockVault(5, 200, "{\"data\":{\"value\":\"mock\"}}") );
         server.start();
 
-        final VaultConfig vaultConfig = new VaultConfig("http://127.0.0.1:8999", "...");
-        vaultConfig.retryOption(VaultException.class, 5, 1);
+        final VaultConfig vaultConfig = new VaultConfig("http://127.0.0.1:8999", "mock_token");
         final Vault vault = new Vault(vaultConfig);
-        vault.logical().read("secret/hello");
-        System.out.println("done");
+        final LogicalResponse response = vault.withRetries(5, 100).logical().read("secret/hello");
+        assertEquals(5, response.getRetries());
+        assertEquals("mock", response.getValue());
+
+        shutdownMockVault(server);
     }
 
-}
+    @Test
+    public void testRetries_Write() throws Exception {
+        final Server server = new Server(8999);
+        server.setHandler( new MockVault(5, 204, null) );
+        server.start();
 
-class MockVault extends AbstractHandler {
+        final VaultConfig vaultConfig = new VaultConfig("http://127.0.0.1:8999", "mock_token");
+        final Vault vault = new Vault(vaultConfig);
+        final LogicalResponse response = vault.withRetries(5, 100).logical().write("secret/hello", "world");
+        assertEquals(5, response.getRetries());
 
-    private int failureCount;
-
-    public MockVault(final int failureCount) {
-        this.failureCount = failureCount;
+        shutdownMockVault(server);
     }
 
-    @Override
-    public void handle(
-            final String target,
-            final Request baseRequest,
-            final HttpServletRequest request,
-            final HttpServletResponse response
-    ) throws IOException, ServletException {
-        response.setContentType("application/json");
-        baseRequest.setHandled(true);
-        if (failureCount > 0) {
-            failureCount = failureCount - 1;
-            response.setStatus(500);
-            System.out.printf("Sending 500... failureCount == %d\n", failureCount);
-        } else {
-            response.setStatus(200);
-            response.getWriter().println("{}");
+    private void shutdownMockVault(final Server server) throws Exception {
+        int attemptCount = 0;
+        while (!server.isStopped() && attemptCount < 5) {
+            attemptCount++;
+            server.stop();
+            Thread.sleep(1000);
         }
     }
+
 }
 

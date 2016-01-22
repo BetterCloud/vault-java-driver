@@ -3,14 +3,11 @@ package com.bettercloud.vault.api;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
-import com.bettercloud.vault.response.AuthResponse;
-import junit.framework.Assert;
-import junit.framework.TestCase;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertNotSame;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+
 
 /**
  * Integration tests for the basic (i.e. "auth") Vault API operations.
