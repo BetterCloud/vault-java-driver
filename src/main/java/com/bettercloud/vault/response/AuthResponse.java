@@ -19,7 +19,7 @@ public class AuthResponse {
         return username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
@@ -27,7 +27,7 @@ public class AuthResponse {
         return lease_id;
     }
 
-    public void setLease_id(String lease_id) {
+    public void setLease_id(final String lease_id) {
         this.lease_id = lease_id;
     }
 
@@ -35,7 +35,7 @@ public class AuthResponse {
         return renewable;
     }
 
-    public void setRenewable(boolean renewable) {
+    public void setRenewable(final boolean renewable) {
         this.renewable = renewable;
     }
 
@@ -43,7 +43,7 @@ public class AuthResponse {
         return lease_duration;
     }
 
-    public void setLease_duration(int lease_duration) {
+    public void setLease_duration(final int lease_duration) {
         this.lease_duration = lease_duration;
     }
 
@@ -51,7 +51,7 @@ public class AuthResponse {
         return auth_client_token;
     }
 
-    public void setAuth_client_token(String auth_client_token) {
+    public void setAuth_client_token(final String auth_client_token) {
         this.auth_client_token = auth_client_token;
     }
 
@@ -59,7 +59,7 @@ public class AuthResponse {
         return auth_policies;
     }
 
-    public void setAuth_policies(String[] auth_policies) {
+    public void setAuth_policies(final String[] auth_policies) {
         this.auth_policies = auth_policies;
     }
 
@@ -67,7 +67,7 @@ public class AuthResponse {
         return auth_lease_duration;
     }
 
-    public void setAuth_lease_duration(int auth_lease_duration) {
+    public void setAuth_lease_duration(final int auth_lease_duration) {
         this.auth_lease_duration = auth_lease_duration;
     }
 
@@ -75,7 +75,7 @@ public class AuthResponse {
         return auth_renewable;
     }
 
-    public void setAuth_renewable(boolean auth_renewable) {
+    public void setAuth_renewable(final boolean auth_renewable) {
         this.auth_renewable = auth_renewable;
     }
 
@@ -83,7 +83,7 @@ public class AuthResponse {
         return app_id;
     }
 
-    public void setApp_id(String app_id) {
+    public void setApp_id(final String app_id) {
         this.app_id = app_id;
     }
 
@@ -91,7 +91,7 @@ public class AuthResponse {
         return user_id;
     }
 
-    public void setUser_id(String user_id) {
+    public void setUser_id(final String user_id) {
         this.user_id = user_id;
     }
 

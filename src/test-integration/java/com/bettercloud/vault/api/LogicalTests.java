@@ -38,7 +38,8 @@ public class LogicalTests {
         final Vault vault = new Vault(config);
         vault.logical().write(path, value);
 
-        assertEquals(value, vault.logical().read(path));
+        final String valueRead = vault.logical().read(path).getValue();
+        assertEquals(value, valueRead);
     }
 
 }

@@ -55,11 +55,8 @@ public class Auth {
             }
             return buildAuthResponse(jsonString);
         } catch (RestException e) {
-            // TODO: Turn this into retry loop(s)...
-            final int maxRetries = config.getMaxRetriesForException(e.getClass());
-            final int retryInterval = config.getRetryIntervalForException(e.getClass());
             throw new VaultException(e);
-        }catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new VaultException(e);
         }
     }
@@ -98,24 +95,21 @@ public class Auth {
             }
             return buildAuthResponse(jsonString);
         } catch (RestException e) {
-            // TODO: Turn this into retry loop(s)...
-            final int maxRetries = config.getMaxRetriesForException(e.getClass());
-            final int retryInterval = config.getRetryIntervalForException(e.getClass());
             throw new VaultException(e);
-        }catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new VaultException(e);
         }
     }
 
-    private AuthResponse buildAuthResponse(String responseJson){
-        AuthResponse authResponse = new AuthResponse();
+    private AuthResponse buildAuthResponse(final String responseJson){
+        final AuthResponse authResponse = new AuthResponse();
         final JsonObject jsonObject = Json.parse(responseJson).asObject();
         authResponse.setLease_id(jsonObject.getString("lease_id",""));
         authResponse.setRenewable(jsonObject.getBoolean("renewable",false));
         authResponse.setLease_duration(jsonObject.getInt("lease_duration",0));
         final JsonObject authJsonObject = jsonObject.get("auth").asObject();
         authResponse.setAuth_client_token(authJsonObject.getString("client_token",""));
-        JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();
+        final JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();
         String[] authPolicies = new String[authPoliciesJsonArray.size()];
         for( int i=0; i < authPoliciesJsonArray.size() ; i++){
             authPolicies[i] = authPoliciesJsonArray.get(i).asString();
