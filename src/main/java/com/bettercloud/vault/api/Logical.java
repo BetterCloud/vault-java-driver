@@ -5,10 +5,12 @@ import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.response.LogicalResponse;
-import com.bettercloud.vault.rest.Response;
+import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.rest.Rest;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Logical {
 
@@ -21,6 +23,8 @@ public class Logical {
     /**
      * Basic read operation to retrieve a secret.
      *
+     * TODO: Support reading from and writing to fields other than "value"
+     *
      * @param path
      * @return
      * @throws VaultException
@@ -30,7 +34,7 @@ public class Logical {
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                final Response restResponse = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
                         .header("X-Vault-Token", config.getToken())
                         .get();
@@ -51,9 +55,11 @@ public class Logical {
                 }
 
                 // Parse JSON
-                final JsonObject jsonObject = Json.parse(jsonString).asObject();
-                final String value = jsonObject.get("data").asObject().getString("value", "");
-                return new LogicalResponse(value, retryCount);
+                final Map<String, String> data = new HashMap<String, String>();
+                for (final JsonObject.Member member : Json.parse(jsonString).asObject().get("data").asObject()) {
+                    data.put(member.getName(), member.getValue().asString());
+                }
+                return new LogicalResponse(restResponse, retryCount, data);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -83,7 +89,7 @@ public class Logical {
         int retryCount = 0;
         while (true) {
             try {
-                final Response restResponse = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
                         .body(Json.object().add("value", value).toString().getBytes("UTF-8"))
                         .header("X-Vault-Token", config.getToken())

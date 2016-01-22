@@ -6,7 +6,7 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.response.AuthResponse;
-import com.bettercloud.vault.rest.Response;
+import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestException;
 
@@ -34,22 +34,22 @@ public class Auth {
     public AuthResponse loginByAppID(final String path, final String appId, final String userId) throws VaultException {
         try {
             // HTTP request to Vault
-            final Response response = new Rest()
+            final RestResponse restResponse = new Rest()
                     .url(config.getAddress() + "/v1/auth/" + path)
                     .body(Json.object().add("app_id", appId).add("user_id",userId).toString().getBytes("UTF-8"))
                     .post();
 
-            // Validate response
-            if (response.getStatus() != 200) {
-                throw new VaultException("Vault responded with HTTP status code: " + response.getStatus());
+            // Validate restResponse
+            if (restResponse.getStatus() != 200) {
+                throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
             }
-            final String mimeType = response.getMimeType() == null ? "null" : response.getMimeType();
+            final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
             if (!mimeType.equals("application/json")) {
                 throw new VaultException("Vault responded with MIME type: " + mimeType);
             }
             String jsonString;
             try {
-                jsonString = new String(response.getBody(), "UTF-8");
+                jsonString = new String(restResponse.getBody(), "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 throw new VaultException(e);
             }
@@ -74,22 +74,22 @@ public class Auth {
     public AuthResponse loginByUsernamePassword(final String path, final String password) throws VaultException {
         try {
             // HTTP request to Vault
-            final Response response = new Rest()
+            final RestResponse restResponse = new Rest()
                     .url(config.getAddress() + "/v1/auth/" + path)
                     .body(Json.object().add("password", password).toString().getBytes("UTF-8"))
                     .post();
 
-            // Validate response
-            if (response.getStatus() != 200) {
-                throw new VaultException("Vault responded with HTTP status code: " + response.getStatus());
+            // Validate restResponse
+            if (restResponse.getStatus() != 200) {
+                throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
             }
-            final String mimeType = response.getMimeType() == null ? "null" : response.getMimeType();
+            final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
             if (!mimeType.equals("application/json")) {
                 throw new VaultException("Vault responded with MIME type: " + mimeType);
             }
             String jsonString;
             try {
-                jsonString = new String(response.getBody(), "UTF-8");
+                jsonString = new String(restResponse.getBody(), "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 throw new VaultException(e);
             }

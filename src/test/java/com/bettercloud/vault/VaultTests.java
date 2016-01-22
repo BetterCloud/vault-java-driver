@@ -21,7 +21,7 @@ public class VaultTests {
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.withRetries(5, 100).logical().read("secret/hello");
         assertEquals(5, response.getRetries());
-        assertEquals("mock", response.getValue());
+        assertEquals("mock", response.getData().get("value"));
 
         shutdownMockVault(server);
     }

@@ -21,13 +21,13 @@ public class PostTests {
      */
     @Test
     public void testPost_Plain() throws RestException, UnsupportedEncodingException {
-        final Response response = new Rest()
+        final RestResponse restResponse = new Rest()
                 .url("https://httpbin.org/post")
                 .post();
-        assertEquals(200, response.getStatus());
-        assertEquals("application/json", response.getMimeType());
+        assertEquals(200, restResponse.getStatus());
+        assertEquals("application/json", restResponse.getMimeType());
 
-        final String jsonString = new String(response.getBody(), "UTF-8");
+        final String jsonString = new String(restResponse.getBody(), "UTF-8");
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/post", jsonObject.getString("url", null));
     }
@@ -42,16 +42,16 @@ public class PostTests {
      */
     @Test
     public void testPost_InsertParams() throws RestException, UnsupportedEncodingException {
-        final Response response = new Rest()
+        final RestResponse restResponse = new Rest()
                 .url("https://httpbin.org/post")
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
                 .parameter("multi part", "this parameter has whitespace in its name and value")
                 .post();
-        assertEquals(200, response.getStatus());
-        assertEquals("application/json", response.getMimeType());
+        assertEquals(200, restResponse.getStatus());
+        assertEquals("application/json", restResponse.getMimeType());
 
-        final String jsonString = new String(response.getBody(), "UTF-8");
+        final String jsonString = new String(restResponse.getBody(), "UTF-8");
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/post", jsonObject.getString("url", null));
 
@@ -73,16 +73,16 @@ public class PostTests {
      */
     @Test
     public void testPost_UpdateParams() throws RestException, UnsupportedEncodingException {
-        final Response response = new Rest()
+        final RestResponse restResponse = new Rest()
                 .url("https://httpbin.org/post?hot=cold")
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
                 .parameter("multi part", "this parameter has whitespace in its name and value")
                 .post();
-        assertEquals(200, response.getStatus());
-        assertEquals("application/json", response.getMimeType());
+        assertEquals(200, restResponse.getStatus());
+        assertEquals("application/json", restResponse.getMimeType());
 
-        final String jsonString = new String(response.getBody(), "UTF-8");
+        final String jsonString = new String(restResponse.getBody(), "UTF-8");
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/post?hot=cold", jsonObject.getString("url", null));
         final JsonObject args = jsonObject.get("args").asObject();
@@ -104,16 +104,16 @@ public class PostTests {
      */
     @Test
     public void testPost_WithHeaders() throws RestException, UnsupportedEncodingException {
-        final Response response = new Rest()
+        final RestResponse restResponse = new Rest()
                 .url("https://httpbin.org/post")
                 .header("black", "white")
                 .header("day", "night")
                 .header("two-part", "Note that headers are send in url-encoded format")
                 .post();
-        assertEquals(200, response.getStatus());
-        assertEquals("application/json", response.getMimeType());
+        assertEquals(200, restResponse.getStatus());
+        assertEquals("application/json", restResponse.getMimeType());
 
-        final String jsonString = new String(response.getBody(), "UTF-8");
+        final String jsonString = new String(restResponse.getBody(), "UTF-8");
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/post", jsonObject.getString("url", null));
         final JsonObject headers = jsonObject.get("headers").asObject();

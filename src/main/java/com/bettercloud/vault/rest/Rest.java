@@ -28,7 +28,7 @@ import java.util.TreeMap;
  *
  * <blockquote>
  * <pre>{@code
- * final Response getResponse = new Rest()
+ * final RestResponse getResponse = new Rest()
  *                              .url("https://httpbin.org/get")
  *                              .header("header-1", "foo")
  *                              .header("header-2", "bar")
@@ -36,7 +36,7 @@ import java.util.TreeMap;
  *                              .parameter("param-2", "down")
  *                              .get();
  *
- * final Response postResponse = new Rest()
+ * final RestResponse postResponse = new Rest()
  *                              .url("https://httpbin.org/post")
  *                              .header("header-1", "foo")
  *                              .header("header-2", "bar")
@@ -143,7 +143,7 @@ public final class Rest {
      * @return The result of the HTTP operation
      * @throws RestException
      */
-    public Response get() throws RestException {
+    public RestResponse get() throws RestException {
         if (urlString == null) {
             throw new RestException("No URL is set");
         }
@@ -168,7 +168,7 @@ public final class Rest {
             final int statusCode = connection.getResponseCode();
             final String mimeType = connection.getContentType();
             final byte[] body = responseBodyBytes(connection);
-            return new Response(statusCode, mimeType, body);
+            return new RestResponse(statusCode, mimeType, body);
         } catch (IOException e) {
             throw new RestException(e);
         }
@@ -187,7 +187,7 @@ public final class Rest {
      * @return The result of the HTTP operation
      * @throws RestException
      */
-    public Response post() throws RestException {
+    public RestResponse post() throws RestException {
         return postOrPutImpl(true);
     }
 
@@ -204,7 +204,7 @@ public final class Rest {
      * @return The result of the HTTP operation
      * @throws RestException
      */
-    public Response put() throws RestException {
+    public RestResponse put() throws RestException {
         return postOrPutImpl(false);
     }
 
@@ -216,7 +216,7 @@ public final class Rest {
      * @return The result of the HTTP operation
      * @throws RestException
      */
-    public Response delete() throws RestException {
+    public RestResponse delete() throws RestException {
         // TODO: Implement
         throw new UnsupportedOperationException();
     }
@@ -230,7 +230,7 @@ public final class Rest {
      * @return The result of the HTTP operation
      * @throws RestException
      */
-    private Response postOrPutImpl(final boolean doPost) throws RestException {
+    private RestResponse postOrPutImpl(final boolean doPost) throws RestException {
         if (urlString == null) {
             throw new RestException("No URL is set");
         }
@@ -268,7 +268,7 @@ public final class Rest {
             final int statusCode = connection.getResponseCode();
             final String mimeType = connection.getContentType();
             final byte[] body = responseBodyBytes(connection);
-            return new Response(statusCode, mimeType, body);
+            return new RestResponse(statusCode, mimeType, body);
         } catch (IOException e) {
             throw new RestException(e);
         }
