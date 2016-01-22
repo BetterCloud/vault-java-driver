@@ -23,6 +23,8 @@ public class Logical {
     /**
      * Basic read operation to retrieve a secret.
      *
+     * TODO: Support reading from and writing to fields other than "value"
+     *
      * @param path
      * @return
      * @throws VaultException
