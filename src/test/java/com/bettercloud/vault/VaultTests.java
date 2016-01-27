@@ -7,7 +7,9 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * TODO: Document...
+ * <p>Unit tests for the Vault driver, having no dependency on an actual Vault server instance being available.</p>
+ *
+ * <p>Currently, this includes only tests of retry logic... using <code>MockVault</code> to simulate a Vault server.</p>
  */
 public class VaultTests {
 

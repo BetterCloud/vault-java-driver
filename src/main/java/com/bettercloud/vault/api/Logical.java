@@ -25,8 +25,8 @@ public class Logical {
      *
      * TODO: Support reading from and writing to fields other than "value"
      *
-     * @param path
-     * @return
+     * @param path The Vault key value from which to read (e.g. <code>secret/hello</code>
+     * @return Response metadata, as well as all values found for that key
      * @throws VaultException
      */
     public LogicalResponse read(final String path) throws VaultException {
@@ -80,6 +80,8 @@ public class Logical {
 
     /**
      * Basic operation to store a secret.
+     *
+     * TODO: Support secret names other than the hard-coded "value".
      *
      * @param path The path on which the secret is to be stored (e.g. <code>secret/hello</code>)
      * @param value The secret value to be stored
