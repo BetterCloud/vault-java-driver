@@ -9,7 +9,39 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * TODO: Document...
+ * <p>This class is used to mock out a Vault server in unit tests.  As it extends Jetty's <code>AbstractHandler</code>,
+ * it can be passed to an embedded Jetty server and respond to actual (albeit localhost) HTTP requests.</p>
+ *
+ * <p>The basic usage pattern is as follows:</p>
+ *
+ * <ol>
+ *     <li>
+ *         <code>MockVault</code> responds with HTTP 500 status codes to a designated number of requests (which
+ *         can be zero).  This can be used to test retry logic.
+ *     </li>
+ *     <li>
+ *         On subsequent HTTP requests, <code>MockVault</code> responds with a designated HTTP status code, and
+ *         a designated response body.
+ *     </li>
+ * </ol>
+ *
+ * <p>Example usage:</p>
+ *
+ * <blockquote>
+ * <pre>{@code
+ * final Server server = new Server(8999);
+ * server.setHandler( new MockVault(5, 200, "{\"data\":{\"value\":\"mock\"}}") );
+ * server.start();
+ *
+ * final VaultConfig vaultConfig = new VaultConfig("http://127.0.0.1:8999", "mock_token");
+ * final Vault vault = new Vault(vaultConfig);
+ * final LogicalResponse response = vault.withRetries(5, 100).logical().read("secret/hello");
+ * assertEquals(5, response.getRetries());
+ * assertEquals("mock", response.getData().get("value"));
+ *
+ * server.stop();
+ * }</pre>
+ * </blockquote>
  */
 public class MockVault extends AbstractHandler {
 

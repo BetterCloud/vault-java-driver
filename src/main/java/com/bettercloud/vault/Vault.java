@@ -4,12 +4,10 @@ import com.bettercloud.vault.api.Auth;
 import com.bettercloud.vault.api.Logical;
 
 /**
- * <p>The Vault driver class, the primary interface through which dependent applications will
- * access Vault.</p>
+ * <p>The Vault driver class, the primary interface through which dependent applications will access Vault.</p>
  *
- * <p>This driver exposes a DSL, compartmentalizing the various endpoints of the HTTP API
- * (e.g. "/", "sys/init", "sys/seal") into separate implementation classes (e.g. <code>Logical</code>,
- * <code>Init</code>, etc).</p>
+ * <p>This driver exposes a DSL, compartmentalizing the various endpoints of the HTTP API (e.g. "/", "sys/init",
+ * "sys/seal") into separate implementation classes (e.g. <code>Logical</code>, <code>Init</code>, etc).</p>
  *
  * <p>Example usage:</p>
  *
@@ -18,12 +16,11 @@ import com.bettercloud.vault.api.Logical;
  * final VaultConfig config = new VaultConfig("http://127.0.0.1:8200", "eace6676-4d78-c687-4e54-03cad00e3abf");
  * final Vault vault = new Vault(config);
  * ...
- * vault.logical().write("secret/hello", "world");
+ * final LogicalResponse writeResponse = vault.logical()
+ *                                          .withRetries(5, 1000)  // optional
+ *                                          .write("secret/hello", "world");
  * ...
- * final String value = vault
- *      .withRetries(RestException.class, 5, 10)
- *      .logical()
- *      .read("secret/hello");
+ * final LogicalResponse readResponse = vault.logical().read("secret/hello");
  * }</pre>
  * </blockquote>
  */
@@ -41,10 +38,11 @@ public final class Vault {
     }
 
     /**
-     * TODO: Document...
+     * This method is chained ahead of endpoints (e.g. <code>logical()</code>, <code>auth()</code>,
+     * etc... to specify retry rules for any API operations invoked on that endpoint.
      *
-     * @param maxRetries
-     * @param retryIntervalMilliseconds
+     * @param maxRetries The number of times that API operations will be retried when a failure occurs.
+     * @param retryIntervalMilliseconds The number of milliseconds that the driver will wait in between retries.
      * @return
      */
     public Vault withRetries(final int maxRetries, final int retryIntervalMilliseconds) {
@@ -54,7 +52,7 @@ public final class Vault {
     }
 
     /**
-     * Returns the implementing class for Vault's core/logical operations (e.g. read, write)
+     * Returns the implementing class for Vault's core/logical operations (e.g. read, write).
      *
      * @return The implementing class for Vault's core/logical operations (e.g. read, write)
      */
@@ -62,6 +60,13 @@ public final class Vault {
         return new Logical(vaultConfig);
     }
 
-    public Auth auth() { return new Auth(vaultConfig); }
+    /**
+     * Returns the implementing class for operations on Vault's <code>/v1/auth/*</code> REST endpoints
+     *
+     * @return The implementing class for Vault's auth operations.
+     */
+    public Auth auth() {
+        return new Auth(vaultConfig);
+    }
 
 }
