@@ -15,22 +15,19 @@ import static junit.framework.TestCase.assertTrue;
 public class VaultConfigTests {
 
     /**
-     * <p>The code used by <code>VaultConfig</code> to load environment variables is
-     * encapsulated within an inner class, so that a mock version of that environment
-     * loader can be used by unit tests.</p>
+     * <p>The code used by <code>VaultConfig</code> to load environment variables is encapsulated within an inner
+     * class, so that a mock version of that environment loader can be used by unit tests.</p>
      *
-     * <p>This mock implementation of <code>VaultConfig.EnvironmentLoader</code> allows
-     * unit tests to declare values that should be returned for a given environment
-     * variable name.  The actual environment is never used.
+     * <p>This mock implementation of <code>VaultConfig.EnvironmentLoader</code> allows unit tests to declare values
+     * that should be returned for a given environment variable name.  The actual environment is never used.
      */
     class MockEnvironmentLoader extends VaultConfig.EnvironmentLoader {
         final Map<String, String> overrides = new HashMap<String, String>();
 
         /**
-         * Declare a variable and value to be available in the mock "environment".  This
-         * method may be called repeatedly, to populate multiple variables.  This method
-         * should be called prior to passing the object instance to a <code>VaultConfig</code>
-         * constructor, or calling the <code>build()</code> method on that class.
+         * Declare a variable and value to be available in the mock "environment".  This method may be called
+         * repeatedly, to populate multiple variables.  This method should be called prior to passing the object
+         * instance to a <code>VaultConfig</code> constructor, or calling the <code>build()</code> method on that class.
          *
          * @param name Mock environment variable name
          * @param value Mock environment variable value
@@ -47,8 +44,8 @@ public class VaultConfigTests {
     }
 
     /**
-     * Test creating a new <code>VaultConfig</code> via its constructor, passing address
-     * and token values and ensuring that they're later accessible.
+     * Test creating a new <code>VaultConfig</code> via its constructor, passing address and token values and ensuring
+     * that they're later accessible.
      *
      * @throws VaultException
      */
@@ -60,9 +57,8 @@ public class VaultConfigTests {
     }
 
     /**
-     * Test creating a new <code>VaultConfig</code> via its constructor, deliberately
-     * passing null address and token values so it's forced to fetch them from environment
-     * variables.
+     * Test creating a new <code>VaultConfig</code> via its constructor, deliberately passing null address and token
+     * values so it's forced to fetch them from environment variables.
      *
      * @throws VaultException
      */
@@ -80,6 +76,9 @@ public class VaultConfigTests {
         mock.override("VAULT_SSL_CERT", "mycert.pem");
         mock.override("VAULT_SSL_VERIFY", "true");
         mock.override("VAULT_TIMEOUT", "30");
+        mock.override("VAULT_SSL_TIMEOUT", "30");
+        mock.override("VAULT_OPEN_TIMEOUT", "30");
+        mock.override("VAULT_READ_TIMEOUT", "30");
 
         final VaultConfig config = new VaultConfig(null, null, mock);
         assertEquals("http://127.0.0.1:8200", config.getAddress());
@@ -91,16 +90,14 @@ public class VaultConfigTests {
         assertEquals("mycert.pem", config.getSslPemFile());
         assertTrue(config.isSslVerify());
         assertTrue(30 == config.getTimeout());
-        // Properties that do NOT default to environment variables
-        assertNull(config.getSslTimeout());
-        assertNull(config.getOpenTimeout());
-        assertNull(config.getReadTimeout());
+        assertTrue(30 == config.getSslTimeout());
+        assertTrue(30 == config.getOpenTimeout());
+        assertTrue(30 == config.getReadTimeout());
     }
 
     /**
-     * Test creating a new <code>VaultConfig</code> via its constructor, passing null
-     * address and token values AND having them unavailable in the environment variables
-     * too.  This should cause initialization failure.
+     * Test creating a new <code>VaultConfig</code> via its constructor, passing null address and token values AND
+     * having them unavailable in the environment variables too.  This should cause initialization failure.
      *
      * @throws VaultException
      */
@@ -110,8 +107,8 @@ public class VaultConfigTests {
     }
 
     /**
-     * Test creating a <code>VaultConfig</code> instance via its builder pattern,
-     * explicitly specifying address and token values.
+     * Test creating a <code>VaultConfig</code> instance via its builder pattern, explicitly specifying address and
+     * token values.
      *
      * @throws VaultException
      */
@@ -127,8 +124,8 @@ public class VaultConfigTests {
     }
 
     /**
-     * Test creating a <code>VaultConfig</code> instance via its builder pattern,
-     * forcing it to look to the environment variables for address and token values.
+     * Test creating a <code>VaultConfig</code> instance via its builder pattern, forcing it to look to the environment
+     * variables for address and token values.
      *
      * @throws VaultException
      */
@@ -144,6 +141,9 @@ public class VaultConfigTests {
         mock.override("VAULT_SSL_CERT", "mycert.pem");
         mock.override("VAULT_SSL_VERIFY", "true");
         mock.override("VAULT_TIMEOUT", "30");
+        mock.override("VAULT_SSL_TIMEOUT", "30");
+        mock.override("VAULT_OPEN_TIMEOUT", "30");
+        mock.override("VAULT_READ_TIMEOUT", "30");
 
         final VaultConfig config = new VaultConfig()
                 .environmentLoader(mock)
@@ -157,23 +157,20 @@ public class VaultConfigTests {
         assertEquals("mycert.pem", config.getSslPemFile());
         assertTrue(config.isSslVerify());
         assertTrue(30 == config.getTimeout());
-        // Properties that do NOT default to environment variables
-        assertNull(config.getSslTimeout());
-        assertNull(config.getOpenTimeout());
-        assertNull(config.getReadTimeout());
+        assertTrue(30 == config.getSslTimeout());
+        assertTrue(30 == config.getOpenTimeout());
+        assertTrue(30 == config.getReadTimeout());
     }
 
     /**
-     * Test creating a <code>VaultConfig</code> instance via its builder pattern, with
-     * no address no token values passed OR available in the environment.  This should
-     * cause initialization failure.
+     * Test creating a <code>VaultConfig</code> instance via its builder pattern, with no address no token values
+     * passed OR available in the environment.  This should cause initialization failure.
      *
      * @throws VaultException
      */
     @Test(expected = VaultException.class)
     public void testConfigBuilder_FailToLoad() throws VaultException {
-        final VaultConfig config = new VaultConfig()
-                .build();
+        final VaultConfig config = new VaultConfig().build();
     }
 
 }
