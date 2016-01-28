@@ -1,5 +1,5 @@
 group 'com.bettercloud'
-version '1.0-SNAPSHOT'
+version '0.3-SNAPSHOT'
 
 apply plugin: 'java'
 
@@ -73,3 +73,19 @@ task integrationTest(type: Test) {
         VAULT_PASSWORD: System.getProperty("VAULT_PASSWORD")
     ]
 }
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
