@@ -302,7 +302,9 @@ public final class VaultConfig {
     /**
      * TODO: Not yet being used.  Implement...
      *
-     * TODO: The documentation for the Ruby driver makes no mention of supporting an environment variable fallback.  Is there one, or should there be?
+     * <p>If no sslTimeout is explicitly set, either by this method in a builder pattern approach or else by one of the
+     * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_SSL_TIMEOUT</code>
+     * environment variable.</p>
      *
      * @param sslTimeout
      * @return
@@ -315,7 +317,9 @@ public final class VaultConfig {
     /**
      * TODO: Not yet being used.  Implement...
      *
-     * TODO: The documentation for the Ruby driver makes no mention of supporting an environment variable fallback.  Is there one, or should there be?
+     * <p>If no openTimeout is explicitly set, either by this method in a builder pattern approach or else by one of
+     * the convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_OPEN_TIMEOUT</code>
+     * environment variable.</p>
      *
      * @param openTimeout
      * @return
@@ -328,7 +332,9 @@ public final class VaultConfig {
     /**
      * TODO: Not yet being used.  Implement...
      *
-     * TODO: The documentation for the Ruby driver makes no mention of supporting an environment variable fallback.  Is there one, or should there be?
+     * <p>If no readTimeout is explicitly set, either by this method in a builder pattern approach or else by one of
+     * the convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_READ_TIMEOUT</code>
+     * environment variable.</p>
      *
      * @param readTimeout
      * @return
@@ -368,8 +374,8 @@ public final class VaultConfig {
 
     /**
      * <p>This is the terminating method in the builder pattern.  The method that validates all of the fields that
-     * has been set already, uses environment variables to populate any required fields that were left unset, and
-     * returns a <code>VaultConfig</code> object that is ready for use.</p>
+     * has been set already, uses environment variables when available to populate any unset fields, and returns
+     * a <code>VaultConfig</code> object that is ready for use.</p>
      *
      * @return
      * @throws VaultException If the <code>address</code> field was left unset, and there is no <code>VAULT_ADDR</code> environment variable value with which to populate it.
@@ -418,6 +424,30 @@ public final class VaultConfig {
             } catch (NumberFormatException e) {
                 System.err.printf("The \"VAULT_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.\n",
                         environmentLoader.loadVariable("VAULT_TIMEOUT"));
+            }
+        }
+        if (this.sslTimeout == null && environmentLoader.loadVariable("VAULT_SSL_TIMEOUT") != null) {
+            try {
+                this.sslTimeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_SSL_TIMEOUT"));
+            } catch (NumberFormatException e) {
+                System.err.printf("The \"VAULT_SSL_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.\n",
+                        environmentLoader.loadVariable("VAULT_SSL_TIMEOUT"));
+            }
+        }
+        if (this.openTimeout == null && environmentLoader.loadVariable("VAULT_OPEN_TIMEOUT") != null) {
+            try {
+                this.openTimeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_OPEN_TIMEOUT"));
+            } catch (NumberFormatException e) {
+                System.err.printf("The \"VAULT_OPEN_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.\n",
+                        environmentLoader.loadVariable("VAULT_OPEN_TIMEOUT"));
+            }
+        }
+        if (this.readTimeout == null && environmentLoader.loadVariable("VAULT_READ_TIMEOUT") != null) {
+            try {
+                this.readTimeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_READ_TIMEOUT"));
+            } catch (NumberFormatException e) {
+                System.err.printf("The \"VAULT_READ_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.\n",
+                        environmentLoader.loadVariable("VAULT_READ_TIMEOUT"));
             }
         }
         return this;
