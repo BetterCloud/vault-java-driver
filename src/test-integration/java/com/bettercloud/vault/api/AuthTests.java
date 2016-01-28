@@ -28,15 +28,20 @@ public class AuthTests {
     @Test
     public void testLoginByAuthId() throws VaultException {
         final String address = System.getProperty("VAULT_ADDR");
-        assertNotNull("", address);
+        final String appId = System.getProperty("VAULT_APP_ID");
+        final String userId = System.getProperty("VAULT_USER_ID");
+
+        assertNotNull(address);
+        assertNotNull(appId);
+        assertNotNull(userId);
 
         final String path = "app-id/login";
-        final String app_id = "foo";
-        final String user_id = "bar";
         final VaultConfig config = new VaultConfig(address);
         final Vault vault = new Vault(config);
 
-        assertNotSame("", vault.auth().loginByAppID(path, app_id, user_id).getAuthClientToken());
+        final String token = vault.auth().loginByAppID(path, appId, userId).getAuthClientToken();
+        assertNotNull(token);
+        assertNotSame("", token.trim());
     }
 
     /**
@@ -47,14 +52,20 @@ public class AuthTests {
     @Test
     public void testLoginByUsernamePassword() throws VaultException {
         final String address = System.getProperty("VAULT_ADDR");
+        final String userId = System.getProperty("VAULT_USER_ID");
+        final String password = System.getProperty("VAULT_PASSWORD");
+
         assertNotNull(address);
+        assertNotNull(userId);
+        assertNotNull(password);
 
-        final String path = "userpass/login/test";
-        final String password = "foo";
-
+        final String path = "userpass/login/" + userId;
         final VaultConfig config = new VaultConfig(address);
         final Vault vault = new Vault(config);
-        assertNotSame("", vault.auth().loginByUsernamePassword(path, password).getAuthClientToken());
+
+        final String token = vault.auth().loginByUsernamePassword(path, password).getAuthClientToken();
+        assertNotNull(token);
+        assertNotSame("", token.trim());
     }
 
 }

@@ -67,6 +67,9 @@ task integrationTest(type: Test) {
     }
     systemProperties = [
         VAULT_ADDR: System.getProperty("VAULT_ADDR"),
-        VAULT_TOKEN: System.getProperty("VAULT_TOKEN")
+        VAULT_TOKEN: System.getProperty("VAULT_TOKEN"),
+        VAULT_APP_ID: System.getProperty("VAULT_APP_ID"),
+        VAULT_USER_ID: System.getProperty("VAULT_USER_ID"),
+        VAULT_PASSWORD: System.getProperty("VAULT_PASSWORD")
     ]
 }
