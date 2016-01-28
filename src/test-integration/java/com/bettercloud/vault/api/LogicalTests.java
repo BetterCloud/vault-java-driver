@@ -5,6 +5,8 @@ import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import org.junit.Test;
 
+import java.util.HashMap;
+
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
@@ -36,7 +38,7 @@ public class LogicalTests {
 
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
-        vault.logical().write(path, value);
+        vault.logical().write(path, new HashMap() {{ put("value", value); }});
 
         final String valueRead = vault.logical().read(path).getData().get("value");
         assertEquals(value, valueRead);

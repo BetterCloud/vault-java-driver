@@ -12,7 +12,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Logical {
+/**
+ * <p>The implementing class for Vault's core/logical operations (e.g. read, write).</p>
+ *
+ * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of <code>Vault</code>
+ * in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code> method for usage examples.</p>
+ */
+public final class Logical {
 
     private final VaultConfig config;
 
@@ -21,13 +27,21 @@ public class Logical {
     }
 
     /**
-     * Basic read operation to retrieve a secret.
+     * <p>Basic read operation to retrieve a secret.  A single secret key can map to multiple name-value pairs,
+     * which can be retrieved from the response object.  E.g.:</p>
      *
-     * TODO: Support reading from and writing to fields other than "value"
+     * <blockquote>
+     * <pre>{@code
+     * final LogicalResponse response = vault.logical().read("secret/hello");
      *
-     * @param path The Vault key value from which to read (e.g. <code>secret/hello</code>
-     * @return Response metadata, as well as all values found for that key
-     * @throws VaultException
+     * final String value = response.getData().get("value");
+     * final String otherValue = response.getData().get("other_value");
+     * }</pre>
+     * </blockquote>
+     *
+     * @param path The Vault key value from which to read (e.g. <code>secret/hello</code>)
+     * @return
+     * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
      */
     public LogicalResponse read(final String path) throws VaultException {
         int retryCount = 0;
@@ -55,7 +69,7 @@ public class Logical {
                 }
 
                 // Parse JSON
-                final Map<String, String> data = new HashMap<String, String>();
+                final Map<String, String> data = new HashMap<String, String>();//NOPMD
                 for (final JsonObject.Member member : Json.parse(jsonString).asObject().get("data").asObject()) {
                     data.put(member.getName(), member.getValue().asString());
                 }
@@ -79,21 +93,35 @@ public class Logical {
     }
 
     /**
-     * Basic operation to store a secret.
+     * <p>Basic operation to store secrets.  Multiple name value pairs can be stored under the same secret key.
+     * E.g.:</p>
      *
-     * TODO: Support secret names other than the hard-coded "value".
+     * <blockquote>
+     * <pre>{@code
+     * final Map<String, String> nameValuePairs = new HashMap<String, String>();
+     * nameValuePairs.put("value", "foo");
+     * nameValuePairs.put("other_value", "bar");
      *
-     * @param path The path on which the secret is to be stored (e.g. <code>secret/hello</code>)
-     * @param value The secret value to be stored
+     * final LogicalResponse response = vault.logical().write("secret/hello", nameValuePairs);
+     * }</pre>
+     * </blockquote>
+     *
+     * @param path The Vault key value to which to write (e.g. <code>secret/hello</code>)
+     * @param nameValuePairs Secret name and value pairs to store under this Vault key
      * @throws VaultException
      */
-    public LogicalResponse write(final String path, final String value) throws VaultException {
+    public LogicalResponse write(final String path, final Map<String, String> nameValuePairs) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
+                JsonObject requestJson = Json.object();
+                for (final Map.Entry<String, String> pair : nameValuePairs.entrySet()) {
+                    requestJson = requestJson.add(pair.getKey(), pair.getValue());
+                }
+
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
-                        .body(Json.object().add("value", value).toString().getBytes("UTF-8"))
+                        .body(requestJson.toString().getBytes("UTF-8"))
                         .header("X-Vault-Token", config.getToken())
                         .post();
                 if (restResponse.getStatus() != 204) {

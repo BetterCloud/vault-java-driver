@@ -4,6 +4,8 @@ import com.bettercloud.vault.response.LogicalResponse;
 import org.eclipse.jetty.server.Server;
 import org.junit.Test;
 
+import java.util.HashMap;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -36,7 +38,8 @@ public class VaultTests {
 
         final VaultConfig vaultConfig = new VaultConfig("http://127.0.0.1:8999", "mock_token");
         final Vault vault = new Vault(vaultConfig);
-        final LogicalResponse response = vault.withRetries(5, 100).logical().write("secret/hello", "world");
+        final LogicalResponse response = vault.withRetries(5, 100).logical()
+                .write("secret/hello", new HashMap() {{ put("value", "world"); }});
         assertEquals(5, response.getRetries());
 
         shutdownMockVault(server);
