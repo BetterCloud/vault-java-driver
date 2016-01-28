@@ -50,9 +50,10 @@ public final class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
+                final String requestJson = Json.object().add("app_id", appId).add("user_id", userId).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + path)
-                        .body(Json.object().add("app_id", appId).add("user_id", userId).asString().getBytes("UTF-8"))
+                        .body(requestJson.getBytes("UTF-8"))
                         .post();
 
                 // Validate restResponse
@@ -103,9 +104,10 @@ public final class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
+                final String requestJson = Json.object().add("password", password).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + path)
-                        .body(Json.object().add("password", password).toString().getBytes("UTF-8"))
+                        .body(requestJson.getBytes("UTF-8"))
                         .post();
 
                 // Validate restResponse
