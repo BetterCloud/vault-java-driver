@@ -27,7 +27,7 @@ public class VaultResponse {
         return restResponse;
     }
 
-    public void setRestResponse(RestResponse restResponse) {
+    public void setRestResponse(final RestResponse restResponse) {
         this.restResponse = restResponse;
     }
 
@@ -35,7 +35,7 @@ public class VaultResponse {
         return retries;
     }
 
-    public void setRetries(int retries) {
+    public void setRetries(final int retries) {
         this.retries = retries;
     }
 
