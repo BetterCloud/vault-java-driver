@@ -84,7 +84,7 @@ public final class Auth {
     }
 
     /**
-     * <p>Basic login operation to authenticate to an username & password backend.  Example usage:</p>
+     * <p>Basic login operation to authenticate to a Username &amp; Password backend.  Example usage:</p>
      *
      * <blockquote>
      * <pre>{@code
