@@ -1,14 +1,14 @@
 package com.bettercloud.vault.response;
 
+import com.bettercloud.vault.rest.RestResponse;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * TODO: Document...
- *
- * TODO: Can we use the same type for all auth backends?  Is that a good idea, or would it be less messy to have multiple response types?
  */
-public class AuthResponse {
+public final class AuthResponse extends VaultResponse {
 
     private String leaseId;
     private boolean renewable;
@@ -22,6 +22,16 @@ public class AuthResponse {
     private String username;
 
     // TODO: Do we also need fields for "data" and/or "authMetadata"?
+
+    /**
+     * This constructor simply exposes the common base class constructor.
+     *
+     * @param restResponse The raw HTTP response from Vault.
+     * @param retries      The number of retry attempts that occurred during the API call (can be zero).
+     */
+    public AuthResponse(final RestResponse restResponse, final int retries) {
+        super(restResponse, retries);
+    }
 
     public String getUsername() {
         return username;

@@ -63,13 +63,7 @@ public final class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType);
                 }
-                String jsonString;
-                try {
-                    jsonString = new String(restResponse.getBody(), "UTF-8");//NOPMD
-                } catch (UnsupportedEncodingException e) {
-                    throw new VaultException(e);
-                }
-                return buildAuthResponse(jsonString);
+                return buildAuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -122,13 +116,7 @@ public final class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType);
                 }
-                String jsonString;
-                try {
-                    jsonString = new String(restResponse.getBody(), "UTF-8");//NOPMD
-                } catch (UnsupportedEncodingException e) {
-                    throw new VaultException(e);
-                }
-                return buildAuthResponse(jsonString);
+                return buildAuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -147,11 +135,14 @@ public final class Auth {
         }
     }
 
-    private AuthResponse buildAuthResponse(final String responseJson){
-        final AuthResponse authResponse = new AuthResponse();
+    private AuthResponse buildAuthResponse(final RestResponse restResponse, final int retries)
+            throws UnsupportedEncodingException {
+        final AuthResponse authResponse = new AuthResponse(restResponse, retries);
 
+        final String responseJson = new String(restResponse.getBody(), "UTF-8");
         final JsonObject jsonObject = Json.parse(responseJson).asObject();
         final JsonObject authJsonObject = jsonObject.get("auth").asObject();
+
         authResponse.setAuthLeaseDuration(authJsonObject.getInt("lease_duration",0));
         authResponse.setAuthRenewable(authJsonObject.getBoolean("renewable",false));
         authResponse.setAppId(authJsonObject.get("metadata").asObject().getString("app-id",""));
