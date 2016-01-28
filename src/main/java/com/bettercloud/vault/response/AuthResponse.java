@@ -1,19 +1,27 @@
 package com.bettercloud.vault.response;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Created by amit on 1/21/16.
+ * TODO: Document...
+ *
+ * TODO: Can we use the same type for all auth backends?  Is that a good idea, or would it be less messy to have multiple response types?
  */
 public class AuthResponse {
-    private String lease_id;
+
+    private String leaseId;
     private boolean renewable;
-    private int lease_duration;
-    private String auth_client_token;
-    private String[] auth_policies;
-    private int auth_lease_duration;
-    private boolean auth_renewable;
-    private String app_id;
-    private String user_id;
+    private int leaseDuration;
+    private String authClientToken;
+    private List<String> authPolicies = new ArrayList<String>();
+    private int authLeaseDuration;
+    private boolean authRenewable;
+    private String appId;
+    private String userId;
     private String username;
+
+    // TODO: Do we also need fields for "data" and/or "authMetadata"?
 
     public String getUsername() {
         return username;
@@ -23,12 +31,12 @@ public class AuthResponse {
         this.username = username;
     }
 
-    public String getLease_id() {
-        return lease_id;
+    public String getLeaseId() {
+        return leaseId;
     }
 
-    public void setLease_id(final String lease_id) {
-        this.lease_id = lease_id;
+    public void setLeaseId(final String leaseId) {
+        this.leaseId = leaseId;
     }
 
     public boolean isRenewable() {
@@ -39,60 +47,61 @@ public class AuthResponse {
         this.renewable = renewable;
     }
 
-    public int getLease_duration() {
-        return lease_duration;
+    public int getLeaseDuration() {
+        return leaseDuration;
     }
 
-    public void setLease_duration(final int lease_duration) {
-        this.lease_duration = lease_duration;
+    public void setLeaseDuration(final int leaseDuration) {
+        this.leaseDuration = leaseDuration;
     }
 
-    public String getAuth_client_token() {
-        return auth_client_token;
+    public String getAuthClientToken() {
+        return authClientToken;
     }
 
-    public void setAuth_client_token(final String auth_client_token) {
-        this.auth_client_token = auth_client_token;
+    public void setAuthClientToken(final String authClientToken) {
+        this.authClientToken = authClientToken;
     }
 
-    public String[] getAuth_policies() {
-        return auth_policies;
+    public List<String> getAuthPolicies() {
+        return authPolicies;
     }
 
-    public void setAuth_policies(final String[] auth_policies) {
-        this.auth_policies = auth_policies;
+    public void setAuthPolicies(final List<String> authPolicies) {
+        this.authPolicies.clear();
+        this.authPolicies.addAll(authPolicies);
     }
 
-    public int getAuth_lease_duration() {
-        return auth_lease_duration;
+    public int getAuthLeaseDuration() {
+        return authLeaseDuration;
     }
 
-    public void setAuth_lease_duration(final int auth_lease_duration) {
-        this.auth_lease_duration = auth_lease_duration;
+    public void setAuthLeaseDuration(final int authLeaseDuration) {
+        this.authLeaseDuration = authLeaseDuration;
     }
 
-    public boolean isAuth_renewable() {
-        return auth_renewable;
+    public boolean isAuthRenewable() {
+        return authRenewable;
     }
 
-    public void setAuth_renewable(final boolean auth_renewable) {
-        this.auth_renewable = auth_renewable;
+    public void setAuthRenewable(final boolean authRenewable) {
+        this.authRenewable = authRenewable;
     }
 
-    public String getApp_id() {
-        return app_id;
+    public String getAppId() {
+        return appId;
     }
 
-    public void setApp_id(final String app_id) {
-        this.app_id = app_id;
+    public void setAppId(final String appId) {
+        this.appId = appId;
     }
 
-    public String getUser_id() {
-        return user_id;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUser_id(final String user_id) {
-        this.user_id = user_id;
+    public void setUserId(final String userId) {
+        this.userId = userId;
     }
 
 }
