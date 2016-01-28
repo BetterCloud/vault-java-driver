@@ -36,7 +36,7 @@ public class AuthTests {
         final VaultConfig config = new VaultConfig(address);
         final Vault vault = new Vault(config);
 
-        assertNotSame("",vault.auth().loginByAppID(path, app_id, user_id).getAuth_client_token());
+        assertNotSame("", vault.auth().loginByAppID(path, app_id, user_id).getAuthClientToken());
     }
 
     /**
@@ -54,7 +54,7 @@ public class AuthTests {
 
         final VaultConfig config = new VaultConfig(address);
         final Vault vault = new Vault(config);
-        assertNotSame("",vault.auth().loginByUsernamePassword(path,password).getAuth_client_token());
+        assertNotSame("", vault.auth().loginByUsernamePassword(path, password).getAuthClientToken());
     }
 
 }
