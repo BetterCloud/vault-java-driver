@@ -374,8 +374,8 @@ public final class VaultConfig {
 
     /**
      * <p>This is the terminating method in the builder pattern.  The method that validates all of the fields that
-     * has been set already, uses environment variables to populate any required fields that were left unset, and
-     * returns a <code>VaultConfig</code> object that is ready for use.</p>
+     * has been set already, uses environment variables when available to populate any unset fields, and returns
+     * a <code>VaultConfig</code> object that is ready for use.</p>
      *
      * @return
      * @throws VaultException If the <code>address</code> field was left unset, and there is no <code>VAULT_ADDR</code> environment variable value with which to populate it.
