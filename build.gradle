@@ -5,7 +5,7 @@ apply plugin: 'signing'
 group 'com.bettercloud'
 //noinspection GroovyUnusedAssignment
 archivesBaseName = 'vault-java-driver'
-version '0.3.0-SNAPSHOT'
+version '0.3.0'
 
 //noinspection GroovyUnusedAssignment
 sourceCompatibility = 1.6
@@ -136,6 +136,14 @@ uploadArchives {
                     license {
                         name 'MIT'
                         url 'https://github.com/BetterCloud/vault-java-driver/blob/master/README.md'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'steve-perkins-bc'
+                        name 'Steve Perkins'
+                        email 'steve.perkins@bettercloud.com'
                     }
                 }
             }
