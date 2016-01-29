@@ -1,7 +1,11 @@
-group 'com.bettercloud'
-version '0.3.0-SNAPSHOT'
-
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+group 'com.bettercloud'
+//noinspection GroovyUnusedAssignment
+archivesBaseName = 'vault-java-driver'
+version '0.3.0-SNAPSHOT'
 
 //noinspection GroovyUnusedAssignment
 sourceCompatibility = 1.6
@@ -22,13 +26,20 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.6'
 }
 
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
 
 
 //
-// Separate unit tests from integration tests.  The latter require a Vault server instance
-// up and running, and appropriate "VAULT_ADDR" and "VAULT_TOKEN" JVM properties set.  E.g.:
-//
-// gradlew integrationTest -DVAULT_ADDR=http://127.0.0.1:8200 -DVAULT_TOKEN=eace6676-4d78-c687-4e54-03cad00e3abf
+// Separate unit tests from integration tests.  See: `src/test-integration/README.md`
 //
 
 configurations {
@@ -74,18 +85,61 @@ task integrationTest(type: Test) {
     ]
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
+//
+// Deploying releases to Maven Central.
+//
+// Requires a `gradle.properties` file in your `$HOME/.gradle` directory, with
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
+// signing.keyId = <ID of the private key in your secure keyring used for signing JAR's>
+// signing.password = <public key password>
+// signing.secretKeyRingFile = <full path to your keyring file (i.e secring.gpg)>
+//
+// ossrhUsername = sonatype.org JIRA user
+// ossrhPassword = sonatype.org JIRA password
+//
 
 artifacts {
-    archives sourcesJar
-    archives javadocJar
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'java-vault-driver'
+                packaging 'jar'
+                // optionally artifactId can be defined here
+                description 'Zero-dependency Java client for HashiCorp\'s Vault'
+                url 'https://github.com/BetterCloud/vault-java-driver'
+
+                scm {
+                    connection 'https://github.com/BetterCloud/vault-java-driver.git'
+                    developerConnection 'https://github.com/BetterCloud/vault-java-driver.git'
+                    url 'https://github.com/BetterCloud/vault-java-driver'
+                }
+
+                licenses {
+                    license {
+                        name 'MIT'
+                        url 'https://github.com/BetterCloud/vault-java-driver/blob/master/README.md'
+                    }
+                }
+            }
+        }
+    }
 }
 
