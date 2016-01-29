@@ -15,12 +15,22 @@ import com.bettercloud.vault.api.Logical;
  * <pre>{@code
  * final VaultConfig config = new VaultConfig("http://127.0.0.1:8200", "eace6676-4d78-c687-4e54-03cad00e3abf");
  * final Vault vault = new Vault(config);
+ *
  * ...
+ *
+ * final Map<String, String> secrets = new HashMap<String, String>();
+ * secrets.put("value", "world");
+ * secrets.put("other_value", "You can store multiple name/value pairs under a given key");
+ *
  * final LogicalResponse writeResponse = vault.logical()
- *                                          .withRetries(5, 1000)  // optional
- *                                          .write("secret/hello", "world");
+ *                                         .withRetries(5, 1000)  // optional
+ *                                         .write("secret/hello", secrets);
+ *
  * ...
- * final LogicalResponse readResponse = vault.logical().read("secret/hello");
+ *
+ * final String value = vault.logical()
+ *                        .read("secret/hello")
+ *                        .getData().get("value");
  * }</pre>
  * </blockquote>
  */
