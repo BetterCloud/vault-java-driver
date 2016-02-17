@@ -1,5 +1,11 @@
 package com.bettercloud.vault;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 /**
  * <p>A container for the configuration settings needed to initialize a <code>Vault</code> driver instance.</p>
  *
@@ -49,6 +55,7 @@ public final class VaultConfig {
     private String proxyUsername;
     private String proxyPassword;
     private String sslPemFile;
+    private String sslPemUTF8;
     private Boolean sslVerify;
     private Integer timeout;
     private Integer sslTimeout;
@@ -255,7 +262,19 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
+     * TODO: Document
+     *
+     * @param sslPemUTF8
+     * @return
+     */
+    public VaultConfig sslPemUTF8(final String sslPemUTF8) {
+        this.sslPemUTF8 = sslPemUTF8;
+        return this;
+    }
+
+    /**
+     * TODO: Document
+     * TODO: Support for loading from classpath
      *
      * <p>If no sslPemFile is explicitly set, either by this method in a builder pattern approach or else by one of the
      * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_SSL_CERT</code> environment
@@ -264,13 +283,18 @@ public final class VaultConfig {
      * @param sslPemFile
      * @return
      */
-    public VaultConfig sslPemFile(final String sslPemFile) {
-        this.sslPemFile = sslPemFile;
+    public VaultConfig sslPemFile(final File sslPemFile) throws VaultException {
+        try {
+            this.sslPemUTF8 = fileToUTF8(sslPemFile);
+            this.sslPemFile = sslPemFile.getPath();
+        } catch (IOException e) {
+            throw new VaultException(e);
+        }
         return this;
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
+     * TODO: Document
      *
      * <p>If no sslVerify is explicitly set, either by this method in a builder pattern approach or else by one of the
      * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_SSL_VERIFY</code>
@@ -285,37 +309,33 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
-     *
-     * <p>If no timeout is explicitly set, either by this method in a builder pattern approach or else by one of the
-     * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_TIMEOUT</code> environment
-     * variable.</p>
+     * This field is unused, and will be removed in the next version of the driver.  Use <code>openTimeout</code>
+     * and <code>readTimeout</code>.
      *
      * @param timeout
      * @return
      */
+    @Deprecated
     public VaultConfig timeout(final Integer timeout) {
         this.timeout = timeout;
         return this;
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
-     *
-     * <p>If no sslTimeout is explicitly set, either by this method in a builder pattern approach or else by one of the
-     * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_SSL_TIMEOUT</code>
-     * environment variable.</p>
+     * This field is unused, and will be removed in the next version of the driver.  Use <code>openTimeout</code>
+     * and <code>readTimeout</code>.
      *
      * @param sslTimeout
      * @return
      */
+    @Deprecated
     public VaultConfig sslTimeout(final Integer sslTimeout) {
         this.sslTimeout = sslTimeout;
         return this;
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
+     * TODO: Document
      *
      * <p>If no openTimeout is explicitly set, either by this method in a builder pattern approach or else by one of
      * the convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_OPEN_TIMEOUT</code>
@@ -330,7 +350,7 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
+     * TODO: Document
      *
      * <p>If no readTimeout is explicitly set, either by this method in a builder pattern approach or else by one of
      * the convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_READ_TIMEOUT</code>
@@ -412,27 +432,16 @@ public final class VaultConfig {
         if (this.proxyPassword == null && environmentLoader.loadVariable("VAULT_PROXY_PASSWORD") != null) {
             this.proxyPassword = environmentLoader.loadVariable("VAULT_PROXY_PASSWORD");
         }
-        if (this.sslPemFile == null && environmentLoader.loadVariable("VAULT_SSL_CERT") != null) {
-            this.sslPemFile = environmentLoader.loadVariable("VAULT_SSL_CERT");
+        if (this.sslPemUTF8 == null && environmentLoader.loadVariable("VAULT_SSL_CERT") != null) {
+            final File pemFile = new File(environmentLoader.loadVariable("VAULT_SSL_CERT"));
+            try {
+                this.sslPemUTF8 = fileToUTF8(pemFile);
+            } catch (IOException e) {
+                throw new VaultException(e);
+            }
         }
         if (this.sslVerify == null && environmentLoader.loadVariable("VAULT_SSL_VERIFY") != null) {
             this.sslVerify = Boolean.valueOf(environmentLoader.loadVariable("VAULT_SSL_VERIFY"));
-        }
-        if (this.timeout == null && environmentLoader.loadVariable("VAULT_TIMEOUT") != null) {
-            try {
-                this.timeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_TIMEOUT"));
-            } catch (NumberFormatException e) {
-                System.err.printf("The \"VAULT_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.\n",
-                        environmentLoader.loadVariable("VAULT_TIMEOUT"));
-            }
-        }
-        if (this.sslTimeout == null && environmentLoader.loadVariable("VAULT_SSL_TIMEOUT") != null) {
-            try {
-                this.sslTimeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_SSL_TIMEOUT"));
-            } catch (NumberFormatException e) {
-                System.err.printf("The \"VAULT_SSL_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.\n",
-                        environmentLoader.loadVariable("VAULT_SSL_TIMEOUT"));
-            }
         }
         if (this.openTimeout == null && environmentLoader.loadVariable("VAULT_OPEN_TIMEOUT") != null) {
             try {
@@ -477,18 +486,25 @@ public final class VaultConfig {
         return proxyPassword;
     }
 
+    @Deprecated
     public String getSslPemFile() {
         return sslPemFile;
+    }
+
+    public String getSslPemUTF8() {
+        return sslPemUTF8;
     }
 
     public Boolean isSslVerify() {
         return sslVerify;
     }
 
+    @Deprecated
     public Integer getTimeout() {
         return timeout;
     }
 
+    @Deprecated
     public Integer getSslTimeout() {
         return sslTimeout;
     }
@@ -509,4 +525,18 @@ public final class VaultConfig {
         return retryIntervalMilliseconds;
     }
 
+    private String fileToUTF8(final File file) throws IOException {
+        final BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+        String utf8 = "";
+        String str;
+        while ((str = in.readLine()) != null) {
+            // String concatenation is less efficient, but for some reason the line-breaks (which are necessary
+            // for Java to correctly parse SSL certs) are stripped off when using a StringBuilder.
+            utf8 += str + System.lineSeparator();//NOPMD
+        }
+        in.close();
+        return utf8;
+    }
+
 }
+

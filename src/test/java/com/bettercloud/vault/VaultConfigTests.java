@@ -2,11 +2,14 @@ package com.bettercloud.vault;
 
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertTrue;
 
 /**
@@ -73,10 +76,7 @@ public class VaultConfigTests {
         mock.override("VAULT_PROXY_PORT", "80");
         mock.override("VAULT_PROXY_USERNAME", "scott");
         mock.override("VAULT_PROXY_PASSWORD", "tiger");
-        mock.override("VAULT_SSL_CERT", "mycert.pem");
         mock.override("VAULT_SSL_VERIFY", "true");
-        mock.override("VAULT_TIMEOUT", "30");
-        mock.override("VAULT_SSL_TIMEOUT", "30");
         mock.override("VAULT_OPEN_TIMEOUT", "30");
         mock.override("VAULT_READ_TIMEOUT", "30");
 
@@ -87,10 +87,7 @@ public class VaultConfigTests {
         assertTrue(80 == config.getProxyPort());
         assertEquals("scott", config.getProxyUsername());
         assertEquals("tiger", config.getProxyPassword());
-        assertEquals("mycert.pem", config.getSslPemFile());
         assertTrue(config.isSslVerify());
-        assertTrue(30 == config.getTimeout());
-        assertTrue(30 == config.getSslTimeout());
         assertTrue(30 == config.getOpenTimeout());
         assertTrue(30 == config.getReadTimeout());
     }
@@ -138,10 +135,7 @@ public class VaultConfigTests {
         mock.override("VAULT_PROXY_PORT", "80");
         mock.override("VAULT_PROXY_USERNAME", "scott");
         mock.override("VAULT_PROXY_PASSWORD", "tiger");
-        mock.override("VAULT_SSL_CERT", "mycert.pem");
         mock.override("VAULT_SSL_VERIFY", "true");
-        mock.override("VAULT_TIMEOUT", "30");
-        mock.override("VAULT_SSL_TIMEOUT", "30");
         mock.override("VAULT_OPEN_TIMEOUT", "30");
         mock.override("VAULT_READ_TIMEOUT", "30");
 
@@ -154,12 +148,43 @@ public class VaultConfigTests {
         assertTrue(80 == config.getProxyPort());
         assertEquals("scott", config.getProxyUsername());
         assertEquals("tiger", config.getProxyPassword());
-        assertEquals("mycert.pem", config.getSslPemFile());
         assertTrue(config.isSslVerify());
-        assertTrue(30 == config.getTimeout());
-        assertTrue(30 == config.getSslTimeout());
         assertTrue(30 == config.getOpenTimeout());
         assertTrue(30 == config.getReadTimeout());
+    }
+
+    @Test
+    public void testConfigBuilder_LoadFromEnv_SslCert() throws IOException, VaultException {
+        final String tempDirectoryPath = System.getProperty("java.io.tmpdir");
+        final InputStream input = this.getClass().getResourceAsStream("/cert.pem");
+        final FileOutputStream output = new FileOutputStream(tempDirectoryPath + File.separator + "cert.pem");
+        int nextChar;
+        while ( (nextChar = input.read()) != -1 ) {
+            output.write( (char) nextChar );
+        }
+        input.close();
+        output.close();
+
+        final MockEnvironmentLoader mock = new MockEnvironmentLoader();
+        mock.override("VAULT_ADDR", "http://127.0.0.1:8200");
+        mock.override("VAULT_SSL_CERT", tempDirectoryPath + File.separator + "cert.pem");
+        final VaultConfig config = new VaultConfig()
+                .environmentLoader(mock)
+                .build();
+
+        final String expected = "-----BEGIN CERTIFICATE-----MIIDhjCCAm6gAwIBAgIES40FSTANBgkqhkiG9w0BAQsFADBrMQswCQYDVQQGEwJVUzERMA8GA1UECBMIQW55c3RhdGUxEDAOBgNVBAcTB0FueXRvd24xETAPBgNVBAoTCFRlc3QgT3JnMRAwDgYDVQQLEwdUZXN0IE9VMRIwEAYDVQQDEwlUZXN0IFVzZXIwHhcNMTYwMjE2MTcwNDQ3WhcNMTYwNTE2MTcwNDQ3WjBrMQswCQYDVQQGEwJVUzERMA8GA1UECBMIQW55c3RhdGUxEDAOBgNVBAcTB0FueXRvd24xETAPBgNVBAoTCFRlc3QgT3JnMRAwDgYDVQQLEwdUZXN0IE9VMRIwEAYDVQQDEwlUZXN0IFVzZXIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCHNAd93WjoDl7EYddxqpAd9FGoyvFA0900tmLJWmD3YPXhkOkXO38E//tS9KkXD39tDsDwHxw53iF1SmzgrHvzJzQvGjR5rvp7KjMhv/wlpED2E4FR/q2WigoXVtzpOwc4fk4PizBZV4fkSOtiQA0LEoQochw8wp7OI1tzE5iISKggD0N9EOJUzwQIcAgkAdaYEP9Fd2YMgTJAiHSakOgQowKQQGmIbKg0YWici9tiojwNCuNlcp1kBEUi4odO6BxRs8RKk6McvHCu1+2SSlxctGGU8kFKsF92/sULxvHAOovYspKdBJfw2f088Hnfw3jSgaWWQNB+oilVsfECx1BPAgMBAAGjMjAwMA8GA1UdEQQIMAaHBH8AAAEwHQYDVR0OBBYEFHuppZEESxlasbK5aq4LvF/IhtseMA0GCSqGSIb3DQEBCwUAA4IBAQBK9g8sWk6jCPekk2VjK6aKYIs4BB79xsaj41hdjoMwVRSelSpsmJE34/Vflqy+SBrf59czvk/UqJIYSrHRx7M0hpfIChmqqNEj5NKY+MFBuOTt4r/Wv3tbBTf2CMs4hLnkevhleNLxJhAjvh7r52U+uE8l6O11dsQRVXOSGnwdnvInVTs1ilxdTQh680DEU0q26P3o36N3Oxxgls2ZC3ExnLJnOofhj01l6cYhI06RtFPzJtv5sICCkYGMDKSIsWUndmurZjLAjsAKPT/RePeqyW0dKY5ZjtC+YAg5i3O0DLhERsDZECIp56oqsYxATuoHVzbjorM2ua2pUcuIR0p3-----END CERTIFICATE-----";
+        final String actual = config.getSslPemUTF8().replaceAll(System.lineSeparator(), "");
+        assertEquals(actual, expected);
+    }
+
+    @Test(expected = VaultException.class)
+    public void testConfigBuilder_LoadFromEnv_SslCert_NotFound() throws VaultException {
+        final MockEnvironmentLoader mock = new MockEnvironmentLoader();
+        mock.override("VAULT_ADDR", "http://127.0.0.1:8200");
+        mock.override("VAULT_SSL_CERT", "doesnt-exist.pem");
+        final VaultConfig config = new VaultConfig()
+                .environmentLoader(mock)
+                .build();
     }
 
     /**

@@ -1,5 +1,13 @@
 package com.bettercloud.vault.rest;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +15,15 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +70,11 @@ public final class Rest {
     private byte[] body;
     private final Map<String, String> parameters = new TreeMap<String, String>();
     private final Map<String, String> headers = new TreeMap<String, String>();
+
+    private Integer connectTimeoutSeconds;
+    private Integer readTimeoutSeconds;
+    private Boolean sslVerification;
+    private String sslPemUTF8;
 
     /**
      * <p>Sets the base URL to which the HTTP request will be sent.  The URL may or may not include query parameters
@@ -132,6 +153,52 @@ public final class Rest {
         return this;
     }
 
+    // TODO: Add testing for timeouts
+
+    /**
+     * TODO: Document
+     *
+     * @param connectTimeoutSeconds
+     * @return
+     */
+    public Rest connectTimeoutSeconds(final int connectTimeoutSeconds) {
+        this.connectTimeoutSeconds = connectTimeoutSeconds;
+        return this;
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @param readTimeoutSeconds
+     * @return
+     */
+    public Rest readTimeoutSeconds(final int readTimeoutSeconds) {
+        this.readTimeoutSeconds = readTimeoutSeconds;
+        return this;
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @param sslVerification
+     * @return
+     */
+    public Rest sslVerification(final Boolean sslVerification) {
+        this.sslVerification = sslVerification;
+        return this;
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @param pemFileContents
+     * @return
+     */
+    public Rest sslPemUTF8(final String pemFileContents) {
+        this.sslPemUTF8 = pemFileContents;
+        return this;
+    }
+
     /**
      * <p>Executes an HTTP GET request with the settings already configured.  Parameters and headers are optional, but
      * a <code>RestException</code> will be thrown if the caller has not first set a base URL with the
@@ -156,22 +223,130 @@ public final class Rest {
                     urlString = urlString + "&" + parametersToQueryString();
                 }
             }
-            // Initialize HTTP connection, and set any header values
-            final URL url = new URL(urlString);
-            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+            // TODO:  Do this for "post" likewise
+            // Initialize HTTP(S) connection, and set any header values
+            final URLConnection connection = initURLConnection(urlString);
             for (final Map.Entry<String, String> header : headers.entrySet()) {
                 connection.setRequestProperty(header.getKey(), header.getValue());
             }
 
+            // Set request method and get resulting status code
+            int statusCode;
+            if (connection instanceof HttpsURLConnection) {
+                final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
+                httpsURLConnection.setRequestMethod("GET");
+                statusCode = httpsURLConnection.getResponseCode();
+            } else if (connection instanceof HttpURLConnection) {
+                final HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
+                httpURLConnection.setRequestMethod("GET");
+                statusCode = httpURLConnection.getResponseCode();
+            } else {
+                final String className = connection != null ? connection.getClass().getName() : "null";
+                throw new RestException("Expecting a URLConnection of type "
+                        + HttpURLConnection.class.getName()
+                        + " or "
+                        + HttpsURLConnection.class.getName()
+                        + ", found "
+                        + className);
+            }
+
             // Download and parse response
-            final int statusCode = connection.getResponseCode();
             final String mimeType = connection.getContentType();
             final byte[] body = responseBodyBytes(connection);
             return new RestResponse(statusCode, mimeType, body);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RestException(e);
         }
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @param urlString
+     * @return
+     * @throws IOException
+     * @throws CertificateException
+     * @throws NoSuchAlgorithmException
+     * @throws KeyStoreException
+     * @throws KeyManagementException
+     * @throws RestException
+     */
+    private URLConnection initURLConnection(final String urlString)
+            throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
+            KeyManagementException, RestException {
+        final URL url = new URL(urlString);
+        final URLConnection connection = url.openConnection();
+
+        // Timeout settings, if applicable
+        if (connectTimeoutSeconds != null) {
+            connection.setConnectTimeout(connectTimeoutSeconds * 1000);
+        }
+        if (readTimeoutSeconds != null) {
+            connection.setReadTimeout(readTimeoutSeconds * 1000);
+        }
+
+        // SSL settings, if applicable
+        if (connection instanceof HttpsURLConnection) {
+            final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
+            // Cert file supplied
+            if (sslPemUTF8 != null) {
+                final SSLContext sslContext = initSSLContext();
+                httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
+            }
+            // SSL verification disabled
+            if (sslVerification != null && !sslVerification.booleanValue()) {
+                final SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, new TrustManager[] { new X509TrustManager() {
+                    @Override
+                    public void checkClientTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
+                    }
+                    @Override
+                    public void checkServerTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
+                    }
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
+                    }
+                } }, new java.security.SecureRandom());
+                httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
+                httpsURLConnection.setHostnameVerifier(new HostnameVerifier() {
+                    @Override
+                    public boolean verify(final String s, final SSLSession sslSession) {
+                        return true;
+                    }
+                });
+            }
+        }
+        return connection;
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @return
+     * @throws CertificateException
+     * @throws NoSuchAlgorithmException
+     * @throws KeyStoreException
+     * @throws IOException
+     * @throws KeyManagementException
+     */
+    private SSLContext initSSLContext() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException {
+        final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+
+        final ByteArrayInputStream pem = new ByteArrayInputStream(sslPemUTF8.getBytes("UTF-8"));
+        final X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(pem);
+        pem.close();
+
+        final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keyStore.load(null);
+        keyStore.setCertificateEntry("caCert", certificate);
+
+        trustManagerFactory.init(keyStore);
+
+        final SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+        return sslContext;
     }
 
     /**
@@ -300,7 +475,7 @@ public final class Rest {
      * @param connection An active HTTP connection
      * @return The body payload, downloaded from the HTTP connection response
      */
-    private byte[] responseBodyBytes(final HttpURLConnection connection) {
+    private byte[] responseBodyBytes(final URLConnection connection) {
         try {
             final InputStream inputStream = connection.getInputStream();
             final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
