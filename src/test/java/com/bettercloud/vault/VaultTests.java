@@ -12,6 +12,9 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.junit.Test;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 
@@ -86,7 +89,52 @@ public class VaultTests {
     }
 
     @Test
-    public void testSslPem() throws Exception {
+    public void testSslPem_File() throws Exception {
+        final MockVault mockVault = new MockVault(5, 200, "{\"data\":{\"value\":\"mock\"}}");
+        final Server server = initHttpsMockVault(mockVault);
+        server.start();
+
+        final String tempDirectoryPath = System.getProperty("java.io.tmpdir");
+        final File pem = new File(tempDirectoryPath + File.separator + "cert.pem");
+        final InputStream input = this.getClass().getResourceAsStream("/cert.pem");
+        final FileOutputStream output = new FileOutputStream(pem);
+        int nextChar;
+        while ( (nextChar = input.read()) != -1 ) {
+            output.write( (char) nextChar );
+        }
+        input.close();
+        output.close();
+
+        final VaultConfig vaultConfig = new VaultConfig()
+                .address("https://127.0.0.1:9998")
+                .token("mock_token")
+                .sslPemFile(pem)
+                .build();
+        final Vault vault = new Vault(vaultConfig);
+        final LogicalResponse response = vault.withRetries(5, 100).logical().read("secret/hello");
+
+        shutdownMockVault(server);
+    }
+
+    @Test
+    public void testSslPem_Resource() throws Exception {
+        final MockVault mockVault = new MockVault(5, 200, "{\"data\":{\"value\":\"mock\"}}");
+        final Server server = initHttpsMockVault(mockVault);
+        server.start();
+
+        final VaultConfig vaultConfig = new VaultConfig()
+                .address("https://127.0.0.1:9998")
+                .token("mock_token")
+                .sslPemResource("/cert.pem")
+                .build();
+        final Vault vault = new Vault(vaultConfig);
+        final LogicalResponse response = vault.withRetries(5, 100).logical().read("secret/hello");
+
+        shutdownMockVault(server);
+    }
+
+    @Test
+    public void testSslPem_UTF8() throws Exception {
         final MockVault mockVault = new MockVault(5, 200, "{\"data\":{\"value\":\"mock\"}}");
         final Server server = initHttpsMockVault(mockVault);
         server.start();

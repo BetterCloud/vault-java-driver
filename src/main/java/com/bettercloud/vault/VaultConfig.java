@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
@@ -274,7 +275,6 @@ public final class VaultConfig {
 
     /**
      * TODO: Document
-     * TODO: Support for loading from classpath
      *
      * <p>If no sslPemFile is explicitly set, either by this method in a builder pattern approach or else by one of the
      * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_SSL_CERT</code> environment
@@ -285,8 +285,29 @@ public final class VaultConfig {
      */
     public VaultConfig sslPemFile(final File sslPemFile) throws VaultException {
         try {
-            this.sslPemUTF8 = fileToUTF8(sslPemFile);
+            final InputStream input = new FileInputStream(sslPemFile);
+            this.sslPemUTF8 = inputStreamToUTF8(input);
+            input.close();
             this.sslPemFile = sslPemFile.getPath();
+        } catch (IOException e) {
+            throw new VaultException(e);
+        }
+        return this;
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @param classpathResource
+     * @return
+     * @throws VaultException
+     */
+    public VaultConfig sslPemResource(final String classpathResource) throws VaultException {
+        try {
+            final InputStream input = this.getClass().getResourceAsStream(classpathResource);
+            this.sslPemUTF8 = inputStreamToUTF8(input);
+            input.close();
+            this.sslPemFile = classpathResource;
         } catch (IOException e) {
             throw new VaultException(e);
         }
@@ -435,7 +456,9 @@ public final class VaultConfig {
         if (this.sslPemUTF8 == null && environmentLoader.loadVariable("VAULT_SSL_CERT") != null) {
             final File pemFile = new File(environmentLoader.loadVariable("VAULT_SSL_CERT"));
             try {
-                this.sslPemUTF8 = fileToUTF8(pemFile);
+                final InputStream input = new FileInputStream(pemFile);
+                this.sslPemUTF8 = inputStreamToUTF8(input);
+                input.close();
             } catch (IOException e) {
                 throw new VaultException(e);
             }
@@ -525,8 +548,8 @@ public final class VaultConfig {
         return retryIntervalMilliseconds;
     }
 
-    private String fileToUTF8(final File file) throws IOException {
-        final BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+    private String inputStreamToUTF8(final InputStream input) throws IOException {
+        final BufferedReader in = new BufferedReader(new InputStreamReader(input, "UTF-8"));
         String utf8 = "";
         String str;
         while ((str = in.readLine()) != null) {

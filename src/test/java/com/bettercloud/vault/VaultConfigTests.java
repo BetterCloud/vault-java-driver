@@ -156,8 +156,9 @@ public class VaultConfigTests {
     @Test
     public void testConfigBuilder_LoadFromEnv_SslCert() throws IOException, VaultException {
         final String tempDirectoryPath = System.getProperty("java.io.tmpdir");
+        final String pemPath = tempDirectoryPath + File.separator + "cert.pem";
         final InputStream input = this.getClass().getResourceAsStream("/cert.pem");
-        final FileOutputStream output = new FileOutputStream(tempDirectoryPath + File.separator + "cert.pem");
+        final FileOutputStream output = new FileOutputStream(pemPath);
         int nextChar;
         while ( (nextChar = input.read()) != -1 ) {
             output.write( (char) nextChar );
@@ -167,7 +168,7 @@ public class VaultConfigTests {
 
         final MockEnvironmentLoader mock = new MockEnvironmentLoader();
         mock.override("VAULT_ADDR", "http://127.0.0.1:8200");
-        mock.override("VAULT_SSL_CERT", tempDirectoryPath + File.separator + "cert.pem");
+        mock.override("VAULT_SSL_CERT", pemPath);
         final VaultConfig config = new VaultConfig()
                 .environmentLoader(mock)
                 .build();
