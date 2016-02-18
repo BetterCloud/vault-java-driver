@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TODO: Document...
+ * This class is a container for the information returned by Vault in auth backend operations.
  */
 public final class AuthResponse extends VaultResponse {
 
@@ -20,8 +20,6 @@ public final class AuthResponse extends VaultResponse {
     private String appId;
     private String userId;
     private String username;
-
-    // TODO: Do we also need fields for "data" and/or "authMetadata"?
 
     /**
      * This constructor simply exposes the common base class constructor.

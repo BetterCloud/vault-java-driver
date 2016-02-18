@@ -1,5 +1,13 @@
 package com.bettercloud.vault.rest;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +15,12 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +67,11 @@ public final class Rest {
     private byte[] body;
     private final Map<String, String> parameters = new TreeMap<String, String>();
     private final Map<String, String> headers = new TreeMap<String, String>();
+
+    private Integer connectTimeoutSeconds;
+    private Integer readTimeoutSeconds;
+    private Boolean sslVerification;
+    private String sslPemUTF8;
 
     /**
      * <p>Sets the base URL to which the HTTP request will be sent.  The URL may or may not include query parameters
@@ -133,6 +151,72 @@ public final class Rest {
     }
 
     /**
+     * <p>The number of seconds to wait before giving up on establishing an HTTP(S) connection.</p>
+     *
+     * @param connectTimeoutSeconds Number of seconds to wait for an HTTP(S) connection to successfully establish
+     * @return
+     */
+    public Rest connectTimeoutSeconds(final Integer connectTimeoutSeconds) {
+        this.connectTimeoutSeconds = connectTimeoutSeconds;
+        return this;
+    }
+
+    /**
+     * <p>After an HTTP(S) connection has already been established, this is the number of seconds to wait for all
+     * data to finish downloading.</p>
+     *
+     * @param readTimeoutSeconds Number of seconds to wait for all data to be retrieved from an established HTTP(S) connection
+     * @return
+     */
+    public Rest readTimeoutSeconds(final Integer readTimeoutSeconds) {
+        this.readTimeoutSeconds = readTimeoutSeconds;
+        return this;
+    }
+
+    /**
+     * <p>Whether or not HTTPS connections should verify that the server has a valid SSL certificate.
+     * Unless this is set to <code>false</code>, the default behavior is to always verify SSL certificates.</p>
+     *
+     * <p>SSL CERTIFICATE VERIFICATION SHOULD NOT BE DISABLED IN PRODUCTION!  This feature is made available to
+     * facilitate development or testing environments, where you might be using a self-signed cert that will not
+     * pass verification.  However, even if you are using a self-signed cert on your server, you can still leave
+     * SSL verification enabled and have your application supply the cert using <code>sslPemFile()</code>,
+     * <code>sslPemResource()</code>, or <code>sslPemUTF8()</code>.</p>
+     *
+     * @param sslVerification Whether or not to verify the SSL certificate used by the server with HTTPS connections.  Default is <code>true</code>.
+     * @return
+     */
+    public Rest sslVerification(final Boolean sslVerification) {
+        this.sslVerification = sslVerification;
+        return this;
+    }
+
+    /**
+     * <p>An X.509 certificate, to use when communicating with Vault over HTTPS.  This method accepts a string
+     * containing the certificate data.  This string should meet the following requirements:</p>
+     *
+     * <ul>
+     *     <li>Contain an unencrypted X.509 certificate, in PEM format.</li>
+     *     <li>Use UTF-8 encoding.</li>
+     *     <li>
+     *          Contain a line-break between the certificate header (e.g. "-----BEGIN CERTIFICATE-----") and the
+     *          rest of the certificate content.  It doesn't matter whether or not there are additional line
+     *          breaks within the certificate content, or whether there is a line break before the certificate
+     *          footer (e.g. "-----END CERTIFICATE-----").  But the Java standard library will fail to properly
+     *          process the certificate without a break following the header
+     *          (see http://www.doublecloud.org/2014/03/reading-x-509-certificate-in-java-how-to-handle-format-issue/).
+     *      </li>
+     * </ul>
+     *
+     * @param pemFileContents An X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
+     * @return
+     */
+    public Rest sslPemUTF8(final String pemFileContents) {
+        this.sslPemUTF8 = pemFileContents;
+        return this;
+    }
+
+    /**
      * <p>Executes an HTTP GET request with the settings already configured.  Parameters and headers are optional, but
      * a <code>RestException</code> will be thrown if the caller has not first set a base URL with the
      * <code>url()</code> method.</p>
@@ -156,20 +240,19 @@ public final class Rest {
                     urlString = urlString + "&" + parametersToQueryString();
                 }
             }
-            // Initialize HTTP connection, and set any header values
-            final URL url = new URL(urlString);
-            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+            // Initialize HTTP(S) connection, and set any header values
+            final URLConnection connection = initURLConnection(urlString, "GET");
             for (final Map.Entry<String, String> header : headers.entrySet()) {
                 connection.setRequestProperty(header.getKey(), header.getValue());
             }
 
+            // Get the resulting status code
+            final int statusCode = connectionStatus(connection);
             // Download and parse response
-            final int statusCode = connection.getResponseCode();
             final String mimeType = connection.getContentType();
             final byte[] body = responseBodyBytes(connection);
             return new RestResponse(statusCode, mimeType, body);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RestException(e);
         }
     }
@@ -236,12 +319,11 @@ public final class Rest {
         }
         try {
             // Initialize HTTP connection, and set any header values
-            final URL url = new URL(urlString);
-            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            URLConnection connection;
             if (doPost) {
-                connection.setRequestMethod("POST");
+                connection = initURLConnection(urlString, "POST");
             } else {
-                connection.setRequestMethod("PUT");
+                connection = initURLConnection(urlString, "PUT");
             }
             for (final Map.Entry<String, String> header : headers.entrySet()) {
                 connection.setRequestProperty(header.getKey(), header.getValue());
@@ -264,12 +346,113 @@ public final class Rest {
                 outputStream.close();
             }
 
+            // Get the resulting status code
+            final int statusCode = connectionStatus(connection);
             // Download and parse response
-            final int statusCode = connection.getResponseCode();
             final String mimeType = connection.getContentType();
             final byte[] body = responseBodyBytes(connection);
             return new RestResponse(statusCode, mimeType, body);
         } catch (IOException e) {
+            throw new RestException(e);
+        }
+    }
+
+    /**
+     * <p>This helper method constructs a new <code>HttpURLConnection</code> or <code>HttpsURLConnection</code>,
+     * configured with all of the settings that were passed in when first initializing this <code>Rest</code>
+     * instance (e.g. timeout thresholds, SSL verification, SSL certificate data).</p>
+     *
+     * @param urlString The URL to which this connection will be made
+     * @param method The applicable request method (e.g. "GET", "POST", etc)
+     * @return
+     * @throws RestException If the URL cannot be successfully parsed, or if there are errors processing an SSL cert, etc.
+     */
+    private URLConnection initURLConnection(final String urlString, final String method) throws RestException {
+        try {
+            final URL url = new URL(urlString);
+            final URLConnection connection = url.openConnection();
+
+            // Timeout settings, if applicable
+            if (connectTimeoutSeconds != null) {
+                connection.setConnectTimeout(connectTimeoutSeconds * 1000);
+            }
+            if (readTimeoutSeconds != null) {
+                connection.setReadTimeout(readTimeoutSeconds * 1000);
+            }
+
+            // SSL settings, if applicable
+            if (connection instanceof HttpsURLConnection) {
+                final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
+                // Cert file supplied
+                if (sslPemUTF8 != null) {
+                    final SSLContext sslContext = initSSLContext();
+                    httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
+                }
+                // SSL verification disabled
+                if (sslVerification != null && !sslVerification.booleanValue()) {
+                    final SSLContext sslContext = SSLContext.getInstance("TLS");
+                    sslContext.init(null, new TrustManager[]{new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
+                        }
+
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
+                    }}, new java.security.SecureRandom());
+                    httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
+                    httpsURLConnection.setHostnameVerifier(new HostnameVerifier() {
+                        @Override
+                        public boolean verify(final String s, final SSLSession sslSession) {
+                            return true;
+                        }
+                    });
+                }
+                httpsURLConnection.setRequestMethod(method);
+            } else if (connection instanceof HttpURLConnection) {
+                final HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
+                httpURLConnection.setRequestMethod(method);
+            } else {
+                final String message = "URL string " + (urlString != null ? urlString : "null") + " cannot be parsed as an instance of HttpURLConnection or HttpsURLConnection";
+                throw new RestException(message);
+            }
+            return connection;
+        } catch (Exception e) {
+            throw new RestException(e);
+        }
+    }
+
+    /**
+     * <p>This helper method is used when a X.509 certificate PEM file has been provided, to configure the HTTPS
+     * connection with an in-memory keystore containing that certificate.</p>
+     *
+     * @return
+     * @throws RestException If there are any issues processing the SSL cert
+     */
+    private SSLContext initSSLContext() throws RestException {
+        try {
+            final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+
+            final ByteArrayInputStream pem = new ByteArrayInputStream(sslPemUTF8.getBytes("UTF-8"));
+            final X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(pem);
+            pem.close();
+
+            final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keyStore.load(null);
+            keyStore.setCertificateEntry("caCert", certificate);
+
+            trustManagerFactory.init(keyStore);
+
+            final SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+            return sslContext;
+        } catch (Exception e) {
             throw new RestException(e);
         }
     }
@@ -297,10 +480,10 @@ public final class Rest {
     /**
      * <p>This helper method downloads the body of an HTTP response (e.g. a clob of JSON text) as binary data.</p>
      *
-     * @param connection An active HTTP connection
+     * @param connection An active HTTP(S) connection
      * @return The body payload, downloaded from the HTTP connection response
      */
-    private byte[] responseBodyBytes(final HttpURLConnection connection) {
+    private byte[] responseBodyBytes(final URLConnection connection) {
         try {
             final InputStream inputStream = connection.getInputStream();
             final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -314,6 +497,36 @@ public final class Rest {
         } catch (IOException e) {
             return new byte[0];
         }
+    }
+
+
+    /**
+     * <p>This helper method extracts the HTTP(S) status code from a <code>URLConnection</code>, provided
+     * that it is an <code>HttpURLConnection</code> or a <code>HttpsUrlConnection</code>.</p>
+     *
+     * @param connection An active HTTP(S) connection
+     * @return
+     * @throws IOException
+     * @throws RestException
+     */
+    private int connectionStatus(final URLConnection connection) throws IOException, RestException {
+        int statusCode;
+        if (connection instanceof HttpsURLConnection) {
+            final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
+            statusCode = httpsURLConnection.getResponseCode();
+        } else if (connection instanceof HttpURLConnection) {
+            final HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
+            statusCode = httpURLConnection.getResponseCode();
+        } else {
+            final String className = connection != null ? connection.getClass().getName() : "null";
+            throw new RestException("Expecting a URLConnection of type "
+                    + HttpURLConnection.class.getName()
+                    + " or "
+                    + HttpsURLConnection.class.getName()
+                    + ", found "
+                    + className);
+        }
+        return statusCode;
     }
 
 }

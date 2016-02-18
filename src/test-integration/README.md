@@ -40,12 +40,12 @@ So prior to running these tests, you will need to run some Vault CLI commands to
 enable auth backends and populate user and app data:
 
 ```
-$ vault auth-enable app-id
-$ vault write auth/app-id/map/app-id/fake_app value=root display_name=fake_app
-$ vault write auth/app-id/map/user-id/fake_user value=fake_app
+vault auth-enable app-id
+vault write auth/app-id/map/app-id/fake_app value=root display_name=fake_app
+vault write auth/app-id/map/user-id/fake_user value=fake_app
 
-$ vault auth-enable userpass
-$ vault write auth/userpass/users/fake_user password=fake_password policies=root
+vault auth-enable userpass
+vault write auth/userpass/users/fake_user password=fake_password policies=root
 ```
 
 Configuring and Running the Integration Tests

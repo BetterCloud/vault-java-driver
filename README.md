@@ -50,21 +50,33 @@ final VaultConfig config =
     new VaultConfig().
         .address("http://127.0.0.1:8200")               // Defaults to "VAULT_ADDR" environment variable
         .token("3c9fd6be-7bc2-9d1f-6fb3-cd746c0fc4e8")  // Defaults to "VAULT_TOKEN" environment variable
-        .proxyAddress("...")                            // Defaults to "VAULT_PROXY_ADDRESS" environment variable
-        .proxyPort(8888)                                // Defaults to "VAULT_PROXY_PORT" environment variable
-        .proxyUsername("...")                           // Defaults to "VAULT_PROXY_USERNAME" environment variable
-        .proxyPassword("...")                           // Defaults to "VAULT_PROXY_PASSWORD" environment variable
-        .sslPemFile("/path/on/disk.pem")                // Defaults to "VAULT_SSL_CERT" environment variable
-        .sslVerify(false)                               // Defaults to "VAULT_SSL_VERIFY" environment variable
-        .timeout(30)                                    // Defaults to "VAULT_TIMEOUT" environment variable
-        .sslTimeout(5)                                  // Defaults to "VAULT_SSL_TIMEOUT" environment variable
         .openTimeout(5)                                 // Defaults to "VAULT_OPEN_TIMEOUT" environment variable
         .readTimeout(30)                                // Defaults to "VAULT_READ_TIMEOUT" environment variable
+        .sslPemFile("/path/on/disk.pem")                // Defaults to "VAULT_SSL_CERT" environment variable
+                                                        //    See also: "sslPemUTF8()" and "sslPemResource()"
+        .sslVerify(false)                               // Defaults to "VAULT_SSL_VERIFY" environment variable
         .build();
 ```
 
-> (*) NOTE: Config parameters beyond `address` and `token` are currently parsed from input or loaded from environment
-> variables, but are not yet actually used by the driver.  Support is pending in upcoming versions.
+> NOTES ON SSL CONFIG
+>
+> If your Vault server uses a SSL certificate, there are three different options for supplying that certificate to the
+> Vault driver:
+>
+> `sslPemFile(path)` - Supply the path to an X.509 certificate in unencrypted PEM format, using UTF-8 encoding.
+>
+> `sslPemResource(path)` - Same as above, but the path references a classpath resource rather than a filesystem path (e.g. if
+>                        you've bundled the PEM file into your applications's JAR, WAR, or EAR file).
+>
+> `sslPemUTF8(contents)` - The string contents extracted from the PEM file.  For Java to parse the certificate properly,
+>                        there must be a line-break in between the certificate header and body (see the `VaultConfig`
+>                        Javadocs for more detail).
+>
+> If none of these three methods are called, then `VaultConfig` will by default check for a `VAULT_SSL_CERT` environment
+> variable, and if that's set then it will be treated as a filesystem path.
+>
+> To disable SSL certificate verification altogether, set `sslVerify(false)`.  YOU SHOULD NOT DO THIS IS A REAL
+> PRODUCTION SETTING!  However, it can be useful in a development or testing server context.
 
 Once you have initialized a `VaultConfig` object, you can use it to construct an instance of the `Vault` primary
 driver class:

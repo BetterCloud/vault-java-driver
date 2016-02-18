@@ -1,5 +1,12 @@
 package com.bettercloud.vault;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 /**
  * <p>A container for the configuration settings needed to initialize a <code>Vault</code> driver instance.</p>
  *
@@ -49,6 +56,7 @@ public final class VaultConfig {
     private String proxyUsername;
     private String proxyPassword;
     private String sslPemFile;
+    private String sslPemUTF8;
     private Boolean sslVerify;
     private Integer timeout;
     private Integer sslTimeout;
@@ -255,28 +263,123 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
+     * <p>An X.509 certificate, to use when communicating with Vault over HTTPS.  This method accepts a string
+     * containing the certificate data.  This string should meet the following requirements:</p>
      *
-     * <p>If no sslPemFile is explicitly set, either by this method in a builder pattern approach or else by one of the
-     * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_SSL_CERT</code> environment
-     * variable.</p>
+     * <ul>
+     *     <li>Contain an unencrypted X.509 certificate, in PEM format.</li>
+     *     <li>Use UTF-8 encoding.</li>
+     *     <li>
+     *          Contain a line-break between the certificate header (e.g. "-----BEGIN CERTIFICATE-----") and the
+     *          rest of the certificate content.  It doesn't matter whether or not there are additional line
+     *          breaks within the certificate content, or whether there is a line break before the certificate
+     *          footer (e.g. "-----END CERTIFICATE-----").  But the Java standard library will fail to properly
+     *          process the certificate without a break following the header
+     *          (see http://www.doublecloud.org/2014/03/reading-x-509-certificate-in-java-how-to-handle-format-issue/).
+     *      </li>
+     * </ul>
      *
-     * @param sslPemFile
+     * <p>If no certificate data is provided, either by this method or <code>sslPemFile()</code>
+     * or <code>sslPemResource()</code>, then <code>VaultConfig</code> will look to the
+     * <code>VAULT_SSL_CERT</code> environment variable.</p>
+     *
+     * @param sslPemUTF8 An X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
      * @return
      */
-    public VaultConfig sslPemFile(final String sslPemFile) {
-        this.sslPemFile = sslPemFile;
+    public VaultConfig sslPemUTF8(final String sslPemUTF8) {
+        this.sslPemUTF8 = sslPemUTF8;
         return this;
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
+     * <p>An X.509 certificate, to use when communicating with Vault over HTTPS.  This method accepts the path of
+     * a file containing the certificate data.  This file's contents should meet the following requirements:</p>
+     *
+     * <ul>
+     *     <li>Contain an unencrypted X.509 certificate, in PEM format.</li>
+     *     <li>Use UTF-8 encoding.</li>
+     *     <li>
+     *          Contain a line-break between the certificate header (e.g. "-----BEGIN CERTIFICATE-----") and the
+     *          rest of the certificate content.  It doesn't matter whether or not there are additional line
+     *          breaks within the certificate content, or whether there is a line break before the certificate
+     *          footer (e.g. "-----END CERTIFICATE-----").  But the Java standard library will fail to properly
+     *          process the certificate without a break following the header
+     *          (see http://www.doublecloud.org/2014/03/reading-x-509-certificate-in-java-how-to-handle-format-issue/).
+     *      </li>
+     * </ul>
+     *
+     * <p>If no certificate data is provided, either by this method or <code>sslPemResource()</code>
+     * or <code>sslPemUTF8()</code>, then <code>VaultConfig</code> will look to the
+     * <code>VAULT_SSL_CERT</code> environment variable.</p>
+     *
+     * @param sslPemFile The path of a file containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
+     * @return
+     */
+    public VaultConfig sslPemFile(final File sslPemFile) throws VaultException {
+        try {
+            final InputStream input = new FileInputStream(sslPemFile);
+            this.sslPemUTF8 = inputStreamToUTF8(input);
+            input.close();
+            this.sslPemFile = sslPemFile.getPath();
+        } catch (IOException e) {
+            throw new VaultException(e);
+        }
+        return this;
+    }
+
+    /**
+     * <p>An X.509 certificate, to use when communicating with Vault over HTTPS.  This method accepts the path of
+     * a classpath resource containing the certificate data (e.g. you've bundled the cert into your library or
+     * application's JAR/WAR/EAR file).  This resource's contents should meet the following requirements:</p>
+     *
+     * <ul>
+     *     <li>Contain an unencrypted X.509 certificate, in PEM format.</li>
+     *     <li>Use UTF-8 encoding.</li>
+     *     <li>
+     *          Contain a line-break between the certificate header (e.g. "-----BEGIN CERTIFICATE-----") and the
+     *          rest of the certificate content.  It doesn't matter whether or not there are additional line
+     *          breaks within the certificate content, or whether there is a line break before the certificate
+     *          footer (e.g. "-----END CERTIFICATE-----").  But the Java standard library will fail to properly
+     *          process the certificate without a break following the header
+     *          (see http://www.doublecloud.org/2014/03/reading-x-509-certificate-in-java-how-to-handle-format-issue/).
+     *      </li>
+     * </ul>
+     *
+     * <p>If no certificate data is provided, either by this method or <code>sslPemFile()</code>
+     * or <code>sslPemUTF8()</code>, then <code>VaultConfig</code> will look to the
+     * <code>VAULT_SSL_CERT</code> environment variable.</p>
+     *
+     * @param classpathResource The path of a classpath resource containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
+     * @return
+     * @throws VaultException
+     */
+    public VaultConfig sslPemResource(final String classpathResource) throws VaultException {
+        try {
+            final InputStream input = this.getClass().getResourceAsStream(classpathResource);
+            this.sslPemUTF8 = inputStreamToUTF8(input);
+            input.close();
+            this.sslPemFile = classpathResource;
+        } catch (IOException e) {
+            throw new VaultException(e);
+        }
+        return this;
+    }
+
+    /**
+     * <p>Whether or not HTTPS connections to the Vault server should verify that a valid SSL certificate is being
+     * used.  Unless this is set to <code>false</code>, the default behavior is to always verify SSL certificates.</p>
+     *
+     * <p>SSL CERTIFICATE VERIFICATION SHOULD NOT BE DISABLED IN PRODUCTION!  This feature is made available to
+     * facilitate development or testing environments, where you might be using a self-signed cert that will not
+     * pass verification.  However, even if you are using a self-signed cert on your Vault server, you can still leave
+     * SSL verification enabled and have your application supply the cert using <code>sslPemFile()</code>,
+     * <code>sslPemResource()</code>, or <code>sslPemUTF8()</code>.</p>
      *
      * <p>If no sslVerify is explicitly set, either by this method in a builder pattern approach or else by one of the
      * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_SSL_VERIFY</code>
      * environment variable.</p>
      *
-     * @param sslVerify
+     * @param sslVerify Whether or not to verify the SSL certificate used by Vault with HTTPS connections.  Default is <code>true</code>.
      * @return
      */
     public VaultConfig sslVerify(final Boolean sslVerify) {
@@ -285,43 +388,39 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
-     *
-     * <p>If no timeout is explicitly set, either by this method in a builder pattern approach or else by one of the
-     * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_TIMEOUT</code> environment
-     * variable.</p>
+     * This field is unused, and will be removed in the next version of the driver.  Use <code>openTimeout</code>
+     * and <code>readTimeout</code>.
      *
      * @param timeout
      * @return
      */
+    @Deprecated
     public VaultConfig timeout(final Integer timeout) {
         this.timeout = timeout;
         return this;
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
-     *
-     * <p>If no sslTimeout is explicitly set, either by this method in a builder pattern approach or else by one of the
-     * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_SSL_TIMEOUT</code>
-     * environment variable.</p>
+     * This field is unused, and will be removed in the next version of the driver.  Use <code>openTimeout</code>
+     * and <code>readTimeout</code>.
      *
      * @param sslTimeout
      * @return
      */
+    @Deprecated
     public VaultConfig sslTimeout(final Integer sslTimeout) {
         this.sslTimeout = sslTimeout;
         return this;
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
+     * <p>The number of seconds to wait before giving up on establishing an HTTP(S) connection to the Vault server.</p>
      *
      * <p>If no openTimeout is explicitly set, either by this method in a builder pattern approach or else by one of
      * the convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_OPEN_TIMEOUT</code>
      * environment variable.</p>
      *
-     * @param openTimeout
+     * @param openTimeout Number of seconds to wait for an HTTP(S) connection to successfully establish
      * @return
      */
     public VaultConfig openTimeout(final Integer openTimeout) {
@@ -330,13 +429,14 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
+     * <p>After an HTTP(S) connection has already been established, this is the number of seconds to wait for all
+     * data to finish downloading.</p>
      *
      * <p>If no readTimeout is explicitly set, either by this method in a builder pattern approach or else by one of
      * the convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_READ_TIMEOUT</code>
      * environment variable.</p>
      *
-     * @param readTimeout
+     * @param readTimeout Number of seconds to wait for all data to be retrieved from an established HTTP(S) connection
      * @return
      */
     public VaultConfig readTimeout(final Integer readTimeout) {
@@ -412,27 +512,18 @@ public final class VaultConfig {
         if (this.proxyPassword == null && environmentLoader.loadVariable("VAULT_PROXY_PASSWORD") != null) {
             this.proxyPassword = environmentLoader.loadVariable("VAULT_PROXY_PASSWORD");
         }
-        if (this.sslPemFile == null && environmentLoader.loadVariable("VAULT_SSL_CERT") != null) {
-            this.sslPemFile = environmentLoader.loadVariable("VAULT_SSL_CERT");
+        if (this.sslPemUTF8 == null && environmentLoader.loadVariable("VAULT_SSL_CERT") != null) {
+            final File pemFile = new File(environmentLoader.loadVariable("VAULT_SSL_CERT"));
+            try {
+                final InputStream input = new FileInputStream(pemFile);
+                this.sslPemUTF8 = inputStreamToUTF8(input);
+                input.close();
+            } catch (IOException e) {
+                throw new VaultException(e);
+            }
         }
         if (this.sslVerify == null && environmentLoader.loadVariable("VAULT_SSL_VERIFY") != null) {
             this.sslVerify = Boolean.valueOf(environmentLoader.loadVariable("VAULT_SSL_VERIFY"));
-        }
-        if (this.timeout == null && environmentLoader.loadVariable("VAULT_TIMEOUT") != null) {
-            try {
-                this.timeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_TIMEOUT"));
-            } catch (NumberFormatException e) {
-                System.err.printf("The \"VAULT_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.\n",
-                        environmentLoader.loadVariable("VAULT_TIMEOUT"));
-            }
-        }
-        if (this.sslTimeout == null && environmentLoader.loadVariable("VAULT_SSL_TIMEOUT") != null) {
-            try {
-                this.sslTimeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_SSL_TIMEOUT"));
-            } catch (NumberFormatException e) {
-                System.err.printf("The \"VAULT_SSL_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.\n",
-                        environmentLoader.loadVariable("VAULT_SSL_TIMEOUT"));
-            }
         }
         if (this.openTimeout == null && environmentLoader.loadVariable("VAULT_OPEN_TIMEOUT") != null) {
             try {
@@ -477,18 +568,25 @@ public final class VaultConfig {
         return proxyPassword;
     }
 
+    @Deprecated
     public String getSslPemFile() {
         return sslPemFile;
+    }
+
+    public String getSslPemUTF8() {
+        return sslPemUTF8;
     }
 
     public Boolean isSslVerify() {
         return sslVerify;
     }
 
+    @Deprecated
     public Integer getTimeout() {
         return timeout;
     }
 
+    @Deprecated
     public Integer getSslTimeout() {
         return sslTimeout;
     }
@@ -509,4 +607,18 @@ public final class VaultConfig {
         return retryIntervalMilliseconds;
     }
 
+    private String inputStreamToUTF8(final InputStream input) throws IOException {
+        final BufferedReader in = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+        String utf8 = "";
+        String str;
+        while ((str = in.readLine()) != null) {
+            // String concatenation is less efficient, but for some reason the line-breaks (which are necessary
+            // for Java to correctly parse SSL certs) are stripped off when using a StringBuilder.
+            utf8 += str + System.lineSeparator();//NOPMD
+        }
+        in.close();
+        return utf8;
+    }
+
 }
+
