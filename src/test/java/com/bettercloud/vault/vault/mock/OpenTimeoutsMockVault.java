@@ -74,6 +74,7 @@ public class OpenTimeoutsMockVault extends MockVault {
             Thread.sleep(delaySeconds * 1000);
             response.setContentType("application/json");
             baseRequest.setHandled(true);
+            System.out.println("OpenTimeoutsMockVault is sending an HTTP " + mockStatus + " code, with expected success payload...");
             response.setStatus(mockStatus);
             if (response != null) {
                 response.getWriter().println(mockResponse);

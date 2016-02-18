@@ -46,13 +46,13 @@ import java.io.IOException;
 public class RetriesMockVault extends MockVault {
 
     private int failureCount ;
-    private int successStatus;
-    private String successResponse;
+    private int mockStatus;
+    private String mockResponse;
 
-    public RetriesMockVault(final int failureCount, final int successStatus, final String successResponse) {
+    public RetriesMockVault(final int failureCount, final int mockStatus, final String mockResponse) {
         this.failureCount = failureCount;
-        this.successStatus = successStatus;
-        this.successResponse = successResponse;
+        this.mockStatus = mockStatus;
+        this.mockResponse = mockResponse;
     }
 
     @Override
@@ -67,12 +67,12 @@ public class RetriesMockVault extends MockVault {
         if (failureCount > 0) {
             failureCount = failureCount - 1;
             response.setStatus(500);
-            System.out.println("Mock Vault is sending an HTTP 500 code, to cause a retry...");
+            System.out.println("RetriesMockVault is sending an HTTP 500 code, to cause a retry...");
         } else {
-            System.out.println("Mock Vault is sending an HTTP 200 code, with expected success payload...");
-            response.setStatus(successStatus);
-            if (successResponse != null) {
-                response.getWriter().println(successResponse);
+            System.out.println("RetriesMockVault is sending an HTTP " + mockStatus + " code, with expected success payload...");
+            response.setStatus(mockStatus);
+            if (mockResponse != null) {
+                response.getWriter().println(mockResponse);
             }
         }
     }

@@ -1,7 +1,5 @@
 package com.bettercloud.vault.rest;
 
-import com.bettercloud.vault.VaultException;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -242,31 +240,14 @@ public final class Rest {
                     urlString = urlString + "&" + parametersToQueryString();
                 }
             }
-            // TODO:  Do this for "post" likewise
             // Initialize HTTP(S) connection, and set any header values
             final URLConnection connection = initURLConnection(urlString, "GET");
             for (final Map.Entry<String, String> header : headers.entrySet()) {
                 connection.setRequestProperty(header.getKey(), header.getValue());
             }
 
-            // Set request method and get resulting status code
-            int statusCode;
-            if (connection instanceof HttpsURLConnection) {
-                final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
-                statusCode = httpsURLConnection.getResponseCode();
-            } else if (connection instanceof HttpURLConnection) {
-                final HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
-                statusCode = httpURLConnection.getResponseCode();
-            } else {
-                final String className = connection != null ? connection.getClass().getName() : "null";
-                throw new RestException("Expecting a URLConnection of type "
-                        + HttpURLConnection.class.getName()
-                        + " or "
-                        + HttpsURLConnection.class.getName()
-                        + ", found "
-                        + className);
-            }
-
+            // Get the resulting status code
+            final int statusCode = connectionStatus(connection);
             // Download and parse response
             final String mimeType = connection.getContentType();
             final byte[] body = responseBodyBytes(connection);
@@ -338,12 +319,11 @@ public final class Rest {
         }
         try {
             // Initialize HTTP connection, and set any header values
-            final URL url = new URL(urlString);
-            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            URLConnection connection;
             if (doPost) {
-                connection.setRequestMethod("POST");
+                connection = initURLConnection(urlString, "POST");
             } else {
-                connection.setRequestMethod("PUT");
+                connection = initURLConnection(urlString, "PUT");
             }
             for (final Map.Entry<String, String> header : headers.entrySet()) {
                 connection.setRequestProperty(header.getKey(), header.getValue());
@@ -366,8 +346,9 @@ public final class Rest {
                 outputStream.close();
             }
 
+            // Get the resulting status code
+            final int statusCode = connectionStatus(connection);
             // Download and parse response
-            final int statusCode = connection.getResponseCode();
             final String mimeType = connection.getContentType();
             final byte[] body = responseBodyBytes(connection);
             return new RestResponse(statusCode, mimeType, body);
@@ -384,9 +365,9 @@ public final class Rest {
      * @param urlString The URL to which this connection will be made
      * @param method The applicable request method (e.g. "GET", "POST", etc)
      * @return
-     * @throws VaultException If the URL cannot be successfully parsed, or if there are errors processing an SSL cert, etc.
+     * @throws RestException If the URL cannot be successfully parsed, or if there are errors processing an SSL cert, etc.
      */
-    private URLConnection initURLConnection(final String urlString, final String method) throws VaultException {
+    private URLConnection initURLConnection(final String urlString, final String method) throws RestException {
         try {
             final URL url = new URL(urlString);
             final URLConnection connection = url.openConnection();
@@ -438,11 +419,11 @@ public final class Rest {
                 httpURLConnection.setRequestMethod(method);
             } else {
                 final String message = "URL string " + (urlString != null ? urlString : "null") + " cannot be parsed as an instance of HttpURLConnection or HttpsURLConnection";
-                throw new VaultException(message);
+                throw new RestException(message);
             }
             return connection;
         } catch (Exception e) {
-            throw new VaultException(e);
+            throw new RestException(e);
         }
     }
 
@@ -451,9 +432,9 @@ public final class Rest {
      * connection with an in-memory keystore containing that certificate.</p>
      *
      * @return
-     * @throws VaultException If there are any issues processing the SSL cert
+     * @throws RestException If there are any issues processing the SSL cert
      */
-    private SSLContext initSSLContext() throws VaultException {
+    private SSLContext initSSLContext() throws RestException {
         try {
             final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 
@@ -472,7 +453,7 @@ public final class Rest {
             sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
             return sslContext;
         } catch (Exception e) {
-            throw new VaultException(e);
+            throw new RestException(e);
         }
     }
 
@@ -499,7 +480,7 @@ public final class Rest {
     /**
      * <p>This helper method downloads the body of an HTTP response (e.g. a clob of JSON text) as binary data.</p>
      *
-     * @param connection An active HTTP connection
+     * @param connection An active HTTP(S) connection
      * @return The body payload, downloaded from the HTTP connection response
      */
     private byte[] responseBodyBytes(final URLConnection connection) {
@@ -516,6 +497,36 @@ public final class Rest {
         } catch (IOException e) {
             return new byte[0];
         }
+    }
+
+
+    /**
+     * <p>This helper method extracts the HTTP(S) status code from a <code>URLConnection</code>, provided
+     * that it is an <code>HttpURLConnection</code> or a <code>HttpsUrlConnection</code>.</p>
+     *
+     * @param connection An active HTTP(S) connection
+     * @return
+     * @throws IOException
+     * @throws RestException
+     */
+    private int connectionStatus(final URLConnection connection) throws IOException, RestException {
+        int statusCode;
+        if (connection instanceof HttpsURLConnection) {
+            final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
+            statusCode = httpsURLConnection.getResponseCode();
+        } else if (connection instanceof HttpURLConnection) {
+            final HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
+            statusCode = httpURLConnection.getResponseCode();
+        } else {
+            final String className = connection != null ? connection.getClass().getName() : "null";
+            throw new RestException("Expecting a URLConnection of type "
+                    + HttpURLConnection.class.getName()
+                    + " or "
+                    + HttpsURLConnection.class.getName()
+                    + ", found "
+                    + className);
+        }
+        return statusCode;
     }
 
 }

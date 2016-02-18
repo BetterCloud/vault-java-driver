@@ -127,11 +127,15 @@ public final class Logical {
                         .url(config.getAddress() + "/v1/" + path)
                         .body(requestJson.toString().getBytes("UTF-8"))
                         .header("X-Vault-Token", config.getToken())
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslPemUTF8(config.getSslPemUTF8())
+                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
                         .post();
                 if (restResponse.getStatus() != 204) {
                     throw new VaultException("Expecting HTTP status 204, but instead receiving " + restResponse.getStatus());
                 }
-                return new LogicalResponse(null, retryCount);
+                return new LogicalResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
