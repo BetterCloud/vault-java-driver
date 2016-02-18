@@ -263,9 +263,27 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: Document
+     * <p>An X.509 certificate, to use when communicating with Vault over HTTPS.  This method accepts a string
+     * containing the certificate data.  This string should meet the following requirements:</p>
      *
-     * @param sslPemUTF8
+     * <ul>
+     *     <li>Contain an unencrypted X.509 certificate, in PEM format.</li>
+     *     <li>Use UTF-8 encoding.</li>
+     *     <li>
+     *          Contain a line-break between the certificate header (e.g. "-----BEGIN CERTIFICATE-----") and the
+     *          rest of the certificate content.  It doesn't matter whether or not there are additional line
+     *          breaks within the certificate content, or whether there is a line break before the certificate
+     *          footer (e.g. "-----END CERTIFICATE-----").  But the Java standard library will fail to properly
+     *          process the certificate without a break following the header
+     *          (see http://www.doublecloud.org/2014/03/reading-x-509-certificate-in-java-how-to-handle-format-issue/).
+     *      </li>
+     * </ul>
+     *
+     * <p>If no certificate data is provided, either by this method or <code>sslPemFile()</code>
+     * or <code>sslPemResource()</code>, then <code>VaultConfig</code> will look to the
+     * <code>VAULT_SSL_CERT</code> environment variable.</p>
+     *
+     * @param sslPemUTF8 An X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
      * @return
      */
     public VaultConfig sslPemUTF8(final String sslPemUTF8) {
@@ -274,13 +292,27 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: Document
+     * <p>An X.509 certificate, to use when communicating with Vault over HTTPS.  This method accepts the path of
+     * a file containing the certificate data.  This file's contents should meet the following requirements:</p>
      *
-     * <p>If no sslPemFile is explicitly set, either by this method in a builder pattern approach or else by one of the
-     * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_SSL_CERT</code> environment
-     * variable.</p>
+     * <ul>
+     *     <li>Contain an unencrypted X.509 certificate, in PEM format.</li>
+     *     <li>Use UTF-8 encoding.</li>
+     *     <li>
+     *          Contain a line-break between the certificate header (e.g. "-----BEGIN CERTIFICATE-----") and the
+     *          rest of the certificate content.  It doesn't matter whether or not there are additional line
+     *          breaks within the certificate content, or whether there is a line break before the certificate
+     *          footer (e.g. "-----END CERTIFICATE-----").  But the Java standard library will fail to properly
+     *          process the certificate without a break following the header
+     *          (see http://www.doublecloud.org/2014/03/reading-x-509-certificate-in-java-how-to-handle-format-issue/).
+     *      </li>
+     * </ul>
      *
-     * @param sslPemFile
+     * <p>If no certificate data is provided, either by this method or <code>sslPemResource()</code>
+     * or <code>sslPemUTF8()</code>, then <code>VaultConfig</code> will look to the
+     * <code>VAULT_SSL_CERT</code> environment variable.</p>
+     *
+     * @param sslPemFile The path of a file containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
      * @return
      */
     public VaultConfig sslPemFile(final File sslPemFile) throws VaultException {
@@ -296,9 +328,28 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: Document
+     * <p>An X.509 certificate, to use when communicating with Vault over HTTPS.  This method accepts the path of
+     * a classpath resource containing the certificate data (e.g. you've bundled the cert into your library or
+     * application's JAR/WAR/EAR file).  This resource's contents should meet the following requirements:</p>
      *
-     * @param classpathResource
+     * <ul>
+     *     <li>Contain an unencrypted X.509 certificate, in PEM format.</li>
+     *     <li>Use UTF-8 encoding.</li>
+     *     <li>
+     *          Contain a line-break between the certificate header (e.g. "-----BEGIN CERTIFICATE-----") and the
+     *          rest of the certificate content.  It doesn't matter whether or not there are additional line
+     *          breaks within the certificate content, or whether there is a line break before the certificate
+     *          footer (e.g. "-----END CERTIFICATE-----").  But the Java standard library will fail to properly
+     *          process the certificate without a break following the header
+     *          (see http://www.doublecloud.org/2014/03/reading-x-509-certificate-in-java-how-to-handle-format-issue/).
+     *      </li>
+     * </ul>
+     *
+     * <p>If no certificate data is provided, either by this method or <code>sslPemFile()</code>
+     * or <code>sslPemUTF8()</code>, then <code>VaultConfig</code> will look to the
+     * <code>VAULT_SSL_CERT</code> environment variable.</p>
+     *
+     * @param classpathResource The path of a classpath resource containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
      * @return
      * @throws VaultException
      */
@@ -315,13 +366,20 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: Document
+     * <p>Whether or not HTTPS connections to the Vault server should verify that a valid SSL certificate is being
+     * used.  Unless this is set to <code>false</code>, the default behavior is to always verify SSL certificates.</p>
+     *
+     * <p>SSL CERTIFICATE VERIFICATION SHOULD NOT BE DISABLED IN PRODUCTION!  This feature is made available to
+     * facilitate development or testing environments, where you might be using a self-signed cert that will not
+     * pass verification.  However, even if you are using a self-signed cert on your Vault server, you can still leave
+     * SSL verification enabled and have your application supply the cert using <code>sslPemFile()</code>,
+     * <code>sslPemResource()</code>, or <code>sslPemUTF8()</code>.</p>
      *
      * <p>If no sslVerify is explicitly set, either by this method in a builder pattern approach or else by one of the
      * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_SSL_VERIFY</code>
      * environment variable.</p>
      *
-     * @param sslVerify
+     * @param sslVerify Whether or not to verify the SSL certificate used by Vault with HTTPS connections.  Default is <code>true</code>.
      * @return
      */
     public VaultConfig sslVerify(final Boolean sslVerify) {

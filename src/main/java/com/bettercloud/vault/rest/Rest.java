@@ -1,5 +1,7 @@
 package com.bettercloud.vault.rest;
 
+import com.bettercloud.vault.VaultException;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -17,10 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -161,7 +160,7 @@ public final class Rest {
      * @param connectTimeoutSeconds
      * @return
      */
-    public Rest connectTimeoutSeconds(final int connectTimeoutSeconds) {
+    public Rest connectTimeoutSeconds(final Integer connectTimeoutSeconds) {
         this.connectTimeoutSeconds = connectTimeoutSeconds;
         return this;
     }
@@ -172,15 +171,22 @@ public final class Rest {
      * @param readTimeoutSeconds
      * @return
      */
-    public Rest readTimeoutSeconds(final int readTimeoutSeconds) {
+    public Rest readTimeoutSeconds(final Integer readTimeoutSeconds) {
         this.readTimeoutSeconds = readTimeoutSeconds;
         return this;
     }
 
     /**
-     * TODO: Document
+     * <p>Whether or not HTTPS connections should verify that the server has a valid SSL certificate.
+     * Unless this is set to <code>false</code>, the default behavior is to always verify SSL certificates.</p>
      *
-     * @param sslVerification
+     * <p>SSL CERTIFICATE VERIFICATION SHOULD NOT BE DISABLED IN PRODUCTION!  This feature is made available to
+     * facilitate development or testing environments, where you might be using a self-signed cert that will not
+     * pass verification.  However, even if you are using a self-signed cert on your server, you can still leave
+     * SSL verification enabled and have your application supply the cert using <code>sslPemFile()</code>,
+     * <code>sslPemResource()</code>, or <code>sslPemUTF8()</code>.</p>
+     *
+     * @param sslVerification Whether or not to verify the SSL certificate used by the server with HTTPS connections.  Default is <code>true</code>.
      * @return
      */
     public Rest sslVerification(final Boolean sslVerification) {
@@ -189,9 +195,23 @@ public final class Rest {
     }
 
     /**
-     * TODO: Document
+     * <p>An X.509 certificate, to use when communicating with Vault over HTTPS.  This method accepts a string
+     * containing the certificate data.  This string should meet the following requirements:</p>
      *
-     * @param pemFileContents
+     * <ul>
+     *     <li>Contain an unencrypted X.509 certificate, in PEM format.</li>
+     *     <li>Use UTF-8 encoding.</li>
+     *     <li>
+     *          Contain a line-break between the certificate header (e.g. "-----BEGIN CERTIFICATE-----") and the
+     *          rest of the certificate content.  It doesn't matter whether or not there are additional line
+     *          breaks within the certificate content, or whether there is a line break before the certificate
+     *          footer (e.g. "-----END CERTIFICATE-----").  But the Java standard library will fail to properly
+     *          process the certificate without a break following the header
+     *          (see http://www.doublecloud.org/2014/03/reading-x-509-certificate-in-java-how-to-handle-format-issue/).
+     *      </li>
+     * </ul>
+     *
+     * @param pemFileContents An X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
      * @return
      */
     public Rest sslPemUTF8(final String pemFileContents) {
@@ -225,7 +245,7 @@ public final class Rest {
             }
             // TODO:  Do this for "post" likewise
             // Initialize HTTP(S) connection, and set any header values
-            final URLConnection connection = initURLConnection(urlString);
+            final URLConnection connection = initURLConnection(urlString, "GET");
             for (final Map.Entry<String, String> header : headers.entrySet()) {
                 connection.setRequestProperty(header.getKey(), header.getValue());
             }
@@ -234,11 +254,9 @@ public final class Rest {
             int statusCode;
             if (connection instanceof HttpsURLConnection) {
                 final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
-                httpsURLConnection.setRequestMethod("GET");
                 statusCode = httpsURLConnection.getResponseCode();
             } else if (connection instanceof HttpURLConnection) {
                 final HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
-                httpURLConnection.setRequestMethod("GET");
                 statusCode = httpURLConnection.getResponseCode();
             } else {
                 final String className = connection != null ? connection.getClass().getName() : "null";
@@ -257,96 +275,6 @@ public final class Rest {
         } catch (Exception e) {
             throw new RestException(e);
         }
-    }
-
-    /**
-     * TODO: Document
-     *
-     * @param urlString
-     * @return
-     * @throws IOException
-     * @throws CertificateException
-     * @throws NoSuchAlgorithmException
-     * @throws KeyStoreException
-     * @throws KeyManagementException
-     * @throws RestException
-     */
-    private URLConnection initURLConnection(final String urlString)
-            throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-            KeyManagementException, RestException {
-        final URL url = new URL(urlString);
-        final URLConnection connection = url.openConnection();
-
-        // Timeout settings, if applicable
-        if (connectTimeoutSeconds != null) {
-            connection.setConnectTimeout(connectTimeoutSeconds * 1000);
-        }
-        if (readTimeoutSeconds != null) {
-            connection.setReadTimeout(readTimeoutSeconds * 1000);
-        }
-
-        // SSL settings, if applicable
-        if (connection instanceof HttpsURLConnection) {
-            final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
-            // Cert file supplied
-            if (sslPemUTF8 != null) {
-                final SSLContext sslContext = initSSLContext();
-                httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
-            }
-            // SSL verification disabled
-            if (sslVerification != null && !sslVerification.booleanValue()) {
-                final SSLContext sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(null, new TrustManager[] { new X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
-                    }
-                    @Override
-                    public void checkServerTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
-                    }
-                    @Override
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
-                    }
-                } }, new java.security.SecureRandom());
-                httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
-                httpsURLConnection.setHostnameVerifier(new HostnameVerifier() {
-                    @Override
-                    public boolean verify(final String s, final SSLSession sslSession) {
-                        return true;
-                    }
-                });
-            }
-        }
-        return connection;
-    }
-
-    /**
-     * TODO: Document
-     *
-     * @return
-     * @throws CertificateException
-     * @throws NoSuchAlgorithmException
-     * @throws KeyStoreException
-     * @throws IOException
-     * @throws KeyManagementException
-     */
-    private SSLContext initSSLContext() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException {
-        final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-
-        final ByteArrayInputStream pem = new ByteArrayInputStream(sslPemUTF8.getBytes("UTF-8"));
-        final X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(pem);
-        pem.close();
-
-        final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        keyStore.load(null);
-        keyStore.setCertificateEntry("caCert", certificate);
-
-        trustManagerFactory.init(keyStore);
-
-        final SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
-        return sslContext;
     }
 
     /**
@@ -446,6 +374,103 @@ public final class Rest {
             return new RestResponse(statusCode, mimeType, body);
         } catch (IOException e) {
             throw new RestException(e);
+        }
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @param urlString
+     * @param method
+     * @return
+     * @throws VaultException
+     */
+    private URLConnection initURLConnection(final String urlString, final String method) throws VaultException {
+        try {
+            final URL url = new URL(urlString);
+            final URLConnection connection = url.openConnection();
+
+            // Timeout settings, if applicable
+            if (connectTimeoutSeconds != null) {
+                connection.setConnectTimeout(connectTimeoutSeconds * 1000);
+            }
+            if (readTimeoutSeconds != null) {
+                connection.setReadTimeout(readTimeoutSeconds * 1000);
+            }
+
+            // SSL settings, if applicable
+            if (connection instanceof HttpsURLConnection) {
+                final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
+                // Cert file supplied
+                if (sslPemUTF8 != null) {
+                    final SSLContext sslContext = initSSLContext();
+                    httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
+                }
+                // SSL verification disabled
+                if (sslVerification != null && !sslVerification.booleanValue()) {
+                    final SSLContext sslContext = SSLContext.getInstance("TLS");
+                    sslContext.init(null, new TrustManager[]{new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
+                        }
+
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
+                    }}, new java.security.SecureRandom());
+                    httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
+                    httpsURLConnection.setHostnameVerifier(new HostnameVerifier() {
+                        @Override
+                        public boolean verify(final String s, final SSLSession sslSession) {
+                            return true;
+                        }
+                    });
+                }
+                httpsURLConnection.setRequestMethod(method);
+            } else if (connection instanceof HttpURLConnection) {
+                final HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
+                httpURLConnection.setRequestMethod(method);
+            } else {
+                final String message = "URL string " + (urlString != null ? urlString : "null") + " cannot be parsed as an instance of HttpURLConnection or HttpsURLConnection";
+                throw new VaultException(message);
+            }
+            return connection;
+        } catch (Exception e) {
+            throw new VaultException(e);
+        }
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @return
+     * @throws VaultException
+     */
+    private SSLContext initSSLContext() throws VaultException {
+        try {
+            final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+
+            final ByteArrayInputStream pem = new ByteArrayInputStream(sslPemUTF8.getBytes("UTF-8"));
+            final X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(pem);
+            pem.close();
+
+            final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keyStore.load(null);
+            keyStore.setCertificateEntry("caCert", certificate);
+
+            trustManagerFactory.init(keyStore);
+
+            final SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+            return sslContext;
+        } catch (Exception e) {
+            throw new VaultException(e);
         }
     }
 

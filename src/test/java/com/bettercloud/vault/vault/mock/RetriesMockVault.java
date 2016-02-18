@@ -1,7 +1,6 @@
-package com.bettercloud.vault;
+package com.bettercloud.vault.vault.mock;
 
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -16,11 +15,11 @@ import java.io.IOException;
  *
  * <ol>
  *     <li>
- *         <code>MockVault</code> responds with HTTP 500 status codes to a designated number of requests (which
+ *         <code>RetriesMockVault</code> responds with HTTP 500 status codes to a designated number of requests (which
  *         can be zero).  This can be used to test retry logic.
  *     </li>
  *     <li>
- *         On subsequent HTTP requests, <code>MockVault</code> responds with a designated HTTP status code, and
+ *         On subsequent HTTP requests, <code>RetriesMockVault</code> responds with a designated HTTP status code, and
  *         a designated response body.
  *     </li>
  * </ol>
@@ -30,7 +29,7 @@ import java.io.IOException;
  * <blockquote>
  * <pre>{@code
  * final Server server = new Server(8999);
- * server.setHandler( new MockVault(5, 200, "{\"data\":{\"value\":\"mock\"}}") );
+ * server.setHandler( new RetriesMockVault(5, 200, "{\"data\":{\"value\":\"mock\"}}") );
  * server.start();
  *
  * final VaultConfig vaultConfig = new VaultConfig("http://127.0.0.1:8999", "mock_token");
@@ -43,13 +42,13 @@ import java.io.IOException;
  * }</pre>
  * </blockquote>
  */
-public class MockVault extends AbstractHandler {
+public class RetriesMockVault extends MockVault {
 
     private int failureCount ;
     private int successStatus;
     private String successResponse;
 
-    public MockVault(final int failureCount, final int successStatus, final String successResponse) {
+    public RetriesMockVault(final int failureCount, final int successStatus, final String successResponse) {
         this.failureCount = failureCount;
         this.successStatus = successStatus;
         this.successResponse = successResponse;

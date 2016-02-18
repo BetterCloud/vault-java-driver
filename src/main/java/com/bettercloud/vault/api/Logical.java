@@ -51,6 +51,8 @@ public final class Logical {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
                         .header("X-Vault-Token", config.getToken())
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
                         .sslPemUTF8(config.getSslPemUTF8())
                         .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
                         .get();
