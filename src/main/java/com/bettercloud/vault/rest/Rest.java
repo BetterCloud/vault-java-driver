@@ -152,12 +152,10 @@ public final class Rest {
         return this;
     }
 
-    // TODO: Add testing for timeouts
-
     /**
-     * TODO: Document
+     * <p>The number of seconds to wait before giving up on establishing an HTTP(S) connection.</p>
      *
-     * @param connectTimeoutSeconds
+     * @param connectTimeoutSeconds Number of seconds to wait for an HTTP(S) connection to successfully establish
      * @return
      */
     public Rest connectTimeoutSeconds(final Integer connectTimeoutSeconds) {
@@ -166,9 +164,10 @@ public final class Rest {
     }
 
     /**
-     * TODO: Document
+     * <p>After an HTTP(S) connection has already been established, this is the number of seconds to wait for all
+     * data to finish downloading.</p>
      *
-     * @param readTimeoutSeconds
+     * @param readTimeoutSeconds Number of seconds to wait for all data to be retrieved from an established HTTP(S) connection
      * @return
      */
     public Rest readTimeoutSeconds(final Integer readTimeoutSeconds) {
@@ -378,12 +377,14 @@ public final class Rest {
     }
 
     /**
-     * TODO: Document
+     * <p>This helper method constructs a new <code>HttpURLConnection</code> or <code>HttpsURLConnection</code>,
+     * configured with all of the settings that were passed in when first initializing this <code>Rest</code>
+     * instance (e.g. timeout thresholds, SSL verification, SSL certificate data).</p>
      *
-     * @param urlString
-     * @param method
+     * @param urlString The URL to which this connection will be made
+     * @param method The applicable request method (e.g. "GET", "POST", etc)
      * @return
-     * @throws VaultException
+     * @throws VaultException If the URL cannot be successfully parsed, or if there are errors processing an SSL cert, etc.
      */
     private URLConnection initURLConnection(final String urlString, final String method) throws VaultException {
         try {
@@ -446,10 +447,11 @@ public final class Rest {
     }
 
     /**
-     * TODO: Document
+     * <p>This helper method is used when a X.509 certificate PEM file has been provided, to configure the HTTPS
+     * connection with an in-memory keystore containing that certificate.</p>
      *
      * @return
-     * @throws VaultException
+     * @throws VaultException If there are any issues processing the SSL cert
      */
     private SSLContext initSSLContext() throws VaultException {
         try {

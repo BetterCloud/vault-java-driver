@@ -8,8 +8,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * <p>This class is used to mock out a Vault server in unit tests.  As it extends Jetty's <code>AbstractHandler</code>,
- * it can be passed to an embedded Jetty server and respond to actual (albeit localhost) HTTP requests.</p>
+ * <p>This class is used to mock out a Vault server in unit tests involving retry logic.  As it extends Jetty's
+ * <code>AbstractHandler</code>, it can be passed to an embedded Jetty server and respond to actual (albeit localhost)
+ * HTTP requests.</p>
  *
  * <p>The basic usage pattern is as follows:</p>
  *
@@ -38,7 +39,7 @@ import java.io.IOException;
  * assertEquals(5, response.getRetries());
  * assertEquals("mock", response.getData().get("value"));
  *
- * server.stop();
+ * VaultTestUtils.shutdownMockVault(server);
  * }</pre>
  * </blockquote>
  */

@@ -414,13 +414,13 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: Document
+     * <p>The number of seconds to wait before giving up on establishing an HTTP(S) connection to the Vault server.</p>
      *
      * <p>If no openTimeout is explicitly set, either by this method in a builder pattern approach or else by one of
      * the convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_OPEN_TIMEOUT</code>
      * environment variable.</p>
      *
-     * @param openTimeout
+     * @param openTimeout Number of seconds to wait for an HTTP(S) connection to successfully establish
      * @return
      */
     public VaultConfig openTimeout(final Integer openTimeout) {
@@ -429,13 +429,14 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: Document
+     * <p>After an HTTP(S) connection has already been established, this is the number of seconds to wait for all
+     * data to finish downloading.</p>
      *
      * <p>If no readTimeout is explicitly set, either by this method in a builder pattern approach or else by one of
      * the convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_READ_TIMEOUT</code>
      * environment variable.</p>
      *
-     * @param readTimeout
+     * @param readTimeout Number of seconds to wait for all data to be retrieved from an established HTTP(S) connection
      * @return
      */
     public VaultConfig readTimeout(final Integer readTimeout) {

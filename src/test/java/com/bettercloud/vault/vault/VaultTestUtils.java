@@ -11,9 +11,8 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 /**
- * TODO: Document
- *
- * <p>Unit tests for the Vault driver, having no dependency on an actual Vault server instance being available.</p>
+ * <p>Utilities used by all of the Vault-related unit test classes under
+ * <code>src/test/java/com/bettercloud/vault</code>, to setup and shutdown mock Vault server implementations.</p>
  */
 public class VaultTestUtils {
 

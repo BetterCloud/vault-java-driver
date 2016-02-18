@@ -15,7 +15,8 @@ import java.io.InputStreamReader;
 import static org.junit.Assert.assertEquals;
 
 /**
- * TODO: Document
+ * <p>Unit tests for the Vault driver, having no dependency on an actual Vault server instance being available.  The
+ * tests in this class relate to handling of SSL certificates and SSL verification.</p>
  */
 public class SSLTests {
 
