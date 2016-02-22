@@ -203,60 +203,48 @@ public final class VaultConfig {
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
-     *
-     * <p>If no proxyAddress is explicitly set, either by this method in a builder pattern approach or else by one of
-     * the convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_PROXY_ADDRESS</code>
-     * environment variable.</p>
+     * This field is unused, and will be removed in the next version of the driver.
      *
      * @param proxyAddress
      * @return
      */
+    @Deprecated
     public VaultConfig proxyAddress(final String proxyAddress) {
         this.proxyAddress = proxyAddress;
         return this;
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
-     *
-     * <p>If no proxyPort is explicitly set, either by this method in a builder pattern approach or else by one of the
-     * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_PROXY_PORT</code>
-     * environment variable.</p>
+     * This field is unused, and will be removed in the next version of the driver.
      *
      * @param proxyPort
      * @return
      */
+    @Deprecated
     public VaultConfig proxyPort(final Integer proxyPort) {
         this.proxyPort = proxyPort;
         return this;
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
-     *
-     * <p>If no proxyUsername is explicitly set, either by this method in a builder pattern approach or else by one of
-     * the convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_PROXY_USERNAME</code>
-     * environment variable.</p>
+     * This field is unused, and will be removed in the next version of the driver.
      *
      * @param proxyUsername
      * @return
      */
+    @Deprecated
     public VaultConfig proxyUsername(final String proxyUsername) {
         this.proxyUsername = proxyUsername;
         return this;
     }
 
     /**
-     * TODO: Not yet being used.  Implement...
-     *
-     * <p>If no proxyPassword is explicitly set, either by this method in a builder pattern approach or else by one of
-     * the convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_PROXY_PASSWORD</code>
-     * environment variable.</p>
+     * This field is unused, and will be removed in the next version of the driver.
      *
      * @param proxyPassword
      * @return
      */
+    @Deprecated
     public VaultConfig proxyPassword(final String proxyPassword) {
         this.proxyPassword = proxyPassword;
         return this;
@@ -495,23 +483,6 @@ public final class VaultConfig {
         if (this.token == null && environmentLoader.loadVariable("VAULT_TOKEN") != null) {
             this.token = environmentLoader.loadVariable("VAULT_TOKEN");
         }
-        if (this.proxyAddress == null && environmentLoader.loadVariable("VAULT_PROXY_ADDRESS") != null) {
-            this.proxyAddress = environmentLoader.loadVariable("VAULT_PROXY_ADDRESS");
-        }
-        if (this.proxyPort == null && environmentLoader.loadVariable("VAULT_PROXY_PORT") != null) {
-            try {
-                this.proxyPort = Integer.valueOf(environmentLoader.loadVariable("VAULT_PROXY_PORT"));
-            } catch (NumberFormatException e) {
-                System.err.printf("The \"VAULT_PROXY_PORT\" environment variable contains value \"%s\", which cannot be parsed as an integer port number.\n",
-                        environmentLoader.loadVariable("VAULT_PROXY_PORT"));
-            }
-        }
-        if (this.proxyUsername == null && environmentLoader.loadVariable("VAULT_PROXY_USERNAME") != null) {
-            this.proxyUsername = environmentLoader.loadVariable("VAULT_PROXY_USERNAME");
-        }
-        if (this.proxyPassword == null && environmentLoader.loadVariable("VAULT_PROXY_PASSWORD") != null) {
-            this.proxyPassword = environmentLoader.loadVariable("VAULT_PROXY_PASSWORD");
-        }
         if (this.sslPemUTF8 == null && environmentLoader.loadVariable("VAULT_SSL_CERT") != null) {
             final File pemFile = new File(environmentLoader.loadVariable("VAULT_SSL_CERT"));
             try {
@@ -552,18 +523,22 @@ public final class VaultConfig {
         return token;
     }
 
+    @Deprecated
     public String getProxyAddress() {
         return proxyAddress;
     }
 
+    @Deprecated
     public Integer getProxyPort() {
         return proxyPort;
     }
 
+    @Deprecated
     public String getProxyUsername() {
         return proxyUsername;
     }
 
+    @Deprecated
     public String getProxyPassword() {
         return proxyPassword;
     }

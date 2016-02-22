@@ -15,7 +15,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    compile('com.bettercloud:vault-java-driver:0.3.0')
+    compile('com.bettercloud:vault-java-driver:0.5.0')
 }
 ```
 
@@ -24,7 +24,7 @@ Maven:
 <dependency>
     <groupId>com.bettercloud</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>0.3.0</version>
+    <version>0.5.0</version>
 </dependency>
 ```
 
@@ -121,6 +121,20 @@ final LogicalResponse response = vault.logical()
                                    .withRetries(5, 1000)
                                    .read("secret/hello");
 ```
+
+Reference
+---------
+Full [Javadoc documentation](http://bettercloud.github.io/vault-java-driver/javadoc/).
+
+Version History
+---------------
+* **0.5-RELEASE**: Adds support for supplying SSL certificates, and for toggling whether or not the Vault server's
+                   SSL certificate will be verified.  Also adds support for "openTimeout" and "readTimeout"
+                   settings.  Deprecates the "timeout", "sslTimeout", "proxyAddress", "proxyPort", "proxyUsername",
+                   and "proxyPassword" settings (the proxy settings may return in a future version, but it's too
+                   misleading to have methods exposed for settings that won't really be supported soon).
+* **0.3-RELEASE**: Initial public release.  Support for writing and reading secrets, authenticating with the "AppID"
+                   or "Username & Password" auth backends.  All over-the-wire methods support automatic retry logic.
 
 Development
 -----------
