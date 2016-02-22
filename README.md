@@ -122,6 +122,20 @@ final LogicalResponse response = vault.logical()
                                    .read("secret/hello");
 ```
 
+Reference
+---------
+Full Javadoc documentation.
+
+Version History
+---------------
+* **0.5-RELEASE**: Adds support for supplying SSL certificates, and for toggling whether or not the Vault server's
+                   SSL certificate will be verified.  Also adds support for "openTimeout" and "readTimeout"
+                   settings.  Deprecates the "timeout", "sslTimeout", "proxyAddress", "proxyPort", "proxyUsername",
+                   and "proxyPassword" settings (the proxy settings may return in a future version, but it's too
+                   misleading to have methods exposed for settings that won't really be supported soon).
+* **0.3-RELEASE**: Initial public release.  Support for writing and reading secrets, authenticating with the "AppID"
+                   or "Username & Password" auth backends.  All over-the-wire methods support automatic retry logic.
+
 Development
 -----------
 Pull requests are welcomed for bugfixes or enhancements that do not alter the external facing class and method
