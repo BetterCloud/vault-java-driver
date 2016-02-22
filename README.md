@@ -124,7 +124,7 @@ final LogicalResponse response = vault.logical()
 
 Reference
 ---------
-Full Javadoc documentation.
+Full [Javadoc documentation](http://bettercloud.github.io/vault-java-driver/javadoc/).
 
 Version History
 ---------------
