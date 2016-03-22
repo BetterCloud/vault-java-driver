@@ -9,7 +9,7 @@ import java.util.Map;
  * This class is a container for the information returned by Vault in logical API
  * operations (e.g. read, write).
  */
-public final class LogicalResponse extends VaultResponse {
+public class LogicalResponse extends VaultResponse {
 
     private Map<String, String> data = new HashMap<String, String>();
 

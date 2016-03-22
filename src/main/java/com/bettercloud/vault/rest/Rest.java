@@ -61,7 +61,7 @@ import java.util.TreeMap;
  * <p>Header and parameter names and values are url-encoded by the Rest client prior to sending the request.  The URL
  * string should be url-encoded by you (if necessary) prior to passing it.</p>
  */
-public final class Rest {
+public class Rest {
 
     private String urlString;
     private byte[] body;

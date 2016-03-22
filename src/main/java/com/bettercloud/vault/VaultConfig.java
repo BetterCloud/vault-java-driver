@@ -36,7 +36,7 @@ import java.io.InputStreamReader;
  * <p>Note that when using the shorthand convenience constructor, you should NOT set additional properties on the
  * same instance afterward.</p>
  */
-public final class VaultConfig {
+public class VaultConfig {
 
     /**
      * <p>The code used to load environment variables is encapsulated within an inner class,

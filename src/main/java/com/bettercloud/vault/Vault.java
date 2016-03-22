@@ -35,7 +35,7 @@ import com.bettercloud.vault.api.Logical;
  * }</pre>
  * </blockquote>
  */
-public final class Vault {
+public class Vault {
 
     private final VaultConfig vaultConfig;
 
