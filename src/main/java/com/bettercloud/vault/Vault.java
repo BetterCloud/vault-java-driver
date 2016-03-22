@@ -22,8 +22,9 @@ import com.bettercloud.vault.api.Logical;
  * secrets.put("value", "world");
  * secrets.put("other_value", "You can store multiple name/value pairs under a given key");
  *
- * final LogicalResponse writeResponse = vault.logical()
+ * final LogicalResponse writeResponse = vault
  *                                         .withRetries(5, 1000)  // optional
+ *                                         .logical()
  *                                         .write("secret/hello", secrets);
  *
  * ...

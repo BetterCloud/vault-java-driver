@@ -4,6 +4,7 @@ import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
+import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.rest.Rest;
@@ -75,7 +76,14 @@ public final class Logical {
                 // Parse JSON
                 final Map<String, String> data = new HashMap<String, String>();//NOPMD
                 for (final JsonObject.Member member : Json.parse(jsonString).asObject().get("data").asObject()) {
-                    data.put(member.getName(), member.getValue().asString());
+                    final JsonValue jsonValue = member.getValue();
+                    if (jsonValue == null || jsonValue.isNull()) {
+                        continue;
+                    } else if (jsonValue.isString()) {
+                        data.put(member.getName(), jsonValue.asString());
+                    } else {
+                        data.put(member.getName(), jsonValue.toString());
+                    }
                 }
                 return new LogicalResponse(restResponse, retryCount, data);
             } catch (Exception e) {

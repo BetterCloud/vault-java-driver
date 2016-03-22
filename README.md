@@ -117,8 +117,8 @@ implementation:
 
 ```
 // Retry up to 5 times if failures occur, waiting 1000 milliseconds in between each retry attempt.
-final LogicalResponse response = vault.logical()
-                                   .withRetries(5, 1000)
+final LogicalResponse response = vault.withRetries(5,1000)
+                                   .logical()
                                    .read("secret/hello");
 ```
 
