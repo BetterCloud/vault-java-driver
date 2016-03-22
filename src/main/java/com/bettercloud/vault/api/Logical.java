@@ -77,7 +77,7 @@ public final class Logical {
                 final Map<String, String> data = new HashMap<String, String>();//NOPMD
                 for (final JsonObject.Member member : Json.parse(jsonString).asObject().get("data").asObject()) {
                     final JsonValue jsonValue = member.getValue();
-                    data.put(member.getName(), jsonValue.isNull() ? null : jsonValue.asString());
+                    data.put(member.getName(), jsonValue.isNull() ? null : jsonValue.toString());
                 }
                 return new LogicalResponse(restResponse, retryCount, data);
             } catch (Exception e) {
