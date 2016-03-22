@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * <p>Unit tests for the Vault driver, having no dependency on an actual Vault server instance being available.  The
@@ -18,7 +19,7 @@ public class RetryTests {
 
     @Test
     public void testRetries_Read() throws Exception {
-        final RetriesMockVault retriesMockVault = new RetriesMockVault(5, 200, "{\"data\":{\"value\":\"mock\"}}");
+        final RetriesMockVault retriesMockVault = new RetriesMockVault(5, 200, "{\"lease_id\":\"12345\",\"renewable\":false,\"lease_duration\":10000,\"data\":{\"value\":\"mock\"}}");
         final Server server = VaultTestUtils.initHttpMockVault(retriesMockVault);
         server.start();
 
@@ -27,6 +28,9 @@ public class RetryTests {
         final LogicalResponse response = vault.withRetries(5, 100).logical().read("secret/hello");
         assertEquals(5, response.getRetries());
         assertEquals("mock", response.getData().get("value"));
+        assertEquals("12345", response.getLeaseId());
+        assertEquals(false, response.getRenewable());
+        assertTrue(10000L == response.getLeaseDuration());
 
         VaultTestUtils.shutdownMockVault(server);
     }

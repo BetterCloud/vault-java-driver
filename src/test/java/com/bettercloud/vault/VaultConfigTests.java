@@ -83,10 +83,6 @@ public class VaultConfigTests {
         final VaultConfig config = new VaultConfig(null, null, mock);
         assertEquals("http://127.0.0.1:8200", config.getAddress());
         assertEquals("c24e2469-298a-6c64-6a71-5b47c9ba459a", config.getToken());
-        assertEquals("localhost", config.getProxyAddress());
-        assertTrue(80 == config.getProxyPort());
-        assertEquals("scott", config.getProxyUsername());
-        assertEquals("tiger", config.getProxyPassword());
         assertTrue(config.isSslVerify());
         assertTrue(30 == config.getOpenTimeout());
         assertTrue(30 == config.getReadTimeout());
@@ -144,10 +140,6 @@ public class VaultConfigTests {
                 .build();
         assertEquals("http://127.0.0.1:8200", config.getAddress());
         assertEquals("c24e2469-298a-6c64-6a71-5b47c9ba459a", config.getToken());
-        assertEquals("localhost", config.getProxyAddress());
-        assertTrue(80 == config.getProxyPort());
-        assertEquals("scott", config.getProxyUsername());
-        assertEquals("tiger", config.getProxyPassword());
         assertTrue(config.isSslVerify());
         assertTrue(30 == config.getOpenTimeout());
         assertTrue(30 == config.getReadTimeout());

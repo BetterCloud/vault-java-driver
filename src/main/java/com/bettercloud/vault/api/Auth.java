@@ -158,9 +158,9 @@ public final class Auth {
         authResponse.setAppId(authJsonObject.get("metadata").asObject().getString("app-id",""));
         authResponse.setUserId(authJsonObject.get("metadata").asObject().getString("user-id",""));
         authResponse.setUsername(authJsonObject.get("metadata").asObject().getString("username",""));
-        authResponse.setLeaseId(jsonObject.getString("lease_id",""));
-        authResponse.setRenewable(jsonObject.getBoolean("renewable",false));
-        authResponse.setLeaseDuration(jsonObject.getInt("lease_duration",0));
+//        authResponse.setLeaseId(jsonObject.getString("lease_id",""));
+//        authResponse.setRenewable(jsonObject.getBoolean("renewable",false));
+//        authResponse.setLeaseDuration((long) jsonObject.getInt("lease_duration", 0));
         authResponse.setAuthClientToken(authJsonObject.getString("client_token",""));
 
         final JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();

@@ -8,7 +8,6 @@ import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
-
 /**
  * Integration tests for the basic (i.e. "auth") Vault API operations.
  *

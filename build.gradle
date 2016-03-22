@@ -8,9 +8,9 @@ archivesBaseName = 'vault-java-driver'
 version '0.6.0-SNAPSHOT'
 
 //noinspection GroovyUnusedAssignment
-sourceCompatibility = 1.6
+sourceCompatibility = 1.7
 //noinspection GroovyUnusedAssignment
-targetCompatibility = 1.6
+targetCompatibility = 1.7
 
 repositories {
     mavenCentral()

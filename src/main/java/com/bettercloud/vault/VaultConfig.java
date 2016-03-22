@@ -51,15 +51,8 @@ public final class VaultConfig {
     private EnvironmentLoader environmentLoader;
     private String address;
     private String token;
-    private String proxyAddress;
-    private Integer proxyPort;
-    private String proxyUsername;
-    private String proxyPassword;
-    private String sslPemFile;
     private String sslPemUTF8;
     private Boolean sslVerify;
-    private Integer timeout;
-    private Integer sslTimeout;
     private Integer openTimeout;
     private Integer readTimeout;
     private int maxRetries;
@@ -203,54 +196,6 @@ public final class VaultConfig {
     }
 
     /**
-     * This field is unused, and will be removed in the next version of the driver.
-     *
-     * @param proxyAddress
-     * @return
-     */
-    @Deprecated
-    public VaultConfig proxyAddress(final String proxyAddress) {
-        this.proxyAddress = proxyAddress;
-        return this;
-    }
-
-    /**
-     * This field is unused, and will be removed in the next version of the driver.
-     *
-     * @param proxyPort
-     * @return
-     */
-    @Deprecated
-    public VaultConfig proxyPort(final Integer proxyPort) {
-        this.proxyPort = proxyPort;
-        return this;
-    }
-
-    /**
-     * This field is unused, and will be removed in the next version of the driver.
-     *
-     * @param proxyUsername
-     * @return
-     */
-    @Deprecated
-    public VaultConfig proxyUsername(final String proxyUsername) {
-        this.proxyUsername = proxyUsername;
-        return this;
-    }
-
-    /**
-     * This field is unused, and will be removed in the next version of the driver.
-     *
-     * @param proxyPassword
-     * @return
-     */
-    @Deprecated
-    public VaultConfig proxyPassword(final String proxyPassword) {
-        this.proxyPassword = proxyPassword;
-        return this;
-    }
-
-    /**
      * <p>An X.509 certificate, to use when communicating with Vault over HTTPS.  This method accepts a string
      * containing the certificate data.  This string should meet the following requirements:</p>
      *
@@ -304,11 +249,8 @@ public final class VaultConfig {
      * @return
      */
     public VaultConfig sslPemFile(final File sslPemFile) throws VaultException {
-        try {
-            final InputStream input = new FileInputStream(sslPemFile);
+        try (final InputStream input = new FileInputStream(sslPemFile)){
             this.sslPemUTF8 = inputStreamToUTF8(input);
-            input.close();
-            this.sslPemFile = sslPemFile.getPath();
         } catch (IOException e) {
             throw new VaultException(e);
         }
@@ -342,11 +284,8 @@ public final class VaultConfig {
      * @throws VaultException
      */
     public VaultConfig sslPemResource(final String classpathResource) throws VaultException {
-        try {
-            final InputStream input = this.getClass().getResourceAsStream(classpathResource);
+        try (final InputStream input = this.getClass().getResourceAsStream(classpathResource)){
             this.sslPemUTF8 = inputStreamToUTF8(input);
-            input.close();
-            this.sslPemFile = classpathResource;
         } catch (IOException e) {
             throw new VaultException(e);
         }
@@ -372,32 +311,6 @@ public final class VaultConfig {
      */
     public VaultConfig sslVerify(final Boolean sslVerify) {
         this.sslVerify = sslVerify;
-        return this;
-    }
-
-    /**
-     * This field is unused, and will be removed in the next version of the driver.  Use <code>openTimeout</code>
-     * and <code>readTimeout</code>.
-     *
-     * @param timeout
-     * @return
-     */
-    @Deprecated
-    public VaultConfig timeout(final Integer timeout) {
-        this.timeout = timeout;
-        return this;
-    }
-
-    /**
-     * This field is unused, and will be removed in the next version of the driver.  Use <code>openTimeout</code>
-     * and <code>readTimeout</code>.
-     *
-     * @param sslTimeout
-     * @return
-     */
-    @Deprecated
-    public VaultConfig sslTimeout(final Integer sslTimeout) {
-        this.sslTimeout = sslTimeout;
         return this;
     }
 
@@ -485,10 +398,8 @@ public final class VaultConfig {
         }
         if (this.sslPemUTF8 == null && environmentLoader.loadVariable("VAULT_SSL_CERT") != null) {
             final File pemFile = new File(environmentLoader.loadVariable("VAULT_SSL_CERT"));
-            try {
-                final InputStream input = new FileInputStream(pemFile);
+            try (final InputStream input = new FileInputStream(pemFile)) {
                 this.sslPemUTF8 = inputStreamToUTF8(input);
-                input.close();
             } catch (IOException e) {
                 throw new VaultException(e);
             }
@@ -500,7 +411,7 @@ public final class VaultConfig {
             try {
                 this.openTimeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_OPEN_TIMEOUT"));
             } catch (NumberFormatException e) {
-                System.err.printf("The \"VAULT_OPEN_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.\n",
+                System.err.printf("The \"VAULT_OPEN_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
                         environmentLoader.loadVariable("VAULT_OPEN_TIMEOUT"));
             }
         }
@@ -508,7 +419,7 @@ public final class VaultConfig {
             try {
                 this.readTimeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_READ_TIMEOUT"));
             } catch (NumberFormatException e) {
-                System.err.printf("The \"VAULT_READ_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.\n",
+                System.err.printf("The \"VAULT_READ_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
                         environmentLoader.loadVariable("VAULT_READ_TIMEOUT"));
             }
         }
@@ -523,47 +434,12 @@ public final class VaultConfig {
         return token;
     }
 
-    @Deprecated
-    public String getProxyAddress() {
-        return proxyAddress;
-    }
-
-    @Deprecated
-    public Integer getProxyPort() {
-        return proxyPort;
-    }
-
-    @Deprecated
-    public String getProxyUsername() {
-        return proxyUsername;
-    }
-
-    @Deprecated
-    public String getProxyPassword() {
-        return proxyPassword;
-    }
-
-    @Deprecated
-    public String getSslPemFile() {
-        return sslPemFile;
-    }
-
     public String getSslPemUTF8() {
         return sslPemUTF8;
     }
 
     public Boolean isSslVerify() {
         return sslVerify;
-    }
-
-    @Deprecated
-    public Integer getTimeout() {
-        return timeout;
-    }
-
-    @Deprecated
-    public Integer getSslTimeout() {
-        return sslTimeout;
     }
 
     public Integer getOpenTimeout() {
@@ -584,15 +460,15 @@ public final class VaultConfig {
 
     private String inputStreamToUTF8(final InputStream input) throws IOException {
         final BufferedReader in = new BufferedReader(new InputStreamReader(input, "UTF-8"));
-        String utf8 = "";
+        final StringBuilder utf8 = new StringBuilder("");
         String str;
         while ((str = in.readLine()) != null) {
             // String concatenation is less efficient, but for some reason the line-breaks (which are necessary
             // for Java to correctly parse SSL certs) are stripped off when using a StringBuilder.
-            utf8 += str + System.lineSeparator();//NOPMD
+            utf8.append(str).append(System.lineSeparator());
         }
         in.close();
-        return utf8;
+        return utf8.toString();
     }
 
 }

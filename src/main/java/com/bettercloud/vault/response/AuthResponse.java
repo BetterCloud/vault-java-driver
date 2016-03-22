@@ -10,9 +10,6 @@ import java.util.List;
  */
 public final class AuthResponse extends VaultResponse {
 
-    private String leaseId;
-    private boolean renewable;
-    private int leaseDuration;
     private String authClientToken;
     private List<String> authPolicies = new ArrayList<String>();
     private int authLeaseDuration;
@@ -39,28 +36,26 @@ public final class AuthResponse extends VaultResponse {
         this.username = username;
     }
 
-    public String getLeaseId() {
-        return leaseId;
-    }
-
-    public void setLeaseId(final String leaseId) {
-        this.leaseId = leaseId;
-    }
-
+    /**
+     * Deprecated.  Use <code>getRenewable()</code> (returning object <code>Boolean</code> rather than
+     * primitive <code>boolean</code>.
+     *
+     * @return
+     */
+    @Deprecated
     public boolean isRenewable() {
-        return renewable;
+        return getRenewable() == null ? false : getRenewable();
     }
 
+    /**
+     * Deprecated.  Use <code>setRenewable(final Boolean renewable)</code>, passing object <code>Boolean</code>
+     * rather than primitive <code>boolean</code>.
+     *
+     * @param renewable
+     */
+    @Deprecated
     public void setRenewable(final boolean renewable) {
-        this.renewable = renewable;
-    }
-
-    public int getLeaseDuration() {
-        return leaseDuration;
-    }
-
-    public void setLeaseDuration(final int leaseDuration) {
-        this.leaseDuration = leaseDuration;
+        baseSetRenewable(renewable);
     }
 
     public String getAuthClientToken() {
