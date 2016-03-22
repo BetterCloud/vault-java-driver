@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * This class is a container for the information returned by Vault in auth backend operations.
  */
-public final class AuthResponse extends VaultResponse {
+public class AuthResponse extends VaultResponse {
 
     private String authClientToken;
     private List<String> authPolicies = new ArrayList<String>();
