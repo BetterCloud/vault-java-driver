@@ -128,6 +128,10 @@ Full [Javadoc documentation](http://bettercloud.github.io/vault-java-driver/java
 
 Version History
 ---------------
+* **0.7.0**: Drops support for Java 6.  Removes all methods marked as `@Deprecated` in version 0.5.0.  Adds
+             support for response metadata (i.e. "lease_id", "renewable", "lease_duration") to all response
+             types, rather than just `AuthResponse`.  Changes `leaseDuration` type from `int` to `Long` in
+             `AuthResponse`.  Various JSON parsing bugfixes.
 * **0.5.0**: Adds support for supplying SSL certificates, and for toggling whether or not the Vault server's
              SSL certificate will be verified.  Also adds support for "openTimeout" and "readTimeout"
              settings.  Deprecates the "timeout", "sslTimeout", "proxyAddress", "proxyPort", "proxyUsername",
