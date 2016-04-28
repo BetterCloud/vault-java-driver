@@ -1,5 +1,7 @@
 package com.bettercloud.vault.rest;
 
+import java.util.Arrays;
+
 /**
  * This class contains the metadata and data that was downloaded by <code>Rest</code>
  * from an HTTP response.
@@ -19,7 +21,7 @@ public class RestResponse {
     public RestResponse(final int status, final String mimeType, final byte[] body) {
         this.status = status;
         this.mimeType = mimeType;
-        this.body = body;
+        this.body = body == null ? null : Arrays.copyOf(body, body.length);
     }
 
     /**
@@ -40,7 +42,7 @@ public class RestResponse {
      * @return The binary payload of the response body.
      */
     public byte[] getBody() {
-        return body;
+        return Arrays.copyOf(body, body.length);
     }
 
 }

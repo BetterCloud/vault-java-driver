@@ -6,6 +6,7 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.response.LogicalResponse;
+import com.bettercloud.vault.rest.RestException;
 import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.rest.Rest;
 
@@ -86,7 +87,7 @@ public class Logical {
                     }
                 }
                 return new LogicalResponse(restResponse, retryCount, data);
-            } catch (Exception e) {
+            } catch (RuntimeException | VaultException | RestException e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
                     retryCount++;

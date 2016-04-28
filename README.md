@@ -132,7 +132,7 @@ Version History
              support for response metadata (i.e. "lease_id", "renewable", "lease_duration") to all response
              types, rather than just `AuthResponse`.  Changes `leaseDuration` type from `int` to `Long` in
              `AuthResponse`.  Removes `final` declarations on all classes (outside of the JSON package).
-             Various bugfixes.
+             Various bugfixes.  Adds support for auth token self-renewal.
 * **0.5.0**: Adds support for supplying SSL certificates, and for toggling whether or not the Vault server's
              SSL certificate will be verified.  Also adds support for "openTimeout" and "readTimeout"
              settings.  Deprecates the "timeout", "sslTimeout", "proxyAddress", "proxyPort", "proxyUsername",
