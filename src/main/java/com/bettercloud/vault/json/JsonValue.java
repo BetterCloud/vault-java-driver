@@ -33,18 +33,9 @@ import java.io.Writer;
  * a <strong>number</strong>, a <strong>string</strong>, or one of the literals
  * <strong>true</strong>, <strong>false</strong>, and <strong>null</strong>.
  * <p>
- * The literals <strong>true</strong>, <strong>false</strong>, and <strong>null</strong> are
- * represented by the constants {@link #TRUE}, {@link #FALSE}, and {@link #NULL}.
- * </p>
- * <p>
  * JSON <strong>objects</strong> and <strong>arrays</strong> are represented by the subtypes
  * {@link JsonObject} and {@link JsonArray}. Instances of these types can be created using the
  * public constructors of these classes.
- * </p>
- * <p>
- * Instances that represent JSON <strong>numbers</strong>, <strong>strings</strong> and
- * <strong>boolean</strong> values can be created using the static factory methods
- * {@link #valueOf(String)}, {@link #valueOf(long)}, {@link #valueOf(double)}, etc.
  * </p>
  * <p>
  * In order to find out whether an instance of this class is of a certain type, the methods
@@ -303,8 +294,6 @@ public abstract class JsonValue implements Serializable {
 
   /**
    * Returns the JSON string for this value in its minimal form, without any additional whitespace.
-   * The result is guaranteed to be a valid input for the method {@link #readFrom(String)} and to
-   * create a value that is <em>equal</em> to this object.
    *
    * @return a JSON string that represents this value
    */
