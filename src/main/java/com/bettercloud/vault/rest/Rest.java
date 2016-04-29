@@ -22,6 +22,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -98,7 +99,7 @@ public class Rest {
      * @return The <code>Rest</code> instance itself
      */
     public Rest body(final byte[] body) {
-        this.body = body;
+        this.body = body == null ? null : Arrays.copyOf(body, body.length);
         return this;
     }
 
@@ -418,7 +419,7 @@ public class Rest {
                 final HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
                 httpURLConnection.setRequestMethod(method);
             } else {
-                final String message = "URL string " + (urlString != null ? urlString : "null") + " cannot be parsed as an instance of HttpURLConnection or HttpsURLConnection";
+                final String message = "URL string " + urlString + " cannot be parsed as an instance of HttpURLConnection or HttpsURLConnection";
                 throw new RestException(message);
             }
             return connection;

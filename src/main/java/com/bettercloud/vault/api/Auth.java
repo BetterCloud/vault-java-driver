@@ -145,6 +145,67 @@ public class Auth {
         }
     }
 
+    /**
+     * <p>Renews the lease associated with the calling token.  This version of the method tells Vault to use the
+     * default lifespan for the new lease.</p>
+     *
+     * @return
+     * @throws VaultException
+     */
+    public AuthResponse renewSelf() throws VaultException {
+        return renewSelf(-1);
+    }
+
+    /**
+     * <p>Renews the lease associated with the calling token.  This version of the method accepts a parameter to
+     * explicitly declare how long the new lease period should be (in seconds).  The Vault documentation suggests
+     * that this value may be ignored, however.</p>
+     *
+     * @param increment The number of seconds requested for the new lease lifespan
+     * @throws VaultException
+     */
+    public AuthResponse renewSelf(final long increment) throws VaultException {
+        int retryCount = 0;
+        while (true) {
+            try {
+                // HTTP request to Vault
+                final String requestJson = Json.object().add("increment", increment).toString();
+                final RestResponse restResponse = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/auth/token/renew-self")
+                        .header("X-Vault-Token", config.getToken())
+                        .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslPemUTF8(config.getSslPemUTF8())
+                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .post();
+                // Validate restResponse
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                }
+                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+                if (!mimeType.equals("application/json")) {
+                    throw new VaultException("Vault responded with MIME type: " + mimeType);
+                }
+                return buildAuthResponse(restResponse, retryCount);
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else {
+                    // ... otherwise, give up.
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
+
     private AuthResponse buildAuthResponse(final RestResponse restResponse, final int retries)
             throws UnsupportedEncodingException {
         final AuthResponse authResponse = new AuthResponse(restResponse, retries);
@@ -158,9 +219,6 @@ public class Auth {
         authResponse.setAppId(authJsonObject.get("metadata").asObject().getString("app-id",""));
         authResponse.setUserId(authJsonObject.get("metadata").asObject().getString("user-id",""));
         authResponse.setUsername(authJsonObject.get("metadata").asObject().getString("username",""));
-//        authResponse.setLeaseId(jsonObject.getString("lease_id",""));
-//        authResponse.setRenewable(jsonObject.getBoolean("renewable",false));
-//        authResponse.setLeaseDuration((long) jsonObject.getInt("lease_duration", 0));
         authResponse.setAuthClientToken(authJsonObject.getString("client_token",""));
 
         final JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();

@@ -1,5 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'eclipse'
 
@@ -15,6 +16,27 @@ targetCompatibility = 1.7
 
 repositories {
     mavenCentral()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId groupId
+            artifactId archivesBaseName
+            version version
+
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url nexusUrl
+            credentials {
+                username = nexusUsername
+                password = nexusPassword
+            }
+        }
+    }
 }
 
 dependencies {
