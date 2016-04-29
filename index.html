@@ -38,7 +38,7 @@ greenfield and legacy alike, without causing conflicts with any other dependency
 <p>Gradle:</p>
 
 <pre><code>dependencies {
-    compile('com.bettercloud:vault-java-driver:0.5.0')
+    compile('com.bettercloud:vault-java-driver:1.0.0')
 }
 </code></pre>
 
@@ -47,7 +47,7 @@ greenfield and legacy alike, without causing conflicts with any other dependency
 <pre><code>&lt;dependency&gt;
     &lt;groupId&gt;com.bettercloud&lt;/groupId&gt;
     &lt;artifactId&gt;vault-java-driver&lt;/artifactId&gt;
-    &lt;version&gt;0.5.0&lt;/version&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
 &lt;/dependency&gt;
 </code></pre>
 
@@ -144,8 +144,8 @@ by authenticating with a username and password).</li>
 implementation:</p>
 
 <pre><code>// Retry up to 5 times if failures occur, waiting 1000 milliseconds in between each retry attempt.
-final LogicalResponse response = vault.logical()
-                                   .withRetries(5, 1000)
+final LogicalResponse response = vault.withRetries(5,1000)
+                                   .logical()
                                    .read("secret/hello");
 </code></pre>
 
@@ -157,7 +157,18 @@ final LogicalResponse response = vault.logical()
 <h2>
 <a id="version-history" class="anchor" href="#version-history" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Version History</h2>
 
+<p>Note that changes to the major version (i.e. the first number) represent possible breaking changes, and
+may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
+should represent non-breaking changes.  The third number represents any very minor bugfix patches.</p>
+
 <ul>
+<li>
+<strong>1.0.0</strong>: Drops support for Java 6.  Removes all methods marked as <code>@Deprecated</code> in version 0.5.0.  Adds
+         support for response metadata (i.e. "lease_id", "renewable", "lease_duration") to all response
+         types, rather than just <code>AuthResponse</code>.  Changes <code>leaseDuration</code> type from <code>int</code> to <code>Long</code> in
+         <code>AuthResponse</code>.  Removes <code>final</code> declarations on all classes (outside of the JSON package).
+         Various bugfixes.  Adds support for auth token self-renewal.  Adds support for writing values
+         that return content (e.g. PKI).</li>
 <li>
 <strong>0.5.0</strong>: Adds support for supplying SSL certificates, and for toggling whether or not the Vault server's
          SSL certificate will be verified.  Also adds support for "openTimeout" and "readTimeout"
