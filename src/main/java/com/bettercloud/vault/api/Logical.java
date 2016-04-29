@@ -1,18 +1,18 @@
 package com.bettercloud.vault.api;
 
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.response.LogicalResponse;
+import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestException;
 import com.bettercloud.vault.rest.RestResponse;
-import com.bettercloud.vault.rest.Rest;
-
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * <p>The implementing class for Vault's core/logical operations (e.g. read, write).</p>
@@ -63,30 +63,9 @@ public class Logical {
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
                 }
-                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
-                if (!mimeType.equals("application/json")) {
-                    throw new VaultException("Vault responded with MIME type: " + mimeType);
-                }
-                String jsonString;
-                try {
-                    jsonString = new String(restResponse.getBody(), "UTF-8");//NOPMD
-                } catch (UnsupportedEncodingException e) {
-                    throw new VaultException(e);
-                }
 
-                // Parse JSON
-                final Map<String, String> data = new HashMap<String, String>();//NOPMD
-                for (final JsonObject.Member member : Json.parse(jsonString).asObject().get("data").asObject()) {
-                    final JsonValue jsonValue = member.getValue();
-                    if (jsonValue == null || jsonValue.isNull()) {
-                        continue;
-                    } else if (jsonValue.isString()) {
-                        data.put(member.getName(), jsonValue.asString());
-                    } else {
-                        data.put(member.getName(), jsonValue.toString());
-                    }
-                }
-                return new LogicalResponse(restResponse, retryCount, data);
+                return buildResponseFromContent(restResponse, retryCount);
+
             } catch (RuntimeException | VaultException | RestException e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -141,10 +120,19 @@ public class Logical {
                         .sslPemUTF8(config.getSslPemUTF8())
                         .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
                         .post();
-                if (restResponse.getStatus() != 204) {
-                    throw new VaultException("Expecting HTTP status 204, but instead receiving " + restResponse.getStatus());
+
+                int restStatus = restResponse.getStatus();
+                if (restStatus != 204 && restStatus != 200) {
+                    throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus);
                 }
-                return new LogicalResponse(restResponse, retryCount);
+
+                // HTTP Status is either 200 (with content - e.g. PKI write) or 204 (no content)
+                if (restStatus==204) {
+                    return new LogicalResponse(restResponse, retryCount);
+                } else {
+                    // HTTP status code was 200
+                    return buildResponseFromContent(restResponse, retryCount);
+                }
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -163,4 +151,30 @@ public class Logical {
         }
     }
 
+    private LogicalResponse buildResponseFromContent(RestResponse restResponse, int retryCount) throws VaultException {
+        final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+        if (!mimeType.equals("application/json")) {
+            throw new VaultException("Vault responded with MIME type: " + mimeType);
+        }
+        String jsonString;
+        try {
+            jsonString = new String(restResponse.getBody(), "UTF-8");//NOPMD
+        } catch (UnsupportedEncodingException e) {
+            throw new VaultException(e);
+        }
+
+        // Parse JSON
+        final Map<String, String> data = new HashMap<String, String>();//NOPMD
+        for (final JsonObject.Member member : Json.parse(jsonString).asObject().get("data").asObject()) {
+            final JsonValue jsonValue = member.getValue();
+            if (jsonValue == null || jsonValue.isNull()) {
+                continue;
+            } else if (jsonValue.isString()) {
+                data.put(member.getName(), jsonValue.asString());
+            } else {
+                data.put(member.getName(), jsonValue.toString());
+            }
+        }
+        return new LogicalResponse(restResponse, retryCount, data);
+    }
 }

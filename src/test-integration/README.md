@@ -46,6 +46,8 @@ vault write auth/app-id/map/user-id/fake_user value=fake_app
 
 vault auth-enable userpass
 vault write auth/userpass/users/fake_user password=fake_password policies=root
+
+vault mount -path=pki pki
 ```
 
 Configuring and Running the Integration Tests
