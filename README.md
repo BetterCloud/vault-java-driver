@@ -133,6 +133,7 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
+* **1.1.0**: PKI
 * **1.0.0**: Drops support for Java 6.  Removes all methods marked as `@Deprecated` in version 0.5.0.  Adds
              support for response metadata (i.e. "lease_id", "renewable", "lease_duration") to all response
              types, rather than just `AuthResponse`.  Changes `leaseDuration` type from `int` to `Long` in

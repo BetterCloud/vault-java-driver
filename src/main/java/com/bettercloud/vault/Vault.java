@@ -2,6 +2,7 @@ package com.bettercloud.vault;
 
 import com.bettercloud.vault.api.Auth;
 import com.bettercloud.vault.api.Logical;
+import com.bettercloud.vault.api.Pki;
 
 /**
  * <p>The Vault driver class, the primary interface through which dependent applications will access Vault.</p>
@@ -80,4 +81,12 @@ public class Vault {
         return new Auth(vaultConfig);
     }
 
+    /**
+     * TODO: Document
+     *
+     * @return
+     */
+    public Pki pki() {
+        return new Pki(vaultConfig);
+    }
 }
