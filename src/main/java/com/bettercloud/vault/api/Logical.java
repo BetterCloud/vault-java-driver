@@ -64,8 +64,8 @@ public class Logical {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
                 }
 
-                return buildResponseFromContent(restResponse, retryCount);
-
+                final Map<String, String> data = parseResponseData(restResponse);
+                return new LogicalResponse(restResponse, retryCount, data);
             } catch (RuntimeException | VaultException | RestException e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -121,17 +121,15 @@ public class Logical {
                         .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
                         .post();
 
+                // HTTP Status should be either 200 (with content - e.g. PKI write) or 204 (no content)
                 int restStatus = restResponse.getStatus();
-                if (restStatus != 204 && restStatus != 200) {
-                    throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus);
-                }
-
-                // HTTP Status is either 200 (with content - e.g. PKI write) or 204 (no content)
-                if (restStatus==204) {
+                if (restStatus == 204) {
                     return new LogicalResponse(restResponse, retryCount);
+                } else if (restStatus == 200) {
+                    final Map<String, String> data = parseResponseData(restResponse);
+                    return new LogicalResponse(restResponse, retryCount, data);
                 } else {
-                    // HTTP status code was 200
-                    return buildResponseFromContent(restResponse, retryCount);
+                    throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus);
                 }
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
@@ -151,7 +149,7 @@ public class Logical {
         }
     }
 
-    private LogicalResponse buildResponseFromContent(RestResponse restResponse, int retryCount) throws VaultException {
+    private Map<String, String> parseResponseData(RestResponse restResponse) throws VaultException {
         final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
         if (!mimeType.equals("application/json")) {
             throw new VaultException("Vault responded with MIME type: " + mimeType);
@@ -175,6 +173,6 @@ public class Logical {
                 data.put(member.getName(), jsonValue.toString());
             }
         }
-        return new LogicalResponse(restResponse, retryCount, data);
+        return data;
     }
 }
