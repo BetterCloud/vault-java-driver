@@ -2,7 +2,6 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
-apply plugin: 'eclipse'
 
 group 'com.bettercloud'
 //noinspection GroovyUnusedAssignment
