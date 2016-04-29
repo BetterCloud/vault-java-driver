@@ -38,7 +38,7 @@ greenfield and legacy alike, without causing conflicts with any other dependency
 <p>Gradle:</p>
 
 <pre><code>dependencies {
-    compile('com.bettercloud:vault-java-driver:0.3.0')
+    compile('com.bettercloud:vault-java-driver:0.5.0')
 }
 </code></pre>
 
@@ -47,7 +47,7 @@ greenfield and legacy alike, without causing conflicts with any other dependency
 <pre><code>&lt;dependency&gt;
     &lt;groupId&gt;com.bettercloud&lt;/groupId&gt;
     &lt;artifactId&gt;vault-java-driver&lt;/artifactId&gt;
-    &lt;version&gt;0.3.0&lt;/version&gt;
+    &lt;version&gt;0.5.0&lt;/version&gt;
 &lt;/dependency&gt;
 </code></pre>
 
@@ -159,14 +159,14 @@ final LogicalResponse response = vault.logical()
 
 <ul>
 <li>
-<strong>0.5-RELEASE</strong>: Adds support for supplying SSL certificates, and for toggling whether or not the Vault server's
-               SSL certificate will be verified.  Also adds support for "openTimeout" and "readTimeout"
-               settings.  Deprecates the "timeout", "sslTimeout", "proxyAddress", "proxyPort", "proxyUsername",
-               and "proxyPassword" settings (the proxy settings may return in a future version, but it's too
-               misleading to have methods exposed for settings that won't really be supported soon).</li>
+<strong>0.5.0</strong>: Adds support for supplying SSL certificates, and for toggling whether or not the Vault server's
+         SSL certificate will be verified.  Also adds support for "openTimeout" and "readTimeout"
+         settings.  Deprecates the "timeout", "sslTimeout", "proxyAddress", "proxyPort", "proxyUsername",
+         and "proxyPassword" settings (the proxy settings may return in a future version, but it's too
+         misleading to have methods exposed for settings that won't really be supported soon).</li>
 <li>
-<strong>0.3-RELEASE</strong>: Initial public release.  Support for writing and reading secrets, authenticating with the "AppID"
-               or "Username &amp; Password" auth backends.  All over-the-wire methods support automatic retry logic.</li>
+<strong>0.3.0</strong>: Initial public release.  Support for writing and reading secrets, authenticating with the "AppID"
+         or "Username &amp; Password" auth backends.  All over-the-wire methods support automatic retry logic.</li>
 </ul>
 
 <h2>
