@@ -11,6 +11,7 @@ import com.bettercloud.vault.rest.RestResponse;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -218,6 +219,10 @@ public class Pki {
         }
     }
 
+    public static class CredentialOptions {
+
+    }
+
     private final VaultConfig config;
 
     public Pki(final VaultConfig config) {
@@ -228,6 +233,8 @@ public class Pki {
      * TODO: Document
      *
      * TODO: Create return type
+     *
+     * TODO: Change RoleOptions csv fields to Lists
      *
      * @param roleName
      * @param options
@@ -270,6 +277,15 @@ public class Pki {
         }
     }
 
+    /**
+     * TODO: Document
+     *
+     * TODO: Create return type
+     *
+     * @param roleName
+     * @return
+     * @throws VaultException
+     */
     public LogicalResponse getRole(final String roleName) throws VaultException {
         int retryCount = 0;
         while (true) {
@@ -285,11 +301,121 @@ public class Pki {
                         .get();
 
                 // Validate response
-                if (restResponse.getStatus() != 200) {
+                if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
                 }
 
-                final Map<String, String> data = parseResponseData(restResponse);
+                final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
+                        ? new HashMap<String, String>()
+                        : parseResponseData(restResponse);
+                return new LogicalResponse(restResponse, retryCount, data);
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else {
+                    // ... otherwise, give up.
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
+
+    /**
+     * TODO: Document
+     *
+     * TODO: Create return type
+     *
+     * @param roleName
+     * @return
+     */
+    public LogicalResponse issue(
+            final String roleName,
+            final String commonName,
+            final List<String> altNames,
+            final List<String> ipSans,
+            final Integer ttl,
+            final String format    // TODO: Make enum
+    ) throws VaultException {
+        int retryCount = 0;
+        while (true) {
+            // Make an HTTP request to Vault
+            final String requestJson = Json.object().add("common_name", commonName).toString();
+            try {
+                final RestResponse restResponse = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/pki/issue/" + roleName)
+                        .header("X-Vault-Token", config.getToken())
+                        .body(requestJson.getBytes("UTF-8"))
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslPemUTF8(config.getSslPemUTF8())
+                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .post();
+
+                // Validate response
+                if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                }
+
+                final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
+                        ? new HashMap<String, String>()
+                        : parseResponseData(restResponse);
+                return new LogicalResponse(restResponse, retryCount, data);
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else {
+                    // ... otherwise, give up.
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
+
+    /**
+     * TODO: Document
+     *
+     * TODO: Create return type
+     *
+     * @param roleName
+     * @return
+     * @throws VaultException
+     */
+    public LogicalResponse deleteRole(final String roleName) throws VaultException {
+        int retryCount = 0;
+        while (true) {
+            // Make an HTTP request to Vault
+            try {
+                final RestResponse restResponse = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/pki/roles/" + roleName)
+                        .header("X-Vault-Token", config.getToken())
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslPemUTF8(config.getSslPemUTF8())
+                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .delete();
+
+                // Validate response
+                if (restResponse.getStatus() != 204) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                }
+
+                final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
+                        ? new HashMap<String, String>()
+                        : parseResponseData(restResponse);
                 return new LogicalResponse(restResponse, retryCount, data);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...

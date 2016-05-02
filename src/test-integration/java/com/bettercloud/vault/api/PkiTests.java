@@ -4,11 +4,13 @@ import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.LogicalResponse;
+import com.bettercloud.vault.rest.RestResponse;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
@@ -19,8 +21,15 @@ import static org.junit.Assert.assertTrue;
 public class PkiTests {
 
     @Before
-    public void setup() {
-        // TODO: Delete
+    public void setup() throws VaultException {
+        final String token = authenticate();
+        final String address = System.getProperty("VAULT_ADDR");
+        final VaultConfig config = new VaultConfig(address, token);
+        final Vault vault = new Vault(config);
+
+        final LogicalResponse response = vault.pki().deleteRole("testRole");
+        final RestResponse restResponse = response.getRestResponse();
+        assertEquals(204, restResponse.getStatus());
     }
 
     @Test
@@ -46,6 +55,45 @@ public class PkiTests {
         vault.pki().createOrUpdateRole("testRole", options);
         final LogicalResponse response = vault.pki().getRole("testRole");
         compareRoleOptionsToResponseData(options, response.getData());
+    }
+
+    @Test
+    public void testDeleteRole() throws VaultException {
+        final String token = authenticate();
+        final String address = System.getProperty("VAULT_ADDR");
+        final VaultConfig config = new VaultConfig(address, token);
+        final Vault vault = new Vault(config);
+
+        final LogicalResponse deleteReponse = vault.pki().deleteRole("testRole");
+        assertEquals(204, deleteReponse.getRestResponse().getStatus());
+        final LogicalResponse getResponse = vault.pki().getRole("testRole");
+        assertEquals(404, getResponse.getRestResponse().getStatus());
+    }
+
+    @Test
+    public void testIssueCredential() throws VaultException {
+        final String token = authenticate();
+        final String address = System.getProperty("VAULT_ADDR");
+        final VaultConfig config = new VaultConfig(address, token);
+        final Vault vault = new Vault(config);
+
+        // Create a role
+        final LogicalResponse createRoleResponse = vault.pki().createOrUpdateRole("testRole",
+                new Pki.RoleOptions()
+                        .allowedDomains("myvault.com")
+                        .allowSubdomains(true)
+                        .maxTtl("9h")
+        );
+        assertEquals(204, createRoleResponse.getRestResponse().getStatus());
+
+        // Issue cert
+        final LogicalResponse issueReponse = vault.pki().issue("testRole", "test.myvault.com", null, null, null, null);
+        final Map<String, String> data = issueReponse.getData();
+        assertNotNull(data.get("certificate"));
+        assertNotNull(data.get("private_key"));
+        assertNotNull(data.get("serial_number"));
+        assertNotNull(data.get("private_key_type"));
+        assertNotNull(data.get("issuing_ca"));
     }
 
     private String authenticate() throws VaultException {
