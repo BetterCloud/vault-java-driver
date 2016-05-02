@@ -122,7 +122,7 @@ public class Logical {
                         .post();
 
                 // HTTP Status should be either 200 (with content - e.g. PKI write) or 204 (no content)
-                int restStatus = restResponse.getStatus();
+                final int restStatus = restResponse.getStatus();
                 if (restStatus == 204) {
                     return new LogicalResponse(restResponse, retryCount);
                 } else if (restStatus == 200) {
@@ -149,7 +149,7 @@ public class Logical {
         }
     }
 
-    private Map<String, String> parseResponseData(RestResponse restResponse) throws VaultException {
+    private Map<String, String> parseResponseData(final RestResponse restResponse) throws VaultException {
         final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
         if (!mimeType.equals("application/json")) {
             throw new VaultException("Vault responded with MIME type: " + mimeType);
