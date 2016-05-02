@@ -2,7 +2,7 @@ package com.bettercloud.vault;
 
 import com.bettercloud.vault.api.Auth;
 import com.bettercloud.vault.api.Logical;
-import com.bettercloud.vault.api.Pki;
+import com.bettercloud.vault.api.pki.Pki;
 
 /**
  * <p>The Vault driver class, the primary interface through which dependent applications will access Vault.</p>

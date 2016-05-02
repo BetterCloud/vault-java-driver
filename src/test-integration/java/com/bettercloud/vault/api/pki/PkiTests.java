@@ -1,4 +1,4 @@
-package com.bettercloud.vault.api;
+package com.bettercloud.vault.api.pki;
 
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
@@ -8,12 +8,10 @@ import com.bettercloud.vault.rest.RestResponse;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
+import static junit.framework.TestCase.*;
 
 /**
  * TODO: Document
@@ -41,7 +39,7 @@ public class PkiTests {
 
         vault.pki().createOrUpdateRole("testRole", null);
         final LogicalResponse response = vault.pki().getRole("testRole");
-        compareRoleOptionsToResponseData(new Pki.RoleOptions(), response.getData());
+        compareRoleOptionsToResponseData(new RoleOptions(), response.getData());
     }
 
     @Test
@@ -51,7 +49,7 @@ public class PkiTests {
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
 
-        final Pki.RoleOptions options = new Pki.RoleOptions().allowAnyName(true);
+        final RoleOptions options = new RoleOptions().allowAnyName(true);
         vault.pki().createOrUpdateRole("testRole", options);
         final LogicalResponse response = vault.pki().getRole("testRole");
         compareRoleOptionsToResponseData(options, response.getData());
@@ -79,8 +77,8 @@ public class PkiTests {
 
         // Create a role
         final LogicalResponse createRoleResponse = vault.pki().createOrUpdateRole("testRole",
-                new Pki.RoleOptions()
-                        .allowedDomains("myvault.com")
+                new RoleOptions()
+                        .allowedDomains(new ArrayList<String>(){{ add("myvault.com"); }})
                         .allowSubdomains(true)
                         .maxTtl("9h")
         );
@@ -115,13 +113,12 @@ public class PkiTests {
         return token;
     }
 
-    private void compareRoleOptionsToResponseData(final Pki.RoleOptions options, final Map<String, String> data) {
+    private void compareRoleOptionsToResponseData(final RoleOptions options, final Map<String, String> data) {
         compareRoleOptionField(options.getAllowAnyName(), data.get("allow_any_name"), "false");
         compareRoleOptionField(options.getAllowBareDomains(), data.get("allow_bare_domains"), "false");
         compareRoleOptionField(options.getAllowIpSans(), data.get("allow_ip_sans"), "true");
         compareRoleOptionField(options.getAllowLocalhost(), data.get("allow_localhost"), "true");
         compareRoleOptionField(options.getAllowSubdomains(), data.get("allow_subdomains"), "false");
-        compareRoleOptionField(options.getAllowedDomains(), data.get("allowed_domains"), "");
         compareRoleOptionField(options.getClientFlag(), data.get("client_flag"), "true");
         compareRoleOptionField(options.getCodeSigningFlag(), data.get("code_signing_flag"), "false");
         compareRoleOptionField(options.getEmailProtectionFlag(), data.get("email_protection_flag"), "false");
@@ -132,6 +129,19 @@ public class PkiTests {
         compareRoleOptionField(options.getServerFlag(), data.get("server_flag"), "true");
         compareRoleOptionField(options.getTtl(), data.get("ttl"), "(system default)");
         compareRoleOptionField(options.getUseCsrCommonName(), data.get("use_csr_common_name"), "true");
+
+        // allowed_domains doesn't fit the normal pattern, since it requires conversion between List<String> and
+        // a CSV String
+        final StringBuilder allowedDomains = new StringBuilder();
+        if (options.getAllowedDomains() != null) {
+            for (int index = 0; index < options.getAllowedDomains().size(); index++) {
+                allowedDomains.append(options.getAllowedDomains().get(index));
+                if (index + 1 < options.getAllowedDomains().size()) {
+                    allowedDomains.append(',');
+                }
+            }
+        }
+        assertEquals(allowedDomains.toString(), data.get("allowed_domains") == null ? "" : data.get("allowed_domains"));
     }
 
     private void compareRoleOptionField(final Object option, final Object data, final Object expectedDefault) {

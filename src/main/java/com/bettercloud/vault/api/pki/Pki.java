@@ -1,4 +1,4 @@
-package com.bettercloud.vault.api;
+package com.bettercloud.vault.api.pki;
 
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
@@ -18,210 +18,6 @@ import java.util.Map;
  * TODO: Document
  */
 public class Pki {
-
-    public static class RoleOptions {
-        private String ttl;
-        private String maxTtl;
-        private Boolean allowLocalhost;
-        private String allowedDomains;
-        private Boolean allowBareDomains;
-        private Boolean allowSubdomains;
-        private Boolean allowAnyName;
-        private Boolean enforceHostnames;
-        private Boolean allowIpSans;
-        private Boolean serverFlag;
-        private Boolean clientFlag;
-        private Boolean codeSigningFlag;
-        private Boolean emailProtectionFlag;
-        private String keyType;
-        private Long keyBits;
-        private Boolean useCsrCommonName;
-
-        /**
-         * TODO: Document
-         */
-        public RoleOptions ttl(final String ttl) {
-            this.ttl = ttl;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions maxTtl(final String maxTtl) {
-            this.maxTtl = maxTtl;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions allowLocalhost(final Boolean allowLocalhost) {
-            this.allowLocalhost = allowLocalhost;
-            return this;
-        }
-
-        /**
-         * TODO: Document
-         *
-         * @param allowedDomains
-         * @return
-         */
-        public RoleOptions allowedDomains(final String allowedDomains) {
-            this.allowedDomains = allowedDomains;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions allowBareDomains(final Boolean allowBareDomains) {
-            this.allowBareDomains = allowBareDomains;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions allowSubdomains(final Boolean allowSubdomains) {
-            this.allowSubdomains = allowSubdomains;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions allowAnyName(final Boolean allowAnyName) {
-            this.allowAnyName = allowAnyName;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions enforceHostnames(final Boolean enforceHostnames) {
-            this.enforceHostnames = enforceHostnames;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions allowIpSans(final Boolean allowIpSans) {
-            this.allowIpSans = allowIpSans;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions serverFlag(final Boolean serverFlag) {
-            this.serverFlag = serverFlag;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions clientFlag(final Boolean clientFlag) {
-            this.clientFlag = clientFlag;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions codeSigningFlag(final Boolean codeSigningFlag) {
-            this.codeSigningFlag = codeSigningFlag;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions emailProtectionFlag(final Boolean emailProtectionFlag) {
-            this.emailProtectionFlag = emailProtectionFlag;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions keyType(final String keyType) {
-            this.keyType = keyType;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions keyBits(final Long keyBits) {
-            this.keyBits = keyBits;
-            return this;
-        }
-        /**
-         * TODO: Document
-         */
-        public RoleOptions useCsrCommonName(final Boolean useCsrCommonName) {
-            this.useCsrCommonName = useCsrCommonName;
-            return this;
-        }
-
-        public String getTtl() {
-            return ttl;
-        }
-
-        public String getMaxTtl() {
-            return maxTtl;
-        }
-
-        public Boolean getAllowLocalhost() {
-            return allowLocalhost;
-        }
-
-        public String getAllowedDomains() {
-            return allowedDomains;
-        }
-
-        public Boolean getAllowBareDomains() {
-            return allowBareDomains;
-        }
-
-        public Boolean getAllowSubdomains() {
-            return allowSubdomains;
-        }
-
-        public Boolean getAllowAnyName() {
-            return allowAnyName;
-        }
-
-        public Boolean getEnforceHostnames() {
-            return enforceHostnames;
-        }
-
-        public Boolean getAllowIpSans() {
-            return allowIpSans;
-        }
-
-        public Boolean getServerFlag() {
-            return serverFlag;
-        }
-
-        public Boolean getClientFlag() {
-            return clientFlag;
-        }
-
-        public Boolean getCodeSigningFlag() {
-            return codeSigningFlag;
-        }
-
-        public Boolean getEmailProtectionFlag() {
-            return emailProtectionFlag;
-        }
-
-        public String getKeyType() {
-            return keyType;
-        }
-
-        public Long getKeyBits() {
-            return keyBits;
-        }
-
-        public Boolean getUseCsrCommonName() {
-            return useCsrCommonName;
-        }
-    }
-
-    public static class CredentialOptions {
-
-    }
 
     private final VaultConfig config;
 
@@ -306,7 +102,7 @@ public class Pki {
                 }
 
                 final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
-                        ? new HashMap<String, String>()
+                        ? new HashMap<String, String>()//NOPMD
                         : parseResponseData(restResponse);
                 return new LogicalResponse(restResponse, retryCount, data);
             } catch (Exception e) {
@@ -364,7 +160,7 @@ public class Pki {
                 }
 
                 final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
-                        ? new HashMap<String, String>()
+                        ? new HashMap<String, String>()//NOPMD
                         : parseResponseData(restResponse);
                 return new LogicalResponse(restResponse, retryCount, data);
             } catch (Exception e) {
@@ -414,7 +210,7 @@ public class Pki {
                 }
 
                 final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
-                        ? new HashMap<String, String>()
+                        ? new HashMap<String, String>()//NOPMD
                         : parseResponseData(restResponse);
                 return new LogicalResponse(restResponse, retryCount, data);
             } catch (Exception e) {
@@ -441,7 +237,16 @@ public class Pki {
             addJsonFieldIfNotNull(jsonObject, "ttl", options.getTtl());
             addJsonFieldIfNotNull(jsonObject, "max_ttl", options.getMaxTtl());
             addJsonFieldIfNotNull(jsonObject, "allow_localhost", options.getAllowLocalhost());
-            addJsonFieldIfNotNull(jsonObject, "allowed_domains", options.getAllowedDomains());
+            if (options.getAllowedDomains() != null && options.getAllowedDomains().size() > 0) {
+                final StringBuilder allowedDomains = new StringBuilder();
+                for (int index = 0; index < options.getAllowedDomains().size(); index++) {
+                    allowedDomains.append(options.getAllowedDomains().get(index));
+                    if (index + 1 < options.getAllowedDomains().size()) {
+                        allowedDomains.append(',');
+                    }
+                }
+                addJsonFieldIfNotNull(jsonObject, "allowed_domains", allowedDomains.toString());
+            }
             addJsonFieldIfNotNull(jsonObject, "allow_bare_domains", options.getAllowBareDomains());
             addJsonFieldIfNotNull(jsonObject, "allow_subdomains", options.getAllowSubdomains());
             addJsonFieldIfNotNull(jsonObject, "allow_any_name", options.getAllowAnyName());
