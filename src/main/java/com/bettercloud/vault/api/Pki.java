@@ -57,6 +57,17 @@ public class Pki {
             this.allowLocalhost = allowLocalhost;
             return this;
         }
+
+        /**
+         * TODO: Document
+         *
+         * @param allowedDomains
+         * @return
+         */
+        public RoleOptions allowedDomains(final String allowedDomains) {
+            this.allowedDomains = allowedDomains;
+            return this;
+        }
         /**
          * TODO: Document
          */
@@ -226,8 +237,7 @@ public class Pki {
         while (true) {
             try {
                 final String requestJson = roleOptionsToJson(options);
-                final String url = config.getAddress() + "/v1/pki/roles/" + roleName;
-                final RestResponse restResponse = new Rest()
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/pki/roles/" + roleName)
                         .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes("UTF-8"))
@@ -265,7 +275,7 @@ public class Pki {
         while (true) {
             // Make an HTTP request to Vault
             try {
-                final RestResponse restResponse = new Rest()
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/pki/roles/" + roleName)
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -322,7 +332,7 @@ public class Pki {
         return jsonObject.toString();
     }
 
-    private JsonObject addJsonFieldIfNotNull(final JsonObject jsonObject, String name, Object value) {
+    private JsonObject addJsonFieldIfNotNull(final JsonObject jsonObject, final String name, final Object value) {
         if (value == null) {
             return jsonObject;
         }
@@ -336,7 +346,7 @@ public class Pki {
         return jsonObject;
     }
 
-    private Map<String, String> parseResponseData(RestResponse restResponse) throws VaultException {
+    private Map<String, String> parseResponseData(final RestResponse restResponse) throws VaultException {
         final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
         if (!mimeType.equals("application/json")) {
             throw new VaultException("Vault responded with MIME type: " + mimeType);

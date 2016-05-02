@@ -297,12 +297,40 @@ public class Rest {
      * but a <code>RestException</code> will be thrown if the caller has not first set a base URL with the
      * <code>url()</code> method.
      *
+     * Note that any parameters are set in the query string.  This method does not send a request body, as some
+     * HTTP servers will ignore it for DELETE requests.
+     *
      * @return The result of the HTTP operation
      * @throws RestException
      */
     public RestResponse delete() throws RestException {
-        // TODO: Implement
-        throw new UnsupportedOperationException();
+        if (urlString == null) {
+            throw new RestException("No URL is set");
+        }
+        try {
+            if (!parameters.isEmpty()) {
+                // Append parameters to existing query string, or create one
+                if (urlString.indexOf('?') == -1) {
+                    urlString = urlString + "?" + parametersToQueryString();
+                } else {
+                    urlString = urlString + "&" + parametersToQueryString();
+                }
+            }
+            // Initialize HTTP(S) connection, and set any header values
+            final URLConnection connection = initURLConnection(urlString, "DELETE");
+            for (final Map.Entry<String, String> header : headers.entrySet()) {
+                connection.setRequestProperty(header.getKey(), header.getValue());
+            }
+
+            // Get the resulting status code
+            final int statusCode = connectionStatus(connection);
+            // Download and parse response
+            final String mimeType = connection.getContentType();
+            final byte[] body = responseBodyBytes(connection);
+            return new RestResponse(statusCode, mimeType, body);
+        } catch (Exception e) {
+            throw new RestException(e);
+        }
     }
 
 

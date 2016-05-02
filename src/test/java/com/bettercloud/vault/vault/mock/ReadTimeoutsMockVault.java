@@ -78,7 +78,7 @@ public class ReadTimeoutsMockVault extends MockVault {
         try {
             Thread.sleep(delaySeconds * 1000);
             response.setStatus(mockStatus);
-            if (response != null) {
+            if (mockResponse != null) {
                 response.getWriter().println(mockResponse);
             }
         } catch (InterruptedException e) {
