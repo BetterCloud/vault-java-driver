@@ -20,9 +20,18 @@ public class PkiTests {
 
     @Before
     public void setup() throws VaultException {
-        final String token = authenticate();
         final String address = System.getProperty("VAULT_ADDR");
-        final VaultConfig config = new VaultConfig(address, token);
+        final String appId = System.getProperty("VAULT_APP_ID");
+        final String userId = System.getProperty("VAULT_USER_ID");
+        final String rootToken = System.getProperty("VAULT_TOKEN");
+
+        assertNotNull(address);
+        assertNotNull(appId);
+        assertNotNull(userId);
+        assertNotNull(rootToken);
+
+//        final String token = authenticate();
+        final VaultConfig config = new VaultConfig(address, rootToken);
         final Vault vault = new Vault(config);
 
         final LogicalResponse response = vault.pki().deleteRole("testRole");
@@ -32,7 +41,8 @@ public class PkiTests {
 
     @Test
     public void testCreateRole_Defaults() throws VaultException {
-        final String token = authenticate();
+        final String token = System.getProperty("VAULT_TOKEN");
+//        final String token = authenticate();
         final String address = System.getProperty("VAULT_ADDR");
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
@@ -44,7 +54,8 @@ public class PkiTests {
 
     @Test
     public void testCreateRole_WithOptions() throws VaultException {
-        final String token = authenticate();
+        final String token = System.getProperty("VAULT_TOKEN");
+//        final String token = authenticate();
         final String address = System.getProperty("VAULT_ADDR");
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
@@ -57,11 +68,13 @@ public class PkiTests {
 
     @Test
     public void testDeleteRole() throws VaultException {
-        final String token = authenticate();
+        final String token = System.getProperty("VAULT_TOKEN");
+//        final String token = authenticate();
         final String address = System.getProperty("VAULT_ADDR");
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
 
+        testCreateRole_Defaults();
         final LogicalResponse deleteReponse = vault.pki().deleteRole("testRole");
         assertEquals(204, deleteReponse.getRestResponse().getStatus());
         final LogicalResponse getResponse = vault.pki().getRole("testRole");
@@ -70,7 +83,8 @@ public class PkiTests {
 
     @Test
     public void testIssueCredential() throws VaultException {
-        final String token = authenticate();
+        final String token = System.getProperty("VAULT_TOKEN");
+//        final String token = authenticate();
         final String address = System.getProperty("VAULT_ADDR");
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
@@ -85,8 +99,8 @@ public class PkiTests {
         assertEquals(204, createRoleResponse.getRestResponse().getStatus());
 
         // Issue cert
-        final LogicalResponse issueReponse = vault.pki().issue("testRole", "test.myvault.com", null, null, null, null);
-        final Map<String, String> data = issueReponse.getData();
+        final LogicalResponse issueResponse = vault.pki().issue("testRole", "test.myvault.com", null, null, null, null);
+        final Map<String, String> data = issueResponse.getData();
         assertNotNull(data.get("certificate"));
         assertNotNull(data.get("private_key"));
         assertNotNull(data.get("serial_number"));
@@ -94,6 +108,13 @@ public class PkiTests {
         assertNotNull(data.get("issuing_ca"));
     }
 
+    /**
+     * TODO: For some reason, running these PKI tests with tokens generated from the username/password backend
+     * throws the CA data into a weird state.  Always using the root Vault token works fine.
+     *
+     * @return
+     * @throws VaultException
+     */
     private String authenticate() throws VaultException {
         final String address = System.getProperty("VAULT_ADDR");
         final String userId = System.getProperty("VAULT_USER_ID");
