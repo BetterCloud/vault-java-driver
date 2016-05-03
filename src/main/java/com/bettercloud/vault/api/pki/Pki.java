@@ -6,6 +6,7 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.response.LogicalResponse;
+import com.bettercloud.vault.response.PkiResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
 
@@ -35,7 +36,7 @@ public class Pki {
      * @param roleName
      * @param options
      */
-    public LogicalResponse createOrUpdateRole(final String roleName, final RoleOptions options) throws VaultException {
+    public PkiResponse createOrUpdateRole(final String roleName, final RoleOptions options) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
@@ -54,7 +55,7 @@ public class Pki {
                 if (restResponse.getStatus() != 204) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
                 }
-                return new LogicalResponse(restResponse, retryCount, new HashMap<String, String>());
+                return new PkiResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -82,7 +83,7 @@ public class Pki {
      * @return
      * @throws VaultException
      */
-    public LogicalResponse getRole(final String roleName) throws VaultException {
+    public PkiResponse getRole(final String roleName) throws VaultException {
         int retryCount = 0;
         while (true) {
             // Make an HTTP request to Vault
@@ -104,7 +105,7 @@ public class Pki {
                 final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
                         ? new HashMap<String, String>()//NOPMD
                         : parseResponseData(restResponse);
-                return new LogicalResponse(restResponse, retryCount, data);
+                return new PkiResponse(restResponse, retryCount, data);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -131,7 +132,7 @@ public class Pki {
      * @param roleName
      * @return
      */
-    public LogicalResponse issue(
+    public PkiResponse issue(
             final String roleName,
             final String commonName,
             final List<String> altNames,
@@ -162,7 +163,7 @@ public class Pki {
                 final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
                         ? new HashMap<String, String>()//NOPMD
                         : parseResponseData(restResponse);
-                return new LogicalResponse(restResponse, retryCount, data);
+                return new PkiResponse(restResponse, retryCount, data);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {

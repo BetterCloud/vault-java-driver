@@ -31,9 +31,31 @@ public class Auth {
     }
 
     /**
-     * TODO: Document
+     * <p>Operation to create an authentication token.  Relies on another token already being present in
+     * the <code>VaultConfig</code> instance.  Example usage:</p>
      *
-     * @return
+     * <blockquote>
+     * <pre>{@code
+     * final VaultConfig config = new VaultConfig(address, rootToken);
+     * final Vault vault = new Vault(config);
+     * final AuthResponse response = vault.auth().createToken(null, null, null, null, null, "1h", null, null);
+     *
+     * final String token = response.getAuthClientToken());
+     * }</pre>
+     * </blockquote>
+     *
+     * <p>All parameters to this method are optional, and can be <code>null</code>.</p>
+     *
+     * @param id (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
+     * @param polices (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token.
+     * @param meta (optional) A map of string to string valued metadata. This is passed through to the audit backends.
+     * @param noParent (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent.
+     * @param noDefaultPolicy (optional) If <code>true</code> the default policy will not be a part of this token's policy set.
+     * @param ttl (optional) The TTL period of the token, provided as "1h", where hour is the largest suffix. If not provided, the token is valid for the default lease TTL, or indefinitely if the root policy is used.
+     * @param displayName (optional) The display name of the token. Defaults to "token".
+     * @param numUses (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses.
+     * @return The auth token
+     * @throws VaultException
      */
     public AuthResponse createToken(
             final UUID id,

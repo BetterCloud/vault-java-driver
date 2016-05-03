@@ -43,7 +43,9 @@ public class AuthTests {
     }
 
     /**
-     * TODO: Document
+     * Test creation of a new client auth token, using the Vault root token
+     *
+     * @throws VaultException
      */
     @Test
     public void testCreateToken() throws VaultException {

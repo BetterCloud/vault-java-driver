@@ -43,6 +43,7 @@ public class LogicalResponse extends VaultResponse {
         return data;
     }
 
+    @Deprecated
     public void setData(final Map<String, String> data) {
         this.data = data;
     }

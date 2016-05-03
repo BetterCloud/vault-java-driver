@@ -54,8 +54,10 @@ public class RoleOptions {
      * @return
      */
     public RoleOptions allowedDomains(final List<String> allowedDomains) {
-        this.allowedDomains = new ArrayList<>();
-        this.allowedDomains.addAll(allowedDomains);
+        if (allowedDomains != null) {
+            this.allowedDomains = new ArrayList<>();
+            this.allowedDomains.addAll(allowedDomains);
+        }
         return this;
     }
     /**

@@ -82,9 +82,9 @@ public class Vault {
     }
 
     /**
-     * TODO: Document
+     * Returns the implementing class for Vault's PKI secret backend (i.e. <code>/v1/pki/*</code> REST endpoints).
      *
-     * @return
+     * @return Returns the implementing class for Vault's PKI secret backend.
      */
     public Pki pki() {
         return new Pki(vaultConfig);
