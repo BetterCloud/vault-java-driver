@@ -1,5 +1,6 @@
 package com.bettercloud.vault.response;
 
+import com.bettercloud.vault.api.pki.Credential;
 import com.bettercloud.vault.api.pki.RoleOptions;
 import com.bettercloud.vault.rest.RestResponse;
 
@@ -16,6 +17,7 @@ import java.util.StringTokenizer;
 public class PkiResponse extends LogicalResponse {
 
     private RoleOptions roleOptions;
+    private Credential credential;
 
     /**
      * Constructor for responses that do not include response data
@@ -38,13 +40,15 @@ public class PkiResponse extends LogicalResponse {
     public PkiResponse(final RestResponse restResponse, final int retries, final Map<String, String> data) {
         super(restResponse, retries, data);
         roleOptions = buildRoleOptionsFromData(data);
-
-        // TODO: Parse out certifcate info for "/issue" endpoint calls
-
+        credential = buildCredentialFromData(data);
     }
 
     public RoleOptions getRoleOptions() {
         return roleOptions;
+    }
+
+    public Credential getCredential() {
+        return credential;
     }
 
     /**
@@ -103,6 +107,38 @@ public class PkiResponse extends LogicalResponse {
                 .keyType(keyType)
                 .keyBits(keyBits)
                 .useCsrCommonName(useCsrCommonName);
+    }
+
+    /**
+     * <p>Generates a <code>Credential</code> object from the response data returned by PKI backend REST calls, for
+     * those calls which do return role data (e.g. <code>issue(...)</code>).</p>
+     *
+     * <p>If the response data does not contain credential information, then this method will return
+     * <code>null</code>.</p>
+     *
+     * @param data The <code>"data"</code> object from a Vault JSON response, converted into Java key-value pairs.
+     * @return
+     */
+    private Credential buildCredentialFromData(final Map<String, String> data) {
+        if (data == null) {
+            return null;
+        }
+        final String certificate = data.get("certificate");
+        final String issuingCa = data.get("issuing_ca");
+        final String privateKey = data.get("private_key");
+        final String privateKeyType = data.get("private_key_type");
+        final String serialNumber = data.get("serial_number");
+
+        if (certificate == null && issuingCa == null && privateKey == null && privateKeyType == null
+                && serialNumber == null) {
+            return null;
+        }
+        return new Credential()
+                .certificate(certificate)
+                .issuingCa(issuingCa)
+                .privateKey(privateKey)
+                .privateKeyType(privateKeyType)
+                .serialNumber(serialNumber);
     }
 
     /**

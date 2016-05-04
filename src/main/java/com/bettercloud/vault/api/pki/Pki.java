@@ -243,7 +243,8 @@ public class Pki {
      * client's trust store.</p>
      *
      * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will be thrown if
-     * the role does not exist, or if any other problem occurs.  Example usage:</p>
+     * the role does not exist, or if any other problem occurs.  Credential information will be populated in the
+     * <code>credential</code> field of the <code>PkiResponse</code> return value.  Example usage:</p>
      *
      * <blockquote>
      * <pre>{@code
@@ -261,7 +262,7 @@ public class Pki {
      * @param ipSans (optional) Requested IP Subject Alternative Names, in a comma-delimited list. Only valid if the role allows IP SANs (which is the default).
      * @param ttl (optional) Requested Time To Live. Cannot be greater than the role's max_ttl value. If not provided, the role's ttl value will be used. Note that the role values default to system values if not explicitly set.
      * @param format (optional) Format for returned data. Can be pem, der, or pem_bundle; defaults to pem. If der, the output is base64 encoded. If pem_bundle, the certificate field will contain the private key, certificate, and issuing CA, concatenated.
-     * @return  // TODO: cert values parsed in PkiResponse
+     * @return
      * @throws VaultException
      */
     public PkiResponse issue(
