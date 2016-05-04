@@ -4,7 +4,6 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +11,6 @@ import org.junit.Test;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
-import com.bettercloud.vault.response.LogicalResponse;
 
 /**
  * Integration tests for the basic (i.e. "logical") Vault API operations.
@@ -72,25 +70,4 @@ public class LogicalTests {
         assertEquals(value, valueRead);
     }
 
-    /**
-     * Write to the PKI backend, those writes return 200 response with content.
-     * This test assumes:
-     * A. Vault is running
-     * B. A PKI backend is mounted at 'pki'
-     *
-     * @throws VaultException
-     */
-    @Test
-    public void testWriteWithContentReturned() throws VaultException {
-        final Map<String, String> params = new HashMap<>();
-        params.put("common_name", "test certificate cn");
-        params.put("format", "pem");
-
-        final String path = "pki/intermediate/generate/internal";
-        final VaultConfig config = new VaultConfig(address, token);
-        final Vault vault = new Vault(config);
-
-        LogicalResponse logicalResponse = vault.logical().write(path, params);
-        assertNotNull(logicalResponse.getData().get("csr"));
-    }
 }
