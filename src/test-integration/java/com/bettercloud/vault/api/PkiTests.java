@@ -3,6 +3,7 @@ package com.bettercloud.vault.api;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.api.pki.CredentialFormat;
 import com.bettercloud.vault.api.pki.RoleOptions;
 import com.bettercloud.vault.response.PkiResponse;
 import com.bettercloud.vault.rest.RestResponse;
@@ -93,7 +94,7 @@ public class PkiTests {
         Thread.sleep(3000);
 
         // Issue cert
-        final PkiResponse issueResponse = vault.pki().issue("testRole", "test.myvault.com", null, null, null, null);
+        final PkiResponse issueResponse = vault.pki().issue("testRole", "test.myvault.com", null, null, null, CredentialFormat.PEM);
         final Map<String, String> data = issueResponse.getData();
         assertNotNull(data.get("certificate"));
         assertNotNull(data.get("private_key"));

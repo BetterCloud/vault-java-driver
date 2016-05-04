@@ -270,7 +270,7 @@ public class Pki {
             final List<String> altNames,
             final List<String> ipSans,
             final Integer ttl,
-            final String format    // TODO: Make enum
+            final CredentialFormat format
     ) throws VaultException {
         int retryCount = 0;
         while (true) {
@@ -303,7 +303,7 @@ public class Pki {
                 jsonObject.add("ttl", ttl);
             }
             if (format != null) {
-                jsonObject.add("format", format);
+                jsonObject.add("format", format.toString());
             }
             final String requestJson = jsonObject.toString();
 
