@@ -95,12 +95,11 @@ public class PkiTests {
 
         // Issue cert
         final PkiResponse issueResponse = vault.pki().issue("testRole", "test.myvault.com", null, null, null, CredentialFormat.PEM);
-        final Map<String, String> data = issueResponse.getData();
-        assertNotNull(data.get("certificate"));
-        assertNotNull(data.get("private_key"));
-        assertNotNull(data.get("serial_number"));
-        assertNotNull(data.get("private_key_type"));
-        assertNotNull(data.get("issuing_ca"));
+        assertNotNull(issueResponse.getCredential().getCertificate());
+        assertNotNull(issueResponse.getCredential().getPrivateKey());
+        assertNotNull(issueResponse.getCredential().getSerialNumber());
+        assertEquals("rsa", issueResponse.getCredential().getPrivateKeyType());
+        assertNotNull(issueResponse.getCredential().getIssuingCa());
     }
 
 

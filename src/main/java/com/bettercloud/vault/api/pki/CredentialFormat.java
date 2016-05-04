@@ -12,7 +12,7 @@ public enum CredentialFormat {
     DER,
     PEM_BUNDLE;
 
-    public static CredentialFormat fromString(String text) {
+    public static CredentialFormat fromString(final String text) {
         if (text != null) {
             for (final CredentialFormat format : CredentialFormat.values()) {
                 if (text.equalsIgnoreCase(format.toString())) {
