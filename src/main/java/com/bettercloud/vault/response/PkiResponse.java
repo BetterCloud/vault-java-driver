@@ -9,17 +9,33 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 /**
- * TODO: Document
+ * This class is a container for the information returned by Vault in PKI backend API
+ * operations (e.g. create/delete roles, issue credentials).
  */
+
 public class PkiResponse extends LogicalResponse {
 
     private RoleOptions roleOptions;
 
-    public PkiResponse(RestResponse restResponse, int retries) {
+    /**
+     * Constructor for responses that do not include response data
+     * (e.g. <code>createOrUpdateRole(String roleName)</code>).
+     *
+     * @param restResponse
+     * @param retries
+     */
+    public PkiResponse(final RestResponse restResponse, final int retries) {
         super(restResponse, retries);
     }
 
-    public PkiResponse(RestResponse restResponse, int retries, Map<String, String> data) {
+    /**
+     * Constructor for responses that include response data (e.g. <code>getRole(String roleName)</code>).
+     *
+     * @param restResponse
+     * @param retries
+     * @param data
+     */
+    public PkiResponse(final RestResponse restResponse, final int retries, final Map<String, String> data) {
         super(restResponse, retries, data);
         roleOptions = buildRoleOptionsFromData(data);
 
@@ -27,10 +43,19 @@ public class PkiResponse extends LogicalResponse {
 
     }
 
+    public RoleOptions getRoleOptions() {
+        return roleOptions;
+    }
+
     /**
-     * TODO: Document
+     * <p>Generates a <code>RoleOptions</code> object from the response data returned by PKI
+     * backend REST calls, for those calls which do return role data
+     * (e.g. <code>getRole(String roleName)</code>).</p>
      *
-     * @param data
+     * <p>If the response data does not contain role information, then this method will
+     * return <code>null</code>.</p>
+     *
+     * @param data The <code>"data"</code> object from a Vault JSON response, converted into Java key-value pairs.
      * @return
      */
     private RoleOptions buildRoleOptionsFromData(final Map<String, String> data) {
@@ -106,7 +131,7 @@ public class PkiResponse extends LogicalResponse {
         if (input == null) {
             return null;
         }
-        List<String> returnValue = new ArrayList<>();
+        final List<String> returnValue = new ArrayList<>();
         final StringTokenizer tokenizer = new StringTokenizer(input, ",");
         while (tokenizer.hasMoreTokens()) {
             returnValue.add(tokenizer.nextToken());
