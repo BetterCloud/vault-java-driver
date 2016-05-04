@@ -13,6 +13,8 @@ import com.bettercloud.vault.rest.Rest;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * <p>The implementing class for operations on Vault's <code>/v1/auth/*</code> REST endpoints.</p>
@@ -26,6 +28,111 @@ public class Auth {
 
     public Auth(final VaultConfig config) {
         this.config = config;
+    }
+
+    /**
+     * <p>Operation to create an authentication token.  Relies on another token already being present in
+     * the <code>VaultConfig</code> instance.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final VaultConfig config = new VaultConfig(address, rootToken);
+     * final Vault vault = new Vault(config);
+     * final AuthResponse response = vault.auth().createToken(null, null, null, null, null, "1h", null, null);
+     *
+     * final String token = response.getAuthClientToken());
+     * }</pre>
+     * </blockquote>
+     *
+     * <p>All parameters to this method are optional, and can be <code>null</code>.</p>
+     *
+     * @param id (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
+     * @param polices (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token.
+     * @param meta (optional) A map of string to string valued metadata. This is passed through to the audit backends.
+     * @param noParent (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent.
+     * @param noDefaultPolicy (optional) If <code>true</code> the default policy will not be a part of this token's policy set.
+     * @param ttl (optional) The TTL period of the token, provided as "1h", where hour is the largest suffix. If not provided, the token is valid for the default lease TTL, or indefinitely if the root policy is used.
+     * @param displayName (optional) The display name of the token. Defaults to "token".
+     * @param numUses (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses.
+     * @return The auth token
+     * @throws VaultException
+     */
+    public AuthResponse createToken(
+            final UUID id,
+            final List<String> polices,
+            final Map<String, String> meta,
+            final Boolean noParent,
+            final Boolean noDefaultPolicy,
+            final String ttl,
+            final String displayName,
+            final Long numUses
+    ) throws VaultException {
+        int retryCount = 0;
+        while (true) {
+            try {
+                // Parse parameters to JSON
+                final JsonObject jsonObject = Json.object();
+                if (id != null) jsonObject.add("id", id.toString());
+                if (polices != null && !polices.isEmpty()) {
+                    final StringBuilder policiesCsv = new StringBuilder();//NOPMD
+                    for (int index = 0; index < polices.size(); index++) {
+                        policiesCsv.append(polices.get(index));
+                        if (index + 1 < polices.size()) {
+                            policiesCsv.append(',');
+                        }
+                    }
+                    jsonObject.add("polices", policiesCsv.toString());
+                }
+                if (meta != null && !meta.isEmpty()) {
+                    final JsonObject metaMap = Json.object();
+                    for (final Map.Entry<String, String> entry : meta.entrySet()) {
+                        metaMap.add(entry.getKey(), entry.getValue());
+                    }
+                    jsonObject.add("meta", metaMap);
+                }
+                if (noParent != null) jsonObject.add("no_parent", noParent);
+                if (noDefaultPolicy != null) jsonObject.add("no_default_policy", noDefaultPolicy);
+                if (ttl != null) jsonObject.add("ttl", ttl);
+                if (displayName != null) jsonObject.add("display_name", displayName);
+                if (numUses != null) jsonObject.add("num_uses", numUses);
+                final String requestJson = jsonObject.toString();
+
+                // HTTP request to Vault
+                final RestResponse restResponse = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/auth/token/create")
+                        .header("X-Vault-Token", config.getToken())
+                        .body(requestJson.getBytes("UTF-8"))
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslPemUTF8(config.getSslPemUTF8())
+                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .post();
+
+                // Validate restResponse
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                }
+                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+                if (!mimeType.equals("application/json")) {
+                    throw new VaultException("Vault responded with MIME type: " + mimeType);
+                }
+                return buildAuthResponse(restResponse, retryCount);
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else {
+                    // ... otherwise, give up.
+                    throw new VaultException(e);
+                }
+            }
+        }
     }
 
     /**
@@ -214,12 +321,15 @@ public class Auth {
         final JsonObject jsonObject = Json.parse(responseJson).asObject();
         final JsonObject authJsonObject = jsonObject.get("auth").asObject();
 
-        authResponse.setAuthLeaseDuration(authJsonObject.getInt("lease_duration",0));
-        authResponse.setAuthRenewable(authJsonObject.getBoolean("renewable",false));
-        authResponse.setAppId(authJsonObject.get("metadata").asObject().getString("app-id",""));
-        authResponse.setUserId(authJsonObject.get("metadata").asObject().getString("user-id",""));
-        authResponse.setUsername(authJsonObject.get("metadata").asObject().getString("username",""));
-        authResponse.setAuthClientToken(authJsonObject.getString("client_token",""));
+        authResponse.setAuthLeaseDuration(authJsonObject.getInt("lease_duration", 0));
+        authResponse.setAuthRenewable(authJsonObject.getBoolean("renewable", false));
+        if (authJsonObject.get("metadata") != null && !authJsonObject.get("metadata").toString().equalsIgnoreCase("null")) {
+            final JsonObject metadata = authJsonObject.get("metadata").asObject();
+            authResponse.setAppId(metadata.getString("app-id", ""));
+            authResponse.setUserId(metadata.getString("user-id", ""));
+            authResponse.setUsername(metadata.getString("username", ""));
+        }
+        authResponse.setAuthClientToken(authJsonObject.getString("client_token", ""));
 
         final JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();
         final List<String> authPolicies = new ArrayList<String>();
