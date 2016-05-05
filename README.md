@@ -111,13 +111,14 @@ final String value = vault.logical()
 * `logical()`:  Contains core operations such as reading and writing secrets.
 * `auth()`:  Exposes methods for working with Vault's various auth backends (e.g. to programmatically retrieve a token
   by authenticating with a username and password).
+* `pki()`: Operations on PKI backend (e.g. create and delete roles, issue certificate credentials).
 
 The driver DSL also allows you to specify retry logic, by chaining the `withRetries()` ahead of accessing the endpoint
 implementation:
 
 ```
 // Retry up to 5 times if failures occur, waiting 1000 milliseconds in between each retry attempt.
-final LogicalResponse response = vault.withRetries(5,1000)
+final LogicalResponse response = vault.withRetries(5, 1000)
                                    .logical()
                                    .read("secret/hello");
 ```
