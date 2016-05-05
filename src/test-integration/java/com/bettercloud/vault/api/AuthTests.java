@@ -11,8 +11,8 @@ import org.junit.Test;
 import java.io.UnsupportedEncodingException;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertNotSame;
 
 /**
  * Integration tests for the basic (i.e. "auth") Vault API operations.
@@ -25,20 +25,22 @@ import static org.junit.Assert.assertNotSame;
  */
 public class AuthTests {
 
+    final static String address = System.getProperty("VAULT_ADDR");
+    final static String appId = System.getProperty("VAULT_APP_ID");
+    final static String userId = System.getProperty("VAULT_USER_ID");
+    final static String password = System.getProperty("VAULT_PASSWORD");
+    final static String rootToken = System.getProperty("VAULT_TOKEN");
+
     /**
      * Every test method will need to retrieve Vault credentials from environment variables, but we
      * might as well null-check them once rather than do so redundantly in every method.
      */
     @BeforeClass
     public static void verifyEnv() {
-        final String address = System.getProperty("VAULT_ADDR");
-        final String appId = System.getProperty("VAULT_APP_ID");
-        final String userId = System.getProperty("VAULT_USER_ID");
-        final String rootToken = System.getProperty("VAULT_TOKEN");
-
         assertNotNull(address);
         assertNotNull(appId);
         assertNotNull(userId);
+        assertNotNull(password);
         assertNotNull(rootToken);
     }
 
@@ -49,9 +51,6 @@ public class AuthTests {
      */
     @Test
     public void testCreateToken() throws VaultException {
-        final String address = System.getProperty("VAULT_ADDR");
-        final String rootToken = System.getProperty("VAULT_TOKEN");
-
         final VaultConfig config = new VaultConfig(address, rootToken);
         final Vault vault = new Vault(config);
 
@@ -67,10 +66,6 @@ public class AuthTests {
      */
     @Test
     public void testLoginByAuthId() throws VaultException {
-        final String address = System.getProperty("VAULT_ADDR");
-        final String appId = System.getProperty("VAULT_APP_ID");
-        final String userId = System.getProperty("VAULT_USER_ID");
-
         final String path = "app-id/login";
         final VaultConfig config = new VaultConfig(address);
         final Vault vault = new Vault(config);
@@ -87,10 +82,6 @@ public class AuthTests {
      */
     @Test
     public void testLoginByUsernamePassword() throws VaultException {
-        final String address = System.getProperty("VAULT_ADDR");
-        final String userId = System.getProperty("VAULT_USER_ID");
-        final String password = System.getProperty("VAULT_PASSWORD");
-
         final String path = "userpass/login/" + userId;
         final VaultConfig config = new VaultConfig(address);
         final Vault vault = new Vault(config);
@@ -107,12 +98,6 @@ public class AuthTests {
      */
     @Test
     public void testRenewSelf() throws VaultException, UnsupportedEncodingException {
-        // Check environment variables
-        final String address = System.getProperty("VAULT_ADDR");
-        final String userId = System.getProperty("VAULT_USER_ID");
-        final String password = System.getProperty("VAULT_PASSWORD");
-        final String rootToken = System.getProperty("VAULT_TOKEN");
-
         // Generate a client token
         final VaultConfig authConfig = new VaultConfig(address, rootToken);
         final Vault authVault = new Vault(authConfig);

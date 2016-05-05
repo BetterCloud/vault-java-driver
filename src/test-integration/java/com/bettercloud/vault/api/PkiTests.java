@@ -8,26 +8,32 @@ import com.bettercloud.vault.api.pki.RoleOptions;
 import com.bettercloud.vault.response.PkiResponse;
 import com.bettercloud.vault.rest.RestResponse;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.*;
 
 public class PkiTests {
 
-    @Before
-    public void setup() throws VaultException {
-        final String address = System.getProperty("VAULT_ADDR");
-        final String appId = System.getProperty("VAULT_APP_ID");
-        final String userId = System.getProperty("VAULT_USER_ID");
+    final static String address = System.getProperty("VAULT_ADDR");
+    final static String appId = System.getProperty("VAULT_APP_ID");
+    final static String userId = System.getProperty("VAULT_USER_ID");
+    final static String password = System.getProperty("VAULT_PASSWORD");
 
+    @BeforeClass
+    public static void verifyEnv() {
         assertNotNull(address);
         assertNotNull(appId);
         assertNotNull(userId);
+        assertNotNull(password);
+    }
 
+
+    @Before
+    public void setup() throws VaultException {
         final String token = authenticate();
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
@@ -40,7 +46,6 @@ public class PkiTests {
     @Test
     public void testCreateRole_Defaults() throws VaultException {
         final String token = authenticate();
-        final String address = System.getProperty("VAULT_ADDR");
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
 
@@ -52,7 +57,6 @@ public class PkiTests {
     @Test
     public void testCreateRole_WithOptions() throws VaultException {
         final String token = authenticate();
-        final String address = System.getProperty("VAULT_ADDR");
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
 
@@ -65,7 +69,6 @@ public class PkiTests {
     @Test
     public void testDeleteRole() throws VaultException {
         final String token = authenticate();
-        final String address = System.getProperty("VAULT_ADDR");
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
 
@@ -79,7 +82,6 @@ public class PkiTests {
     @Test
     public void testIssueCredential() throws VaultException, InterruptedException {
         final String token = authenticate();
-        final String address = System.getProperty("VAULT_ADDR");
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
 
@@ -104,14 +106,6 @@ public class PkiTests {
 
 
     private String authenticate() throws VaultException {
-        final String address = System.getProperty("VAULT_ADDR");
-        final String userId = System.getProperty("VAULT_USER_ID");
-        final String password = System.getProperty("VAULT_PASSWORD");
-
-        assertNotNull(address);
-        assertNotNull(userId);
-        assertNotNull(password);
-
         final String path = "userpass/login/" + userId;
         final VaultConfig config = new VaultConfig(address);
         final Vault vault = new Vault(config);

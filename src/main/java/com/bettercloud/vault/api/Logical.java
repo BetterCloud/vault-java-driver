@@ -1,12 +1,15 @@
 package com.bettercloud.vault.api;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.response.LogicalResponse;
@@ -132,6 +135,67 @@ public class Logical {
                     throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus);
                 }
             } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else {
+                    // ... otherwise, give up.
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @param path
+     * @return
+     * @throws VaultException
+     */
+    public List<String> list(final String path) throws VaultException {
+        final String fullPath = path == null ? "list=true" : path + "?list=true";
+        final LogicalResponse response = read(fullPath);
+
+        final List<String> returnValues = new ArrayList<>();
+        if (response.getData() != null && response.getData().get("keys") != null) {
+            final JsonArray keys = Json.parse(response.getData().get("keys")).asArray();
+            for (int index = 0; index < keys.size(); index++) {
+                returnValues.add(keys.get(index).asString());
+            }
+        }
+        return returnValues;
+    }
+
+    /**
+     * TODO: Document (contents within directories must be deleted first
+     */
+    public LogicalResponse delete(final String path) throws VaultException {
+        int retryCount = 0;
+        while (true) {
+            try {
+                // Make an HTTP request to Vault
+                final RestResponse restResponse = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/" + path)
+                        .header("X-Vault-Token", config.getToken())
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslPemUTF8(config.getSslPemUTF8())
+                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .delete();
+
+                // Validate response
+                if (restResponse.getStatus() != 204) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                }
+                return new LogicalResponse(restResponse, retryCount);
+            } catch (RuntimeException | VaultException | RestException e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
                     retryCount++;
