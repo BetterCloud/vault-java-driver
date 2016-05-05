@@ -5,8 +5,8 @@ HashiCorp.
 
 This driver strives to implement Vault's full HTTP API, along with supporting functionality such as automatic
 retry handling.  It does so without relying on any other external libraries beyond the Java standard library,
-and is compatible with Java environments as far back as Java 6.  So it will play nice with all of your projects,
-greenfield and legacy alike, without causing conflicts with any other dependency.
+and is compatible with Java 7 and up.  So it will play nice with all of your projects, greenfield and legacy
+alike, without causing conflicts with any other dependency.
 
 Installing the Driver
 ---------------------
@@ -15,7 +15,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    compile('com.bettercloud:vault-java-driver:1.1.0-SNAPSHOT')
+    compile('com.bettercloud:vault-java-driver:1.0.0')
 }
 ```
 
@@ -24,7 +24,7 @@ Maven:
 <dependency>
     <groupId>com.bettercloud</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
@@ -133,8 +133,8 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **1.1.0**: Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical API
-             wrapper for listing and deleting secrets.  Implements portions of the PKI backend (e.g. creating
+* **1.1.0**: (IN DEVELOPMENT) Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical
+             API wrapper for listing and deleting secrets.  Implements portions of the PKI backend (e.g. creating
              and deleting roles, issuing credentials).
 * **1.0.0**: Drops support for Java 6.  Removes all methods marked as `@Deprecated` in version 0.5.0.  Adds
              support for response metadata (i.e. "lease_id", "renewable", "lease_duration") to all response
