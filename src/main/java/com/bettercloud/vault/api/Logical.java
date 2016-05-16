@@ -153,9 +153,16 @@ public class Logical {
     }
 
     /**
-     * TODO: Document
+     /**
+     * <p>Retrieve a list of keys corresponding to key/value pairs at a given Vault path.</p>
      *
-     * @param path
+     * <p>Key values ending with a trailing-slash characters are sub-paths.  Running a subsequent <code>list()</code>
+     * call, using the original path appended with this key, will retrieve all secret keys stored at that sub-path.</p>
+     *
+     * <p>This method returns only the secret keys, not values.  To retrieve the actual stored value for a key,
+     * use <code>read()</code> with the key appended onto the original base path.</p>
+     *
+     * @param path The Vault key value at which to look for secrets (e.g. <code>secret</code>)
      * @return
      * @throws VaultException
      */
@@ -174,7 +181,14 @@ public class Logical {
     }
 
     /**
-     * TODO: Document (contents within directories must be deleted first
+     * <p>Deletes the key/value pair located at the provided path.</p>
+     *
+     * <p>If the path represents a sub-path, then all of its contents must be deleted prior to deleting the empty
+     * sub-path itself.</p>
+     *
+     * @param path The Vault key value to delete (e.g. <code>secret/hello</code>).
+     * @return
+     * @throws VaultException
      */
     public LogicalResponse delete(final String path) throws VaultException {
         int retryCount = 0;

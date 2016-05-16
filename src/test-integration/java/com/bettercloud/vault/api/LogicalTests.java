@@ -109,7 +109,7 @@ public class LogicalTests {
     }
 
     /**
-     * TODO: Document
+     * Write a secret, and then verify that is is successfully deleted.
      *
      * @throws VaultException
      */
