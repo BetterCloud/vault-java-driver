@@ -2,6 +2,7 @@ package com.bettercloud.vault;
 
 import com.bettercloud.vault.api.Auth;
 import com.bettercloud.vault.api.Logical;
+import com.bettercloud.vault.api.Sys;
 import com.bettercloud.vault.api.pki.Pki;
 
 /**
@@ -89,4 +90,6 @@ public class Vault {
     public Pki pki() {
         return new Pki(vaultConfig);
     }
+
+    public Sys sys() { return new Sys(vaultConfig); }
 }
