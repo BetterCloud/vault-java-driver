@@ -4,12 +4,18 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.rest.RestResponse;
 
 /**
- * <code>VaultResponse</code> is a common base class for the response objects returned by
+ * <p><code>VaultResponse</code> is a common base class for the response objects returned by
  * all API methods.  It contains the bare minimum of information common to all Vault
  * responses (e.g. the raw HTTP response, the number of retry attempts if any).  API methods
  * which return additional information will use more specialized subclasses inheriting
- * from <code>VaultResponse</code>.
+ * from <code>VaultResponse</code>.</p>
+ *
+ * <p>NOTE: It turns out that not all API methods will populate <code>leaseId</code>,
+ * <code>renewable</code>, and <code>leaseDuration</code>.  In fact, many response types won't.
+ * So the next major release will either remove this class and implement those fields directly
+ * where they're used, or at least rename this base class to something less broad in scope.
  */
+@Deprecated
 public class VaultResponse {
 
     private RestResponse restResponse;
@@ -33,6 +39,7 @@ public class VaultResponse {
         return restResponse;
     }
 
+    @Deprecated
     public void setRestResponse(final RestResponse restResponse) {
         this.restResponse = restResponse;
         parseMetadataFields();
@@ -42,6 +49,7 @@ public class VaultResponse {
         return retries;
     }
 
+    @Deprecated
     public void setRetries(final int retries) {
         this.retries = retries;
     }
@@ -50,6 +58,7 @@ public class VaultResponse {
         return leaseId;
     }
 
+    @Deprecated
     public void setLeaseId(final String leaseId) {
         this.leaseId = leaseId;
     }
@@ -58,6 +67,7 @@ public class VaultResponse {
         return renewable;
     }
 
+    @Deprecated
     public void setRenewable(final Boolean renewable) {
         this.renewable = renewable;
     }
@@ -71,6 +81,7 @@ public class VaultResponse {
         return leaseDuration;
     }
 
+    @Deprecated
     public void setLeaseDuration(final Long leaseDuration) {
         this.leaseDuration = leaseDuration;
     }

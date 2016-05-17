@@ -85,11 +85,28 @@ public class Vault {
     /**
      * Returns the implementing class for Vault's PKI secret backend (i.e. <code>/v1/pki/*</code> REST endpoints).
      *
-     * @return Returns the implementing class for Vault's PKI secret backend.
+     * @return The implementing class for Vault's PKI secret backend.
      */
     public Pki pki() {
         return new Pki(vaultConfig);
     }
 
+    /**
+     * <p>Returns a wrapper around the implementing classes for all of Vault's various
+     * <code>/v1/sys/*</code> endpoints.  Because there are so many of them (most Vault API operations
+     * fall under that root path), this Java API groups them by the categories suggested on
+     * the Vault documentation page (https://www.vaultproject.io/docs/http/index.html).</p>
+     *
+     * <p>To make calls on implementing classes within this wrapper, just go one level deeper
+     * that usual in the builder pattern style:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final HealthResponse response = vault.sys().debug().health();
+     * }</pre>
+     * </blockquote>
+     *
+     * @return A wrapper class for the implementing classes for various <code>/v1/sys*</code> endpoints.
+     */
     public Sys sys() { return new Sys(vaultConfig); }
 }
