@@ -32,6 +32,7 @@ public class AuthResponse extends VaultResponse {
         return username;
     }
 
+    @Deprecated
     public void setUsername(final String username) {
         this.username = username;
     }
@@ -62,6 +63,7 @@ public class AuthResponse extends VaultResponse {
         return authClientToken;
     }
 
+    @Deprecated
     public void setAuthClientToken(final String authClientToken) {
         this.authClientToken = authClientToken;
     }
@@ -70,6 +72,7 @@ public class AuthResponse extends VaultResponse {
         return authPolicies;
     }
 
+    @Deprecated
     public void setAuthPolicies(final List<String> authPolicies) {
         this.authPolicies.clear();
         this.authPolicies.addAll(authPolicies);
@@ -79,6 +82,7 @@ public class AuthResponse extends VaultResponse {
         return authLeaseDuration;
     }
 
+    @Deprecated
     public void setAuthLeaseDuration(final int authLeaseDuration) {
         this.authLeaseDuration = authLeaseDuration;
     }
@@ -87,6 +91,7 @@ public class AuthResponse extends VaultResponse {
         return authRenewable;
     }
 
+    @Deprecated
     public void setAuthRenewable(final boolean authRenewable) {
         this.authRenewable = authRenewable;
     }
@@ -95,6 +100,7 @@ public class AuthResponse extends VaultResponse {
         return appId;
     }
 
+    @Deprecated
     public void setAppId(final String appId) {
         this.appId = appId;
     }
@@ -103,6 +109,7 @@ public class AuthResponse extends VaultResponse {
         return userId;
     }
 
+    @Deprecated
     public void setUserId(final String userId) {
         this.userId = userId;
     }

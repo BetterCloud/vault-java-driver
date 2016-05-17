@@ -14,13 +14,10 @@ import com.bettercloud.vault.VaultException;
 import static junit.framework.TestCase.*;
 
 /**
- * Integration tests for the basic (i.e. "logical") Vault API operations.
+ * <p>Integration tests for the basic (i.e. "logical") Vault API operations.</p>
  *
- * These tests require a Vault server to be up and running.  A server address and token
- * should be passed as JVM properties.  E.g.:
- *
- * <code>gradle integrationTest -DVAULT_ADDR=http://127.0.0.1:8200 -DVAULT_TOKEN=eace6676-4d78-c687-4e54-03cad00e3abf</code>
- *
+ * <p>These tests require a Vault server to be up and running.  See the setup notes in
+ * "src/test-integration/README.md".</p>
  */
 public class LogicalTests {
 

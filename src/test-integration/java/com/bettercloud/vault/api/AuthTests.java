@@ -15,13 +15,10 @@ import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNotSame;
 
 /**
- * Integration tests for the basic (i.e. "auth") Vault API operations.
+ * <p>Integration tests for the basic (i.e. "auth") Vault API operations.</p>
  *
- * These tests require a Vault server to be up and running.  A server address and token
- * should be passed as JVM properties.  E.g.:
- *
- * <code>gradle integrationTest -DVAULT_ADDR=http://127.0.0.1:8200
- *
+ * <p>These tests require a Vault server to be up and running.  See the setup notes in
+ * "src/test-integration/README.md".</p>
  */
 public class AuthTests {
 

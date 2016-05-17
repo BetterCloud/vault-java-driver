@@ -394,6 +394,14 @@ public class Pki {
         return jsonObject;
     }
 
+    /**
+     * This logic will move into the <code>PkiResponse</code> constructor.
+     *
+     * @param restResponse
+     * @return
+     * @throws VaultException
+     */
+    @Deprecated
     private Map<String, String> parseResponseData(final RestResponse restResponse) throws VaultException {
         final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
         if (!mimeType.equals("application/json")) {

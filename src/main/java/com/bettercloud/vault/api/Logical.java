@@ -227,6 +227,14 @@ public class Logical {
         }
     }
 
+    /**
+     * This logic will move into the <code>LogicalResponse constructor</code>.
+     *
+     * @param restResponse
+     * @return
+     * @throws VaultException
+     */
+    @Deprecated
     private Map<String, String> parseResponseData(final RestResponse restResponse) throws VaultException {
         final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
         if (!mimeType.equals("application/json")) {

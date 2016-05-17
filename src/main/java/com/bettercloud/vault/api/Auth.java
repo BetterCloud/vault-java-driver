@@ -313,6 +313,15 @@ public class Auth {
         }
     }
 
+    /**
+     * This logic will move into the <code>AuthResponse</code> constructor.
+     *
+     * @param restResponse
+     * @param retries
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    @Deprecated
     private AuthResponse buildAuthResponse(final RestResponse restResponse, final int retries)
             throws UnsupportedEncodingException {
         final AuthResponse authResponse = new AuthResponse(restResponse, retries);

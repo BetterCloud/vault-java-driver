@@ -13,7 +13,6 @@ import java.util.StringTokenizer;
  * This class is a container for the information returned by Vault in PKI backend API
  * operations (e.g. create/delete roles, issue credentials).
  */
-
 public class PkiResponse extends LogicalResponse {
 
     private RoleOptions roleOptions;

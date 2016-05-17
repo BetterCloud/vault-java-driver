@@ -16,6 +16,12 @@ import java.util.ArrayList;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.*;
 
+/**
+ * <p>Integration tests for for operations on Vault's <code>/v1/pki/*</code> REST endpoints.</p>
+ *
+ * <p>These tests require a Vault server to be up and running.  See the setup notes in
+ * "src/test-integration/README.md".</p>
+ */
 public class PkiTests {
 
     final static String address = System.getProperty("VAULT_ADDR");
