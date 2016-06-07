@@ -137,7 +137,7 @@ should represent non-breaking changes.  The third number represents any very min
 * **1.1.0**: (IN DEVELOPMENT) Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical
              API wrapper for listing and deleting secrets.  Implements the `/v1/sys/health` health-check
              HTTP API endpoint.  Implements portions of the PKI backend (e.g. creating and deleting roles, issuing
-             credentials).
+             credentials).  Marks numerous methods as deprecated, to be removed in a future major release.
 * **1.0.0**: Drops support for Java 6.  Removes all methods marked as `@Deprecated` in version 0.5.0.  Adds
              support for response metadata (i.e. "lease_id", "renewable", "lease_duration") to all response
              types, rather than just `AuthResponse`.  Changes `leaseDuration` type from `int` to `Long` in
