@@ -253,7 +253,7 @@ public class Auth {
     }
 
      /**
-     * <p>Basic login operation to authenticate to an app-id backend.  Example usage:</p>
+     * <p>Basic login operation to authenticate to an github backend.  Example usage:</p>
      *
      * <blockquote>
      * <pre>{@code
