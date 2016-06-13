@@ -252,6 +252,63 @@ public class Auth {
         }
     }
 
+     /**
+     * <p>Basic login operation to authenticate to an app-id backend.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().loginByGithub("githubToken");
+     *
+     * final String token = response.getAuthClientToken());
+     * }</pre>
+     * </blockquote>
+     *
+     * @param githubToken The app-id used for authentication
+     * @return The auth token
+     * @throws VaultException
+     */
+    public AuthResponse loginByGithub(final String githubToken) throws VaultException {
+        int retryCount = 0;
+        while (true) {
+            try {
+                // HTTP request to Vault
+                final String requestJson = Json.object().add("token", githubToken).toString();
+                final RestResponse restResponse = new Rest()
+                        .url(config.getAddress() + "/v1/auth/github/login")
+                        .body(requestJson.getBytes("UTF-8"))
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslPemUTF8(config.getSslPemUTF8())
+                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .post();
+
+                // Validate restResponse
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                }
+                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+                if (!mimeType.equals("application/json")) {
+                    throw new VaultException("Vault responded with MIME type: " + mimeType);
+                }
+                return buildAuthResponse(restResponse, retryCount);
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else {
+                    // ... otherwise, give up.
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
+
     /**
      * <p>Renews the lease associated with the calling token.  This version of the method tells Vault to use the
      * default lifespan for the new lease.</p>
