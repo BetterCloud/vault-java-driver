@@ -15,7 +15,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    compile('com.bettercloud:vault-java-driver:1.0.0')
+    compile('com.bettercloud:vault-java-driver:1.1.0')
 }
 ```
 
@@ -24,7 +24,7 @@ Maven:
 <dependency>
     <groupId>com.bettercloud</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -134,7 +134,7 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **1.1.0**: (IN DEVELOPMENT) Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical
+* **1.1.0**: Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical
              API wrapper for listing and deleting secrets.  Implements the `/v1/sys/health` health-check
              HTTP API endpoint.  Implements portions of the PKI backend (e.g. creating and deleting roles, issuing
              credentials).  Marks numerous methods as deprecated, to be removed in a future major release.
