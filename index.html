@@ -27,8 +27,8 @@ HashiCorp.</p>
 
 <p>This driver strives to implement Vault's full HTTP API, along with supporting functionality such as automatic
 retry handling.  It does so without relying on any other external libraries beyond the Java standard library,
-and is compatible with Java environments as far back as Java 6.  So it will play nice with all of your projects,
-greenfield and legacy alike, without causing conflicts with any other dependency.</p>
+and is compatible with Java 7 and up.  So it will play nice with all of your projects, greenfield and legacy
+alike, without causing conflicts with any other dependency.</p>
 
 <h2>
 <a id="installing-the-driver" class="anchor" href="#installing-the-driver" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installing the Driver</h2>
@@ -38,7 +38,7 @@ greenfield and legacy alike, without causing conflicts with any other dependency
 <p>Gradle:</p>
 
 <pre><code>dependencies {
-    compile('com.bettercloud:vault-java-driver:1.0.0')
+    compile('com.bettercloud:vault-java-driver:1.1.0')
 }
 </code></pre>
 
@@ -47,7 +47,7 @@ greenfield and legacy alike, without causing conflicts with any other dependency
 <pre><code>&lt;dependency&gt;
     &lt;groupId&gt;com.bettercloud&lt;/groupId&gt;
     &lt;artifactId&gt;vault-java-driver&lt;/artifactId&gt;
-    &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;version&gt;1.1.0&lt;/version&gt;
 &lt;/dependency&gt;
 </code></pre>
 
@@ -138,13 +138,15 @@ final String value = vault.logical()
 <li>
 <code>auth()</code>:  Exposes methods for working with Vault's various auth backends (e.g. to programmatically retrieve a token
 by authenticating with a username and password).</li>
+<li>
+<code>pki()</code>: Operations on the PKI backend (e.g. create and delete roles, issue certificate credentials).</li>
 </ul>
 
 <p>The driver DSL also allows you to specify retry logic, by chaining the <code>withRetries()</code> ahead of accessing the endpoint
 implementation:</p>
 
 <pre><code>// Retry up to 5 times if failures occur, waiting 1000 milliseconds in between each retry attempt.
-final LogicalResponse response = vault.withRetries(5,1000)
+final LogicalResponse response = vault.withRetries(5, 1000)
                                    .logical()
                                    .read("secret/hello");
 </code></pre>
@@ -163,12 +165,17 @@ should represent non-breaking changes.  The third number represents any very min
 
 <ul>
 <li>
+<strong>1.1.0</strong>: Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical
+         API wrapper for listing and deleting secrets.  Implements the <code>/v1/sys/health</code> health-check
+         HTTP API endpoint.  Implements portions of the PKI backend (e.g. creating and deleting roles, issuing
+         credentials).  Marks numerous methods as deprecated, to be removed in a future major release.</li>
+<li>
 <strong>1.0.0</strong>: Drops support for Java 6.  Removes all methods marked as <code>@Deprecated</code> in version 0.5.0.  Adds
          support for response metadata (i.e. "lease_id", "renewable", "lease_duration") to all response
          types, rather than just <code>AuthResponse</code>.  Changes <code>leaseDuration</code> type from <code>int</code> to <code>Long</code> in
          <code>AuthResponse</code>.  Removes <code>final</code> declarations on all classes (outside of the JSON package).
          Various bugfixes.  Adds support for auth token self-renewal.  Adds support for writing values
-         that return content (e.g. PKI).</li>
+         that return content.</li>
 <li>
 <strong>0.5.0</strong>: Adds support for supplying SSL certificates, and for toggling whether or not the Vault server's
          SSL certificate will be verified.  Also adds support for "openTimeout" and "readTimeout"
