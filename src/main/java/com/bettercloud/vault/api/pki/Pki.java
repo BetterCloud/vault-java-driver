@@ -2,6 +2,7 @@ package com.bettercloud.vault.api.pki;
 
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.VaultResponseException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.JsonValue;
@@ -96,7 +97,7 @@ public class Pki {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 204) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultResponseException(restResponse.getStatus());
                 }
                 return new PkiResponse(restResponse, retryCount);
             } catch (Exception e) {
@@ -154,7 +155,7 @@ public class Pki {
 
                 // Validate response
                 if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultResponseException(restResponse.getStatus());
                 }
 
                 final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
@@ -216,7 +217,7 @@ public class Pki {
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultResponseException(restResponse.getStatus());
                 }
                 return new PkiResponse(restResponse, retryCount);
             } catch (Exception e) {
@@ -322,7 +323,7 @@ public class Pki {
 
                 // Validate response
                 if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultResponseException(restResponse.getStatus());
                 }
 
                 final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
