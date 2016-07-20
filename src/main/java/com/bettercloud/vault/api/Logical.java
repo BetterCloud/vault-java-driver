@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.VaultResponseException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
@@ -64,7 +65,7 @@ public class Logical {
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultResponseException(restResponse.getStatus());
                 }
 
                 final Map<String, String> data = parseResponseData(restResponse);
@@ -132,7 +133,7 @@ public class Logical {
                     final Map<String, String> data = parseResponseData(restResponse);
                     return new LogicalResponse(restResponse, retryCount, data);
                 } else {
-                    throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus);
+                    throw new VaultResponseException(restStatus);
                 }
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
@@ -206,7 +207,7 @@ public class Logical {
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultResponseException(restResponse.getStatus());
                 }
                 return new LogicalResponse(restResponse, retryCount);
             } catch (RuntimeException | VaultException | RestException e) {

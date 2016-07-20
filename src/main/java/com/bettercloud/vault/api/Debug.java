@@ -2,6 +2,7 @@ package com.bettercloud.vault.api;
 
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.VaultResponseException;
 import com.bettercloud.vault.response.HealthResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestException;
@@ -130,7 +131,7 @@ public class Debug {
                 if (standbyCode != null) validCodes.add(standbyCode);
                 if (sealedCode != null) validCodes.add(sealedCode);
                 if (!validCodes.contains(restResponse.getStatus())) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultResponseException(restResponse.getStatus());
                 }
                 return new HealthResponse(restResponse, retryCount);
             } catch (RuntimeException | VaultException | RestException e) {

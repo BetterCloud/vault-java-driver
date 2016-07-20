@@ -2,6 +2,7 @@ package com.bettercloud.vault.api;
 
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.VaultResponseException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
@@ -110,7 +111,7 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultResponseException(restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -169,7 +170,7 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultResponseException(restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -227,7 +228,7 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultResponseException(restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -288,7 +289,7 @@ public class Auth {
                         .post();
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultResponseException(restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
