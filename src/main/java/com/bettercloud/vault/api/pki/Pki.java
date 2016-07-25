@@ -270,7 +270,7 @@ public class Pki {
             final String commonName,
             final List<String> altNames,
             final List<String> ipSans,
-            final Integer ttl,
+            final String ttl,
             final CredentialFormat format
     ) throws VaultException {
         int retryCount = 0;

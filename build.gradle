@@ -6,7 +6,7 @@ apply plugin: 'signing'
 group 'com.bettercloud'
 //noinspection GroovyUnusedAssignment
 archivesBaseName = 'vault-java-driver'
-version '1.1.0'
+version '1.1.1-SNAPSHOT'
 
 //noinspection GroovyUnusedAssignment
 sourceCompatibility = 1.7
