@@ -102,7 +102,7 @@ public class PkiTests {
         Thread.sleep(3000);
 
         // Issue cert
-        final PkiResponse issueResponse = vault.pki().issue("testRole", "test.myvault.com", null, null, null, CredentialFormat.PEM);
+        final PkiResponse issueResponse = vault.pki().issue("testRole", "test.myvault.com", null, null, "1h", CredentialFormat.PEM);
         assertNotNull(issueResponse.getCredential().getCertificate());
         assertNotNull(issueResponse.getCredential().getPrivateKey());
         assertNotNull(issueResponse.getCredential().getSerialNumber());
