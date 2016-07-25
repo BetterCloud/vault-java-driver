@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * <p>A container for the configuration settings needed to initialize a <code>Vault</code> driver instance.</p>
@@ -44,7 +46,17 @@ public class VaultConfig {
      */
     protected static class EnvironmentLoader {
         public String loadVariable(final String name) {
-            return System.getenv(name);
+            if (name != "VAULT_TOKEN")
+                return System.getenv(name);
+            if (System.getenv("VAULT_TOKEN") != null)
+                return System.getenv(name);
+            try {
+                byte[] bytes = Files.readAllBytes(Paths.get(System.getProperty("user.home")).resolve(".vault-token"));
+                return new String(bytes, "UTF-8");
+            } catch (IOException e) {
+                // on I/O error, don't do anything
+            }
+            return null;
         }
     }
 
