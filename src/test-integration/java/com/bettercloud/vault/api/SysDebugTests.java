@@ -1,11 +1,9 @@
 package com.bettercloud.vault.api;
 
 import com.bettercloud.vault.Vault;
-import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.HealthResponse;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import static junit.framework.TestCase.*;
@@ -19,25 +17,14 @@ import static junit.framework.TestCase.*;
  */
 public class SysDebugTests {
 
-    private static final String address = System.getProperty("VAULT_ADDR");
-    private static final String token = System.getProperty("VAULT_TOKEN");
+    final static String rootToken = "36303304-3f53-a0c9-af5d-3ffc8dabe683";
 
-    private Vault vault;
-
-    @BeforeClass
-    public static void verifyEnv() {
-        assertNotNull(address);
-        assertNotNull(token);
-    }
-
-    @Before
-    public void setup() throws VaultException {
-        final VaultConfig config = new VaultConfig(address);
-        vault = new Vault(config);
-    }
+    @ClassRule
+    public static final VaultContainer container = new VaultContainer(rootToken);
 
     @Test
     public void testHealth_Plain() throws VaultException {
+        final Vault vault = container.getRootVault();
         final HealthResponse response = vault.sys().debug().health();
         assertTrue(response.getInitialized());
         assertFalse(response.getSealed());
@@ -48,7 +35,7 @@ public class SysDebugTests {
 
     @Test
     public void testHealth_WithToken() throws VaultException {
-        final Vault localVault = new Vault(new VaultConfig(address, token));
+        final Vault localVault = container.getRootVault();
         final HealthResponse response = localVault.sys().debug().health();
         assertTrue(response.getInitialized());
         assertFalse(response.getSealed());
@@ -59,6 +46,7 @@ public class SysDebugTests {
 
     @Test
     public void testHealth_WithParams() throws VaultException {
+        final Vault vault = container.getRootVault();
         final HealthResponse response = vault.sys().debug().health(null, 212, null, null);
         assertTrue(response.getInitialized());
         assertFalse(response.getSealed());
@@ -77,6 +65,7 @@ public class SysDebugTests {
      */
     @Test
     public void testHealth_WonkyActiveCode() throws VaultException {
+        final Vault vault = container.getRootVault();
         final HealthResponse response = vault.sys().debug().health(null, 204, null, null);
         assertNull(response.getInitialized());
         assertNull(response.getSealed());

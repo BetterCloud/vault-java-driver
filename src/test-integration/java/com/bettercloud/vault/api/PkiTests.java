@@ -1,16 +1,14 @@
 package com.bettercloud.vault.api;
 
 import com.bettercloud.vault.Vault;
-import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.api.pki.CredentialFormat;
 import com.bettercloud.vault.api.pki.RoleOptions;
 import com.bettercloud.vault.response.PkiResponse;
-import com.bettercloud.vault.rest.RestResponse;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static junit.framework.Assert.assertTrue;
@@ -24,36 +22,20 @@ import static junit.framework.TestCase.*;
  */
 public class PkiTests {
 
-    final static String address = System.getProperty("VAULT_ADDR");
-    final static String appId = System.getProperty("VAULT_APP_ID");
-    final static String userId = System.getProperty("VAULT_USER_ID");
-    final static String password = System.getProperty("VAULT_PASSWORD");
+    final static String appId = "fake_app";
+    final static String userId = "fake_user";
+    final static String password = "fake_password";
+    final static String rootToken = "36303304-3f53-a0c9-af5d-3ffc8dabe683";
 
-    @BeforeClass
-    public static void verifyEnv() {
-        assertNotNull(address);
-        assertNotNull(appId);
-        assertNotNull(userId);
-        assertNotNull(password);
-    }
+    @Rule
+    public final VaultContainer container = new VaultContainer(rootToken);
 
-
-    @Before
-    public void setup() throws VaultException {
-        final String token = authenticate();
-        final VaultConfig config = new VaultConfig(address, token);
-        final Vault vault = new Vault(config);
-
-        final PkiResponse response = vault.pki().deleteRole("testRole");
-        final RestResponse restResponse = response.getRestResponse();
-        assertEquals(204, restResponse.getStatus());
-    }
 
     @Test
-    public void testCreateRole_Defaults() throws VaultException {
+    public void testCreateRole_Defaults() throws VaultException, IOException, InterruptedException {
+        container.createPkiExample();
         final String token = authenticate();
-        final VaultConfig config = new VaultConfig(address, token);
-        final Vault vault = new Vault(config);
+        final Vault vault = container.getVault(token);
 
         vault.pki().createOrUpdateRole("testRole");
         final PkiResponse response = vault.pki().getRole("testRole");
@@ -61,10 +43,10 @@ public class PkiTests {
     }
 
     @Test
-    public void testCreateRole_WithOptions() throws VaultException {
+    public void testCreateRole_WithOptions() throws VaultException, IOException, InterruptedException {
+        container.createPkiExample();
         final String token = authenticate();
-        final VaultConfig config = new VaultConfig(address, token);
-        final Vault vault = new Vault(config);
+        final Vault vault = container.getVault(token);
 
         final RoleOptions options = new RoleOptions().allowAnyName(true);
         vault.pki().createOrUpdateRole("testRole", options);
@@ -73,10 +55,10 @@ public class PkiTests {
     }
 
     @Test
-    public void testDeleteRole() throws VaultException {
+    public void testDeleteRole() throws VaultException, IOException, InterruptedException {
+        container.createPkiExample();
         final String token = authenticate();
-        final VaultConfig config = new VaultConfig(address, token);
-        final Vault vault = new Vault(config);
+        final Vault vault = container.getVault(token);
 
         testCreateRole_Defaults();
         final PkiResponse deleteResponse = vault.pki().deleteRole("testRole");
@@ -86,10 +68,10 @@ public class PkiTests {
     }
 
     @Test
-    public void testIssueCredential() throws VaultException, InterruptedException {
+    public void testIssueCredential() throws VaultException, InterruptedException, IOException {
+        container.createPkiExample();
         final String token = authenticate();
-        final VaultConfig config = new VaultConfig(address, token);
-        final Vault vault = new Vault(config);
+        final Vault vault = container.getVault(token);
 
         // Create a role
         final PkiResponse createRoleResponse = vault.pki().createOrUpdateRole("testRole",
@@ -111,10 +93,10 @@ public class PkiTests {
     }
 
 
-    private String authenticate() throws VaultException {
+    private String authenticate() throws VaultException, IOException, InterruptedException {
+        container.createAuthExample(appId, userId, password);
         final String path = "userpass/login/" + userId;
-        final VaultConfig config = new VaultConfig(address);
-        final Vault vault = new Vault(config);
+        final Vault vault = container.getVault();
 
         final String token = vault.auth().loginByUsernamePassword(path, password).getAuthClientToken();
         assertNotNull(token);
