@@ -330,7 +330,7 @@ public class Auth {
         final JsonObject jsonObject = Json.parse(responseJson).asObject();
         final JsonObject authJsonObject = jsonObject.get("auth").asObject();
 
-        authResponse.setAuthLeaseDuration(authJsonObject.getInt("lease_duration", 0));
+        authResponse.setAuthLeaseDuration(authJsonObject.getLong("lease_duration", 0));
         authResponse.setAuthRenewable(authJsonObject.getBoolean("renewable", false));
         if (authJsonObject.get("metadata") != null && !authJsonObject.get("metadata").toString().equalsIgnoreCase("null")) {
             final JsonObject metadata = authJsonObject.get("metadata").asObject();
