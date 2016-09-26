@@ -25,22 +25,17 @@ import static junit.framework.TestCase.*;
 public class PkiTests {
 
     final static String address = System.getProperty("VAULT_ADDR");
-    final static String appId = System.getProperty("VAULT_APP_ID");
-    final static String userId = System.getProperty("VAULT_USER_ID");
-    final static String password = System.getProperty("VAULT_PASSWORD");
+    final static String token = System.getProperty("VAULT_TOKEN");
 
     @BeforeClass
     public static void verifyEnv() {
         assertNotNull(address);
-        assertNotNull(appId);
-        assertNotNull(userId);
-        assertNotNull(password);
+        assertNotNull(token);
     }
 
 
     @Before
     public void setup() throws VaultException {
-        final String token = authenticate();
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
 
@@ -51,7 +46,6 @@ public class PkiTests {
 
     @Test
     public void testCreateRole_Defaults() throws VaultException {
-        final String token = authenticate();
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
 
@@ -62,7 +56,6 @@ public class PkiTests {
 
     @Test
     public void testCreateRole_WithOptions() throws VaultException {
-        final String token = authenticate();
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
 
@@ -74,7 +67,6 @@ public class PkiTests {
 
     @Test
     public void testDeleteRole() throws VaultException {
-        final String token = authenticate();
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
 
@@ -87,7 +79,6 @@ public class PkiTests {
 
     @Test
     public void testIssueCredential() throws VaultException, InterruptedException {
-        final String token = authenticate();
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
 
@@ -108,18 +99,6 @@ public class PkiTests {
         assertNotNull(issueResponse.getCredential().getSerialNumber());
         assertEquals("rsa", issueResponse.getCredential().getPrivateKeyType());
         assertNotNull(issueResponse.getCredential().getIssuingCa());
-    }
-
-
-    private String authenticate() throws VaultException {
-        final String path = "userpass/login/" + userId;
-        final VaultConfig config = new VaultConfig(address);
-        final Vault vault = new Vault(config);
-
-        final String token = vault.auth().loginByUsernamePassword(path, password).getAuthClientToken();
-        assertNotNull(token);
-        assertNotSame("", token.trim());
-        return token;
     }
 
     private boolean compareRoleOptions(final RoleOptions expected, final RoleOptions actual) {

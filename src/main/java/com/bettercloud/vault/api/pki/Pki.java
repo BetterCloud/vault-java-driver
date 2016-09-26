@@ -96,7 +96,7 @@ public class Pki {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 204) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
                 return new PkiResponse(restResponse, retryCount);
             } catch (Exception e) {
@@ -109,8 +109,10 @@ public class Pki {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                } else {
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
                     throw new VaultException(e);
                 }
             }
@@ -154,7 +156,7 @@ public class Pki {
 
                 // Validate response
                 if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
 
                 final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
@@ -171,8 +173,10 @@ public class Pki {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                } else {
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
                     throw new VaultException(e);
                 }
             }
@@ -216,7 +220,7 @@ public class Pki {
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
                 return new PkiResponse(restResponse, retryCount);
             } catch (Exception e) {
@@ -229,8 +233,10 @@ public class Pki {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                } else {
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
                     throw new VaultException(e);
                 }
             }
@@ -322,7 +328,7 @@ public class Pki {
 
                 // Validate response
                 if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
 
                 final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
@@ -339,8 +345,10 @@ public class Pki {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                } else {
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
                     throw new VaultException(e);
                 }
             }

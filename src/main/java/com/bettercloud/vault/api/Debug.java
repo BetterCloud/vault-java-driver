@@ -130,7 +130,7 @@ public class Debug {
                 if (standbyCode != null) validCodes.add(standbyCode);
                 if (sealedCode != null) validCodes.add(sealedCode);
                 if (!validCodes.contains(restResponse.getStatus())) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
                 return new HealthResponse(restResponse, retryCount);
             } catch (RuntimeException | VaultException | RestException e) {
@@ -143,8 +143,10 @@ public class Debug {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                } else {
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
                     throw new VaultException(e);
                 }
             }

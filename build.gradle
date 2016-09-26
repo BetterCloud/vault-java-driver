@@ -6,7 +6,7 @@ apply plugin: 'signing'
 group 'com.bettercloud'
 //noinspection GroovyUnusedAssignment
 archivesBaseName = 'vault-java-driver'
-version '1.1.1-SNAPSHOT'
+version '1.2.0-SNAPSHOT'
 
 //noinspection GroovyUnusedAssignment
 sourceCompatibility = 1.7
@@ -15,6 +15,23 @@ targetCompatibility = 1.7
 
 repositories {
     mavenCentral()
+}
+
+//
+// Deploying releases to a local Maven repository (i.e. Nexus).
+//
+// Requires that the following properties be passed via command-line parameters by your CI server, or
+// stored in a `gradle.properties` within your '$HOME/.gradle' directory or the project root (be sure never
+// to commit the latter to source control):
+//
+// nexusUsername = Nexus repository user
+// nexusPassword = Nexus repository password
+//
+if (!hasProperty('nexusUsername')) {
+    ext.ossrhUsername = ''
+}
+if (!hasProperty('nexusPassword')) {
+    ext.ossrhPassword = ''
 }
 
 publishing {
@@ -111,14 +128,17 @@ task integrationTest(type: Test) {
 // Deploying releases to Maven Central.
 //
 // Requires a `gradle.properties` file in your `$HOME/.gradle` directory, with
-
+//
 // signing.keyId = <ID of the private key in your secure keyring used for signing JAR's>
 // signing.password = <public key password>
 // signing.secretKeyRingFile = <full path to your keyring file (i.e secring.gpg)>
 //
-// ossrhUsername = sonatype.org JIRA user
-// ossrhPassword = sonatype.org JIRA password
-//
+if (!hasProperty('ossrhUsername')) {
+    ext.ossrhUsername = ''
+}
+if (!hasProperty('ossrhPassword')) {
+    ext.ossrhPassword = ''
+}
 
 artifacts {
     archives javadocJar, sourcesJar
