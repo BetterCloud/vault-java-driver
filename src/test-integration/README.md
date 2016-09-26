@@ -41,11 +41,11 @@ enable auth backends and populate user and app data:
 
 ```
 vault auth-enable app-id
-vault write auth/app-id/map/app-id/fake_app value=root display_name=fake_app
+vault write auth/app-id/map/app-id/fake_app display_name=fake_app
 vault write auth/app-id/map/user-id/fake_user value=fake_app
 
 vault auth-enable userpass
-vault write auth/userpass/users/fake_user password=fake_password policies=root
+vault write auth/userpass/users/fake_user password=fake_password
 
 vault mount -path=pki pki
 vault write pki/root/generate/internal common_name=myvault.com ttl=99h

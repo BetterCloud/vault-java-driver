@@ -110,11 +110,11 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
-                    throw new VaultException("Vault responded with MIME type: " + mimeType);
+                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
                 return buildAuthResponse(restResponse, retryCount);
             } catch (Exception e) {
@@ -127,8 +127,10 @@ public class Auth {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                } else {
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
                     throw new VaultException(e);
                 }
             }
@@ -169,11 +171,11 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
-                    throw new VaultException("Vault responded with MIME type: " + mimeType);
+                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
                 return buildAuthResponse(restResponse, retryCount);
             } catch (Exception e) {
@@ -186,8 +188,10 @@ public class Auth {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                } else {
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
                     throw new VaultException(e);
                 }
             }
@@ -227,11 +231,11 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
-                    throw new VaultException("Vault responded with MIME type: " + mimeType);
+                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
                 return buildAuthResponse(restResponse, retryCount);
             } catch (Exception e) {
@@ -244,8 +248,10 @@ public class Auth {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                } else {
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
                     throw new VaultException(e);
                 }
             }
@@ -288,11 +294,11 @@ public class Auth {
                         .post();
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
-                    throw new VaultException("Vault responded with MIME type: " + mimeType);
+                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
                 return buildAuthResponse(restResponse, retryCount);
             } catch (Exception e) {
@@ -305,8 +311,10 @@ public class Auth {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                } else {
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
                     throw new VaultException(e);
                 }
             }
