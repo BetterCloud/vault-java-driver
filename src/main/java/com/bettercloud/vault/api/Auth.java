@@ -304,12 +304,15 @@ public class Auth {
      * @throws VaultException
      */
     public AuthResponse loginByGithub(final String githubToken) throws VaultException {
+
+        // TODO:  Add (optional?) integration test coverage
+
         int retryCount = 0;
         while (true) {
             try {
                 // HTTP request to Vault
                 final String requestJson = Json.object().add("token", githubToken).toString();
-                final RestResponse restResponse = new Rest()
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/github/login")
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -320,11 +323,11 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
-                    throw new VaultException("Vault responded with MIME type: " + mimeType);
+                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
                 return buildAuthResponse(restResponse, retryCount);
             } catch (Exception e) {
@@ -337,8 +340,10 @@ public class Auth {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                } else {
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
                     throw new VaultException(e);
                 }
             }
