@@ -148,12 +148,16 @@ public class Auth {
      * }</pre>
      * </blockquote>
      *
+     * <strong>NOTE: </strong> As of Vault 0.6.1, Hashicorp has deprecated the App ID authentication backend in
+     * favor of AppRole.  A wrapper for that authentication backend is pending.
+     *
      * @param path The path on which the authentication is performed (e.g. <code>auth/app-id/login</code>)
      * @param appId The app-id used for authentication
      * @param userId The user-id used for authentication
      * @return The auth token
      * @throws VaultException
      */
+    @Deprecated
     public AuthResponse loginByAppID(final String path, final String appId, final String userId) throws VaultException {
         int retryCount = 0;
         while (true) {
@@ -209,19 +213,45 @@ public class Auth {
      * }</pre>
      * </blockquote>
      *
+     * <strong>NOTE: </strong>This method is deprecated, and will be removed in a future major release of this
+     * library.  Switch to {@link this#loginByUserPass(String, String)}, which does not require you to prefix
+     * the username parameter with `userpass/login/`.
+     *
      * @param path The path on which the authentication is performed (e.g. <code>auth/userpass/login/username</code>)
      * @param password The password used for authentication
      * @return The auth token
      * @throws VaultException
      */
+    @Deprecated
     public AuthResponse loginByUsernamePassword(final String path, final String password) throws VaultException {
+        final String username = path.replace("userpass/login/", "");
+        return loginByUserPass(username, password);
+    }
+
+    /**
+     * <p>Basic login operation to authenticate to a Username &amp; Password backend.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().loginByUserPass("test", "password");
+     *
+     * final String token = response.getAuthClientToken());
+     * }</pre>
+     * </blockquote>
+     *
+     * @param username The username used for authentication
+     * @param password The password used for authentication
+     * @return The auth token
+     * @throws VaultException
+     */
+    public AuthResponse loginByUserPass(final String username, final String password) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
                 // HTTP request to Vault
                 final String requestJson = Json.object().add("password", password).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/auth/" + path)
+                        .url(config.getAddress() + "/v1/auth/userpass/login/" + username)
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())

@@ -139,7 +139,8 @@ should represent non-breaking changes.  The third number represents any very min
              longer need empty placeholder values for certain variables elsewhere in your environment.  Updates 
              integration test suite to account for breaking changes in Vault 0.6.x (e.g. you can no longer use 
              a token that was obtained from one of the authentication backends to perform tasks such as creating 
-             and deleting roles, etc).
+             and deleting roles, etc). Deprecates the App ID authentication backend, and adds a new version of the 
+             Userpass authentication backend that doesn't require a path prefix.
 * **1.1.1**: Changes the `ttl` argument to `Pki.issue()` from `Integer` to `String`, to fix a bug preventing 
              you from specifying the time suffix (e.g. "1h").
 * **1.1.0**: Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical
