@@ -140,6 +140,8 @@ should represent non-breaking changes.  The third number represents any very min
              integration test suite to account for breaking changes in Vault 0.6.x (e.g. you can no longer use 
              a token that was obtained from one of the authentication backends to perform tasks such as creating 
              and deleting roles, etc).
+* **1.1.1**: Changes the `ttl` argument to `Pki.issue()` from `Integer` to `String`, to fix a bug preventing 
+             you from specifying the time suffix (e.g. "1h").
 * **1.1.0**: Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical
              API wrapper for listing and deleting secrets.  Implements the `/v1/sys/health` health-check
              HTTP API endpoint.  Implements portions of the PKI backend (e.g. creating and deleting roles, issuing
