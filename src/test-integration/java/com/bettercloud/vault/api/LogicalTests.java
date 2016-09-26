@@ -1,5 +1,6 @@
 package com.bettercloud.vault.api;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -39,11 +40,28 @@ public class LogicalTests {
 
         // Delete any existing secrets (note: contents within subdirectories must be deleted before the
         // subdirectory itself can be deleted)
-        final List<String> existingSecrets = vault.logical().list("secret");
+        List<String> existingSecrets = new ArrayList<>();
+        try {
+             existingSecrets.addAll(vault.logical().list("secret"));
+        } catch (VaultException e) {
+            if (e.getHttpStatusCode() != 404) {
+                throw e;
+            }
+        }
+
         for (final String secret : existingSecrets) {
             deleteSecretsRecursively("secret/" + secret);
         }
-        assertEquals(0, vault.logical().list("secret").size());
+
+        existingSecrets = new ArrayList<>();
+        try {
+            existingSecrets.addAll(vault.logical().list("secret"));
+        } catch (VaultException e) {
+            if (e.getHttpStatusCode() != 404) {
+                throw e;
+            }
+        }
+        assertEquals(0, existingSecrets.size());
     }
 
     private void deleteSecretsRecursively(final String path) throws VaultException {

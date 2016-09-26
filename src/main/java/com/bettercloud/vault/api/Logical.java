@@ -64,7 +64,7 @@ public class Logical {
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
 
                 final Map<String, String> data = parseResponseData(restResponse);
@@ -79,8 +79,10 @@ public class Logical {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                } else {
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
                     throw new VaultException(e);
                 }
             }
@@ -132,7 +134,7 @@ public class Logical {
                     final Map<String, String> data = parseResponseData(restResponse);
                     return new LogicalResponse(restResponse, retryCount, data);
                 } else {
-                    throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus);
+                    throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus, restStatus);
                 }
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
@@ -144,8 +146,10 @@ public class Logical {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                } else {
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
                     throw new VaultException(e);
                 }
             }
@@ -153,7 +157,6 @@ public class Logical {
     }
 
     /**
-     /**
      * <p>Retrieve a list of keys corresponding to key/value pairs at a given Vault path.</p>
      *
      * <p>Key values ending with a trailing-slash characters are sub-paths.  Running a subsequent <code>list()</code>
@@ -168,10 +171,23 @@ public class Logical {
      */
     public List<String> list(final String path) throws VaultException {
         final String fullPath = path == null ? "list=true" : path + "?list=true";
-        final LogicalResponse response = read(fullPath);
+        LogicalResponse response = null;
+        try {
+            response = read(fullPath);
+        } catch (final VaultException e) {
+            if (e.getHttpStatusCode() != 404) {
+                throw e;
+            }
+        }
 
         final List<String> returnValues = new ArrayList<>();
-        if (response.getData() != null && response.getData().get("keys") != null) {
+        if (
+                response != null
+                && response.getRestResponse().getStatus() != 404
+                && response.getData() != null
+                && response.getData().get("keys") != null
+        ) {
+
             final JsonArray keys = Json.parse(response.getData().get("keys")).asArray();
             for (int index = 0; index < keys.size(); index++) {
                 returnValues.add(keys.get(index).asString());
@@ -206,7 +222,7 @@ public class Logical {
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
                 return new LogicalResponse(restResponse, retryCount);
             } catch (RuntimeException | VaultException | RestException e) {
@@ -219,8 +235,10 @@ public class Logical {
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
-                } else {
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
                     throw new VaultException(e);
                 }
             }

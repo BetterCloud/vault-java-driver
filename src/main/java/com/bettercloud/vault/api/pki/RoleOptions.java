@@ -248,7 +248,7 @@ public class RoleOptions {
         } else {
             final List<String> clone = new ArrayList<>();
             clone.addAll(allowedDomains);
-            return allowedDomains;
+            return clone;
         }
     }
 

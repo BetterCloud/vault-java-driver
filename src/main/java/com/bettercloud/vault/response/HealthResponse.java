@@ -37,13 +37,16 @@ public class HealthResponse {
         this.restResponse = restResponse;
         this.retries = retries;
 
-        if (restResponse == null || restResponse.getBody() == null) {
-            throw new VaultException("Response is null or contains a bad payload");
+        if (restResponse == null) {
+            throw new VaultException("Response is null");
+        }
+        if (restResponse.getBody() == null) {
+            throw new VaultException("Response contains a bad payload", restResponse.getStatus());
         }
         if (restResponse.getBody().length > 0) {
             final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
             if (!mimeType.equals("application/json")) {
-                throw new VaultException("Vault responded with MIME type: " + mimeType);
+                throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
             }
             try {
                 final String jsonString = new String(restResponse.getBody(), "UTF-8");//NOPMD
@@ -53,7 +56,7 @@ public class HealthResponse {
                 this.standby = jsonObject.get("standby") == null ? null : jsonObject.get("standby").asBoolean();
                 this.serverTimeUTC = jsonObject.get("server_time_utc") == null ? null : jsonObject.get("server_time_utc").asLong();
             } catch(final Exception e) {
-                throw new VaultException("Unable to parse JSON payload: " + e);
+                throw new VaultException("Unable to parse JSON payload: " + e, restResponse.getStatus());
             }
         }
     }
