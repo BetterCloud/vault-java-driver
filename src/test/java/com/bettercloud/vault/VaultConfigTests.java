@@ -6,8 +6,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -22,10 +26,26 @@ public class VaultConfigTests {
      * class, so that a mock version of that environment loader can be used by unit tests.</p>
      *
      * <p>This mock implementation of <code>VaultConfig.EnvironmentLoader</code> allows unit tests to declare values
-     * that should be returned for a given environment variable name.  The actual environment is never used.
+     * that should be returned for a given environment variable name.  The actual environment is never used.</p>
+     *
+     * <p>The <code>VAULT_TOKEN</code> variable gets special treatment.  If a value cannot be found in the environment,
+     * then {@link com.bettercloud.vault.VaultConfig.EnvironmentLoader} looks for a <code>.vault-token</code> file in
+     * the user's home directory.  So this mock has a second constructor which allows you to pass a directory path,
+     * to serve as a mock "home directory" for testing.</p>
      */
     class MockEnvironmentLoader extends VaultConfig.EnvironmentLoader {
-        final Map<String, String> overrides = new HashMap<String, String>();
+        final Map<String, String> overrides;
+        final String mockHomeDirectory;
+
+        public MockEnvironmentLoader() {
+            overrides = new HashMap<String, String>();
+            mockHomeDirectory = "";
+        }
+
+        public MockEnvironmentLoader(final String mockHomeDirectory) {
+            overrides = new HashMap<String, String>();
+            this.mockHomeDirectory = mockHomeDirectory;
+        }
 
         /**
          * Declare a variable and value to be available in the mock "environment".  This method may be called
@@ -41,7 +61,21 @@ public class VaultConfigTests {
 
         @Override
         public String loadVariable(final String name) {
-            return overrides.get(name);
+            String value = null;
+            if ("VAULT_TOKEN".equals(name)) {
+                if (overrides.containsKey("VAULT_TOKEN")) {
+                    value = overrides.get("VAULT_TOKEN");
+                } else {
+                    try {
+                        final byte[] bytes = Files.readAllBytes(Paths.get(mockHomeDirectory).resolve(".vault-token"));
+                        value = new String(bytes, "UTF-8").trim();
+                    } catch (IOException e) {
+                    }
+                }
+            } else {
+                value = overrides.get(name);
+            }
+            return value;
         }
 
     }
@@ -96,7 +130,7 @@ public class VaultConfigTests {
      */
     @Test(expected = VaultException.class)
     public void testConfigConstructor_FailToLoad() throws VaultException {
-        final VaultConfig config = new VaultConfig(null);
+        new VaultConfig(null);
     }
 
     /**
@@ -149,14 +183,15 @@ public class VaultConfigTests {
     public void testConfigBuilder_LoadFromEnv_SslCert() throws IOException, VaultException {
         final String tempDirectoryPath = System.getProperty("java.io.tmpdir");
         final String pemPath = tempDirectoryPath + File.separator + "cert.pem";
-        final InputStream input = this.getClass().getResourceAsStream("/cert.pem");
-        final FileOutputStream output = new FileOutputStream(pemPath);
-        int nextChar;
-        while ( (nextChar = input.read()) != -1 ) {
-            output.write( (char) nextChar );
+        try (
+                final InputStream input = this.getClass().getResourceAsStream("/cert.pem");
+                final FileOutputStream output = new FileOutputStream(pemPath)
+        ) {
+            int nextChar;
+            while ( (nextChar = input.read()) != -1 ) {
+                output.write( (char) nextChar );
+            }
         }
-        input.close();
-        output.close();
 
         final MockEnvironmentLoader mock = new MockEnvironmentLoader();
         mock.override("VAULT_ADDR", "http://127.0.0.1:8200");
@@ -175,7 +210,7 @@ public class VaultConfigTests {
         final MockEnvironmentLoader mock = new MockEnvironmentLoader();
         mock.override("VAULT_ADDR", "http://127.0.0.1:8200");
         mock.override("VAULT_SSL_CERT", "doesnt-exist.pem");
-        final VaultConfig config = new VaultConfig()
+        new VaultConfig()
                 .environmentLoader(mock)
                 .build();
     }
@@ -188,7 +223,40 @@ public class VaultConfigTests {
      */
     @Test(expected = VaultException.class)
     public void testConfigBuilder_FailToLoad() throws VaultException {
-        final VaultConfig config = new VaultConfig().build();
+        new VaultConfig().build();
+    }
+
+    @Test
+    public void testConfigBuilder_LoadTokenFromHomedir() throws IOException, VaultException {
+        final String mockHomeDirectory = System.getProperty("java.io.tmpdir") + File.separatorChar + UUID.randomUUID().toString();
+        assertTrue(new File(mockHomeDirectory).mkdirs());
+        final File mockTokenFile = new File(mockHomeDirectory + File.separatorChar + ".vault-token");
+        assertTrue(mockTokenFile.createNewFile());
+        final PrintWriter out = new PrintWriter(mockTokenFile, "UTF-8");
+        out.println("d24e2469-298a-6c64-6a71-5b47c9ba459a");
+        out.close();
+
+        final MockEnvironmentLoader mock = new MockEnvironmentLoader(mockHomeDirectory);
+        mock.override("VAULT_ADDR", "http://127.0.0.1:8200");
+        mock.override("VAULT_PROXY_ADDRESS", "localhost");
+        mock.override("VAULT_PROXY_PORT", "80");
+        mock.override("VAULT_PROXY_USERNAME", "scott");
+        mock.override("VAULT_PROXY_PASSWORD", "tiger");
+        mock.override("VAULT_SSL_VERIFY", "true");
+        mock.override("VAULT_OPEN_TIMEOUT", "30");
+        mock.override("VAULT_READ_TIMEOUT", "30");
+
+        final VaultConfig config = new VaultConfig()
+                .environmentLoader(mock)
+                .build();
+        assertEquals("http://127.0.0.1:8200", config.getAddress());
+        assertEquals("d24e2469-298a-6c64-6a71-5b47c9ba459a", config.getToken());
+        assertTrue(config.isSslVerify());
+        assertTrue(30 == config.getOpenTimeout());
+        assertTrue(30 == config.getReadTimeout());
+
+        assertTrue(mockTokenFile.delete());
+        assertTrue(new File(mockHomeDirectory).delete());
     }
 
 }

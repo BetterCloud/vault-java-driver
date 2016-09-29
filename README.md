@@ -134,14 +134,18 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **1.2.0**: Switches from Vault 0.5.x to 0.6.x for automated tests.  Adds a field to `VaultException` for 
-             capturing the HTTP response code (if any) from Vault.  Updates the Gradle build, so that you no 
-             longer need empty placeholder values for certain variables elsewhere in your environment.  Updates 
-             integration test suite to account for breaking changes in Vault 0.6.x (e.g. you can no longer use 
-             a token that was obtained from one of the authentication backends to perform tasks such as creating 
-             and deleting roles, etc). Deprecates the App ID authentication backend, and adds a new version of the 
-             Userpass authentication backend that doesn't require a path prefix.  Adds support for the GitHub 
-             authentication backend.
+* **1.2.0**:
+  * Switches from Vault 0.5.x to 0.6.x for automated tests.  
+  * Adds a field to `VaultException` for capturing the HTTP response code (if any) from Vault.  
+  * Updates the Gradle build, so that you no longer need empty placeholder values for certain variables elsewhere 
+    in your environment.  
+  * Updates integration test suite to account for breaking changes in Vault 0.6.x (e.g. you can no longer use 
+    a token that was obtained from one of the authentication backends to perform tasks such as creating and deleting 
+    roles, etc). 
+  * Deprecates the App ID authentication backend, and adds a new version of the Userpass authentication backend that 
+    doesn't require a path prefix.  Adds support for the GitHub authentication backend.
+  * If the `VAULT_TOKEN` environment parameter is not set, then the driver will now check for a file named `.vault-token` 
+    in the executing user's home directory, and try to read a token value from that.
 * **1.1.1**: Changes the `ttl` argument to `Pki.issue()` from `Integer` to `String`, to fix a bug preventing 
              you from specifying the time suffix (e.g. "1h").
 * **1.1.0**: Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical
