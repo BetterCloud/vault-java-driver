@@ -46,17 +46,29 @@ public class VaultConfig {
      */
     protected static class EnvironmentLoader {
         public String loadVariable(final String name) {
-            if (name != "VAULT_TOKEN")
-                return System.getenv(name);
-            if (System.getenv("VAULT_TOKEN") != null)
-                return System.getenv(name);
-            try {
-                byte[] bytes = Files.readAllBytes(Paths.get(System.getProperty("user.home")).resolve(".vault-token"));
-                return new String(bytes, "UTF-8");
-            } catch (IOException e) {
-                // on I/O error, don't do anything
+            String value = null;
+            if ("VAULT_TOKEN".equals(name)) {
+
+                // Special handling for the VAULT_TOKEN variable, since it can be read from the filesystem if it's not
+                // found in the environment
+                if (System.getenv("VAULT_TOKEN") != null) {
+                    // Found it in the environment
+                    value = System.getenv(name);
+                } else {
+                    // Not in the environment, looking for a ".vault-token" file in the executing user's home directory instead
+                    try {
+                        final byte[] bytes = Files.readAllBytes(Paths.get(System.getProperty("user.home")).resolve(".vault-token"));
+                        value = new String(bytes, "UTF-8").trim();
+                    } catch (IOException e) {
+                        // No-op... there simple isn't a token value available
+                    }
+                }
+            } else {
+
+                // Normal handling for all other variables.  We just check the environment.
+                value = System.getenv(name);
             }
-            return null;
+            return value;
         }
     }
 
