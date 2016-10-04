@@ -11,8 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * <p>The implementing class for operations on Vault's <code>/v1/sys/*</code> REST endpoints, under the
- * "Debug" section of the Vault HTTP API docs (https://www.vaultproject.io/docs/http/index.html).</p>
+ * <p>The implementing class for operations on REST endpoints, under the "Debug" section of the Vault HTTP API
+ * docs (https://www.vaultproject.io/docs/http/index.html).</p>
  *
  * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of
  * <code>Vault</code> in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code>
@@ -49,31 +49,6 @@ public class Debug {
     public HealthResponse health() throws VaultException {
         return health(null, null, null, null);
     }
-
-    /**
-     * <p>An overloaded version of {@link Debug#health()} that allows for </p>
-     * <p>Returns the health status of Vault. This matches the semantics of a Consul HTTP
-     * health check and provides a simple way to monitor the health of a Vault instance.</p>
-     *
-     * @see <a href="https://www.vaultproject.io/docs/http/sys-health.html">https://www.vaultproject.io/docs/http/sys-health.html</a>
-     *
-     * <blockquote>
-     * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, rootToken);
-     * final Vault vault = new Vault(config);
-     * final HashMap<String, String> params = new HashMap<>();
-     * params.put("standbyok", "true");
-     *
-     * final Map<String, String> response = vault.sys().debug().health(params);
-     *
-     * final String sealed = response.get("sealed");
-     * }</pre>
-     * </blockquote>
-     *
-     * @param params the optional query paramaters
-     * @return
-     * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
-     */
 
     /**
      * <p>An overloaded version of {@link Debug#health()} that allows for passing one or more optional parameters.</p>

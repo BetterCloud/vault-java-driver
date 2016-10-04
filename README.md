@@ -134,7 +134,8 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **1.2.0**:
+* **1.2.0**: This is a substantial release, with numerous additions.  It's a minor version number only because there 
+             should be no breaking changes.  The changes include the following:
   * Switches from Vault 0.5.x to 0.6.x for automated tests.  
   * Adds a field to `VaultException` for capturing the HTTP response code (if any) from Vault.  
   * Updates the Gradle build, so that you no longer need empty placeholder values for certain variables elsewhere 
@@ -146,6 +147,9 @@ should represent non-breaking changes.  The third number represents any very min
     doesn't require a path prefix.  Adds support for the GitHub authentication backend.
   * If the `VAULT_TOKEN` environment parameter is not set, then the driver will now check for a file named `.vault-token` 
     in the executing user's home directory, and try to read a token value from that.
+  * Deprecates the `com.bettercloud.vault.api.Sys` class, moving the debug-related methods into their own 
+    specific `com.bettercloud.vault.api.Debug` class instead.  
+  * Implements some of the lease related endpoints (i.e. revoke, revoke-prefix, revoke-force).
 * **1.1.1**: Changes the `ttl` argument to `Pki.issue()` from `Integer` to `String`, to fix a bug preventing 
              you from specifying the time suffix (e.g. "1h").
 * **1.1.0**: Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical
