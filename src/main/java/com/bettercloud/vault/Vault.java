@@ -1,6 +1,8 @@
 package com.bettercloud.vault;
 
 import com.bettercloud.vault.api.Auth;
+import com.bettercloud.vault.api.Debug;
+import com.bettercloud.vault.api.Leases;
 import com.bettercloud.vault.api.Logical;
 import com.bettercloud.vault.api.Sys;
 import com.bettercloud.vault.api.pki.Pki;
@@ -92,21 +94,34 @@ public class Vault {
     }
 
     /**
-     * <p>Returns a wrapper around the implementing classes for all of Vault's various
-     * <code>/v1/sys/*</code> endpoints.  Because there are so many of them (most Vault API operations
-     * fall under that root path), this Java API groups them by the categories suggested on
-     * the Vault documentation page (https://www.vaultproject.io/docs/http/index.html).</p>
+     * Returns the implementing class for Vault's lease operations (e.g. revoke, revoke-prefix).
      *
-     * <p>To make calls on implementing classes within this wrapper, just go one level deeper
-     * that usual in the builder pattern style:</p>
+     * @return The implementing class for Vault's lease operations (e.g. revoke, revoke-prefix).
+     */
+    public Leases leases() {
+        return new Leases(vaultConfig);
+    }
+
+    /**
+     * Returns the implementing class for Vault's debug operations (e.g. raw, health).
+     *
+     * @return The implementing class for Vault's debug operations (e.g. raw, health)
+     */
+    public Debug debug() {
+        return new Debug(vaultConfig);
+    }
+
+    /**
+     * <p>This method has been deprecated, and will removed in a future release.  Please obtain a {@link Debug}
+     * reference directly from the {@link #debug()} method instead:</p>
      *
      * <blockquote>
      * <pre>{@code
-     * final HealthResponse response = vault.sys().debug().health();
+     * final HealthResponse response = vault.debug().health();
      * }</pre>
      * </blockquote>
      *
-     * @return A wrapper class for the implementing classes for various <code>/v1/sys*</code> endpoints.
      */
+    @Deprecated
     public Sys sys() { return new Sys(vaultConfig); }
 }

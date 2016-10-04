@@ -12,17 +12,19 @@ import com.bettercloud.vault.rest.RestResponse;
  *
  * <p>NOTE: It turns out that not all API methods will populate <code>leaseId</code>,
  * <code>renewable</code>, and <code>leaseDuration</code>.  In fact, many response types won't.
- * So the next major release will either remove this class and implement those fields directly
- * where they're used, or at least rename this base class to something less broad in scope.
+ * So the next major release will implement those fields directly in the subclasses where they're
+ * used.
  */
-@Deprecated
 public class VaultResponse {
 
     private RestResponse restResponse;
     private int retries;
 
+    @Deprecated
     private String leaseId;
+    @Deprecated
     private Boolean renewable;
+    @Deprecated
     private Long leaseDuration;
 
     /**

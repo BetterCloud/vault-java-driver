@@ -11,13 +11,12 @@ import org.junit.Test;
 import static junit.framework.TestCase.*;
 
 /**
- * <p>Integration tests for the debug-related operations on the Vault HTTP API's
- * <code>/v1/sys/*</code> endpoints.</p>
+ * <p>Integration tests for the debug-related operations on the Vault HTTP API's.</p>
  *
  * <p>These tests require a Vault server to be up and running.  See the setup notes in
  * "src/test-integration/README.md".</p>
  */
-public class SysDebugTests {
+public class DebugTests {
 
     private static final String address = System.getProperty("VAULT_ADDR");
     private static final String token = System.getProperty("VAULT_TOKEN");
@@ -38,7 +37,7 @@ public class SysDebugTests {
 
     @Test
     public void testHealth_Plain() throws VaultException {
-        final HealthResponse response = vault.sys().debug().health();
+        final HealthResponse response = vault.debug().health();
         assertTrue(response.getInitialized());
         assertFalse(response.getSealed());
         assertFalse(response.getStandby());
@@ -49,7 +48,7 @@ public class SysDebugTests {
     @Test
     public void testHealth_WithToken() throws VaultException {
         final Vault localVault = new Vault(new VaultConfig(address, token));
-        final HealthResponse response = localVault.sys().debug().health();
+        final HealthResponse response = localVault.debug().health();
         assertTrue(response.getInitialized());
         assertFalse(response.getSealed());
         assertFalse(response.getStandby());
@@ -59,7 +58,7 @@ public class SysDebugTests {
 
     @Test
     public void testHealth_WithParams() throws VaultException {
-        final HealthResponse response = vault.sys().debug().health(null, 212, null, null);
+        final HealthResponse response = vault.debug().health(null, 212, null, null);
         assertTrue(response.getInitialized());
         assertFalse(response.getSealed());
         assertFalse(response.getStandby());
@@ -77,7 +76,7 @@ public class SysDebugTests {
      */
     @Test
     public void testHealth_WonkyActiveCode() throws VaultException {
-        final HealthResponse response = vault.sys().debug().health(null, 204, null, null);
+        final HealthResponse response = vault.debug().health(null, 204, null, null);
         assertNull(response.getInitialized());
         assertNull(response.getSealed());
         assertNull(response.getStandby());
