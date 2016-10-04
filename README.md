@@ -150,6 +150,7 @@ should represent non-breaking changes.  The third number represents any very min
   * Deprecates the `com.bettercloud.vault.api.Sys` class, moving the debug-related methods into their own 
     specific `com.bettercloud.vault.api.Debug` class instead.  
   * Implements some of the lease related endpoints (i.e. revoke, revoke-prefix, revoke-force).
+  * Allows for `long` values rather than `int` auth lease duration in the `AuthResponse` class.
 * **1.1.1**: Changes the `ttl` argument to `Pki.issue()` from `Integer` to `String`, to fix a bug preventing 
              you from specifying the time suffix (e.g. "1h").
 * **1.1.0**: Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical
