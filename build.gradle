@@ -25,14 +25,18 @@ repositories {
 // stored in a `gradle.properties` within your '$HOME/.gradle' directory or the project root (be sure never
 // to commit the latter to source control):
 //
+// nexusUrl = Nexus repository location
 // nexusUsername = Nexus repository user
 // nexusPassword = Nexus repository password
 //
+if (!hasProperty('nexusUrl')) {
+    ext.nexusUrl = ''
+}
 if (!hasProperty('nexusUsername')) {
-    ext.ossrhUsername = ''
+    ext.nexusUsername = ''
 }
 if (!hasProperty('nexusPassword')) {
-    ext.ossrhPassword = ''
+    ext.nexusPassword = ''
 }
 
 publishing {
@@ -164,7 +168,7 @@ uploadArchives {
             }
 
             pom.project {
-                name 'java-vault-driver'
+                name 'vault-java-driver'
                 packaging 'jar'
                 // optionally artifactId can be defined here
                 description 'Zero-dependency Java client for HashiCorp\'s Vault'
