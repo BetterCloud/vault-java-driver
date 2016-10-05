@@ -30,8 +30,9 @@ public class HealthResponse {
      * non-standard HTTP status codes.  See docs for
      * {@link com.bettercloud.vault.api.Debug#health(Boolean, Integer, Integer, Integer)}.</p>
      *
-     * @param restResponse The raw HTTP response from Vault.
-     * @param retries The number of retry attempts that occurred during the API call (can be zero).
+     * @param restResponse The raw HTTP response from Vault
+     * @param retries The number of retry attempts that occurred during the API call (can be zero)
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public HealthResponse(final RestResponse restResponse, final int retries) throws VaultException {
         this.restResponse = restResponse;
@@ -82,11 +83,7 @@ public class HealthResponse {
     }
 
     /**
-     * A value representing the number of milliseconds since the epoch.  With all of the changes
-     * in date API's between Java 8 and pre-Java 8, it seemed best for the library not to convert
-     * this value into any particular one.
-     *
-     * @return
+     * @return A value representing the number of milliseconds since the epoch.  With all of the changes in date API's between Java 8 and pre-Java 8, it seemed best for the library not to convert this value into any particular one.
      */
     public Long getServerTimeUTC() {
         return serverTimeUTC;

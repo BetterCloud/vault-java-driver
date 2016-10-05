@@ -84,6 +84,7 @@ public class Rest {
      * <p>Either way, the responsibility for any url-encoding of this base URL string belongs to the caller.</p>
      *
      * @param urlString A URL string, with any necessary url-encoding already applied @return The <code>Rest</code> instance itself
+     * @return This object, with urlString populated, ready for other builder-pattern config methods or an HTTP verb method
      */
     public Rest url(final String urlString) {
         this.urlString = urlString;
@@ -96,7 +97,7 @@ public class Rest {
      * set by <code>parameter()</code> will be ignored for POST or PUT requests.</p>
      *
      * @param body The payload to send with a POST or PUT request (e.g. a JSON string)
-     * @return The <code>Rest</code> instance itself
+     * @return This object, with body populated, ready for other builder-pattern config methods or an HTTP verb method
      */
     public Rest body(final byte[] body) {
         this.body = body == null ? null : Arrays.copyOf(body, body.length);
@@ -117,8 +118,8 @@ public class Rest {
      *
      * @param name The raw parameter name (not url-encoded)
      * @param value The raw parameter value (not url-encoded)
-     * @return The <code>Rest</code> instance itself
-     * @throws RestException
+     * @return This object, with a parameter added, ready for other builder-pattern config methods or an HTTP verb method
+     * @throws RestException If any error occurs, or unexpected response received from Vault
      */
     public Rest parameter(final String name, final String value) throws RestException {
         try {
@@ -139,8 +140,8 @@ public class Rest {
      *
      * @param name The raw header name (not url-encoded)
      * @param value The raw header value (not url-encoded)
-     * @return The <code>Rest</code> instance itself
-     * @throws RestException
+     * @return This object, with a header added, ready for other builder-pattern config methods or an HTTP verb method
+     * @throws RestException If any error occurs, or unexpected response received from Vault
      */
     public Rest header(final String name, final String value) throws RestException {
         try {
@@ -155,7 +156,7 @@ public class Rest {
      * <p>The number of seconds to wait before giving up on establishing an HTTP(S) connection.</p>
      *
      * @param connectTimeoutSeconds Number of seconds to wait for an HTTP(S) connection to successfully establish
-     * @return
+     * @return This object, with connectTimeoutSeconds populated, ready for other builder-pattern config methods or an HTTP verb method
      */
     public Rest connectTimeoutSeconds(final Integer connectTimeoutSeconds) {
         this.connectTimeoutSeconds = connectTimeoutSeconds;
@@ -167,7 +168,7 @@ public class Rest {
      * data to finish downloading.</p>
      *
      * @param readTimeoutSeconds Number of seconds to wait for all data to be retrieved from an established HTTP(S) connection
-     * @return
+     * @return This object, with readTimeoutSeconds populated, ready for other builder-pattern config methods or an HTTP verb method
      */
     public Rest readTimeoutSeconds(final Integer readTimeoutSeconds) {
         this.readTimeoutSeconds = readTimeoutSeconds;
@@ -185,7 +186,7 @@ public class Rest {
      * <code>sslPemResource()</code>, or <code>sslPemUTF8()</code>.</p>
      *
      * @param sslVerification Whether or not to verify the SSL certificate used by the server with HTTPS connections.  Default is <code>true</code>.
-     * @return
+     * @return This object, with sslVerification populated, ready for other builder-pattern config methods or an HTTP verb method
      */
     public Rest sslVerification(final Boolean sslVerification) {
         this.sslVerification = sslVerification;
@@ -210,7 +211,7 @@ public class Rest {
      * </ul>
      *
      * @param pemFileContents An X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
-     * @return
+     * @return This object, with sslPemUTF8 populated, ready for other builder-pattern config methods or an HTTP verb method
      */
     public Rest sslPemUTF8(final String pemFileContents) {
         this.sslPemUTF8 = pemFileContents;
@@ -226,7 +227,7 @@ public class Rest {
      * a GET request.</p>
      *
      * @return The result of the HTTP operation
-     * @throws RestException
+     * @throws RestException If an error occurs, or an unexpected response received
      */
     public RestResponse get() throws RestException {
         if (urlString == null) {
@@ -269,7 +270,7 @@ public class Rest {
      * <code>parameter()</code>, and those values will be discarded.</p>
      *
      * @return The result of the HTTP operation
-     * @throws RestException
+     * @throws RestException If an error occurs, or an unexpected response received
      */
     public RestResponse post() throws RestException {
         return postOrPutImpl(true);
@@ -286,7 +287,7 @@ public class Rest {
      * <code>parameter()</code>, and those values will be discarded.</p>
      *
      * @return The result of the HTTP operation
-     * @throws RestException
+     * @throws RestException If an error occurs, or an unexpected response received
      */
     public RestResponse put() throws RestException {
         return postOrPutImpl(false);
@@ -301,7 +302,7 @@ public class Rest {
      * HTTP servers will ignore it for DELETE requests.
      *
      * @return The result of the HTTP operation
-     * @throws RestException
+     * @throws RestException If an error occurs, or an unexpected response received
      */
     public RestResponse delete() throws RestException {
         if (urlString == null) {

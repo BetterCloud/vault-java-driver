@@ -45,7 +45,7 @@ public class Logical {
      * </blockquote>
      *
      * @param path The Vault key value from which to read (e.g. <code>secret/hello</code>)
-     * @return
+     * @return The response information returned from Vault
      * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
      */
     public LogicalResponse read(final String path) throws VaultException {
@@ -105,7 +105,8 @@ public class Logical {
      *
      * @param path The Vault key value to which to write (e.g. <code>secret/hello</code>)
      * @param nameValuePairs Secret name and value pairs to store under this Vault key
-     * @throws VaultException
+     * @return The response information received from Vault
+     * @throws VaultException If any errors occurs with the REST request, and the maximum number of retries is exceeded.
      */
     public LogicalResponse write(final String path, final Map<String, String> nameValuePairs) throws VaultException {
         int retryCount = 0;
@@ -166,8 +167,8 @@ public class Logical {
      * use <code>read()</code> with the key appended onto the original base path.</p>
      *
      * @param path The Vault key value at which to look for secrets (e.g. <code>secret</code>)
-     * @return
-     * @throws VaultException
+     * @return A list of keys corresponding to key/value pairs at a given Vault path, or an empty list if there are none
+     * @throws VaultException If any errors occur, or unexpected response received from Vault
      */
     public List<String> list(final String path) throws VaultException {
         final String fullPath = path == null ? "list=true" : path + "?list=true";
@@ -203,8 +204,8 @@ public class Logical {
      * sub-path itself.</p>
      *
      * @param path The Vault key value to delete (e.g. <code>secret/hello</code>).
-     * @return
-     * @throws VaultException
+     * @return The response information received from Vault
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public LogicalResponse delete(final String path) throws VaultException {
         int retryCount = 0;

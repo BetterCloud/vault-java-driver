@@ -55,7 +55,7 @@ public class Auth {
      * @param displayName (optional) The display name of the token. Defaults to "token".
      * @param numUses (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses.
      * @return The auth token
-     * @throws VaultException
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse createToken(
             final UUID id,
@@ -155,7 +155,7 @@ public class Auth {
      * @param appId The app-id used for authentication
      * @param userId The user-id used for authentication
      * @return The auth token
-     * @throws VaultException
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     @Deprecated
     public AuthResponse loginByAppID(final String path, final String appId, final String userId) throws VaultException {
@@ -214,13 +214,13 @@ public class Auth {
      * </blockquote>
      *
      * <strong>NOTE: </strong>This method is deprecated, and will be removed in a future major release of this
-     * library.  Switch to {@link this#loginByUserPass(String, String)}, which does not require you to prefix
+     * library.  Switch to loginByUserPass(String, String), which does not require you to prefix
      * the username parameter with `userpass/login/`.
      *
      * @param path The path on which the authentication is performed (e.g. <code>auth/userpass/login/username</code>)
      * @param password The password used for authentication
      * @return The auth token
-     * @throws VaultException
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     @Deprecated
     public AuthResponse loginByUsernamePassword(final String path, final String password) throws VaultException {
@@ -242,7 +242,7 @@ public class Auth {
      * @param username The username used for authentication
      * @param password The password used for authentication
      * @return The auth token
-     * @throws VaultException
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByUserPass(final String username, final String password) throws VaultException {
         int retryCount = 0;
@@ -301,7 +301,7 @@ public class Auth {
      *
      * @param githubToken The app-id used for authentication
      * @return The auth token
-     * @throws VaultException
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByGithub(final String githubToken) throws VaultException {
 
@@ -354,8 +354,8 @@ public class Auth {
      * <p>Renews the lease associated with the calling token.  This version of the method tells Vault to use the
      * default lifespan for the new lease.</p>
      *
-     * @return
-     * @throws VaultException
+     * @return The response information returned from Vault
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse renewSelf() throws VaultException {
         return renewSelf(-1);
@@ -367,7 +367,8 @@ public class Auth {
      * that this value may be ignored, however.</p>
      *
      * @param increment The number of seconds requested for the new lease lifespan
-     * @throws VaultException
+     * @return The response information returned from Vault
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse renewSelf(final long increment) throws VaultException {
         int retryCount = 0;
@@ -416,9 +417,9 @@ public class Auth {
     /**
      * This logic will move into the <code>AuthResponse</code> constructor.
      *
-     * @param restResponse
-     * @param retries
-     * @return
+     * @param restResponse The raw response information returned from Vault
+     * @param retries The number of retries that were performed for this operation
+     * @return The parsed response information returned from Vault
      * @throws UnsupportedEncodingException
      */
     @Deprecated

@@ -44,7 +44,7 @@ public class VaultConfig {
      * <p>The code used to load environment variables is encapsulated within an inner class,
      * so that a mock version of that environment loader can be used by unit tests.</p>
      */
-    protected static class EnvironmentLoader {
+    static class EnvironmentLoader {
         public String loadVariable(final String name) {
             String value = null;
             if ("VAULT_TOKEN".equals(name)) {
@@ -106,7 +106,7 @@ public class VaultConfig {
      *
      * @param address The URL of the target Vault server
      * @param token The access token to enable Vault access
-     * @throws VaultException
+     * @throws VaultException If any error occurs while loading and parsing config values
      */
     public VaultConfig(final String address, final String token) throws VaultException {
         this(address, token, new EnvironmentLoader());
@@ -127,7 +127,7 @@ public class VaultConfig {
      * need any other properties set explicitly, then use the builder pattern approach.</p>
      *
      * @param address The URL of the target Vault server
-     * @throws VaultException
+     * @throws VaultException If any error occurs while loading and parsing config values
      */
     public VaultConfig(final String address) throws VaultException {
         this(address, new EnvironmentLoader());
@@ -140,7 +140,7 @@ public class VaultConfig {
      * @param address The URL of the target Vault server
      * @param token The access token to enable Vault access
      * @param environmentLoader A (mock) environment loader implementation
-     * @throws VaultException
+     * @throws VaultException If any error occurs while loading and parsing config values
      */
     protected VaultConfig(final String address, final String token, final EnvironmentLoader environmentLoader) throws VaultException {
         this.address = address;
@@ -155,7 +155,7 @@ public class VaultConfig {
      *
      * @param address The URL of the target Vault server
      * @param environmentLoader A (mock) environment loader implementation
-     * @throws VaultException
+     * @throws VaultException If any error occurs while loading and parsing config values
      */
     protected VaultConfig(final String address, final EnvironmentLoader environmentLoader) throws VaultException {
         this.address = address;
@@ -172,10 +172,10 @@ public class VaultConfig {
      * There really shouldn't ever be a need to call this method outside of a unit test context (hence the
      * <code>protected</code> access level).</p>
      *
-     * @param environmentLoader An environment variable loader implementation (presumably a mock).
-     * @return
+     * @param environmentLoader An environment variable loader implementation (presumably a mock)
+     * @return This object, with environmentLoader populated, ready for additional builder-pattern method calls or else finalization with the {@link this#build()} method
      */
-    protected VaultConfig environmentLoader(final EnvironmentLoader environmentLoader) {
+    VaultConfig environmentLoader(final EnvironmentLoader environmentLoader) {
         this.environmentLoader = environmentLoader;
         return this;
     }
@@ -192,7 +192,7 @@ public class VaultConfig {
      * environment variable value is found, then initialization of the <code>VaultConfig</code> object will fail.</p>
      *
      * @param address The Vault server base URL
-     * @return
+     * @return This object, with address populated, ready for additional builder-pattern method calls or else finalization with the build() method
      */
     public VaultConfig address(final String address) {
         this.address = address;
@@ -200,7 +200,7 @@ public class VaultConfig {
     }
 
     /**
-     * <p>Sets the root token used to access Vault.</p>
+     * <p>Sets the token used to access Vault.</p>
      *
      * <p>If no token is explicitly set, either by this method in a builder pattern approach or else by one of the
      * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_TOKEN</code> environment
@@ -211,8 +211,8 @@ public class VaultConfig {
      * it prior to making any other API calls).  In such use cases, you can still use either the builder pattern
      * approach or the single-argument convenience constructor.</p>
      *
-     * @param token
-     * @return
+     * @param token The token to use for accessing Vault
+     * @return This object, with token populated, ready for additional builder-pattern method calls or else finalization with the build() method
      */
     public VaultConfig token(final String token) {
         this.token = token;
@@ -241,7 +241,7 @@ public class VaultConfig {
      * <code>VAULT_SSL_CERT</code> environment variable.</p>
      *
      * @param sslPemUTF8 An X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
-     * @return
+     * @return This object, with sslPemUTF8 populated, ready for additional builder-pattern method calls or else finalization with the build() method
      */
     public VaultConfig sslPemUTF8(final String sslPemUTF8) {
         this.sslPemUTF8 = sslPemUTF8;
@@ -270,7 +270,8 @@ public class VaultConfig {
      * <code>VAULT_SSL_CERT</code> environment variable.</p>
      *
      * @param sslPemFile The path of a file containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
-     * @return
+     * @return This object, with sslPemFile populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     * @throws VaultException If any error occurs while loading and parsing the PEM file
      */
     public VaultConfig sslPemFile(final File sslPemFile) throws VaultException {
         try (final InputStream input = new FileInputStream(sslPemFile)){
@@ -304,8 +305,8 @@ public class VaultConfig {
      * <code>VAULT_SSL_CERT</code> environment variable.</p>
      *
      * @param classpathResource The path of a classpath resource containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
-     * @return
-     * @throws VaultException
+     * @return This object, with sslPemResource populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     * @throws VaultException If any error occurs while loading and parsing the PEM file
      */
     public VaultConfig sslPemResource(final String classpathResource) throws VaultException {
         try (final InputStream input = this.getClass().getResourceAsStream(classpathResource)){
@@ -331,7 +332,7 @@ public class VaultConfig {
      * environment variable.</p>
      *
      * @param sslVerify Whether or not to verify the SSL certificate used by Vault with HTTPS connections.  Default is <code>true</code>.
-     * @return
+     * @return This object, with sslVerify populated, ready for additional builder-pattern method calls or else finalization with the build() method
      */
     public VaultConfig sslVerify(final Boolean sslVerify) {
         this.sslVerify = sslVerify;
@@ -346,7 +347,7 @@ public class VaultConfig {
      * environment variable.</p>
      *
      * @param openTimeout Number of seconds to wait for an HTTP(S) connection to successfully establish
-     * @return
+     * @return This object, with openTimeout populated, ready for additional builder-pattern method calls or else finalization with the build() method
      */
     public VaultConfig openTimeout(final Integer openTimeout) {
         this.openTimeout = openTimeout;
@@ -362,7 +363,7 @@ public class VaultConfig {
      * environment variable.</p>
      *
      * @param readTimeout Number of seconds to wait for all data to be retrieved from an established HTTP(S) connection
-     * @return
+     * @return This object, with readTimeout populated, ready for additional builder-pattern method calls or else finalization with the build() method
      */
     public VaultConfig readTimeout(final Integer readTimeout) {
         this.readTimeout = readTimeout;
@@ -402,7 +403,7 @@ public class VaultConfig {
      * has been set already, uses environment variables when available to populate any unset fields, and returns
      * a <code>VaultConfig</code> object that is ready for use.</p>
      *
-     * @return
+     * @return This object, with all available config options parsed and loaded
      * @throws VaultException If the <code>address</code> field was left unset, and there is no <code>VAULT_ADDR</code> environment variable value with which to populate it.
      */
     public VaultConfig build() throws VaultException {

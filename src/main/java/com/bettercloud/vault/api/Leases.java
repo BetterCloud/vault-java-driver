@@ -33,8 +33,8 @@ public class Leases {
      * </blockquote>
      *
      * @param leaseId A lease ID associated with the secret to be revoked
-     * @return
-     * @throws VaultException
+     * @return The response information returned from Vault
+     * @throws VaultException If an error occurs, or unexpected reponse received from Vault
      */
     public VaultResponse revoke(final String leaseId) throws VaultException {
         int retryCount = 0;
@@ -87,8 +87,8 @@ public class Leases {
      * </blockquote>
      *
      * @param prefix A Vault path prefix, for which all secrets beneath it should be revoked
-     * @return
-     * @throws VaultException
+     * @return The response information returned from Vault
+     * @throws VaultException If an error occurs, or unexpected reponse received from Vault
      */
     public VaultResponse revokePrefix(final String prefix) throws VaultException {
         int retryCount = 0;
@@ -129,7 +129,7 @@ public class Leases {
     }
 
     /**
-     * <p>Revokes all secrets or tokens generated under a given prefix immediately. Unlike {@link this#revokePrefix(String)},
+     * <p>Revokes all secrets or tokens generated under a given prefix immediately. Unlike revokePrefix(String),
      * this method ignores backend errors encountered during revocation. This is potentially very dangerous and should
      * only be used in specific emergency situations where errors in the backend or the connected backend service
      * prevent normal revocation.  By ignoring these errors, Vault abdicates responsibility for ensuring that the
@@ -144,8 +144,8 @@ public class Leases {
      * </blockquote>
      *
      * @param prefix A Vault path prefix, for which all secrets beneath it should be revoked
-     * @return
-     * @throws VaultException
+     * @return The response information returned from Vault
+     * @throws VaultException If an error occurs, or unexpected reponse received from Vault
      */
     public VaultResponse revokeForce(final String prefix) throws VaultException {
         int retryCount = 0;

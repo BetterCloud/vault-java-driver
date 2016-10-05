@@ -43,7 +43,7 @@ public class Debug {
      * }</pre>
      * </blockquote>
      *
-     * @return
+     * @return The response information returned from Vault
      * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
      */
     public HealthResponse health() throws VaultException {
@@ -64,8 +64,8 @@ public class Debug {
      * @param activeCode (optional) Indicates the status code that should be returned for an active node instead of the default of 200
      * @param standbyCode (optional) Indicates the status code that should be returned for a standby node instead of the default of 429
      * @param sealedCode (optional) Indicates the status code that should be returned for a sealed node instead of the default of 500
-     * @return
-     * @throws VaultException
+     * @return The response information returned from Vault
+     * @throws VaultException If an error occurs or unexpected response received from Vault
      */
     public HealthResponse health(
             final Boolean standbyOk,
