@@ -1,7 +1,8 @@
-classes
 .gradle
 .idea
 vault-java-driver.iml
+gradle.properties
 build
 build.gradle
+classes
 com/
