@@ -7,6 +7,7 @@ group 'com.bettercloud'
 //noinspection GroovyUnusedAssignment
 archivesBaseName = 'vault-java-driver'
 version '1.2.0-SNAPSHOT'
+ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 
 //noinspection GroovyUnusedAssignment
 sourceCompatibility = 1.7
@@ -145,6 +146,7 @@ artifacts {
 }
 
 signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
 
