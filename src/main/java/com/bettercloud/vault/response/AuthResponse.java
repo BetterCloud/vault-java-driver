@@ -12,7 +12,11 @@ public class AuthResponse extends VaultResponse {
 
     private String authClientToken;
     private List<String> authPolicies = new ArrayList<String>();
-    private long authLeaseDuration;
+
+    /** This field will change from type <code>int</code> to <code>long</code> in the next major release. */
+    @Deprecated
+    private int authLeaseDuration;
+
     private boolean authRenewable;
     private String appId;
     private String userId;
@@ -78,12 +82,12 @@ public class AuthResponse extends VaultResponse {
         this.authPolicies.addAll(authPolicies);
     }
 
-    public long getAuthLeaseDuration() {
+    public int getAuthLeaseDuration() {
         return authLeaseDuration;
     }
 
     @Deprecated
-    public void setAuthLeaseDuration(final long authLeaseDuration) {
+    public void setAuthLeaseDuration(final int authLeaseDuration) {
         this.authLeaseDuration = authLeaseDuration;
     }
 
