@@ -56,9 +56,9 @@ public class Vault {
      * This method is chained ahead of endpoints (e.g. <code>logical()</code>, <code>auth()</code>,
      * etc... to specify retry rules for any API operations invoked on that endpoint.
      *
-     * @param maxRetries The number of times that API operations will be retried when a failure occurs.
-     * @param retryIntervalMilliseconds The number of milliseconds that the driver will wait in between retries.
-     * @return
+     * @param maxRetries The number of times that API operations will be retried when a failure occurs
+     * @param retryIntervalMilliseconds The number of milliseconds that the driver will wait in between retries
+     * @return This object, with maxRetries and retryIntervalMilliseconds populated
      */
     public Vault withRetries(final int maxRetries, final int retryIntervalMilliseconds) {
         this.vaultConfig.setMaxRetries(maxRetries);
@@ -121,6 +121,7 @@ public class Vault {
      * }</pre>
      * </blockquote>
      *
+     * @return The DEPRECATED class for accessing Vault's heath check endpoint functionality
      */
     @Deprecated
     public Sys sys() { return new Sys(vaultConfig); }

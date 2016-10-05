@@ -42,10 +42,7 @@ public class AuthResponse extends VaultResponse {
     }
 
     /**
-     * Deprecated.  Use <code>getRenewable()</code> (returning object <code>Boolean</code> rather than
-     * primitive <code>boolean</code>.
-     *
-     * @return
+     * @return Deprecated.  Use <code>getRenewable()</code> (returning object <code>Boolean</code> rather than primitive <code>boolean</code>.
      */
     @Deprecated
     public boolean isRenewable() {
@@ -53,10 +50,7 @@ public class AuthResponse extends VaultResponse {
     }
 
     /**
-     * Deprecated.  Use <code>setRenewable(final Boolean renewable)</code>, passing object <code>Boolean</code>
-     * rather than primitive <code>boolean</code>.
-     *
-     * @param renewable
+     * @param renewable Deprecated.  Use <code>setRenewable(final Boolean renewable)</code>, passing object <code>Boolean</code> rather than primitive <code>boolean</code>.
      */
     @Deprecated
     public void setRenewable(final boolean renewable) {

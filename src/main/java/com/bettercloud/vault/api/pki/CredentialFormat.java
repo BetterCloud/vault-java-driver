@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * <p>Possible format options for credentials issued by the PKI backend.</p>
  *
- * <p>See: {@link Pki#issue(String, String, List, List, Integer, CredentialFormat) Pki.issue}</p>
+ * <p>See: {@link Pki#issue(String, String, List, List, String, CredentialFormat)}</p>
  */
 public enum CredentialFormat {
     PEM,

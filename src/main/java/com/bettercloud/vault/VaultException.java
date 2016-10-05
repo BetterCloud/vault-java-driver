@@ -42,7 +42,7 @@ public class VaultException extends Exception {
      * Some exceptions are not caused on the Vault side.  Obviously, if there is no relevant HTTP status code then
      * this method will return <code>0</code>.
      *
-     * @return
+     * @return An HTTP status code, returned from a Vault server, that is the cause of this <code>VaultException</code>
      */
     public int getHttpStatusCode() {
         return httpStatusCode;

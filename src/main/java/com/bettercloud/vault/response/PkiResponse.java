@@ -19,11 +19,10 @@ public class PkiResponse extends LogicalResponse {
     private Credential credential;
 
     /**
-     * Constructor for responses that do not include response data
-     * (e.g. <code>createOrUpdateRole(String roleName)</code>).
+     * Constructor for responses that do not include response data (e.g. <code>createOrUpdateRole(String roleName)</code>).
      *
-     * @param restResponse
-     * @param retries
+     * @param restResponse The raw response received from Vault
+     * @param retries The number of retries that were performed for this operation
      */
     public PkiResponse(final RestResponse restResponse, final int retries) {
         super(restResponse, retries);
@@ -32,9 +31,9 @@ public class PkiResponse extends LogicalResponse {
     /**
      * Constructor for responses that include response data (e.g. <code>getRole(String roleName)</code>).
      *
-     * @param restResponse
-     * @param retries
-     * @param data
+     * @param restResponse The raw response received from Vault
+     * @param retries The number of retries that were performed for this operation
+     * @param data The data received from Vault, parsed into key-value pairs
      */
     public PkiResponse(final RestResponse restResponse, final int retries, final Map<String, String> data) {
         super(restResponse, retries, data);
@@ -59,7 +58,7 @@ public class PkiResponse extends LogicalResponse {
      * return <code>null</code>.</p>
      *
      * @param data The <code>"data"</code> object from a Vault JSON response, converted into Java key-value pairs.
-     * @return
+     * @return A container for role options
      */
     private RoleOptions buildRoleOptionsFromData(final Map<String, String> data) {
         if (data == null) {
@@ -116,7 +115,7 @@ public class PkiResponse extends LogicalResponse {
      * <code>null</code>.</p>
      *
      * @param data The <code>"data"</code> object from a Vault JSON response, converted into Java key-value pairs.
-     * @return
+     * @return A container for credential data
      */
     private Credential buildCredentialFromData(final Map<String, String> data) {
         if (data == null) {
@@ -177,8 +176,8 @@ public class PkiResponse extends LogicalResponse {
     /**
      * <p>Used to convert a String to an object Long, if possble.</p>
      *
-     * @param input
-     * @return
+     * @param input A String which should represent a numeric (i.e. Long) value
+     * @return A Long representation of the input String, or else null if the input cannot be converted to a Long
      */
     private Long parseLong(final String input) {
         try {

@@ -44,9 +44,9 @@ public class Pki {
      * }</pre>
      * </blockquote>
      *
-     * @param roleName
-     * @return
-     * @throws VaultException
+     * @param roleName A name for the role to be created or updated
+     * @return A container for the information returned by Vault
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public PkiResponse createOrUpdateRole(final String roleName) throws VaultException {
         return createOrUpdateRole(roleName, null);
@@ -74,10 +74,10 @@ public class Pki {
      * }</pre>
      * </blockquote>
      *
-     * @param roleName
-     * @param options
-     * @return
-     * @throws VaultException
+     * @param roleName A name for the role to be created or updated
+     * @param options Optional settings for the role to be created or updated (e.g. allowed domains, ttl, etc)
+     * @return A container for the information returned by Vault
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public PkiResponse createOrUpdateRole(final String roleName, final RoleOptions options) throws VaultException {
         int retryCount = 0;
@@ -136,9 +136,9 @@ public class Pki {
      * }</pre>
      * </blockquote>
      *
-     * @param roleName
-     * @return
-     * @throws VaultException
+     * @param roleName The name of the role to retrieve
+     * @return A container for the information returned by Vault
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public PkiResponse getRole(final String roleName) throws VaultException {
         int retryCount = 0;
@@ -200,9 +200,9 @@ public class Pki {
      * }</pre>
      * </blockquote>
      *
-     * @param roleName
-     * @return
-     * @throws VaultException
+     * @param roleName The name of the role to delete
+     * @return A container for the information returned by Vault
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public PkiResponse deleteRole(final String roleName) throws VaultException {
         int retryCount = 0;
@@ -268,8 +268,8 @@ public class Pki {
      * @param ipSans (optional) Requested IP Subject Alternative Names, in a comma-delimited list. Only valid if the role allows IP SANs (which is the default).
      * @param ttl (optional) Requested Time To Live. Cannot be greater than the role's max_ttl value. If not provided, the role's ttl value will be used. Note that the role values default to system values if not explicitly set.
      * @param format (optional) Format for returned data. Can be pem, der, or pem_bundle; defaults to pem. If der, the output is base64 encoded. If pem_bundle, the certificate field will contain the private key, certificate, and issuing CA, concatenated.
-     * @return
-     * @throws VaultException
+     * @return A container for the information returned by Vault
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public PkiResponse issue(
             final String roleName,
@@ -405,9 +405,9 @@ public class Pki {
     /**
      * This logic will move into the <code>PkiResponse</code> constructor.
      *
-     * @param restResponse
-     * @return
-     * @throws VaultException
+     * @param restResponse The Vault reponse data to be parsed
+     * @return Key-value pairs representing the parsed data
+     * @throws VaultException If any error occurs
      */
     @Deprecated
     private Map<String, String> parseResponseData(final RestResponse restResponse) throws VaultException {
