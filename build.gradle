@@ -10,16 +10,11 @@ ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
-configurations {
-    deployerJars
-}
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    deployerJars('org.apache.maven.wagon:wagon-http:2.2')
     testCompile('junit:junit:4.11')
     testCompile('org.mockito:mockito-core:1.10.19')
     testCompile('org.eclipse.jetty:jetty-server:9.3.7.v20160115')
@@ -37,12 +32,6 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
-}
-
-task printIt {
-    System.out.println(nexusUrl)
-    System.out.println(nexusUsername)
-    System.out.println(nexusPassword)
 }
 
 
@@ -96,8 +85,7 @@ task integrationTest(type: Test) {
 //
 // Deploying releases to Maven Central (or snapshots to a local Nexus repository).
 //
-// Snapshots are not signed... but signing the release artifact requires a `gradle.properties` file in
-// your `$HOME/.gradle` directory, with:
+// Snapshots are not signed... but signing the release artifact requires the following project properties:
 //
 // signing.keyId = <ID of the private key in your secure keyring used for signing JAR's>
 // signing.password = <public key password>
