@@ -39,6 +39,12 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
 }
 
+task printIt {
+    System.out.println(nexusUrl)
+    System.out.println(nexusUsername)
+    System.out.println(nexusPassword)
+}
+
 
 //
 // Separate unit tests from integration tests.  See: `src/test-integration/README.md`
