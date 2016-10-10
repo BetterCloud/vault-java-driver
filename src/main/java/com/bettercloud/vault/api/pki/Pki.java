@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>The implementing class for operations on Vault's <code>/v1/pki/*</code> REST endpoints.</p>
+ * <p>The implementing class for operations on Vault's PKI backend.</p>
  *
  * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of <code>Vault</code>
  * in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code> method for usage examples.</p>
@@ -24,13 +24,16 @@ public class Pki {
 
     private final VaultConfig config;
 
+    private static final String DEFAULT_PATH = "pki";
+
     public Pki(final VaultConfig config) {
         this.config = config;
     }
 
     /**
-     * <p>Operation to create an role using the PKI backend.  Relies on an authentication token being present in
-     * the <code>VaultConfig</code> instance.</p>
+     * <p>Operation to create an role using the PKI backend at the default path
+     * ({@value com.bettercloud.vault.api.pki.Pki#DEFAULT_PATH}). Relies on an authentication token being present in the
+     * <code>VaultConfig</code> instance.</p>
      *
      * <p>This version of the method uses default values for all optional settings.  Example usage:</p>
      *
@@ -49,12 +52,38 @@ public class Pki {
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public PkiResponse createOrUpdateRole(final String roleName) throws VaultException {
-        return createOrUpdateRole(roleName, null);
+        return createOrUpdateRole(DEFAULT_PATH, roleName, null);
     }
 
     /**
-     * <p>Operation to create an role using the PKI backend.  Relies on an authentication token being present in
-     * the <code>VaultConfig</code> instance.</p>
+     * <p>Operation to create an role using the PKI backend at the given path. Relies on an authentication token being
+     * present in the <code>VaultConfig</code> instance.</p>
+     *
+     * <p>This version of the method uses default values for all optional settings.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final VaultConfig config = new VaultConfig(address, token);
+     * final Vault vault = new Vault(config);
+     * final PkiResponse response = vault.pki().createOrUpdateRole("testRole");
+     *
+     * assertEquals(204, response.getRestResponse().getStatus());
+     * }</pre>
+     * </blockquote>
+     *
+     * @param path The path at which the PKI endpoint is mounted
+     * @param roleName A name for the role to be created or updated
+     * @return A container for the information returned by Vault
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
+     */
+    public PkiResponse createOrUpdateRole(final String path, final String roleName) throws VaultException {
+        return createOrUpdateRole(path, roleName, null);
+    }
+
+    /**
+     * <p>Operation to create an role using the PKI backend at the default path
+     * ({@value com.bettercloud.vault.api.pki.Pki#DEFAULT_PATH}). Relies on an authentication token being present in the
+     * <code>VaultConfig</code> instance.</p>
      *
      * <p>This version of the method accepts a <code>RoleOptions</code> parameter, containing optional settings
      * for the role creation operation.  Example usage:</p>
@@ -80,12 +109,45 @@ public class Pki {
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public PkiResponse createOrUpdateRole(final String roleName, final RoleOptions options) throws VaultException {
+        return createOrUpdateRole(DEFAULT_PATH, roleName, options);
+    }
+
+    /**
+     * <p>Operation to create an role using the PKI backend.  Relies on an authentication token being present in
+     * the <code>VaultConfig</code> instance.</p>
+     *
+     * <p>This version of the method accepts a <code>RoleOptions</code> parameter, containing optional settings
+     * for the role creation operation.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final VaultConfig config = new VaultConfig(address, token);
+     * final Vault vault = new Vault(config);
+     *
+     * final RoleOptions options = new RoleOptions()
+     *                              .allowedDomains(new ArrayList<String>(){{ add("myvault.com"); }})
+     *                              .allowSubdomains(true)
+     *                              .maxTtl("9h");
+     * final PkiResponse response = vault.pki().createOrUpdateRole("testRole", options);
+     *
+     * assertEquals(204, response.getRestResponse().getStatus());
+     * }</pre>
+     * </blockquote>
+     *
+     * @param path The path at which the PKI endpoint is mounted
+     * @param roleName A name for the role to be created or updated
+     * @param options Optional settings for the role to be created or updated (e.g. allowed domains, ttl, etc)
+     * @return A container for the information returned by Vault
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
+     */
+    public PkiResponse createOrUpdateRole(final String path, final String roleName, final RoleOptions options) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
                 final String requestJson = roleOptionsToJson(options);
+
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/pki/roles/" + roleName)
+                        .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), path, roleName))
                         .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -120,8 +182,9 @@ public class Pki {
     }
 
     /**
-     * <p>Operation to retrieve an role using the PKI backend.  Relies on an authentication token being present in
-     * the <code>VaultConfig</code> instance.</p>
+     * <p>Operation to retrieve an role using the PKI backend at the default
+     * path ({@value com.bettercloud.vault.api.pki.Pki#DEFAULT_PATH}). Relies on an authentication token being present
+     * in the <code>VaultConfig</code> instance.</p>
      *
      * <p>The role information will be populated in the <code>roleOptions</code> field of the <code>PkiResponse</code>
      * return value.  Example usage:</p>
@@ -141,12 +204,38 @@ public class Pki {
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public PkiResponse getRole(final String roleName) throws VaultException {
+        return getRole(DEFAULT_PATH, roleName);
+    }
+
+    /**
+     * <p>Operation to retrieve an role using the PKI backend at the given path. Relies on an authentication token being
+     * present in the <code>VaultConfig</code> instance.</p>
+     *
+     * <p>The role information will be populated in the <code>roleOptions</code> field of the <code>PkiResponse</code>
+     * return value.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final VaultConfig config = new VaultConfig(address, token);
+     * final Vault vault = new Vault(config);
+     * final PkiResponse response = vault.pki().getRole("testRole");
+     *
+     * final RoleOptions details = response.getRoleOptions();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param path The path at which the PKI endpoint is mounted
+     * @param roleName The name of the role to retrieve
+     * @return A container for the information returned by Vault
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
+     */
+    public PkiResponse getRole(final String path, final String roleName) throws VaultException {
         int retryCount = 0;
         while (true) {
             // Make an HTTP request to Vault
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/pki/roles/" + roleName)
+                        .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), path, roleName))
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -184,7 +273,8 @@ public class Pki {
     }
 
     /**
-     * <p>Operation to delete an role using the PKI backend.  Relies on an authentication token being present in
+     * <p>Operation to delete an role using the PKI backend at the default path
+     * ({@value com.bettercloud.vault.api.pki.Pki#DEFAULT_PATH}). Relies on an authentication token being present in
      * the <code>VaultConfig</code> instance.</p>
      *
      * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will be thrown if
@@ -205,12 +295,38 @@ public class Pki {
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public PkiResponse deleteRole(final String roleName) throws VaultException {
+        return deleteRole(DEFAULT_PATH, roleName);
+    }
+
+    /**
+     * <p>Operation to delete an role using the PKI backend at the given path. Relies on an authentication token being
+     * present in the <code>VaultConfig</code> instance.</p>
+     *
+     * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will be thrown if
+     * the role does not exist, or if any other problem occurs.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final VaultConfig config = new VaultConfig(address, token);
+     * final Vault vault = new Vault(config);
+     *
+     * final PkiResponse response = vault.pki().deleteRole("testRole");
+     * assertEquals(204, response.getRestResponse().getStatus();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param path The path at which the PKI endpoint is mounted
+     * @param roleName The name of the role to delete
+     * @return A container for the information returned by Vault
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
+     */
+    public PkiResponse deleteRole(final String path, final String roleName) throws VaultException {
         int retryCount = 0;
         while (true) {
             // Make an HTTP request to Vault
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/pki/roles/" + roleName)
+                        .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), path, roleName))
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -245,8 +361,8 @@ public class Pki {
 
     /**
      * <p>Operation to generate a new set of credentials (private key and certificate) based on a given role using
-     * the PKI backend.  The issuing CA certificate is returned as well, so that only the root CA need be in a
-     * client's trust store.</p>
+     * the PKI backend at the default path ({@value com.bettercloud.vault.api.pki.Pki#DEFAULT_PATH}). The issuing CA
+     * certificate is returned as well, so that only the root CA need be in a client's trust store.</p>
      *
      * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will be thrown if
      * the role does not exist, or if any other problem occurs.  Credential information will be populated in the
@@ -272,6 +388,47 @@ public class Pki {
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public PkiResponse issue(
+            final String roleName,
+            final String commonName,
+            final List<String> altNames,
+            final List<String> ipSans,
+            final String ttl,
+            final CredentialFormat format
+    ) throws VaultException {
+        return issue(DEFAULT_PATH, roleName, commonName, altNames, ipSans, ttl, format);
+    }
+
+    /**
+     * <p>Operation to generate a new set of credentials (private key and certificate) based on a given role using
+     * the PKI backend at the given path. The issuing CA certificate is returned as well, so that only the root CA need
+     * be in a client's trust store.</p>
+     *
+     * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will be thrown if
+     * the role does not exist, or if any other problem occurs.  Credential information will be populated in the
+     * <code>credential</code> field of the <code>PkiResponse</code> return value.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final VaultConfig config = new VaultConfig(address, token);
+     * final Vault vault = new Vault(config);
+     *
+     * final PkiResponse response = vault.pki().deleteRole("testRole");
+     * assertEquals(204, response.getRestResponse().getStatus();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param path The path at which the PKI endpoint is mounted
+     * @param roleName The role on which the credentials will be based.
+     * @param commonName The requested CN for the certificate. If the CN is allowed by role policy, it will be issued.
+     * @param altNames (optional) Requested Subject Alternative Names, in a comma-delimited list. These can be host names or email addresses; they will be parsed into their respective fields. If any requested names do not match role policy, the entire request will be denied.
+     * @param ipSans (optional) Requested IP Subject Alternative Names, in a comma-delimited list. Only valid if the role allows IP SANs (which is the default).
+     * @param ttl (optional) Requested Time To Live. Cannot be greater than the role's max_ttl value. If not provided, the role's ttl value will be used. Note that the role values default to system values if not explicitly set.
+     * @param format (optional) Format for returned data. Can be pem, der, or pem_bundle; defaults to pem. If der, the output is base64 encoded. If pem_bundle, the certificate field will contain the private key, certificate, and issuing CA, concatenated.
+     * @return A container for the information returned by Vault
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
+     */
+    public PkiResponse issue(
+            final String path,
             final String roleName,
             final String commonName,
             final List<String> altNames,
@@ -317,7 +474,7 @@ public class Pki {
             // Make an HTTP request to Vault
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/pki/issue/" + roleName)
+                        .url(String.format("%s/v1/%s/issue/%s", config.getAddress(), path, roleName))
                         .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
