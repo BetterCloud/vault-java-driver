@@ -38,7 +38,7 @@ alike, without causing conflicts with any other dependency.</p>
 <p>Gradle:</p>
 
 <pre><code>dependencies {
-    compile('com.bettercloud:vault-java-driver:1.1.0')
+    compile('com.bettercloud:vault-java-driver:1.2.0')
 }
 </code></pre>
 
@@ -47,7 +47,7 @@ alike, without causing conflicts with any other dependency.</p>
 <pre><code>&lt;dependency&gt;
     &lt;groupId&gt;com.bettercloud&lt;/groupId&gt;
     &lt;artifactId&gt;vault-java-driver&lt;/artifactId&gt;
-    &lt;version&gt;1.1.0&lt;/version&gt;
+    &lt;version&gt;1.2.0&lt;/version&gt;
 &lt;/dependency&gt;
 </code></pre>
 
@@ -164,6 +164,35 @@ may require modifications in your code to migrate.  Changes to the minor version
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.</p>
 
 <ul>
+<li>
+<strong>1.2.0</strong>: This is a substantial release, with numerous additions.  It's a minor version number only because there 
+         should be no breaking changes.  The changes include the following:
+
+<ul>
+<li>Switches from Vault 0.5.x to 0.6.x for automated tests.<br>
+</li>
+<li>Adds a field to <code>VaultException</code> for capturing the HTTP response code (if any) from Vault.<br>
+</li>
+<li>Updates the Gradle build, so that you no longer need empty placeholder values for certain variables elsewhere 
+in your environment.<br>
+</li>
+<li>Updates integration test suite to account for breaking changes in Vault 0.6.x (e.g. you can no longer use 
+a token that was obtained from one of the authentication backends to perform tasks such as creating and deleting 
+roles, etc). </li>
+<li>Deprecates the App ID authentication backend, and adds a new version of the Userpass authentication backend that 
+doesn't require a path prefix.  Adds support for the GitHub authentication backend.</li>
+<li>If the <code>VAULT_TOKEN</code> environment parameter is not set, then the driver will now check for a file named <code>.vault-token</code> 
+in the executing user's home directory, and try to read a token value from that.</li>
+<li>Deprecates the <code>com.bettercloud.vault.api.Sys</code> class, moving the debug-related methods into their own 
+specific <code>com.bettercloud.vault.api.Debug</code> class instead.<br>
+</li>
+<li>Implements some of the lease related endpoints (i.e. revoke, revoke-prefix, revoke-force).</li>
+<li>Supports PKI backends that are mounted on non-default paths.</li>
+</ul>
+</li>
+<li>
+<strong>1.1.1</strong>: Changes the <code>ttl</code> argument to <code>Pki.issue()</code> from <code>Integer</code> to <code>String</code>, to fix a bug preventing 
+         you from specifying the time suffix (e.g. "1h").</li>
 <li>
 <strong>1.1.0</strong>: Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical
          API wrapper for listing and deleting secrets.  Implements the <code>/v1/sys/health</code> health-check
