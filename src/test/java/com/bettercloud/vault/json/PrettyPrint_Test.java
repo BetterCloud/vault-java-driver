@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 
+@SuppressWarnings("PMD")
 public class PrettyPrint_Test {
 
   private StringWriter output;

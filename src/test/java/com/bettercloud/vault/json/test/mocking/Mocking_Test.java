@@ -35,6 +35,7 @@ import com.bettercloud.vault.json.ParseException;
 /**
  * Make sure types do not prevent mocking by final or visibility constructs.
  */
+@SuppressWarnings("PMD")
 public class Mocking_Test {
 
   @Test

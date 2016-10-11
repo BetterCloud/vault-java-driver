@@ -34,6 +34,7 @@ import java.util.Arrays;
  * jsonValue.writeTo(writer, PrettyPrint.singleLine());
  * </pre>
  */
+@SuppressWarnings("PMD")
 public class PrettyPrint extends WriterConfig {
 
   private final char[] indentChars;

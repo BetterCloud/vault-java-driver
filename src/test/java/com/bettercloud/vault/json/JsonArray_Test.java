@@ -38,6 +38,7 @@ import org.junit.Test;
 import org.mockito.InOrder;
 
 
+@SuppressWarnings("PMD")
 public class JsonArray_Test {
 
   private JsonArray array;

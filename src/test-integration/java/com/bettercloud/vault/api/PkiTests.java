@@ -39,9 +39,13 @@ public class PkiTests {
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
 
-        final PkiResponse response = vault.pki().deleteRole("testRole");
-        final RestResponse restResponse = response.getRestResponse();
-        assertEquals(204, restResponse.getStatus());
+        final PkiResponse defaultReponse = vault.pki().deleteRole("testRole");
+        final RestResponse defaultRestResponse = defaultReponse.getRestResponse();
+        assertEquals(204, defaultRestResponse.getStatus());
+
+        final PkiResponse customResponse = vault.pki("other-pki").deleteRole("testRole");
+        final RestResponse customRestResponse = customResponse.getRestResponse();
+        assertEquals(204, customRestResponse.getStatus());
     }
 
     @Test
@@ -99,6 +103,16 @@ public class PkiTests {
         assertNotNull(issueResponse.getCredential().getSerialNumber());
         assertEquals("rsa", issueResponse.getCredential().getPrivateKeyType());
         assertNotNull(issueResponse.getCredential().getIssuingCa());
+    }
+
+    @Test
+    public void testCustomMountPath() throws VaultException {
+        final VaultConfig config = new VaultConfig(address, token);
+        final Vault vault = new Vault(config);
+
+        vault.pki("other-pki").createOrUpdateRole("testRole");
+        final PkiResponse response = vault.pki("other-pki").getRole("testRole");
+        assertTrue(compareRoleOptions(new RoleOptions(), response.getRoleOptions()));
     }
 
     private boolean compareRoleOptions(final RoleOptions expected, final RoleOptions actual) {

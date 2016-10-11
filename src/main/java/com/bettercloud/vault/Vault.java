@@ -94,6 +94,30 @@ public class Vault {
     }
 
     /**
+     * <p>Returns the implementing class for Vault's PKI secret backend, using a custom path when that backend is
+     * mounted on something other than the default (i.e. <code>/v1/pki</code>).</p>
+     *
+     * <p>For instance, if your PKI backend is instead mounted on <code>/v1/root-ca</code>, then <code>"root-ca"</code>
+     * would be passed via the <code>mountPath</code> parameter.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final VaultConfig config = new VaultConfig(address, token);
+     * final Vault vault = new Vault(config);
+     * final PkiResponse response = vault.pki("root-ca").createOrUpdateRole("testRole");
+     *
+     * assertEquals(204, response.getRestResponse().getStatus());
+     * }</pre>
+     * </blockquote>
+     *
+     * @param mountPath The path on which your Vault PKI backend is mounted, without the <code>/v1/</code> prefix
+     * @return The implementing class for Vault's PKI secret backend.
+     */
+    public Pki pki(final String mountPath) {
+        return new Pki(vaultConfig, mountPath);
+    }
+
+    /**
      * Returns the implementing class for Vault's lease operations (e.g. revoke, revoke-prefix).
      *
      * @return The implementing class for Vault's lease operations (e.g. revoke, revoke-prefix).

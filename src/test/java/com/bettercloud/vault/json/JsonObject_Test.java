@@ -41,6 +41,7 @@ import com.bettercloud.vault.json.JsonObject.HashIndexTable;
 import com.bettercloud.vault.json.JsonObject.Member;
 
 
+@SuppressWarnings("PMD")
 public class JsonObject_Test {
 
   private JsonObject object;

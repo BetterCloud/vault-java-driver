@@ -27,6 +27,7 @@ import java.io.Writer;
 /**
  * Controls the formatting of the JSON output. Use one of the available constants.
  */
+@SuppressWarnings("PMD")
 public abstract class WriterConfig {
 
   /**

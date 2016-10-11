@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>The implementing class for operations on Vault's <code>/v1/pki/*</code> REST endpoints.</p>
+ * <p>The implementing class for operations on Vault's PKI backend.</p>
  *
  * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of <code>Vault</code>
  * in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code> method for usage examples.</p>
@@ -23,9 +23,27 @@ import java.util.Map;
 public class Pki {
 
     private final VaultConfig config;
+    private final String mountPath;
 
+    /**
+     * Constructor for use when the PKI backend is mounted on the default path (i.e. <code>/v1/pki</code>).
+     *
+     * @param config A container for the configuration settings needed to initialize a <code>Vault</code> driver instance
+     */
     public Pki(final VaultConfig config) {
         this.config = config;
+        this.mountPath = "pki";
+    }
+
+    /**
+     * Constructor for use when the PKI backend is mounted on some non-default custom path (e.g. <code>/v1/root-ca</code>).
+     *
+     * @param config A container for the configuration settings needed to initialize a <code>Vault</code> driver instance
+     * @param mountPath The path on which your Vault PKI backend is mounted, without the <code>/v1/</code> prefix (e.g. <code>"root-ca"</code>)
+     */
+    public Pki(final VaultConfig config, final String mountPath) {
+        this.config = config;
+        this.mountPath = mountPath;
     }
 
     /**
@@ -84,8 +102,9 @@ public class Pki {
         while (true) {
             try {
                 final String requestJson = roleOptionsToJson(options);
+
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/pki/roles/" + roleName)
+                        .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -146,7 +165,7 @@ public class Pki {
             // Make an HTTP request to Vault
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/pki/roles/" + roleName)
+                        .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -210,7 +229,7 @@ public class Pki {
             // Make an HTTP request to Vault
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/pki/roles/" + roleName)
+                        .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -317,7 +336,7 @@ public class Pki {
             // Make an HTTP request to Vault
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/pki/issue/" + roleName)
+                        .url(String.format("%s/v1/%s/issue/%s", config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())

@@ -31,6 +31,7 @@ import org.hamcrest.core.StringStartsWith;
 import org.junit.Test;
 
 
+@SuppressWarnings("PMD")
 public class JsonParser_Test {
 
   @Test
