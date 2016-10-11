@@ -26,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 
+@SuppressWarnings("PMD")
 public class ParseException_Test {
 
   @Test

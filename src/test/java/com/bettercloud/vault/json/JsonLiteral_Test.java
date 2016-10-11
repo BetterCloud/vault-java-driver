@@ -30,6 +30,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 
+@SuppressWarnings("PMD")
 public class JsonLiteral_Test {
 
   @Test

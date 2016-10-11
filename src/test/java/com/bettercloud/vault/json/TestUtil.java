@@ -31,6 +31,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 
+@SuppressWarnings("PMD")
 public class TestUtil {
 
   public static <T extends Exception> T assertException(Class<T> type,

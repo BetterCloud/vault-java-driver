@@ -31,6 +31,7 @@ import java.io.Writer;
  * contract of Writer. In particular, it does not flush or close the wrapped writer nor does it
  * ensure that the wrapped writer is open.
  */
+@SuppressWarnings("PMD")
 class WritingBuffer extends Writer {
 
   private final Writer writer;

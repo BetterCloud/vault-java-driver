@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 
+@SuppressWarnings("PMD")
 class JsonWriter {
 
   private static final int CONTROL_CHARACTERS_END = 0x001f;

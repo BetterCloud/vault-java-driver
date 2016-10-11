@@ -31,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 
+@SuppressWarnings("PMD")
 public class WritingBuffer_Test {
 
   private static final int BUFFER_SIZE = 16;

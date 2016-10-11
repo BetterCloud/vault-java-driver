@@ -31,6 +31,7 @@ import java.io.Writer;
 import org.junit.Test;
 
 
+@SuppressWarnings("PMD")
 public class JsonValue_Test {
 
   @Test

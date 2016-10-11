@@ -33,6 +33,7 @@ import org.junit.Test;
 import com.bettercloud.vault.json.TestUtil.RunnableEx;
 
 
+@SuppressWarnings("PMD")
 public class Json_Test {
 
   @Test

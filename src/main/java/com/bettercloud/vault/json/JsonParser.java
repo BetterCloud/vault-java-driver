@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.io.StringReader;
 
 
+@SuppressWarnings("PMD")
 class JsonParser {
 
   private static final int MIN_BUFFER_SIZE = 10;

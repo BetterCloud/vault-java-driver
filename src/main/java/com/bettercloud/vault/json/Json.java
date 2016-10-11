@@ -51,6 +51,7 @@ import java.io.Reader;
  * JsonArray array = Json.array(names);
  * </pre>
  */
+@SuppressWarnings("PMD")
 public final class Json {
 
   private Json() {

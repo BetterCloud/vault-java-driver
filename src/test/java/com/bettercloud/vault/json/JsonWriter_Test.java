@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 
+@SuppressWarnings("PMD")
 public class JsonWriter_Test {
 
   private StringWriter output;

@@ -24,7 +24,7 @@ package com.bettercloud.vault.json;
 import java.io.IOException;
 
 
-@SuppressWarnings("serial") // use default serial UID
+@SuppressWarnings({"serial", "PMD"}) // use default serial UID
 class JsonNumber extends JsonValue {
 
   private final String string;
