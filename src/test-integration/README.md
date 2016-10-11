@@ -48,6 +48,7 @@ vault auth-enable userpass
 vault write auth/userpass/users/fake_user password=fake_password
 
 vault mount -path=pki pki
+vault mount -path=other-pki pki
 vault write pki/root/generate/internal common_name=myvault.com ttl=99h
 ```
 
