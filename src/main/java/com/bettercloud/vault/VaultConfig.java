@@ -39,6 +39,17 @@ import java.nio.file.Paths;
  * same instance afterward.</p>
  */
 public class VaultConfig {
+    public static final String ENV_VAR_VAULT_ADDR = "VAULT_ADDR";
+    public static final String ENV_VAR_VAULT_TOKEN = "VAULT_TOKEN";
+    public static final String ENV_VAR_VAULT_SSL_CERT = "VAULT_SSL_CERT";
+    public static final String ENV_VAR_VAULT_SSL_VERIFY = "VAULT_SSL_VERIFY";
+    public static final String ENV_VAR_VAULT_OPEN_TIMEOUT = "VAULT_OPEN_TIMEOUT";
+    public static final String ENV_VAR_VAULT_READ_TIMEOUT = "VAULT_READ_TIMEOUT";
+
+    public static final String ENV_VAR_VAULT_CLIENT_KEYSTORE = "VAULT_CLIENT_KEYSTORE";
+    public static final String ENV_VAR_VAULT_CLIENT_KEYSTORE_PASSWORD = "VAULT_CLIENT_KEYSTORE_PASSWORD";
+    public static final String ENV_VAR_VAULT_CLIENT_TRUSTSTORE = "VAULT_CLIENT_TRUSTSTORE";
+    public static final String ENV_VAR_VAULT_CLIENT_TRUSTSTORE_PASSWORD = "VAULT_CLIENT_TRUSTSTORE_PASSWORD";
 
     /**
      * <p>The code used to load environment variables is encapsulated within an inner class,
@@ -81,6 +92,11 @@ public class VaultConfig {
     private Integer readTimeout;
     private int maxRetries;
     private int retryIntervalMilliseconds;
+
+    private File keystore;
+    private String keystorePassword;
+    private File truststore;
+    private String truststorePassword;
 
     /**
      * <p>Default constructor.  Should be used in conjunction with the builder pattern, calling additional
@@ -370,12 +386,82 @@ public class VaultConfig {
         return this;
     }
 
+
     /**
-     * <p>Sets the maximum number of times that an API operation will retry upon failure.</p>
+     * Configure a JKS Keystore for HTTPS mutual authentication
+     * 
+     * @param jksKeystore - Absolute file path of the JKS keystore
+     * @return This object, with keystore populated, ready for additional builder-pattern method calls or else
+     *         finalization with the build() method
+     */
+    public VaultConfig keystoreFile(final String jksKeystore) {
+        this.keystore = new File(jksKeystore);
+        return this;
+    }
+
+    /**
+     * Configure a JKS Keystore for HTTPS mutual authentication
+     * 
+     * @param jksKeystore - File reference to the JKS keystore
+     * @return This object, with keystore populated, ready for additional builder-pattern method calls or else
+     *         finalization with the build() method
+     */
+    public VaultConfig keystoreFile(final File jksKeystore) {
+        this.keystore = jksKeystore;
+        return this;
+    }
+
+    /**
+     * Password to open the JKS keystore
+     * 
+     * @param keystorePassword - Password (in plain text)
+     * @return This object, with keystore password populated, ready for additional builder-pattern method calls or else
+     *         finalization with the build() method
+     */
+    public VaultConfig keystorePassword(String keystorePassword) {
+        this.keystorePassword = keystorePassword;
+        return this;
+    }
+
+    /**
+     * <p>
+     * Configure an alternate truststore to be used for all HTTPS connections with Vault
+     * </p>
+     * <p>
+     * You may set your own truststore if you do not wish to use Java's default truststore
+     * </p>
+     * 
+     * @param truststore - File reference to the JKS keystore containing all your trusted CA certs
+     * @return This object, with truststore populated, ready for additional builder-pattern method calls or else
+     *         finalization with the build() method
+     */
+    public VaultConfig truststore(File truststore) {
+        this.truststore = truststore;
+        return this;
+    }
+
+    /**
+     * Password to open the truststore
+     * 
+     * @param truststorePassword - Password (in plain text)
+     * @return This object, with truststore password populated, ready for additional builder-pattern method calls or
+     *         else finalization with the build() method
+     */
+    public VaultConfig truststorePassword(String truststorePassword) {
+        this.truststorePassword = truststorePassword;
+        return this;
+    }
+
+    /**
+     * <p>
+     * Sets the maximum number of times that an API operation will retry upon failure.
+     * </p>
      *
-     * <p>This method is not meant to be called from application-level code outside of this package (hence
-     * the <code>protected</code> access level.  It is meant to be invoked via <code>Vault.withRetries()</code>
-     * in a builder pattern DSL-style.</p>
+     * <p>
+     * This method is not meant to be called from application-level code outside of this package (hence the
+     * <code>protected</code> access level. It is meant to be invoked via <code>Vault.withRetries()</code> in a builder
+     * pattern DSL-style.
+     * </p>
      *
      * @param maxRetries The number of times that API operations will be retried when a failure occurs.
      */
@@ -411,43 +497,77 @@ public class VaultConfig {
             this.environmentLoader = new EnvironmentLoader();
         }
         if (this.address == null) {
-            final String addressFromEnv = environmentLoader.loadVariable("VAULT_ADDR");
+            final String addressFromEnv = environmentLoader.loadVariable(ENV_VAR_VAULT_ADDR);
             if (addressFromEnv != null) {
                 this.address = addressFromEnv;
             } else {
                 throw new VaultException("No address is set");
             }
         }
-        if (this.token == null && environmentLoader.loadVariable("VAULT_TOKEN") != null) {
-            this.token = environmentLoader.loadVariable("VAULT_TOKEN");
+
+        String token = environmentLoader.loadVariable(ENV_VAR_VAULT_TOKEN);
+        if (this.token == null && token != null) {
+            this.token = token;
         }
-        if (this.sslPemUTF8 == null && environmentLoader.loadVariable("VAULT_SSL_CERT") != null) {
-            final File pemFile = new File(environmentLoader.loadVariable("VAULT_SSL_CERT"));
+
+        String sslCert = environmentLoader.loadVariable(ENV_VAR_VAULT_SSL_CERT);
+        if (this.sslPemUTF8 == null && sslCert != null && !sslCert.trim().isEmpty()) {
+            final File pemFile = new File(sslCert.trim());
             try (final InputStream input = new FileInputStream(pemFile)) {
                 this.sslPemUTF8 = inputStreamToUTF8(input);
             } catch (IOException e) {
                 throw new VaultException(e);
             }
         }
-        if (this.sslVerify == null && environmentLoader.loadVariable("VAULT_SSL_VERIFY") != null) {
-            this.sslVerify = Boolean.valueOf(environmentLoader.loadVariable("VAULT_SSL_VERIFY"));
+
+        String sslVerify = environmentLoader.loadVariable(ENV_VAR_VAULT_SSL_VERIFY);
+        if (this.sslVerify == null && sslVerify != null) {
+            this.sslVerify = Boolean.valueOf(sslVerify);
         }
-        if (this.openTimeout == null && environmentLoader.loadVariable("VAULT_OPEN_TIMEOUT") != null) {
+
+        String openTimeout = environmentLoader.loadVariable(ENV_VAR_VAULT_OPEN_TIMEOUT);
+        if (this.openTimeout == null && openTimeout != null) {
             try {
-                this.openTimeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_OPEN_TIMEOUT"));
+                this.openTimeout = Integer.valueOf(openTimeout);
             } catch (NumberFormatException e) {
-                System.err.printf("The \"VAULT_OPEN_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
-                        environmentLoader.loadVariable("VAULT_OPEN_TIMEOUT"));
+                System.err.printf(
+                    "The \"%s\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
+                    ENV_VAR_VAULT_OPEN_TIMEOUT, openTimeout);
             }
         }
-        if (this.readTimeout == null && environmentLoader.loadVariable("VAULT_READ_TIMEOUT") != null) {
+
+        String readTimeout = environmentLoader.loadVariable(ENV_VAR_VAULT_READ_TIMEOUT);
+        if (this.readTimeout == null && readTimeout != null) {
             try {
-                this.readTimeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_READ_TIMEOUT"));
+                this.readTimeout = Integer.valueOf(readTimeout);
             } catch (NumberFormatException e) {
-                System.err.printf("The \"VAULT_READ_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
-                        environmentLoader.loadVariable("VAULT_READ_TIMEOUT"));
+                System.err.printf(
+                    "The \"%s\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
+                    ENV_VAR_VAULT_READ_TIMEOUT, readTimeout);
             }
         }
+
+        String keystoreFile = environmentLoader.loadVariable(ENV_VAR_VAULT_CLIENT_KEYSTORE);
+        if (this.keystore == null && keystoreFile != null && !keystoreFile.trim().isEmpty()) {
+            this.keystore = new File(keystoreFile.trim());
+        }
+
+        String keystorePassword = environmentLoader.loadVariable(ENV_VAR_VAULT_CLIENT_KEYSTORE_PASSWORD);
+        if (this.keystorePassword == null && keystorePassword != null) {
+            this.keystorePassword = keystorePassword;
+        }
+
+
+        String trustStoreFile = environmentLoader.loadVariable(ENV_VAR_VAULT_CLIENT_TRUSTSTORE);
+        if (this.truststore == null && trustStoreFile != null && !trustStoreFile.trim().isEmpty()) {
+            this.truststore = new File(trustStoreFile.trim());
+        }
+
+        String truststorePassword = environmentLoader.loadVariable(ENV_VAR_VAULT_CLIENT_TRUSTSTORE_PASSWORD);
+        if (this.truststorePassword == null && truststorePassword != null) {
+            this.truststorePassword = truststorePassword;
+        }
+
         return this;
     }
 
@@ -481,6 +601,22 @@ public class VaultConfig {
 
     public int getRetryIntervalMilliseconds() {
         return retryIntervalMilliseconds;
+    }
+
+    public File getKeystore() {
+        return this.keystore;
+    }
+
+    public String getKeystorePassword() {
+        return this.keystorePassword;
+    }
+
+    public File getTruststore() {
+        return truststore;
+    }
+
+    public String getTruststorePassword() {
+        return truststorePassword;
     }
 
     private String inputStreamToUTF8(final InputStream input) throws IOException {

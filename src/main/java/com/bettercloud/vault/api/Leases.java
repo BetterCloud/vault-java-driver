@@ -3,7 +3,6 @@ package com.bettercloud.vault.api;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.VaultResponse;
-import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
 
 /**
@@ -14,12 +13,11 @@ import com.bettercloud.vault.rest.RestResponse;
  * <code>Vault</code> in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code>
  * method for usage examples.</p>
  */
-public class Leases {
+public class Leases extends AbstractAPIClient {
 
-    private final VaultConfig config;
 
     public Leases(final VaultConfig config) {
-        this.config = config;
+        super(config);
     }
 
     /**
@@ -40,13 +38,9 @@ public class Leases {
         int retryCount = 0;
         while (true) {
             try {
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/sys/revoke/" + leaseId)
-                        .header("X-Vault-Token", config.getToken())
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                final RestResponse restResponse = this.getClient()
+                        .url(this.getConfig().getAddress() + "/v1/sys/revoke/" + leaseId)
+                        .header("X-Vault-Token", this.getConfig().getToken())
                         .put();
 
                 // Validate response
@@ -56,10 +50,10 @@ public class Leases {
                 return new VaultResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
+                if (retryCount < this.getConfig().getMaxRetries()) {
                     retryCount++;
                     try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        final int retryIntervalMilliseconds = this.getConfig().getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
@@ -94,13 +88,9 @@ public class Leases {
         int retryCount = 0;
         while (true) {
             try {
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/sys/revoke-prefix/" + prefix)
-                        .header("X-Vault-Token", config.getToken())
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                final RestResponse restResponse = this.getClient()
+                        .url(this.getConfig().getAddress() + "/v1/sys/revoke-prefix/" + prefix)
+                        .header("X-Vault-Token", this.getConfig().getToken())
                         .put();
 
                 // Validate response
@@ -110,10 +100,10 @@ public class Leases {
                 return new VaultResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
+                if (retryCount < this.getConfig().getMaxRetries()) {
                     retryCount++;
                     try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        final int retryIntervalMilliseconds = this.getConfig().getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
@@ -151,13 +141,9 @@ public class Leases {
         int retryCount = 0;
         while (true) {
             try {
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/sys/revoke-force/" + prefix)
-                        .header("X-Vault-Token", config.getToken())
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                final RestResponse restResponse = this.getClient()
+                        .url(this.getConfig().getAddress() + "/v1/sys/revoke-force/" + prefix)
+                        .header("X-Vault-Token", this.getConfig().getToken())
                         .put();
 
                 // Validate response
@@ -167,10 +153,10 @@ public class Leases {
                 return new VaultResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
+                if (retryCount < this.getConfig().getMaxRetries()) {
                     retryCount++;
                     try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        final int retryIntervalMilliseconds = this.getConfig().getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
