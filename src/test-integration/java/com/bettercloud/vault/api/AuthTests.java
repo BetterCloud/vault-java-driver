@@ -5,6 +5,7 @@ import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.response.AuthResponse;
+import com.bettercloud.vault.response.LogicalResponse;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -27,20 +28,28 @@ public class AuthTests {
     final static String userId = System.getProperty("VAULT_USER_ID");
     final static String password = System.getProperty("VAULT_PASSWORD");
     final static String rootToken = System.getProperty("VAULT_TOKEN");
-    final static String appRoleId = System.getProperty("VAULT_APP_ROLE_ID");
-    final static String secretId = System.getProperty("VAULT_SECRET_ID");
+    static String appRoleId;
+    static String secretId;
 
     /**
      * Every test method will need to retrieve Vault credentials from environment variables, but we
      * might as well null-check them once rather than do so redundantly in every method.
      */
     @BeforeClass
-    public static void verifyEnv() {
+    public static void verifyEnv() throws VaultException {
         assertNotNull(address);
         assertNotNull(appId);
         assertNotNull(userId);
         assertNotNull(password);
         assertNotNull(rootToken);
+
+        final VaultConfig config = new VaultConfig(address, rootToken);
+        final Vault vault = new Vault(config);
+        final LogicalResponse roleIdResponse = vault.logical().read("auth/approle/role/testrole/role-id");
+        appRoleId = roleIdResponse.getData().get("role_id");
+        final LogicalResponse secretIdResponse = vault.logical().write("auth/approle/role/testrole/secret-id", null);
+        secretId = secretIdResponse.getData().get("secret_id");
+
         assertNotNull(appRoleId);
         assertNotNull(secretId);
     }
