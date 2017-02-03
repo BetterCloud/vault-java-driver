@@ -104,7 +104,7 @@ public class Logical {
      * </blockquote>
      *
      * @param path The Vault key value to which to write (e.g. <code>secret/hello</code>)
-     * @param nameValuePairs Secret name and value pairs to store under this Vault key
+     * @param nameValuePairs Secret name and value pairs to store under this Vault key (can be <code>null</code> for writing to keys that do not need or expect any fields to be specified)
      * @return The response information received from Vault
      * @throws VaultException If any errors occurs with the REST request, and the maximum number of retries is exceeded.
      */
@@ -113,8 +113,10 @@ public class Logical {
         while (true) {
             try {
                 JsonObject requestJson = Json.object();
-                for (final Map.Entry<String, String> pair : nameValuePairs.entrySet()) {
-                    requestJson = requestJson.add(pair.getKey(), pair.getValue());
+                if (nameValuePairs != null) {
+                    for (final Map.Entry<String, String> pair : nameValuePairs.entrySet()) {
+                        requestJson = requestJson.add(pair.getKey(), pair.getValue());
+                    }
                 }
 
                 final RestResponse restResponse = new Rest()//NOPMD

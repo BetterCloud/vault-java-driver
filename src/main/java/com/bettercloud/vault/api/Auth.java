@@ -207,7 +207,7 @@ public class Auth {
      *
      * <blockquote>
      * <pre>{@code
-     * final AuthResponse response = vault.auth().loginByAppRole("approle", "app_id", "user_id");
+     * final AuthResponse response = vault.auth().loginByAppRole("approle", "9e1aede8-dcc6-a293-8223-f0d824a467ed", "9ff4b26e-6460-834c-b925-a940eddb6880");
      *
      * final String token = response.getAuthClientToken();
      * }</pre>
