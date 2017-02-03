@@ -134,6 +134,7 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
+* **2.0.0 (in progress)**: Adds support for authentication via the AppRole auth backend.
 * **1.2.0**: This is a substantial release, with numerous additions.  It's a minor version number only because there 
              should be no breaking changes.  The changes include the following:
   * Switches from Vault 0.5.x to 0.6.x for automated tests.  
