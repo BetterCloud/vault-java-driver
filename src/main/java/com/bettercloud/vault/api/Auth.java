@@ -40,7 +40,7 @@ public class Auth {
      * final Vault vault = new Vault(config);
      * final AuthResponse response = vault.auth().createToken(null, null, null, null, null, "1h", null, null);
      *
-     * final String token = response.getAuthClientToken());
+     * final String token = response.getAuthClientToken();
      * }</pre>
      * </blockquote>
      *
@@ -144,7 +144,7 @@ public class Auth {
      * <pre>{@code
      * final AuthResponse response = vault.auth().loginByAppID("app-id/login", "app_id", "user_id");
      *
-     * final String token = response.getAuthClientToken());
+     * final String token = response.getAuthClientToken();
      * }</pre>
      * </blockquote>
      *
@@ -209,7 +209,7 @@ public class Auth {
      * <pre>{@code
      * final AuthResponse response = vault.auth().loginByUsernamePassword("userpass/login/test", "password");
      *
-     * final String token = response.getAuthClientToken());
+     * final String token = response.getAuthClientToken();
      * }</pre>
      * </blockquote>
      *
@@ -235,7 +235,7 @@ public class Auth {
      * <pre>{@code
      * final AuthResponse response = vault.auth().loginByUserPass("test", "password");
      *
-     * final String token = response.getAuthClientToken());
+     * final String token = response.getAuthClientToken();
      * }</pre>
      * </blockquote>
      *
@@ -295,7 +295,7 @@ public class Auth {
      * <pre>{@code
      * final AuthResponse response = vault.auth().loginByGithub("githubToken");
      *
-     * final String token = response.getAuthClientToken());
+     * final String token = response.getAuthClientToken();
      * }</pre>
      * </blockquote>
      *
