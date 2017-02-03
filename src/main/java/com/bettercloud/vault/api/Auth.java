@@ -203,6 +203,67 @@ public class Auth {
     }
 
     /**
+     * <p>Basic login operation to authenticate to an app-role backend.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().loginByAppRole("approle", "app_id", "user_id");
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param path The path on which the authentication is performed (e.g. <code>auth/approle/login</code>)
+     * @param roleId The role-id used for authentication
+     * @param secretId The secret-id used for authentication
+     * @return The auth token
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse loginByAppRole(final String path, final String roleId, final String secretId) throws VaultException {
+        int retryCount = 0;
+        while (true) {
+            try {
+                // HTTP request to Vault
+                final String requestJson = Json.object().add("role_id", roleId).add("secret_id", secretId).toString();
+                final RestResponse restResponse = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/auth/" + path + "/login")
+                        .body(requestJson.getBytes("UTF-8"))
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslPemUTF8(config.getSslPemUTF8())
+                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .post();
+
+                // Validate restResponse
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                }
+                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+                if (!mimeType.equals("application/json")) {
+                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
+                }
+                return buildAuthResponse(restResponse, retryCount);
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
+
+    /**
      * <p>Basic login operation to authenticate to a Username &amp; Password backend.  Example usage:</p>
      *
      * <blockquote>
