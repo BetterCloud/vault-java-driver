@@ -27,6 +27,8 @@ public class AuthTests {
     final static String userId = System.getProperty("VAULT_USER_ID");
     final static String password = System.getProperty("VAULT_PASSWORD");
     final static String rootToken = System.getProperty("VAULT_TOKEN");
+    final static String appRoleId = System.getProperty("VAULT_APP_ROLE_ID");
+    final static String secretId = System.getProperty("VAULT_SECRET_ID");
 
     /**
      * Every test method will need to retrieve Vault credentials from environment variables, but we
@@ -39,6 +41,8 @@ public class AuthTests {
         assertNotNull(userId);
         assertNotNull(password);
         assertNotNull(rootToken);
+        assertNotNull(appRoleId);
+        assertNotNull(secretId);
     }
 
     /**
@@ -99,6 +103,22 @@ public class AuthTests {
         final Vault vault = new Vault(config);
 
         final String token = vault.auth().loginByUserPass(userId, password).getAuthClientToken();
+        assertNotNull(token);
+        assertNotSame("", token.trim());
+    }
+
+    /**
+     * Tests authentication with the app role auth backend
+     *
+     * @throws VaultException
+     */
+    @Test
+    public void testLoginByAppRole() throws VaultException {
+        final String path = "approle";
+        final VaultConfig config = new VaultConfig(address);
+        final Vault vault = new Vault(config);
+
+        final String token = vault.auth().loginByAppRole(path, appRoleId, secretId).getAuthClientToken();
         assertNotNull(token);
         assertNotSame("", token.trim());
     }
