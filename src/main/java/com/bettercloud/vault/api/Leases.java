@@ -202,6 +202,14 @@ public class Leases {
      * @throws VaultException The response information returned from Vault
      */
     public VaultResponse renew(final String leaseId, final long increment) throws VaultException {
+
+        // TODO:  Unfortunately, there is not currently a way to cover this in the integration test suite.
+        //        The "generic" backend does not support support lease renewal.  The only other backend
+        //        currently available to the integration test suite is the "pki" backend, which does
+        //        support renewal of credentials, etc.  But lease renewal in this context is talking about
+        //        secrets.  Perhaps revisit this at some point in the future if other backends are available
+        //        to the integration test suite (e.g. if we eventually start using Docker).
+
         int retryCount = 0;
         while (true) {
             try {
