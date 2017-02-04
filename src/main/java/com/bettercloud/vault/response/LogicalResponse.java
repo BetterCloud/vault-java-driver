@@ -1,5 +1,7 @@
 package com.bettercloud.vault.response;
 
+import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.rest.RestResponse;
 
 import java.util.HashMap;
@@ -12,6 +14,9 @@ import java.util.Map;
 public class LogicalResponse extends VaultResponse {
 
     private Map<String, String> data = new HashMap<String, String>();
+    private String leaseId;
+    private Boolean renewable;
+    private Long leaseDuration;
 
     /**
      * This constructor simply exposes the common base class constructor.
@@ -21,6 +26,7 @@ public class LogicalResponse extends VaultResponse {
      */
     public LogicalResponse(final RestResponse restResponse, final int retries) {
         super(restResponse, retries);
+        parseMetadataFields();
     }
 
     /**
@@ -37,14 +43,35 @@ public class LogicalResponse extends VaultResponse {
     ) {
         super(restResponse, retries);
         this.data.putAll(data);
+        parseMetadataFields();
     }
 
     public Map<String, String> getData() {
         return data;
     }
 
-    @Deprecated
-    public void setData(final Map<String, String> data) {
-        this.data = data;
+    public String getLeaseId() {
+        return leaseId;
+    }
+
+    public Boolean getRenewable() {
+        return renewable;
+    }
+
+    public Long getLeaseDuration() {
+        return leaseDuration;
+    }
+
+    private void parseMetadataFields() {
+        try {
+            final String jsonString = new String(getRestResponse().getBody(), "UTF-8");
+            final JsonObject jsonObject = Json.parse(jsonString).asObject();
+
+            this.leaseId = jsonObject.get("lease_id").asString();
+            this.renewable = jsonObject.get("renewable").asBoolean();
+            this.leaseDuration = jsonObject.get("lease_duration").asLong();
+        } catch (Exception e) {
+            return;
+        }
     }
 }

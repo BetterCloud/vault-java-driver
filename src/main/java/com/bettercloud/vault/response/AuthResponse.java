@@ -16,6 +16,7 @@ import java.util.List;
  */
 public class AuthResponse extends VaultResponse {
 
+    private Boolean renewable;
     private String authClientToken;
     private List<String> authPolicies;
     private long authLeaseDuration;
@@ -38,6 +39,7 @@ public class AuthResponse extends VaultResponse {
             final JsonObject jsonObject = Json.parse(responseJson).asObject();
             final JsonObject authJsonObject = jsonObject.get("auth").asObject();
 
+            renewable = jsonObject.get("renewable").asBoolean();
             authLeaseDuration = authJsonObject.getInt("lease_duration", 0);
             authRenewable = authJsonObject.getBoolean("renewable", false);
             if (authJsonObject.get("metadata") != null && !authJsonObject.get("metadata").toString().equalsIgnoreCase("null")) {
@@ -48,12 +50,11 @@ public class AuthResponse extends VaultResponse {
             }
             authClientToken = authJsonObject.getString("client_token", "");
             final JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();
-            authPolicies = new ArrayList<String>();
+            authPolicies = new ArrayList<>();
             for (final JsonValue authPolicy : authPoliciesJsonArray) {
                 authPolicies.add(authPolicy.asString());
             }
         } catch (UnsupportedEncodingException | ParseException e) {
-            e.printStackTrace();
         }
     }
 
@@ -61,12 +62,8 @@ public class AuthResponse extends VaultResponse {
         return username;
     }
 
-    /**
-     * @return Deprecated.  Use <code>getRenewable()</code> (returning object <code>Boolean</code> rather than primitive <code>boolean</code>.
-     */
-    @Deprecated
-    public boolean isRenewable() {
-        return getRenewable() == null ? false : getRenewable();
+    public Boolean getRenewable() {
+        return renewable;
     }
 
     public String getAuthClientToken() {
