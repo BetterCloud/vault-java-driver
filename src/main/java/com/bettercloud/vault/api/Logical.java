@@ -13,7 +13,6 @@ import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.response.LogicalResponse;
-import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestException;
 import com.bettercloud.vault.rest.RestResponse;
 
@@ -23,12 +22,10 @@ import com.bettercloud.vault.rest.RestResponse;
  * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of <code>Vault</code>
  * in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code> method for usage examples.</p>
  */
-public class Logical {
-
-    private final VaultConfig config;
+public class Logical extends AbstractAPIClient {
 
     public Logical(final VaultConfig config) {
-        this.config = config;
+        super(config);
     }
 
     /**
@@ -53,13 +50,9 @@ public class Logical {
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + path)
-                        .header("X-Vault-Token", config.getToken())
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                final RestResponse restResponse = this.getClient()
+                        .url(this.getConfig().getAddress() + "/v1/" + path)
+                        .header("X-Vault-Token", this.getConfig().getToken())
                         .get();
 
                 // Validate response
@@ -71,10 +64,10 @@ public class Logical {
                 return new LogicalResponse(restResponse, retryCount, data);
             } catch (RuntimeException | VaultException | RestException e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
+                if (retryCount < this.getConfig().getMaxRetries()) {
                     retryCount++;
                     try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        final int retryIntervalMilliseconds = this.getConfig().getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
@@ -119,14 +112,10 @@ public class Logical {
                     }
                 }
 
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + path)
+                final RestResponse restResponse = this.getClient()
+                        .url(this.getConfig().getAddress() + "/v1/" + path)
                         .body(requestJson.toString().getBytes("UTF-8"))
-                        .header("X-Vault-Token", config.getToken())
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .header("X-Vault-Token", this.getConfig().getToken())
                         .post();
 
                 // HTTP Status should be either 200 (with content - e.g. PKI write) or 204 (no content)
@@ -141,10 +130,10 @@ public class Logical {
                 }
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
+                if (retryCount < this.getConfig().getMaxRetries()) {
                     retryCount++;
                     try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        final int retryIntervalMilliseconds = this.getConfig().getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
@@ -214,13 +203,9 @@ public class Logical {
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + path)
-                        .header("X-Vault-Token", config.getToken())
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                final RestResponse restResponse = this.getClient()
+                        .url(this.getConfig().getAddress() + "/v1/" + path)
+                        .header("X-Vault-Token", this.getConfig().getToken())
                         .delete();
 
                 // Validate response
@@ -230,10 +215,10 @@ public class Logical {
                 return new LogicalResponse(restResponse, retryCount);
             } catch (RuntimeException | VaultException | RestException e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
+                if (retryCount < this.getConfig().getMaxRetries()) {
                     retryCount++;
                     try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        final int retryIntervalMilliseconds = this.getConfig().getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();

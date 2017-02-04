@@ -18,12 +18,10 @@ import java.util.Set;
  * <code>Vault</code> in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code>
  * method for usage examples.</p>
  */
-public class Debug {
-
-    private final VaultConfig config;
+public class Debug extends AbstractAPIClient {
 
     public Debug(final VaultConfig config) {
-        this.config = config;
+        super(config);
     }
 
     /**
@@ -78,15 +76,11 @@ public class Debug {
         while (true) {
             try {
                 // Build an HTTP request for Vault
-                final Rest rest = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + path)
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null);
+                final Rest rest = this.getClient()
+                        .url(this.getConfig().getAddress() + "/v1/" + path);
                 // Add token if present
-                if (config.getToken() != null) {
-                    rest.header("X-Vault-Token", config.getToken());
+                if (this.getConfig().getToken() != null) {
+                    rest.header("X-Vault-Token", this.getConfig().getToken());
                 }
                 // Add params if present
                 if (standbyOk != null) rest.parameter("standbyok", standbyOk.toString());
@@ -110,10 +104,10 @@ public class Debug {
                 return new HealthResponse(restResponse, retryCount);
             } catch (RuntimeException | VaultException | RestException e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
+                if (retryCount < this.getConfig().getMaxRetries()) {
                     retryCount++;
                     try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        final int retryIntervalMilliseconds = this.getConfig().getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();

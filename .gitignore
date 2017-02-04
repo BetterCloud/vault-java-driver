@@ -1,8 +1,16 @@
-.gradle
-.idea
+#Ignore these files
+.classpath
+.project
 vault-java-driver.iml
 gradle.properties
-build
 build.gradle
-classes
-com/
+
+#Ignore these directories
+build
+bin
+.settings
+.gradle
+.factorypath
+.springBeans
+.pmd
+.idea

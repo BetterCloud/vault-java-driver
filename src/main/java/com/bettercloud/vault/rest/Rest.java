@@ -1,14 +1,10 @@
 package com.bettercloud.vault.rest;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,6 +14,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -26,6 +25,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * <p>A simple client for issuing HTTP requests.  Supports the HTTP verbs:</p>
@@ -72,7 +81,18 @@ public class Rest {
     private Integer connectTimeoutSeconds;
     private Integer readTimeoutSeconds;
     private Boolean sslVerification;
+
+    @SuppressWarnings("unused")
+    @Deprecated
     private String sslPemUTF8;
+
+    private File keystoreFile;
+    private File truststore;
+    private String keystorePassword;
+    private String truststorePassword;
+
+    private static final Object MUTEX = new Object();
+    private SSLContext vaultSSLContext = null;
 
     /**
      * <p>Sets the base URL to which the HTTP request will be sent.  The URL may or may not include query parameters
@@ -215,6 +235,26 @@ public class Rest {
      */
     public Rest sslPemUTF8(final String pemFileContents) {
         this.sslPemUTF8 = pemFileContents;
+        return this;
+    }
+
+    public Rest keystore(File keystore) {
+        this.keystoreFile = keystore;
+        return this;
+    }
+
+    public Rest keystorePassword(String keystorePassword) {
+        this.keystorePassword = keystorePassword;
+        return this;
+    }
+
+    public Rest truststore(File truststore) {
+        this.truststore = truststore;
+        return this;
+    }
+
+    public Rest truststorePassword(String truststorePassword) {
+        this.truststorePassword = truststorePassword;
         return this;
     }
 
@@ -414,28 +454,12 @@ public class Rest {
             if (connection instanceof HttpsURLConnection) {
                 final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
                 // Cert file supplied
-                if (sslPemUTF8 != null) {
-                    final SSLContext sslContext = initSSLContext();
-                    httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
-                }
+
+                final SSLContext sslContext = initSSLContext(sslVerification);
+                httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
+
                 // SSL verification disabled
                 if (sslVerification != null && !sslVerification.booleanValue()) {
-                    final SSLContext sslContext = SSLContext.getInstance("TLS");
-                    sslContext.init(null, new TrustManager[]{new X509TrustManager() {
-                        @Override
-                        public void checkClientTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
-                        }
-
-                        @Override
-                        public void checkServerTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
-                        }
-
-                        @Override
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-                    }}, new java.security.SecureRandom());
-                    httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
                     httpsURLConnection.setHostnameVerifier(new HostnameVerifier() {
                         @Override
                         public boolean verify(final String s, final SSLSession sslSession) {
@@ -443,6 +467,7 @@ public class Rest {
                         }
                     });
                 }
+                
                 httpsURLConnection.setRequestMethod(method);
             } else if (connection instanceof HttpURLConnection) {
                 final HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
@@ -464,26 +489,41 @@ public class Rest {
      * @return
      * @throws RestException If there are any issues processing the SSL cert
      */
-    private SSLContext initSSLContext() throws RestException {
-        try {
-            final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-
-            final ByteArrayInputStream pem = new ByteArrayInputStream(sslPemUTF8.getBytes("UTF-8"));
-            final X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(pem);
-            pem.close();
-
-            final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keyStore.load(null);
-            keyStore.setCertificateEntry("caCert", certificate);
-
-            trustManagerFactory.init(keyStore);
-
-            final SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
-            return sslContext;
-        } catch (Exception e) {
-            throw new RestException(e);
+    private SSLContext initSSLContext(Boolean verificatioEnabled) throws RestException {
+        
+        if (vaultSSLContext != null) {
+            // Initialize SSL context once and keep using it.
+            return vaultSSLContext;
+        }
+        
+        synchronized (MUTEX) {
+            try {
+                vaultSSLContext = SSLContext.getInstance("TLS");
+                KeyManager[] keyManagers = this.getKeyManagers();
+    
+                if (verificatioEnabled == null || verificatioEnabled.booleanValue()) {
+                    vaultSSLContext.init(keyManagers, this.getTrustManagers(), null);
+                } else {
+                    vaultSSLContext.init(keyManagers, new TrustManager[] {new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(final X509Certificate[] x509Certificates, final String s)
+                                throws CertificateException {}
+    
+                        @Override
+                        public void checkServerTrusted(final X509Certificate[] x509Certificates, final String s)
+                                throws CertificateException {}
+    
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
+                    }}, new java.security.SecureRandom());
+                }
+    
+                return vaultSSLContext;
+            } catch (Exception e) {
+                throw new RestException(e);
+            }
         }
     }
 
@@ -559,5 +599,96 @@ public class Rest {
         return statusCode;
     }
 
+    private KeyStore loadKeystore(File keystoreFile, String keystorePassword) throws KeyStoreException,
+            FileNotFoundException, IOException, NoSuchAlgorithmException, CertificateException {
+        final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        char[] password = null;
+
+        if (keystorePassword != null) {
+            password = keystorePassword.toCharArray();
+        }
+
+        if (keystoreFile != null && keystoreFile.exists()) {
+            try (FileInputStream content = new FileInputStream(keystoreFile)) {
+                keyStore.load(content, password);
+            }
+        } else {
+            keyStore.load(null);
+        }
+
+        return keyStore;
+    }
+    
+    private KeyManager[] getKeyManagers() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
+            FileNotFoundException, IOException, UnrecoverableKeyException {
+        KeyManager[] keyManagers = null;
+        
+        if (this.keystoreFile != null && this.keystoreFile.exists()) {
+            KeyStore keyStore = loadKeystore(this.keystoreFile, this.keystorePassword);
+
+            KeyManagerFactory keyManFacto = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            keyManFacto.init(keyStore, this.keystorePassword.toCharArray());
+            keyManagers = keyManFacto.getKeyManagers();
+        }
+        
+        return keyManagers;
+    }
+
+    private TrustManager[] getTrustManagers() throws KeyStoreException, FileNotFoundException, NoSuchAlgorithmException,
+            CertificateException, IOException {
+        TrustManager[] trustManagers = null;
+        KeyStore trustStore = null;
+        TrustManagerFactory facto = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        
+        if (this.truststore != null && this.truststore.exists()) {
+            trustStore = loadKeystore(this.truststore, this.truststorePassword);
+        }
+
+        if (this.sslPemUTF8 != null) {
+            final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+
+            final ByteArrayInputStream pem = new ByteArrayInputStream(sslPemUTF8.getBytes("UTF-8"));
+            final X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(pem);
+            pem.close();
+
+            if (trustStore == null) {
+                trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                trustStore.load(null);
+            }
+            
+            trustStore.setCertificateEntry("caCert", certificate);
+        }
+        
+        if (trustStore != null) {
+            facto.init(trustStore);
+            trustManagers = facto.getTrustManagers();
+        }
+
+        return trustManagers;
+    }
+
+    public Rest clone() {
+        Rest copy = new Rest();
+        
+        //copy.urlString = new String(this.urlString);
+        //copy.body = Arrays.copyOf(this.body, this.body.length);
+        //copy.parameters.putAll(this.parameters);
+        //copy.headers.putAll(this.headers);
+
+        copy.connectTimeoutSeconds = this.connectTimeoutSeconds;
+        copy.readTimeoutSeconds = this.readTimeoutSeconds;
+        copy.sslVerification = this.sslVerification;
+
+        copy.sslPemUTF8 = this.sslPemUTF8;
+
+        copy.keystoreFile = this.keystoreFile;
+        copy.truststore = this.truststore;
+        copy.keystorePassword = this.keystorePassword;
+        copy.truststorePassword = this.truststorePassword;
+
+        copy.vaultSSLContext = this.vaultSSLContext;
+        
+        return copy;
+    }
 }
 

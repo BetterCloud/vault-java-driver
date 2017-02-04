@@ -8,8 +8,6 @@ import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.rest.RestResponse;
-import com.bettercloud.vault.rest.Rest;
-
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +20,10 @@ import java.util.UUID;
  * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of <code>Vault</code>
  * in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code> method for usage examples.</p>
  */
-public class Auth {
+public class Auth extends AbstractAPIClient {
 
-    private final VaultConfig config;
-
-    public Auth(final VaultConfig config) {
-        this.config = config;
+    public Auth(VaultConfig config) {
+        super(config);
     }
 
     /**
@@ -91,14 +87,10 @@ public class Auth {
                 final String requestJson = jsonObject.toString();
 
                 // HTTP request to Vault
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/auth/token/create")
-                        .header("X-Vault-Token", config.getToken())
+                final RestResponse restResponse = this.getClient()
+                        .url(this.getConfig().getAddress() + "/v1/auth/token/create")
+                        .header("X-Vault-Token", this.getConfig().getToken())
                         .body(requestJson.getBytes("UTF-8"))
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
                         .post();
 
                 // Validate restResponse
@@ -112,10 +104,10 @@ public class Auth {
                 return buildAuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
+                if (retryCount < this.getConfig().getMaxRetries()) {
                     retryCount++;
                     try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        final int retryIntervalMilliseconds = this.getConfig().getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
@@ -157,13 +149,9 @@ public class Auth {
             try {
                 // HTTP request to Vault
                 final String requestJson = Json.object().add("app_id", appId).add("user_id", userId).toString();
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/auth/" + path)
+                final RestResponse restResponse = this.getClient()
+                        .url(this.getConfig().getAddress() + "/v1/auth/" + path)
                         .body(requestJson.getBytes("UTF-8"))
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
                         .post();
 
                 // Validate restResponse
@@ -177,10 +165,10 @@ public class Auth {
                 return buildAuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
+                if (retryCount < this.getConfig().getMaxRetries()) {
                     retryCount++;
                     try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        final int retryIntervalMilliseconds = this.getConfig().getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
@@ -304,13 +292,9 @@ public class Auth {
             try {
                 // HTTP request to Vault
                 final String requestJson = Json.object().add("password", password).toString();
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/auth/userpass/login/" + username)
+                final RestResponse restResponse = this.getClient()
+                        .url(this.getConfig().getAddress() + "/v1/auth/userpass/login/" + username)
                         .body(requestJson.getBytes("UTF-8"))
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
                         .post();
 
                 // Validate restResponse
@@ -324,10 +308,10 @@ public class Auth {
                 return buildAuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
+                if (retryCount < this.getConfig().getMaxRetries()) {
                     retryCount++;
                     try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        final int retryIntervalMilliseconds = this.getConfig().getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
@@ -366,13 +350,9 @@ public class Auth {
             try {
                 // HTTP request to Vault
                 final String requestJson = Json.object().add("token", githubToken).toString();
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/auth/github/login")
+                final RestResponse restResponse = this.getClient()
+                        .url(this.getConfig().getAddress() + "/v1/auth/github/login")
                         .body(requestJson.getBytes("UTF-8"))
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
                         .post();
 
                 // Validate restResponse
@@ -386,10 +366,10 @@ public class Auth {
                 return buildAuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
+                if (retryCount < this.getConfig().getMaxRetries()) {
                     retryCount++;
                     try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        final int retryIntervalMilliseconds = this.getConfig().getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
@@ -430,14 +410,10 @@ public class Auth {
             try {
                 // HTTP request to Vault
                 final String requestJson = Json.object().add("increment", increment).toString();
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/auth/token/renew-self")
-                        .header("X-Vault-Token", config.getToken())
+                final RestResponse restResponse = this.getClient()
+                        .url(this.getConfig().getAddress() + "/v1/auth/token/renew-self")
+                        .header("X-Vault-Token", this.getConfig().getToken())
                         .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
                         .post();
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -450,10 +426,10 @@ public class Auth {
                 return buildAuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
+                if (retryCount < this.getConfig().getMaxRetries()) {
                     retryCount++;
                     try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        final int retryIntervalMilliseconds = this.getConfig().getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
@@ -504,4 +480,64 @@ public class Auth {
 
         return authResponse;
     }
+    
+
+
+    /**
+     * <p>Mutual authentication with Vault using cert and private key in keystore</p>
+     * Upon successful authentication, this method sets the client token in config object
+     * 
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().cert();
+     *
+     * final String token = response.getAuthClientToken());
+     * }</pre>
+     * </blockquote>
+     *
+     * @return The auth token
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse cert() throws VaultException {
+        int retryCount = 0;
+        while (true) {
+            try {
+                // HTTP request to Vault
+                final RestResponse restResponse = this.getClient()
+                        .url(this.getConfig().getAddress() + "/v1/auth/cert/login")
+                        .post();
+
+                // Validate restResponse
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                }
+                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+                if (!mimeType.equals("application/json")) {
+                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
+                }
+                AuthResponse authResponse = buildAuthResponse(restResponse, retryCount);
+
+                this.getConfig().token(authResponse.getAuthClientToken());
+
+                return authResponse;
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < this.getConfig().getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = this.getConfig().getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
+
 }
