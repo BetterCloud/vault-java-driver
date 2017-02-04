@@ -2,6 +2,7 @@ package com.bettercloud.vault.response;
 
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
+import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.rest.RestResponse;
 
 import java.util.HashMap;
@@ -19,31 +20,13 @@ public class LogicalResponse extends VaultResponse {
     private Long leaseDuration;
 
     /**
-     * This constructor simply exposes the common base class constructor.
-     *
      * @param restResponse The raw HTTP response from Vault.
      * @param retries The number of retry attempts that occurred during the API call (can be zero).
      */
     public LogicalResponse(final RestResponse restResponse, final int retries) {
         super(restResponse, retries);
         parseMetadataFields();
-    }
-
-    /**
-     * This constructor also takes all of the values read by a Vault read operation.
-     *
-     * @param restResponse The raw HTTP response from Vault.
-     * @param retries The number of retry attempts that occurred during the API call (can be zero).
-     * @param data All name/value pairs found in the <code>data</code> section of a Vault read operation response.
-     */
-    public LogicalResponse(
-            final RestResponse restResponse,
-            final int retries,
-            final Map<String, String> data
-    ) {
-        super(restResponse, retries);
-        this.data.putAll(data);
-        parseMetadataFields();
+        parseResponseData();
     }
 
     public Map<String, String> getData() {
@@ -71,7 +54,25 @@ public class LogicalResponse extends VaultResponse {
             this.renewable = jsonObject.get("renewable").asBoolean();
             this.leaseDuration = jsonObject.get("lease_duration").asLong();
         } catch (Exception e) {
-            return;
+        }
+    }
+
+    private void parseResponseData() {
+        try {
+            final String jsonString = new String(getRestResponse().getBody(), "UTF-8");
+            final JsonObject jsonObject = Json.parse(jsonString).asObject();
+            data = new HashMap<>();
+            for (final JsonObject.Member member : jsonObject.get("data").asObject()) {
+                final JsonValue jsonValue = member.getValue();
+                if (jsonValue == null || jsonValue.isNull()) {
+                    continue;
+                } else if (jsonValue.isString()) {
+                    data.put(member.getName(), jsonValue.asString());
+                } else {
+                    data.put(member.getName(), jsonValue.toString());
+                }
+            }
+        } catch (Exception e) {
         }
     }
 }

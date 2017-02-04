@@ -36,7 +36,7 @@ public class PkiResponse extends LogicalResponse {
      * @param data The data received from Vault, parsed into key-value pairs
      */
     public PkiResponse(final RestResponse restResponse, final int retries, final Map<String, String> data) {
-        super(restResponse, retries, data);
+        super(restResponse, retries);
         roleOptions = buildRoleOptionsFromData(data);
         credential = buildCredentialFromData(data);
     }
