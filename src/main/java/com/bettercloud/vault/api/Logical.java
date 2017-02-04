@@ -1,8 +1,6 @@
 package com.bettercloud.vault.api;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +9,6 @@ import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
-import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestException;
@@ -67,8 +64,7 @@ public class Logical {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
 
-                final Map<String, String> data = parseResponseData(restResponse);
-                return new LogicalResponse(restResponse, retryCount, data);
+                return new LogicalResponse(restResponse, retryCount);
             } catch (RuntimeException | VaultException | RestException e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -131,11 +127,8 @@ public class Logical {
 
                 // HTTP Status should be either 200 (with content - e.g. PKI write) or 204 (no content)
                 final int restStatus = restResponse.getStatus();
-                if (restStatus == 204) {
+                if (restStatus == 200 || restStatus == 204) {
                     return new LogicalResponse(restResponse, retryCount);
-                } else if (restStatus == 200) {
-                    final Map<String, String> data = parseResponseData(restResponse);
-                    return new LogicalResponse(restResponse, retryCount, data);
                 } else {
                     throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus, restStatus);
                 }
@@ -246,40 +239,5 @@ public class Logical {
                 }
             }
         }
-    }
-
-    /**
-     * This logic will move into the <code>LogicalResponse constructor</code>.
-     *
-     * @param restResponse
-     * @return
-     * @throws VaultException
-     */
-    @Deprecated
-    private Map<String, String> parseResponseData(final RestResponse restResponse) throws VaultException {
-        final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
-        if (!mimeType.equals("application/json")) {
-            throw new VaultException("Vault responded with MIME type: " + mimeType);
-        }
-        String jsonString;
-        try {
-            jsonString = new String(restResponse.getBody(), "UTF-8");//NOPMD
-        } catch (UnsupportedEncodingException e) {
-            throw new VaultException(e);
-        }
-
-        // Parse JSON
-        final Map<String, String> data = new HashMap<String, String>();//NOPMD
-        for (final JsonObject.Member member : Json.parse(jsonString).asObject().get("data").asObject()) {
-            final JsonValue jsonValue = member.getValue();
-            if (jsonValue == null || jsonValue.isNull()) {
-                continue;
-            } else if (jsonValue.isString()) {
-                data.put(member.getName(), jsonValue.asString());
-            } else {
-                data.put(member.getName(), jsonValue.toString());
-            }
-        }
-        return data;
     }
 }
