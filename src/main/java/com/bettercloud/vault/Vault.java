@@ -4,7 +4,6 @@ import com.bettercloud.vault.api.Auth;
 import com.bettercloud.vault.api.Debug;
 import com.bettercloud.vault.api.Leases;
 import com.bettercloud.vault.api.Logical;
-import com.bettercloud.vault.api.Sys;
 import com.bettercloud.vault.api.pki.Pki;
 
 /**
@@ -134,19 +133,4 @@ public class Vault {
     public Debug debug() {
         return new Debug(vaultConfig);
     }
-
-    /**
-     * <p>This method has been deprecated, and will removed in a future release.  Please obtain a {@link Debug}
-     * reference directly from the {@link #debug()} method instead:</p>
-     *
-     * <blockquote>
-     * <pre>{@code
-     * final HealthResponse response = vault.debug().health();
-     * }</pre>
-     * </blockquote>
-     *
-     * @return The DEPRECATED class for accessing Vault's heath check endpoint functionality
-     */
-    @Deprecated
-    public Sys sys() { return new Sys(vaultConfig); }
 }

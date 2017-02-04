@@ -142,7 +142,7 @@ public class Auth {
      * </blockquote>
      *
      * <strong>NOTE: </strong> As of Vault 0.6.1, Hashicorp has deprecated the App ID authentication backend in
-     * favor of AppRole.  A wrapper for that authentication backend is pending.
+     * favor of AppRole.
      *
      * @param path The path on which the authentication is performed (e.g. <code>auth/app-id/login</code>)
      * @param appId The app-id used for authentication
@@ -254,32 +254,6 @@ public class Auth {
                 }
             }
         }
-    }
-
-    /**
-     * <p>Basic login operation to authenticate to a Username &amp; Password backend.  Example usage:</p>
-     *
-     * <blockquote>
-     * <pre>{@code
-     * final AuthResponse response = vault.auth().loginByUsernamePassword("userpass/login/test", "password");
-     *
-     * final String token = response.getAuthClientToken();
-     * }</pre>
-     * </blockquote>
-     *
-     * <strong>NOTE: </strong>This method is deprecated, and will be removed in a future major release of this
-     * library.  Switch to loginByUserPass(String, String), which does not require you to prefix
-     * the username parameter with `userpass/login/`.
-     *
-     * @param path The path on which the authentication is performed (e.g. <code>auth/userpass/login/username</code>)
-     * @param password The password used for authentication
-     * @return The auth token
-     * @throws VaultException If any error occurs, or unexpected response received from Vault
-     */
-    @Deprecated
-    public AuthResponse loginByUsernamePassword(final String path, final String password) throws VaultException {
-        final String username = path.replace("userpass/login/", "");
-        return loginByUserPass(username, password);
     }
 
     /**

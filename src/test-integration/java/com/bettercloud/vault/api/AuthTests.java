@@ -86,22 +86,6 @@ public class AuthTests {
     }
 
     /**
-     * Test Authentication with deprecated userpass auth backend
-     *
-     * @throws VaultException
-     */
-    @Test
-    public void testLoginByUsernamePassword() throws VaultException {
-        final String path = "userpass/login/" + userId;
-        final VaultConfig config = new VaultConfig(address);
-        final Vault vault = new Vault(config);
-
-        final String token = vault.auth().loginByUsernamePassword(path, password).getAuthClientToken();
-        assertNotNull(token);
-        assertNotSame("", token.trim());
-    }
-
-    /**
      * Test Authentication with new userpass auth backend
      *
      * @throws VaultException
