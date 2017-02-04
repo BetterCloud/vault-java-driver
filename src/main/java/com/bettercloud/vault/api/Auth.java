@@ -74,7 +74,7 @@ public class Auth {
                 final JsonObject jsonObject = Json.object();
                 if (id != null) jsonObject.add("id", id.toString());
                 if (policies != null && !policies.isEmpty()) {
-                    jsonObject.add("policies", Json.array(policies.toArray(new String[policies.size()])));
+                    jsonObject.add("policies", Json.array(policies.toArray(new String[policies.size()])));//NOPMD
                 }
                 if (meta != null && !meta.isEmpty()) {
                     final JsonObject metaMap = Json.object();
