@@ -137,6 +137,7 @@ should represent non-breaking changes.  The third number represents any very min
 * **2.0.0 (in progress)**: 
   * Removes the `com.bettercloud.vault.api.Sys` class, deprecated in the 1.2.0 release.
   * Removes the `com.bettercloud.vault.api.Auth.loginByUsernamePassword` method, deprecated in the 1.2.0 release.
+  * Changes the `com.bettercloud.vault.response.AuthReponse` class field `authLeaseDuration` from type `int` to `long`.
   * Adds support for authentication via the AppRole auth backend.  
   * Adds support for renewing secret leases.
 * **1.2.0**: This is a substantial release, with numerous additions.  It's a minor version number only because there 

@@ -109,7 +109,7 @@ public class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
-                return buildAuthResponse(restResponse, retryCount);
+                return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -174,7 +174,7 @@ public class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
-                return buildAuthResponse(restResponse, retryCount);
+                return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -235,7 +235,7 @@ public class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
-                return buildAuthResponse(restResponse, retryCount);
+                return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -295,7 +295,7 @@ public class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
-                return buildAuthResponse(restResponse, retryCount);
+                return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -357,7 +357,7 @@ public class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
-                return buildAuthResponse(restResponse, retryCount);
+                return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -421,7 +421,7 @@ public class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
-                return buildAuthResponse(restResponse, retryCount);
+                return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -442,40 +442,4 @@ public class Auth {
         }
     }
 
-    /**
-     * This logic will move into the <code>AuthResponse</code> constructor.
-     *
-     * @param restResponse The raw response information returned from Vault
-     * @param retries The number of retries that were performed for this operation
-     * @return The parsed response information returned from Vault
-     * @throws UnsupportedEncodingException
-     */
-    @Deprecated
-    private AuthResponse buildAuthResponse(final RestResponse restResponse, final int retries)
-            throws UnsupportedEncodingException {
-        final AuthResponse authResponse = new AuthResponse(restResponse, retries);
-
-        final String responseJson = new String(restResponse.getBody(), "UTF-8");
-        final JsonObject jsonObject = Json.parse(responseJson).asObject();
-        final JsonObject authJsonObject = jsonObject.get("auth").asObject();
-
-        authResponse.setAuthLeaseDuration(authJsonObject.getInt("lease_duration", 0));
-        authResponse.setAuthRenewable(authJsonObject.getBoolean("renewable", false));
-        if (authJsonObject.get("metadata") != null && !authJsonObject.get("metadata").toString().equalsIgnoreCase("null")) {
-            final JsonObject metadata = authJsonObject.get("metadata").asObject();
-            authResponse.setAppId(metadata.getString("app-id", ""));
-            authResponse.setUserId(metadata.getString("user-id", ""));
-            authResponse.setUsername(metadata.getString("username", ""));
-        }
-        authResponse.setAuthClientToken(authJsonObject.getString("client_token", ""));
-
-        final JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();
-        final List<String> authPolicies = new ArrayList<String>();
-        for (final JsonValue authPolicy : authPoliciesJsonArray) {
-            authPolicies.add(authPolicy.asString());
-        }
-        authResponse.setAuthPolicies(authPolicies);
-
-        return authResponse;
-    }
 }

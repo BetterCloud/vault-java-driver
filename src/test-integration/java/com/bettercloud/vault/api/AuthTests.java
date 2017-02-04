@@ -95,7 +95,8 @@ public class AuthTests {
         final VaultConfig config = new VaultConfig(address);
         final Vault vault = new Vault(config);
 
-        final String token = vault.auth().loginByUserPass(userId, password).getAuthClientToken();
+        final AuthResponse response = vault.auth().loginByUserPass(userId, password);
+        final String token = response.getAuthClientToken();
         assertNotNull(token);
         assertNotSame("", token.trim());
     }
