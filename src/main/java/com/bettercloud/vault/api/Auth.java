@@ -47,7 +47,7 @@ public class Auth {
      * <p>All parameters to this method are optional, and can be <code>null</code>.</p>
      *
      * @param id (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
-     * @param polices (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token.
+     * @param policies (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token.
      * @param meta (optional) A map of string to string valued metadata. This is passed through to the audit backends.
      * @param noParent (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent.
      * @param noDefaultPolicy (optional) If <code>true</code> the default policy will not be a part of this token's policy set.
@@ -59,7 +59,7 @@ public class Auth {
      */
     public AuthResponse createToken(
             final UUID id,
-            final List<String> polices,
+            final List<String> policies,
             final Map<String, String> meta,
             final Boolean noParent,
             final Boolean noDefaultPolicy,
@@ -73,15 +73,8 @@ public class Auth {
                 // Parse parameters to JSON
                 final JsonObject jsonObject = Json.object();
                 if (id != null) jsonObject.add("id", id.toString());
-                if (polices != null && !polices.isEmpty()) {
-                    final StringBuilder policiesCsv = new StringBuilder();//NOPMD
-                    for (int index = 0; index < polices.size(); index++) {
-                        policiesCsv.append(polices.get(index));
-                        if (index + 1 < polices.size()) {
-                            policiesCsv.append(',');
-                        }
-                    }
-                    jsonObject.add("polices", policiesCsv.toString());
+                if (policies != null && !policies.isEmpty()) {
+                    jsonObject.add("policies", Json.array(policies.toArray(new String[policies.size()])));
                 }
                 if (meta != null && !meta.isEmpty()) {
                     final JsonObject metaMap = Json.object();
