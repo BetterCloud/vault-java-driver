@@ -196,46 +196,46 @@ public class Leases {
      * }</pre>
      * </blockquote>
      *
-     * @param leaseId A lease ID associated with a secret
-     * @param increment  A requested amount of time in seconds to extend the lease. This is advisory.
+     * @param leaseId   A lease ID associated with a secret
+     * @param increment A requested amount of time in seconds to extend the lease. This is advisory.
      * @return The response information returned from Vault
      * @throws VaultException The response information returned from Vault
      */
     public VaultResponse renew(final String leaseId, final long increment) throws VaultException {
         int retryCount = 0;
         while (true) {
-                try {
-                        final String requestJson = Json.object().add("increment", increment).toString();
-                        final RestResponse restResponse = new Rest()
-                                        .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
-                                        .header("X-Vault-Token", config.getToken())
-                                        .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
-                                        .connectTimeoutSeconds(config.getOpenTimeout())
-                                        .readTimeoutSeconds(config.getReadTimeout())
-                                        .sslPemUTF8(config.getSslPemUTF8())
-                                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
-                                        .put();
-                        // Validate response
-                        if (restResponse.getStatus() != 200) {
-                                throw new VaultException("Expecting HTTP status 200, but instead receiving " + restResponse.getStatus(), restResponse.getStatus());
-                        }
-                        return new VaultResponse(restResponse, retryCount);
-                } catch (Exception e) {
-                        if (retryCount < config.getMaxRetries()) {
-                                retryCount++;
-                                try {
-                                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                                        Thread.sleep(retryIntervalMilliseconds);
-                                } catch (InterruptedException e1) {
-                                        e1.printStackTrace();
-                                }
-                        } else if (e instanceof VaultException) {
-                                // ... otherwise, give up.
-                                throw (VaultException) e;
-                        } else {
-                                throw new VaultException(e);
-                        }
+            try {
+                final String requestJson = Json.object().add("increment", increment).toString();
+                final RestResponse restResponse = new Rest()
+                        .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
+                        .header("X-Vault-Token", config.getToken())
+                        .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslPemUTF8(config.getSslPemUTF8())
+                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .put();
+                // Validate response
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Expecting HTTP status 200, but instead receiving " + restResponse.getStatus(), restResponse.getStatus());
                 }
+                return new VaultResponse(restResponse, retryCount);
+            } catch (Exception e) {
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
+            }
         }
     }
 }
