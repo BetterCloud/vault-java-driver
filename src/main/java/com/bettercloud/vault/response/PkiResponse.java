@@ -19,26 +19,13 @@ public class PkiResponse extends LogicalResponse {
     private Credential credential;
 
     /**
-     * Constructor for responses that do not include response data (e.g. <code>createOrUpdateRole(String roleName)</code>).
-     *
      * @param restResponse The raw response received from Vault
      * @param retries The number of retries that were performed for this operation
      */
     public PkiResponse(final RestResponse restResponse, final int retries) {
         super(restResponse, retries);
-    }
-
-    /**
-     * Constructor for responses that include response data (e.g. <code>getRole(String roleName)</code>).
-     *
-     * @param restResponse The raw response received from Vault
-     * @param retries The number of retries that were performed for this operation
-     * @param data The data received from Vault, parsed into key-value pairs
-     */
-    public PkiResponse(final RestResponse restResponse, final int retries, final Map<String, String> data) {
-        super(restResponse, retries);
-        roleOptions = buildRoleOptionsFromData(data);
-        credential = buildCredentialFromData(data);
+        roleOptions = buildRoleOptionsFromData(this.getData());
+        credential = buildCredentialFromData(this.getData());
     }
 
     public RoleOptions getRoleOptions() {
