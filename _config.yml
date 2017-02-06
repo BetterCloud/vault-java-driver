@@ -1,0 +1,8 @@
+title: Vault Java Driver
+description: Zero-dependency Java client for HashiCorp's Vault
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-cayman
+
+gems:
+  - jekyll-mentions
