@@ -15,7 +15,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    compile('com.bettercloud:vault-java-driver:1.2.0')
+    compile('com.bettercloud:vault-java-driver:2.0.0')
 }
 ```
 
@@ -24,7 +24,7 @@ Maven:
 <dependency>
     <groupId>com.bettercloud</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>1.2.0</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -112,6 +112,7 @@ final String value = vault.logical()
 * `auth()`:  Exposes methods for working with Vault's various auth backends (e.g. to programmatically retrieve a token
   by authenticating with a username and password).
 * `pki()`: Operations on the PKI backend (e.g. create and delete roles, issue certificate credentials).
+* `debug()`: Health check endpoints.
 
 The driver DSL also allows you to specify retry logic, by chaining the `withRetries()` ahead of accessing the endpoint
 implementation:
@@ -134,15 +135,15 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **2.0.0 (in progress)**: 
+* **2.0.0**: This is breaking-change release, with numerous deprecated items cleaned up.
+  * Adds support for authentication via the AppRole auth backend.  
+  * Adds support for renewing secret leases.
   * Removes the `com.bettercloud.vault.api.Sys` class, deprecated in the 1.2.0 release.
   * Removes the `com.bettercloud.vault.api.Auth.loginByUsernamePassword` method, deprecated in the 1.2.0 release.
   * Removes the fields `leaseId`, `leaseDuration`, and `renewable` from the `VaultResponse` base class, instead 
     including them only in the subclasses for specific response types where they are found.
   * Changes the `com.bettercloud.vault.response.AuthReponse` class field `authLeaseDuration` from type `int` to `long`.
   * Refactors and removes various deprecated `private` methods, with no change to the exposed API.
-  * Adds support for authentication via the AppRole auth backend.  
-  * Adds support for renewing secret leases.
 * **1.2.0**: This is a substantial release, with numerous additions.  It's a minor version number only because there 
              should be no breaking changes.  The changes include the following:
   * Switches from Vault 0.5.x to 0.6.x for automated tests.  
@@ -200,7 +201,7 @@ License
 -------
 The MIT License (MIT)
 
-Copyright (c) 2016 BetterCloud
+Copyright (c) 2016-2017 BetterCloud
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
