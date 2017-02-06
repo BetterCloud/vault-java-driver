@@ -1,0 +1,6 @@
+com.bettercloud.vault
+com.bettercloud.vault.api
+com.bettercloud.vault.api.pki
+com.bettercloud.vault.json
+com.bettercloud.vault.response
+com.bettercloud.vault.rest

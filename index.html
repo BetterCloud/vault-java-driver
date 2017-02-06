@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Vault Java Driver by BetterCloud</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Vault Java Driver</h1>
+      <h2 class="project-tagline">Zero-dependency Java client for HashiCorp&#39;s Vault</h2>
+      <a href="https://github.com/BetterCloud/vault-java-driver" class="btn">View on GitHub</a>
+      <a href="https://github.com/BetterCloud/vault-java-driver/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/BetterCloud/vault-java-driver/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="vault-java-driver" class="anchor" href="#vault-java-driver" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Vault Java Driver</h1>
+
+<p>A zero-dependency Java client for the <a href="https://www.vaultproject.io/">Vault</a> secrets management solution from
+HashiCorp.</p>
+
+<p>This driver strives to implement Vault's full HTTP API, along with supporting functionality such as automatic
+retry handling.  It does so without relying on any other external libraries beyond the Java standard library,
+and is compatible with Java 7 and up.  So it will play nice with all of your projects, greenfield and legacy
+alike, without causing conflicts with any other dependency.</p>
+
+<h2>
+<a id="installing-the-driver" class="anchor" href="#installing-the-driver" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installing the Driver</h2>
+
+<p>The driver is available from Maven Central, for all modern Java build systems.</p>
+
+<p>Gradle:</p>
+
+<pre><code>dependencies {
+    compile('com.bettercloud:vault-java-driver:1.2.0')
+}
+</code></pre>
+
+<p>Maven:</p>
+
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;com.bettercloud&lt;/groupId&gt;
+    &lt;artifactId&gt;vault-java-driver&lt;/artifactId&gt;
+    &lt;version&gt;1.2.0&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<h2>
+<a id="initializing-a-driver-instance" class="anchor" href="#initializing-a-driver-instance" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Initializing a Driver Instance</h2>
+
+<p>The <code>com.bettercloud.vault.VaultConfig</code> class is used to initialize a driver instance with desired settings.
+In the most basic use cases, where you are only supplying a Vault server address and perhaps a root token, there
+are convenience constructor methods available:</p>
+
+<pre><code>final VaultConfig config = new VaultConfig("http://127.0.0.1:8200", "3c9fd6be-7bc2-9d1f-6fb3-cd746c0fc4e8");
+
+// You may choose not to provide a root token initially, if you plan to use
+// the Vault driver to retrieve one programmatically from an auth backend.
+final VaultConfig config = new VaultConfig("http://127.0.0.1:8200");
+</code></pre>
+
+<p>To explicitly set additional config parameters (*), you can use a builder pattern style to construct the <code>VaultConfig</code>
+instance.  Either way, the initialization process will try to populate any unset values by looking to
+environment variables.</p>
+
+<pre><code>final VaultConfig config =
+    new VaultConfig().
+        .address("http://127.0.0.1:8200")               // Defaults to "VAULT_ADDR" environment variable
+        .token("3c9fd6be-7bc2-9d1f-6fb3-cd746c0fc4e8")  // Defaults to "VAULT_TOKEN" environment variable
+        .openTimeout(5)                                 // Defaults to "VAULT_OPEN_TIMEOUT" environment variable
+        .readTimeout(30)                                // Defaults to "VAULT_READ_TIMEOUT" environment variable
+        .sslPemFile("/path/on/disk.pem")                // Defaults to "VAULT_SSL_CERT" environment variable
+                                                        //    See also: "sslPemUTF8()" and "sslPemResource()"
+        .sslVerify(false)                               // Defaults to "VAULT_SSL_VERIFY" environment variable
+        .build();
+</code></pre>
+
+<blockquote>
+<p>NOTES ON SSL CONFIG</p>
+
+<p>If your Vault server uses a SSL certificate, there are three different options for supplying that certificate to the
+Vault driver:</p>
+
+<p><code>sslPemFile(path)</code> - Supply the path to an X.509 certificate in unencrypted PEM format, using UTF-8 encoding.</p>
+
+<p><code>sslPemResource(path)</code> - Same as above, but the path references a classpath resource rather than a filesystem path (e.g. if
+                       you've bundled the PEM file into your applications's JAR, WAR, or EAR file).</p>
+
+<p><code>sslPemUTF8(contents)</code> - The string contents extracted from the PEM file.  For Java to parse the certificate properly,
+                       there must be a line-break in between the certificate header and body (see the <code>VaultConfig</code>
+                       Javadocs for more detail).</p>
+
+<p>If none of these three methods are called, then <code>VaultConfig</code> will by default check for a <code>VAULT_SSL_CERT</code> environment
+variable, and if that's set then it will be treated as a filesystem path.</p>
+
+<p>To disable SSL certificate verification altogether, set <code>sslVerify(false)</code>.  YOU SHOULD NOT DO THIS IS A REAL
+PRODUCTION SETTING!  However, it can be useful in a development or testing server context.</p>
+</blockquote>
+
+<p>Once you have initialized a <code>VaultConfig</code> object, you can use it to construct an instance of the <code>Vault</code> primary
+driver class:</p>
+
+<pre><code>final Vault vault = new Vault(config);
+</code></pre>
+
+<h2>
+<a id="using-the-driver" class="anchor" href="#using-the-driver" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Using the Driver</h2>
+
+<p>Like the <code>VaultConfig</code> class, <code>Vault</code> too supports a builder pattern DSL style:</p>
+
+<pre><code>final Map&lt;String, String&gt; secrets = new HashMap&lt;String, String&gt;();
+secrets.put("value", "world");
+secrets.put("other_value", "You can store multiple name/value pairs under a single key");
+
+// Write operation
+final LogicalResponse writeResponse = vault.logical()
+                                        .write("secret/hello", secrets);
+
+...
+
+// Read operation
+final String value = vault.logical()
+                       .read("secret/hello")
+                       .getData().get("value");
+</code></pre>
+
+<p><code>Vault</code> has a number of methods for accessing the classes that implement the various endpoints of Vault's HTTP API:</p>
+
+<ul>
+<li>
+<code>logical()</code>:  Contains core operations such as reading and writing secrets.</li>
+<li>
+<code>auth()</code>:  Exposes methods for working with Vault's various auth backends (e.g. to programmatically retrieve a token
+by authenticating with a username and password).</li>
+<li>
+<code>pki()</code>: Operations on the PKI backend (e.g. create and delete roles, issue certificate credentials).</li>
+</ul>
+
+<p>The driver DSL also allows you to specify retry logic, by chaining the <code>withRetries()</code> ahead of accessing the endpoint
+implementation:</p>
+
+<pre><code>// Retry up to 5 times if failures occur, waiting 1000 milliseconds in between each retry attempt.
+final LogicalResponse response = vault.withRetries(5, 1000)
+                                   .logical()
+                                   .read("secret/hello");
+</code></pre>
+
+<h2>
+<a id="reference" class="anchor" href="#reference" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Reference</h2>
+
+<p>Full <a href="http://bettercloud.github.io/vault-java-driver/javadoc/">Javadoc documentation</a>.</p>
+
+<h2>
+<a id="version-history" class="anchor" href="#version-history" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Version History</h2>
+
+<p>Note that changes to the major version (i.e. the first number) represent possible breaking changes, and
+may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
+should represent non-breaking changes.  The third number represents any very minor bugfix patches.</p>
+
+<ul>
+<li>
+<strong>1.2.0</strong>: This is a substantial release, with numerous additions.  It's a minor version number only because there 
+         should be no breaking changes.  The changes include the following:
+
+<ul>
+<li>Switches from Vault 0.5.x to 0.6.x for automated tests.<br>
+</li>
+<li>Adds a field to <code>VaultException</code> for capturing the HTTP response code (if any) from Vault.<br>
+</li>
+<li>Updates the Gradle build, so that you no longer need empty placeholder values for certain variables elsewhere 
+in your environment.<br>
+</li>
+<li>Updates integration test suite to account for breaking changes in Vault 0.6.x (e.g. you can no longer use 
+a token that was obtained from one of the authentication backends to perform tasks such as creating and deleting 
+roles, etc). </li>
+<li>Deprecates the App ID authentication backend, and adds a new version of the Userpass authentication backend that 
+doesn't require a path prefix.  Adds support for the GitHub authentication backend.</li>
+<li>If the <code>VAULT_TOKEN</code> environment parameter is not set, then the driver will now check for a file named <code>.vault-token</code> 
+in the executing user's home directory, and try to read a token value from that.</li>
+<li>Deprecates the <code>com.bettercloud.vault.api.Sys</code> class, moving the debug-related methods into their own 
+specific <code>com.bettercloud.vault.api.Debug</code> class instead.<br>
+</li>
+<li>Implements some of the lease related endpoints (i.e. revoke, revoke-prefix, revoke-force).</li>
+<li>Supports PKI backends that are mounted on non-default paths.</li>
+</ul>
+</li>
+<li>
+<strong>1.1.1</strong>: Changes the <code>ttl</code> argument to <code>Pki.issue()</code> from <code>Integer</code> to <code>String</code>, to fix a bug preventing 
+         you from specifying the time suffix (e.g. "1h").</li>
+<li>
+<strong>1.1.0</strong>: Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical
+         API wrapper for listing and deleting secrets.  Implements the <code>/v1/sys/health</code> health-check
+         HTTP API endpoint.  Implements portions of the PKI backend (e.g. creating and deleting roles, issuing
+         credentials).  Marks numerous methods as deprecated, to be removed in a future major release.</li>
+<li>
+<strong>1.0.0</strong>: Drops support for Java 6.  Removes all methods marked as <code>@Deprecated</code> in version 0.5.0.  Adds
+         support for response metadata (i.e. "lease_id", "renewable", "lease_duration") to all response
+         types, rather than just <code>AuthResponse</code>.  Changes <code>leaseDuration</code> type from <code>int</code> to <code>Long</code> in
+         <code>AuthResponse</code>.  Removes <code>final</code> declarations on all classes (outside of the JSON package).
+         Various bugfixes.  Adds support for auth token self-renewal.  Adds support for writing values
+         that return content.</li>
+<li>
+<strong>0.5.0</strong>: Adds support for supplying SSL certificates, and for toggling whether or not the Vault server's
+         SSL certificate will be verified.  Also adds support for "openTimeout" and "readTimeout"
+         settings.  Deprecates the "timeout", "sslTimeout", "proxyAddress", "proxyPort", "proxyUsername",
+         and "proxyPassword" settings (the proxy settings may return in a future version, but it's too
+         misleading to have methods exposed for settings that won't really be supported soon).</li>
+<li>
+<strong>0.3.0</strong>: Initial public release.  Support for writing and reading secrets, authenticating with the "AppID"
+         or "Username &amp; Password" auth backends.  All over-the-wire methods support automatic retry logic.</li>
+</ul>
+
+<h2>
+<a id="development" class="anchor" href="#development" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Development</h2>
+
+<p>Pull requests are welcomed for bugfixes or enhancements that do not alter the external facing class and method
+signatures.  For any breaking changes that would alter the contract provided by this driver, please open up an issue
+to discuss it first.</p>
+
+<p>All code changes should include unit test and/or integration test coverage as appropriate.  Unit tests are any that
+can be run in isolation, with no external dependencies.  Integration tests are those which require a Vault server
+instance (at least a Dev Server) up and running.</p>
+
+<p>Unit tests are located under the <code>src/test</code> directory, and can be run with the Grade <code>unitTest</code> task.</p>
+
+<p>Integration tests are located under the <code>src/test-integration</code> directory, and can be run with the Gradle
+<code>integrationTest</code> task.  See the additional <code>README.md</code> file in this directory for more detailed information on the
+Vault server setup steps required to run the integration test suite.</p>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<p>The MIT License (MIT)</p>
+
+<p>Copyright (c) 2016 BetterCloud</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+
+<h2>
+<a id="other-notes" class="anchor" href="#other-notes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Other Notes</h2>
+
+<p>The Vault server system itself is a product of HashiCorp, a completely separate organization.</p>
+
+<p>This client driver adapts JSON parsing code from Ralf Sternberg's excellent
+<a href="https://github.com/ralfstx/minimal-json">minimal-json</a> library, likewise available under the MIT License.  Package
+names have all been changed, to prevent any conflicts should you happen to be using a different version of that
+library elsewhere in your project dependencies.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/BetterCloud/vault-java-driver">Vault Java Driver</a> is maintained by <a href="https://github.com/BetterCloud">BetterCloud</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
