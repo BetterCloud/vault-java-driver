@@ -1,7 +1,13 @@
 package com.bettercloud.vault.response;
 
+import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.json.JsonArray;
+import com.bettercloud.vault.json.JsonObject;
+import com.bettercloud.vault.json.JsonValue;
+import com.bettercloud.vault.json.ParseException;
 import com.bettercloud.vault.rest.RestResponse;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,13 +16,10 @@ import java.util.List;
  */
 public class AuthResponse extends VaultResponse {
 
+    private Boolean renewable;
     private String authClientToken;
-    private List<String> authPolicies = new ArrayList<String>();
-
-    /** This field will change from type <code>int</code> to <code>long</code> in the next major release. */
-    @Deprecated
-    private int authLeaseDuration;
-
+    private List<String> authPolicies;
+    private long authLeaseDuration;
     private boolean authRenewable;
     private String appId;
     private String userId;
@@ -30,86 +33,60 @@ public class AuthResponse extends VaultResponse {
      */
     public AuthResponse(final RestResponse restResponse, final int retries) {
         super(restResponse, retries);
+
+        try {
+            final String responseJson = new String(restResponse.getBody(), "UTF-8");
+            final JsonObject jsonObject = Json.parse(responseJson).asObject();
+            final JsonObject authJsonObject = jsonObject.get("auth").asObject();
+
+            renewable = jsonObject.get("renewable").asBoolean();
+            authLeaseDuration = authJsonObject.getInt("lease_duration", 0);
+            authRenewable = authJsonObject.getBoolean("renewable", false);
+            if (authJsonObject.get("metadata") != null && !authJsonObject.get("metadata").toString().equalsIgnoreCase("null")) {
+                final JsonObject metadata = authJsonObject.get("metadata").asObject();
+                appId = metadata.getString("app-id", "");
+                userId = metadata.getString("user-id", "");
+                username = metadata.getString("username", "");
+            }
+            authClientToken = authJsonObject.getString("client_token", "");
+            final JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();
+            authPolicies = new ArrayList<>();
+            for (final JsonValue authPolicy : authPoliciesJsonArray) {
+                authPolicies.add(authPolicy.asString());
+            }
+        } catch (UnsupportedEncodingException | ParseException e) {
+        }
     }
 
     public String getUsername() {
         return username;
     }
 
-    @Deprecated
-    public void setUsername(final String username) {
-        this.username = username;
-    }
-
-    /**
-     * @return Deprecated.  Use <code>getRenewable()</code> (returning object <code>Boolean</code> rather than primitive <code>boolean</code>.
-     */
-    @Deprecated
-    public boolean isRenewable() {
-        return getRenewable() == null ? false : getRenewable();
-    }
-
-    /**
-     * @param renewable Deprecated.  Use <code>setRenewable(final Boolean renewable)</code>, passing object <code>Boolean</code> rather than primitive <code>boolean</code>.
-     */
-    @Deprecated
-    public void setRenewable(final boolean renewable) {
-        baseSetRenewable(renewable);
+    public Boolean getRenewable() {
+        return renewable;
     }
 
     public String getAuthClientToken() {
         return authClientToken;
     }
 
-    @Deprecated
-    public void setAuthClientToken(final String authClientToken) {
-        this.authClientToken = authClientToken;
-    }
-
     public List<String> getAuthPolicies() {
         return authPolicies;
     }
 
-    @Deprecated
-    public void setAuthPolicies(final List<String> authPolicies) {
-        this.authPolicies.clear();
-        this.authPolicies.addAll(authPolicies);
-    }
-
-    public int getAuthLeaseDuration() {
+    public long getAuthLeaseDuration() {
         return authLeaseDuration;
-    }
-
-    @Deprecated
-    public void setAuthLeaseDuration(final int authLeaseDuration) {
-        this.authLeaseDuration = authLeaseDuration;
     }
 
     public boolean isAuthRenewable() {
         return authRenewable;
     }
 
-    @Deprecated
-    public void setAuthRenewable(final boolean authRenewable) {
-        this.authRenewable = authRenewable;
-    }
-
     public String getAppId() {
         return appId;
-    }
-
-    @Deprecated
-    public void setAppId(final String appId) {
-        this.appId = appId;
     }
 
     public String getUserId() {
         return userId;
     }
-
-    @Deprecated
-    public void setUserId(final String userId) {
-        this.userId = userId;
-    }
-
 }

@@ -50,6 +50,9 @@ vault write auth/userpass/users/fake_user password=fake_password
 vault mount -path=pki pki
 vault mount -path=other-pki pki
 vault write pki/root/generate/internal common_name=myvault.com ttl=99h
+
+vault auth-enable approle
+vault write auth/approle/role/testrole secret_id_ttl=10m token_ttl=20m token_max_ttl=30m secret_id_num_uses=40
 ```
 
 Configuring and Running the Integration Tests

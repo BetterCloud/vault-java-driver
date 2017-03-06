@@ -4,15 +4,11 @@ import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
-import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.response.PkiResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
 
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>The implementing class for operations on Vault's PKI backend.</p>
@@ -177,11 +173,7 @@ public class Pki {
                 if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
-
-                final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
-                        ? new HashMap<String, String>()//NOPMD
-                        : parseResponseData(restResponse);
-                return new PkiResponse(restResponse, retryCount, data);
+                return new PkiResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -349,11 +341,7 @@ public class Pki {
                 if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
-
-                final Map<String, String> data = restResponse.getBody() == null || restResponse.getBody().length == 0
-                        ? new HashMap<String, String>()//NOPMD
-                        : parseResponseData(restResponse);
-                return new PkiResponse(restResponse, retryCount, data);
+                return new PkiResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -419,40 +407,5 @@ public class Pki {
             jsonObject.add(name, (Long) value);
         }
         return jsonObject;
-    }
-
-    /**
-     * This logic will move into the <code>PkiResponse</code> constructor.
-     *
-     * @param restResponse The Vault reponse data to be parsed
-     * @return Key-value pairs representing the parsed data
-     * @throws VaultException If any error occurs
-     */
-    @Deprecated
-    private Map<String, String> parseResponseData(final RestResponse restResponse) throws VaultException {
-        final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
-        if (!mimeType.equals("application/json")) {
-            throw new VaultException("Vault responded with MIME type: " + mimeType);
-        }
-        String jsonString;
-        try {
-            jsonString = new String(restResponse.getBody(), "UTF-8");//NOPMD
-        } catch (UnsupportedEncodingException e) {
-            throw new VaultException(e);
-        }
-
-        // Parse JSON
-        final Map<String, String> data = new HashMap<String, String>();//NOPMD
-        for (final JsonObject.Member member : Json.parse(jsonString).asObject().get("data").asObject()) {
-            final JsonValue jsonValue = member.getValue();
-            if (jsonValue == null || jsonValue.isNull()) {
-                continue;
-            } else if (jsonValue.isString()) {
-                data.put(member.getName(), jsonValue.asString());
-            } else {
-                data.put(member.getName(), jsonValue.toString());
-            }
-        }
-        return data;
     }
 }
