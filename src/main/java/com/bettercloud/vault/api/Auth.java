@@ -260,7 +260,7 @@ public class Auth {
         return createToken(
                 new TokenRequest()
                         .withId(id)
-                        .withPolices(polices)
+                        .withPolices(policies)
                         .withMeta(meta)
                         .withNoParent(noParent)
                         .withNoDefaultPolicy(noDefaultPolicy)

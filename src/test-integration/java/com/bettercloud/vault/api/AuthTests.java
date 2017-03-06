@@ -70,6 +70,21 @@ public class AuthTests {
     }
 
     /**
+     * Test creation of a new client auth token via a TokenRequest, using the Vault root token
+     *
+     * @throws VaultException
+     */
+    @Test
+    public void testCreateTokenWithRequest() throws VaultException {
+        final VaultConfig config = new VaultConfig(address, rootToken);
+        final Vault vault = new Vault(config);
+
+        final AuthResponse response = vault.auth().createToken(new Auth.TokenRequest().withTtl("1h"));
+        final String token = response.getAuthClientToken();
+        assertNotNull(token);
+    }
+
+    /**
      * Test Authentication with app-id auth backend
      *
      * @throws VaultException
@@ -127,7 +142,7 @@ public class AuthTests {
         // Generate a client token
         final VaultConfig authConfig = new VaultConfig(address, rootToken);
         final Vault authVault = new Vault(authConfig);
-        final AuthResponse createResponse = authVault.auth().createToken(null, null, null, null, null, "1h", null, null);
+        final AuthResponse createResponse = authVault.auth().createToken(new Auth.TokenRequest().withTtl("1h"));
         final String token = createResponse.getAuthClientToken();
         assertNotNull(token);
         assertNotSame("", token.trim());
