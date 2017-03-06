@@ -5,11 +5,13 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.rest.RestResponse;
 
+import java.io.Serializable;
+
 /**
  * This class is a container for the information returned by Vault in <code>v1/sys/health</code>
  * operations.
  */
-public class HealthResponse {
+public class HealthResponse implements Serializable {
 
     private RestResponse restResponse;
     private int retries;

@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -38,13 +39,13 @@ import java.nio.file.Paths;
  * <p>Note that when using the shorthand convenience constructor, you should NOT set additional properties on the
  * same instance afterward.</p>
  */
-public class VaultConfig {
+public class VaultConfig implements Serializable {
 
     /**
      * <p>The code used to load environment variables is encapsulated within an inner class,
      * so that a mock version of that environment loader can be used by unit tests.</p>
      */
-    static class EnvironmentLoader {
+    static class EnvironmentLoader implements Serializable {
         public String loadVariable(final String name) {
             String value = null;
             if ("VAULT_TOKEN".equals(name)) {

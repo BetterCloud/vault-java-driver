@@ -1,5 +1,6 @@
 package com.bettercloud.vault.api.pki;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ import java.util.List;
  * }</pre>
  * </blockquote>
  */
-public class Credential {
+public class Credential implements Serializable {
 
     private String certificate;
     private String issuingCa;
