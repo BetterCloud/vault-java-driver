@@ -236,7 +236,7 @@ public class Auth {
      * <p>All parameters to this method are optional, and can be <code>null</code>.</p>
      *
      * @param id (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
-     * @param polices (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token.
+     * @param policies (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token.
      * @param meta (optional) A map of string to string valued metadata. This is passed through to the audit backends.
      * @param noParent (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent.
      * @param noDefaultPolicy (optional) If <code>true</code> the default policy will not be a part of this token's policy set.
@@ -250,7 +250,7 @@ public class Auth {
     @Deprecated
     public AuthResponse createToken(
             final UUID id,
-            final List<String> polices,
+            final List<String> policies,
             final Map<String, String> meta,
             final Boolean noParent,
             final Boolean noDefaultPolicy,
@@ -261,7 +261,7 @@ public class Auth {
         return createToken(
                 new TokenRequest()
                         .withId(id)
-                        .withPolices(polices)
+                        .withPolices(policies)
                         .withMeta(meta)
                         .withNoParent(noParent)
                         .withNoDefaultPolicy(noDefaultPolicy)
@@ -290,16 +290,10 @@ public class Auth {
             try {
                 // Parse parameters to JSON
                 final JsonObject jsonObject = Json.object();
+              
                 if (tokenRequest.id != null) jsonObject.add("id", tokenRequest.id.toString());
                 if (tokenRequest.polices != null && !tokenRequest.polices.isEmpty()) {
-                    final StringBuilder policiesCsv = new StringBuilder();//NOPMD
-                    for (int index = 0; index < tokenRequest.polices.size(); index++) {
-                        policiesCsv.append(tokenRequest.polices.get(index));
-                        if (index + 1 < tokenRequest.polices.size()) {
-                            policiesCsv.append(',');
-                        }
-                    }
-                    jsonObject.add("polices", policiesCsv.toString());
+                    jsonObject.add("policies", Json.array(tokenRequest.polices.toArray(new String[tokenRequest.polices.size()])));//NOPMD
                 }
                 if (tokenRequest.meta != null && !tokenRequest.meta.isEmpty()) {
                     final JsonObject metaMap = Json.object();
@@ -337,7 +331,7 @@ public class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
-                return buildAuthResponse(restResponse, retryCount);
+                return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -370,7 +364,7 @@ public class Auth {
      * </blockquote>
      *
      * <strong>NOTE: </strong> As of Vault 0.6.1, Hashicorp has deprecated the App ID authentication backend in
-     * favor of AppRole.  A wrapper for that authentication backend is pending.
+     * favor of AppRole.
      *
      * @param path The path on which the authentication is performed (e.g. <code>auth/app-id/login</code>)
      * @param appId The app-id used for authentication
@@ -402,7 +396,7 @@ public class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
-                return buildAuthResponse(restResponse, retryCount);
+                return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -424,29 +418,64 @@ public class Auth {
     }
 
     /**
-     * <p>Basic login operation to authenticate to a Username &amp; Password backend.  Example usage:</p>
+     * <p>Basic login operation to authenticate to an app-role backend.  Example usage:</p>
      *
      * <blockquote>
      * <pre>{@code
-     * final AuthResponse response = vault.auth().loginByUsernamePassword("userpass/login/test", "password");
+     * final AuthResponse response = vault.auth().loginByAppRole("approle", "9e1aede8-dcc6-a293-8223-f0d824a467ed", "9ff4b26e-6460-834c-b925-a940eddb6880");
      *
      * final String token = response.getAuthClientToken();
      * }</pre>
      * </blockquote>
      *
-     * <strong>NOTE: </strong>This method is deprecated, and will be removed in a future major release of this
-     * library.  Switch to loginByUserPass(String, String), which does not require you to prefix
-     * the username parameter with `userpass/login/`.
-     *
-     * @param path The path on which the authentication is performed (e.g. <code>auth/userpass/login/username</code>)
-     * @param password The password used for authentication
+     * @param path The path on which the authentication is performed (e.g. <code>auth/approle/login</code>)
+     * @param roleId The role-id used for authentication
+     * @param secretId The secret-id used for authentication
      * @return The auth token
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
-    @Deprecated
-    public AuthResponse loginByUsernamePassword(final String path, final String password) throws VaultException {
-        final String username = path.replace("userpass/login/", "");
-        return loginByUserPass(username, password);
+    public AuthResponse loginByAppRole(final String path, final String roleId, final String secretId) throws VaultException {
+        int retryCount = 0;
+        while (true) {
+            try {
+                // HTTP request to Vault
+                final String requestJson = Json.object().add("role_id", roleId).add("secret_id", secretId).toString();
+                final RestResponse restResponse = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/auth/" + path + "/login")
+                        .body(requestJson.getBytes("UTF-8"))
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslPemUTF8(config.getSslPemUTF8())
+                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .post();
+
+                // Validate restResponse
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                }
+                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+                if (!mimeType.equals("application/json")) {
+                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
+                }
+                return new AuthResponse(restResponse, retryCount);
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
+            }
+        }
     }
 
     /**
@@ -488,7 +517,7 @@ public class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
-                return buildAuthResponse(restResponse, retryCount);
+                return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -550,7 +579,7 @@ public class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
-                return buildAuthResponse(restResponse, retryCount);
+                return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -614,7 +643,7 @@ public class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
-                return buildAuthResponse(restResponse, retryCount);
+                return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
@@ -635,40 +664,4 @@ public class Auth {
         }
     }
 
-    /**
-     * This logic will move into the <code>AuthResponse</code> constructor.
-     *
-     * @param restResponse The raw response information returned from Vault
-     * @param retries The number of retries that were performed for this operation
-     * @return The parsed response information returned from Vault
-     * @throws UnsupportedEncodingException
-     */
-    @Deprecated
-    private AuthResponse buildAuthResponse(final RestResponse restResponse, final int retries)
-            throws UnsupportedEncodingException {
-        final AuthResponse authResponse = new AuthResponse(restResponse, retries);
-
-        final String responseJson = new String(restResponse.getBody(), "UTF-8");
-        final JsonObject jsonObject = Json.parse(responseJson).asObject();
-        final JsonObject authJsonObject = jsonObject.get("auth").asObject();
-
-        authResponse.setAuthLeaseDuration(authJsonObject.getInt("lease_duration", 0));
-        authResponse.setAuthRenewable(authJsonObject.getBoolean("renewable", false));
-        if (authJsonObject.get("metadata") != null && !authJsonObject.get("metadata").toString().equalsIgnoreCase("null")) {
-            final JsonObject metadata = authJsonObject.get("metadata").asObject();
-            authResponse.setAppId(metadata.getString("app-id", ""));
-            authResponse.setUserId(metadata.getString("user-id", ""));
-            authResponse.setUsername(metadata.getString("username", ""));
-        }
-        authResponse.setAuthClientToken(authJsonObject.getString("client_token", ""));
-
-        final JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();
-        final List<String> authPolicies = new ArrayList<String>();
-        for (final JsonValue authPolicy : authPoliciesJsonArray) {
-            authPolicies.add(authPolicy.asString());
-        }
-        authResponse.setAuthPolicies(authPolicies);
-
-        return authResponse;
-    }
 }

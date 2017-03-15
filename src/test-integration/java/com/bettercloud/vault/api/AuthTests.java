@@ -5,6 +5,7 @@ import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.response.AuthResponse;
+import com.bettercloud.vault.response.LogicalResponse;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -27,18 +28,30 @@ public class AuthTests {
     final static String userId = System.getProperty("VAULT_USER_ID");
     final static String password = System.getProperty("VAULT_PASSWORD");
     final static String rootToken = System.getProperty("VAULT_TOKEN");
+    static String appRoleId;
+    static String secretId;
 
     /**
      * Every test method will need to retrieve Vault credentials from environment variables, but we
      * might as well null-check them once rather than do so redundantly in every method.
      */
     @BeforeClass
-    public static void verifyEnv() {
+    public static void verifyEnv() throws VaultException {
         assertNotNull(address);
         assertNotNull(appId);
         assertNotNull(userId);
         assertNotNull(password);
         assertNotNull(rootToken);
+
+        final VaultConfig config = new VaultConfig(address, rootToken);
+        final Vault vault = new Vault(config);
+        final LogicalResponse roleIdResponse = vault.logical().read("auth/approle/role/testrole/role-id");
+        appRoleId = roleIdResponse.getData().get("role_id");
+        final LogicalResponse secretIdResponse = vault.logical().write("auth/approle/role/testrole/secret-id", null);
+        secretId = secretIdResponse.getData().get("secret_id");
+
+        assertNotNull(appRoleId);
+        assertNotNull(secretId);
     }
 
     /**
@@ -52,6 +65,21 @@ public class AuthTests {
         final Vault vault = new Vault(config);
 
         final AuthResponse response = vault.auth().createToken(null, null, null, null, null, "1h", null, null);
+        final String token = response.getAuthClientToken();
+        assertNotNull(token);
+    }
+
+    /**
+     * Test creation of a new client auth token via a TokenRequest, using the Vault root token
+     *
+     * @throws VaultException
+     */
+    @Test
+    public void testCreateTokenWithRequest() throws VaultException {
+        final VaultConfig config = new VaultConfig(address, rootToken);
+        final Vault vault = new Vault(config);
+
+        final AuthResponse response = vault.auth().createToken(new Auth.TokenRequest().withTtl("1h"));
         final String token = response.getAuthClientToken();
         assertNotNull(token);
     }
@@ -73,22 +101,6 @@ public class AuthTests {
     }
 
     /**
-     * Test Authentication with deprecated userpass auth backend
-     *
-     * @throws VaultException
-     */
-    @Test
-    public void testLoginByUsernamePassword() throws VaultException {
-        final String path = "userpass/login/" + userId;
-        final VaultConfig config = new VaultConfig(address);
-        final Vault vault = new Vault(config);
-
-        final String token = vault.auth().loginByUsernamePassword(path, password).getAuthClientToken();
-        assertNotNull(token);
-        assertNotSame("", token.trim());
-    }
-
-    /**
      * Test Authentication with new userpass auth backend
      *
      * @throws VaultException
@@ -98,7 +110,24 @@ public class AuthTests {
         final VaultConfig config = new VaultConfig(address);
         final Vault vault = new Vault(config);
 
-        final String token = vault.auth().loginByUserPass(userId, password).getAuthClientToken();
+        final AuthResponse response = vault.auth().loginByUserPass(userId, password);
+        final String token = response.getAuthClientToken();
+        assertNotNull(token);
+        assertNotSame("", token.trim());
+    }
+
+    /**
+     * Tests authentication with the app role auth backend
+     *
+     * @throws VaultException
+     */
+    @Test
+    public void testLoginByAppRole() throws VaultException {
+        final String path = "approle";
+        final VaultConfig config = new VaultConfig(address);
+        final Vault vault = new Vault(config);
+
+        final String token = vault.auth().loginByAppRole(path, appRoleId, secretId).getAuthClientToken();
         assertNotNull(token);
         assertNotSame("", token.trim());
     }
@@ -113,7 +142,7 @@ public class AuthTests {
         // Generate a client token
         final VaultConfig authConfig = new VaultConfig(address, rootToken);
         final Vault authVault = new Vault(authConfig);
-        final AuthResponse createResponse = authVault.auth().createToken(null, null, null, null, null, "1h", null, null);
+        final AuthResponse createResponse = authVault.auth().createToken(new Auth.TokenRequest().withTtl("1h"));
         final String token = createResponse.getAuthClientToken();
         assertNotNull(token);
         assertNotSame("", token.trim());
