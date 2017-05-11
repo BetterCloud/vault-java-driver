@@ -6,11 +6,13 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
+import org.junit.rules.ExpectedException;
 
 import static junit.framework.TestCase.*;
 
@@ -134,6 +136,85 @@ public class LogicalTests {
         assertTrue(vault.logical().list("secret").contains("hello"));
         vault.logical().delete("secret/hello");
         assertFalse(vault.logical().list("secret").contains("hello"));
+    }
+
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
+
+    /**
+     * Tests that exception message includes errors returned by Vault
+     *
+     * @throws VaultException
+     */
+    @Test
+    public void testReadExceptionMessageIncludesErrorsReturnedByVault() throws VaultException {
+        expectedEx.expect(VaultException.class);
+        expectedEx.expectMessage("permission denied");
+
+        final VaultConfig config = new VaultConfig(address, "invalid-token");
+        final Vault vault = new Vault(config);
+        vault.logical().read("secret/null");
+    }
+
+    /**
+     * Tests that exception message includes errors returned by Vault
+     *
+     * @throws VaultException
+     */
+    @Test
+    public void testWriteExceptionMessageIncludesErrorsReturnedByVault() throws VaultException {
+        expectedEx.expect(VaultException.class);
+        expectedEx.expectMessage("permission denied");
+
+        final VaultConfig config = new VaultConfig(address, "invalid-token");
+        final Vault vault = new Vault(config);
+        vault.logical().write("secret/null", new HashMap<String, String>() {{ put("value", null); }});
+    }
+
+    /**
+     * Tests that exception message includes errors returned by Vault
+     *
+     * @throws VaultException
+     */
+    @Test
+    public void testDeleteExceptionMessageIncludesErrorsReturnedByVault() throws VaultException {
+        expectedEx.expect(VaultException.class);
+        expectedEx.expectMessage("permission denied");
+
+        final VaultConfig config = new VaultConfig(address, "invalid-token");
+        final Vault vault = new Vault(config);
+        vault.logical().delete("secret/null");
+    }
+
+    /**
+     * Tests that exception message includes errors returned by Vault
+     *
+     * @throws VaultException
+     */
+    @Test
+    public void testListExceptionMessageIncludesErrorsReturnedByVault() throws VaultException {
+        expectedEx.expect(VaultException.class);
+        expectedEx.expectMessage("permission denied");
+
+        final VaultConfig config = new VaultConfig(address, "invalid-token");
+        final Vault vault = new Vault(config);
+        vault.logical().list("secret/null");
+    }
+
+    /**
+     * Write a secret and verify that it can be read containing a null value.
+     *
+     * @throws VaultException
+     */
+    @Test
+    public void testReadExceptionMessageIncludesErrorsReturnedByVaultOn404() throws VaultException {
+        expectedEx.expect(VaultException.class);
+        expectedEx.expectMessage("{\"errors\":[]}");
+
+        final VaultConfig config = new VaultConfig(address, token);
+        final Vault vault = new Vault(config);
+
+        vault.logical().read("secret/null");
     }
 
 }

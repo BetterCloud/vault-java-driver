@@ -1,5 +1,6 @@
 package com.bettercloud.vault.api;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -61,11 +62,12 @@ public class Logical {
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), "UTF-8"), restResponse.getStatus());
                 }
 
                 return new LogicalResponse(restResponse, retryCount);
-            } catch (RuntimeException | VaultException | RestException e) {
+            } catch (RuntimeException | VaultException | RestException | UnsupportedEncodingException e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
                     retryCount++;
@@ -130,7 +132,8 @@ public class Logical {
                 if (restStatus == 200 || restStatus == 204) {
                     return new LogicalResponse(restResponse, retryCount);
                 } else {
-                    throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus, restStatus);
+                    throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus
+                            + "\nResponse body: " + new String(restResponse.getBody(), "UTF-8"), restStatus);
                 }
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
@@ -218,10 +221,11 @@ public class Logical {
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), "UTF-8"), restResponse.getStatus());
                 }
                 return new LogicalResponse(restResponse, retryCount);
-            } catch (RuntimeException | VaultException | RestException e) {
+            } catch (RuntimeException | VaultException | RestException | UnsupportedEncodingException e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
                     retryCount++;
