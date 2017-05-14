@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
@@ -173,6 +174,6 @@ public class AuthTests {
         final LookupResponse lookupResponse = lookupVault.auth().lookupSelf();
         assertEquals(token, lookupResponse.getId());
         assertEquals(3600, lookupResponse.getCreationTTL());
-        assertTrue(lookupResponse.getCreationTTL()<=3600);
+        assertTrue(lookupResponse.getTTL()<=3600);
     }
 }
