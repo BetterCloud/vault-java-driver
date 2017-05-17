@@ -3,6 +3,7 @@ package com.bettercloud.vault.api;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -88,7 +89,7 @@ public class LogicalTests {
         final String path = "secret/hello";
         final String value = "world";
 
-        vault.logical().write(path, new HashMap<String, String>() {{ put("value", value); }});
+        vault.logical().write(path, new HashMap<String, Object>() {{ put("value", value); }});
 
         final String valueRead = vault.logical().read(path).getData().get("value");
         assertEquals(value, valueRead);
@@ -106,7 +107,7 @@ public class LogicalTests {
 
         final VaultConfig config = new VaultConfig(address, token);
         final Vault vault = new Vault(config);
-        vault.logical().write(path, new HashMap<String, String>() {{ put("value", value); }});
+        vault.logical().write(path, new HashMap<String, Object>() {{ put("value", value); }});
 
         final String valueRead = vault.logical().read(path).getData().get("value");
         assertEquals(value, valueRead);
@@ -119,7 +120,7 @@ public class LogicalTests {
      */
     @Test
     public void testList() throws VaultException {
-        vault.logical().write("secret/hello", new HashMap<String, String>() {{ put("value", "world"); }});
+        vault.logical().write("secret/hello", new HashMap<String, Object>() {{ put("value", "world"); }});
 
         final List<String> keys = vault.logical().list("secret");
         assertTrue(keys.contains("hello"));
@@ -132,7 +133,7 @@ public class LogicalTests {
      */
     @Test
     public void testDelete() throws VaultException {
-        vault.logical().write("secret/hello", new HashMap<String, String>() {{ put("value", "world"); }});
+        vault.logical().write("secret/hello", new HashMap<String, Object>() {{ put("value", "world"); }});
         assertTrue(vault.logical().list("secret").contains("hello"));
         vault.logical().delete("secret/hello");
         assertFalse(vault.logical().list("secret").contains("hello"));
@@ -215,6 +216,23 @@ public class LogicalTests {
         final Vault vault = new Vault(config);
 
         vault.logical().read("secret/null");
-    }
 
+    @Test
+    public void testWriteAndRead_allDataTypes() throws VaultException {
+        final String path = "secret/hello";
+
+        final Map<String, Object> nameValuePairs = new HashMap<>();
+        nameValuePairs.put("testBoolean", true);
+        nameValuePairs.put("testInt", 1001);
+        nameValuePairs.put("testFloat", 123.456);
+        nameValuePairs.put("testString", "Hello world!");
+        nameValuePairs.put("testObject", "{ \"nestedBool\": true, \"nestedInt\": 123, \"nestedFloat\": 123.456, \"nestedString\": \"foobar\", \"nestedArray\": [\"foo\", \"bar\"], \"nestedObject\": { \"foo\": \"bar\" } }");
+
+        vault.logical().write(path, nameValuePairs);
+
+        final Map<String, String> valuesRead = vault.logical().read(path).getData();
+        for (Map.Entry<String, String> entry : valuesRead.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue());
+        }
+    }
 }

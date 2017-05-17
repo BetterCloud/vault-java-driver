@@ -135,6 +135,13 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
+* **3.0.0 (IN DEVELOPMENT)**: This is a (mildly) breaking-change release, with several updates.
+  * Adds support for writing arbitrary objects to Vault, instead of just strings (i.e. the 
+    `com.bettercloud.vault.api.Logical.write(...)` method now accepts a `Map<String. Object>` rather than a 
+    `Map<String, String>`).
+  * Supports creating tokens against a role, and refactors the `com.bettercloud.vault.api.Auth.createToken(...)` 
+    method to accept an options object (deprecating the previous version of the method, which took all of those 
+    options as separate parameters).
 * **2.0.0**: This is breaking-change release, with numerous deprecated items cleaned up.
   * Adds support for authentication via the AppRole auth backend.  
   * Adds support for renewing secret leases.

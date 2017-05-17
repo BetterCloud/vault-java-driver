@@ -3,15 +3,11 @@ package com.bettercloud.vault.api;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
-import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
-import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.rest.Rest;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -23,6 +19,194 @@ import java.util.UUID;
  * in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code> method for usage examples.</p>
  */
 public class Auth {
+
+    /**
+     * Builder-style class for use with {@link #createToken(TokenRequest)}
+     *
+     * <p>All properties are optional and can be <code>null</code>.</p>
+     */
+    public static class TokenRequest {
+        /**
+         * (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
+         */
+        private UUID id;
+
+        /**
+         * (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token.
+         */
+        private List<String> polices;
+
+        /**
+         * (optional) A map of string to string valued metadata. This is passed through to the audit backends.
+         */
+        private Map<String, String> meta;
+
+        /**
+         * (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent.
+         */
+        private Boolean noParent;
+
+        /**
+         * (optional) If <code>true</code> the default policy will not be a part of this token's policy set.
+         */
+        private Boolean noDefaultPolicy;
+
+        /**
+         * (optional) The TTL period of the token, provided as "1h", where hour is the largest suffix. If not provided, the token is valid for the default lease TTL, or indefinitely if the root policy is used.
+         */
+        private String ttl;
+
+        /**
+         * (optional) The display name of the token. Defaults to "token".
+         */
+        private String displayName;
+
+        /**
+         * (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses.
+         */
+        private Long numUses;
+
+        /**
+         * (optional) The role the token will be created with. Default is no role.
+         */
+        private String role;
+
+        /**
+         * {@link #id}
+         */
+        public TokenRequest withId(final UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        /**
+         * {@link #polices}
+         */
+        public TokenRequest withPolices(final List<String> polices) {
+            this.polices = polices;
+            return this;
+        }
+
+        /**
+         * {@link #meta}
+         */
+        public TokenRequest withMeta(final Map<String, String> meta) {
+            this.meta = meta;
+            return this;
+        }
+
+        /**
+         * {@link #noParent}
+         */
+        public TokenRequest withNoParent(final Boolean noParent) {
+            this.noParent = noParent;
+            return this;
+        }
+
+        /**
+         * {@link #noDefaultPolicy}
+         */
+        public TokenRequest withNoDefaultPolicy(final Boolean noDefaultPolicy) {
+            this.noDefaultPolicy = noDefaultPolicy;
+            return this;
+        }
+
+        /**
+         * {@link #ttl}
+         */
+        public TokenRequest withTtl(final String ttl) {
+            this.ttl = ttl;
+            return this;
+        }
+
+        /**
+         * {@link #displayName}
+         */
+        public TokenRequest withDisplayName(final String displayName) {
+            this.displayName = displayName;
+            return this;
+        }
+
+        /**
+         * {@link #numUses}
+         */
+        public TokenRequest withNumUses(final Long numUses) {
+            this.numUses = numUses;
+            return this;
+        }
+
+        /**
+         * {@link #role}
+         */
+        public TokenRequest withRole(final String role) {
+            this.role = role;
+            return this;
+        }
+
+
+        /**
+         * {@link #id}
+         */
+        public UUID getId() {
+            return id;
+        }
+
+        /**
+         * {@link #polices}
+         */
+        public List<String> getPolices() {
+            return polices;
+        }
+
+        /**
+         * {@link #meta}
+         */
+        public Map<String, String> getMeta() {
+            return meta;
+        }
+
+        /**
+         * {@link #noParent}
+         */
+        public Boolean getNoParent() {
+            return noParent;
+        }
+
+        /**
+         * {@link #noDefaultPolicy}
+         */
+        public Boolean getNoDefaultPolicy() {
+            return noDefaultPolicy;
+        }
+
+        /**
+         * {@link #ttl}
+         */
+        public String getTtl() {
+            return ttl;
+        }
+
+        /**
+         * {@link #displayName}
+         */
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        /**
+         * {@link #numUses}
+         */
+        public Long getNumUses() {
+            return numUses;
+        }
+
+        /**
+         * {@link #role}
+         */
+        public String getRole() {
+            return role;
+        }
+    }
 
     private final VaultConfig config;
 
@@ -56,7 +240,9 @@ public class Auth {
      * @param numUses (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses.
      * @return The auth token
      * @throws VaultException If any error occurs, or unexpected response received from Vault
+     * @deprecated Use {@link #createToken(TokenRequest)}
      */
+    @Deprecated
     public AuthResponse createToken(
             final UUID id,
             final List<String> policies,
@@ -67,32 +253,63 @@ public class Auth {
             final String displayName,
             final Long numUses
     ) throws VaultException {
+        return createToken(
+                new TokenRequest()
+                        .withId(id)
+                        .withPolices(policies)
+                        .withMeta(meta)
+                        .withNoParent(noParent)
+                        .withNoDefaultPolicy(noDefaultPolicy)
+                        .withTtl(ttl)
+                        .withDisplayName(displayName)
+                        .withNumUses(numUses));
+    }
+
+
+    /**
+     * <p>Operation to create an authentication token.  Relies on another token already being present in
+     * the <code>VaultConfig</code> instance.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final VaultConfig config = new VaultConfig(address, rootToken);
+     * final Vault vault = new Vault(config);
+     * final AuthResponse response = vault.auth().createToken(new TokenRequest().withTtl("1h"));
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>     */
+    public AuthResponse createToken(TokenRequest tokenRequest) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
                 // Parse parameters to JSON
                 final JsonObject jsonObject = Json.object();
-                if (id != null) jsonObject.add("id", id.toString());
-                if (policies != null && !policies.isEmpty()) {
-                    jsonObject.add("policies", Json.array(policies.toArray(new String[policies.size()])));//NOPMD
+              
+                if (tokenRequest.id != null) jsonObject.add("id", tokenRequest.id.toString());
+                if (tokenRequest.polices != null && !tokenRequest.polices.isEmpty()) {
+                    jsonObject.add("policies", Json.array(tokenRequest.polices.toArray(new String[tokenRequest.polices.size()])));//NOPMD
                 }
-                if (meta != null && !meta.isEmpty()) {
+                if (tokenRequest.meta != null && !tokenRequest.meta.isEmpty()) {
                     final JsonObject metaMap = Json.object();
-                    for (final Map.Entry<String, String> entry : meta.entrySet()) {
+                    for (final Map.Entry<String, String> entry : tokenRequest.meta.entrySet()) {
                         metaMap.add(entry.getKey(), entry.getValue());
                     }
                     jsonObject.add("meta", metaMap);
                 }
-                if (noParent != null) jsonObject.add("no_parent", noParent);
-                if (noDefaultPolicy != null) jsonObject.add("no_default_policy", noDefaultPolicy);
-                if (ttl != null) jsonObject.add("ttl", ttl);
-                if (displayName != null) jsonObject.add("display_name", displayName);
-                if (numUses != null) jsonObject.add("num_uses", numUses);
+                if (tokenRequest.noParent != null) jsonObject.add("no_parent", tokenRequest.noParent);
+                if (tokenRequest.noDefaultPolicy != null) jsonObject.add("no_default_policy", tokenRequest.noDefaultPolicy);
+                if (tokenRequest.ttl != null) jsonObject.add("ttl", tokenRequest.ttl);
+                if (tokenRequest.displayName != null) jsonObject.add("display_name", tokenRequest.displayName);
+                if (tokenRequest.numUses != null) jsonObject.add("num_uses", tokenRequest.numUses);
                 final String requestJson = jsonObject.toString();
+
+                String url = config.getAddress() + "/v1/auth/token/create";
+                if (tokenRequest.role != null) url += "/" + tokenRequest.role;
 
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/auth/token/create")
+                        .url(url)
                         .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
