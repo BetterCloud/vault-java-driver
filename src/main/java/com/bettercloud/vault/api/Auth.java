@@ -462,8 +462,8 @@ public class Auth {
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
-                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
-                if (!mimeType.equals("application/json")) {
+                final String mimeType = restResponse.getMimeType();
+                if (mimeType == null || !"application/json".equals(mimeType)) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
                 return new LookupResponse(restResponse, retryCount);
@@ -475,9 +475,9 @@ public class Auth {
                         final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
-                        e1.printStackTrace();
+                        e1.printStackTrace(); //NOPMD
                     }
-                } else if (e instanceof VaultException) {
+                } else if (e instanceof VaultException) { //NOPMD
                     // ... otherwise, give up.
                     throw (VaultException) e;
                 } else {
