@@ -512,10 +512,23 @@ public class Rest {
      *
      * @param connection An active HTTP(S) connection
      * @return The body payload, downloaded from the HTTP connection response
+     * @throws RestException
      */
-    private byte[] responseBodyBytes(final URLConnection connection) {
+    private byte[] responseBodyBytes(final URLConnection connection) throws RestException {
         try {
-            final InputStream inputStream = connection.getInputStream();
+            final InputStream inputStream;
+            final int responseCode = this.connectionStatus(connection);
+            if (200 <= responseCode && responseCode  <= 299) {
+                inputStream = connection.getInputStream();
+            } else {
+                if (connection instanceof HttpsURLConnection) {
+                    final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
+                    inputStream = httpsURLConnection.getErrorStream();
+                } else {
+                    final HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
+                    inputStream = httpURLConnection.getErrorStream();
+                }
+            }
             final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             int bytesRead;
             final byte[] bytes = new byte[16384];

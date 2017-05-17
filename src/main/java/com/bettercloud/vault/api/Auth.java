@@ -3,9 +3,7 @@ package com.bettercloud.vault.api;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
-import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
-import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.rest.Rest;
@@ -34,52 +32,52 @@ public class Auth {
         /**
          * (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
          */
-        UUID id;
+        private UUID id;
 
         /**
          * (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token.
          */
-        List<String> polices;
+        private List<String> polices;
 
         /**
          * (optional) A map of string to string valued metadata. This is passed through to the audit backends.
          */
-        Map<String, String> meta;
+        private Map<String, String> meta;
 
         /**
          * (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent.
          */
-        Boolean noParent;
+        private Boolean noParent;
 
         /**
          * (optional) If <code>true</code> the default policy will not be a part of this token's policy set.
          */
-        Boolean noDefaultPolicy;
+        private Boolean noDefaultPolicy;
 
         /**
          * (optional) The TTL period of the token, provided as "1h", where hour is the largest suffix. If not provided, the token is valid for the default lease TTL, or indefinitely if the root policy is used.
          */
-        String ttl;
+        private String ttl;
 
         /**
          * (optional) The display name of the token. Defaults to "token".
          */
-        String displayName;
+        private String displayName;
 
         /**
          * (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses.
          */
-        Long numUses;
+        private Long numUses;
 
         /**
          * (optional) The role the token will be created with. Default is no role.
          */
-        String role;
+        private String role;
 
         /**
          * {@link #id}
          */
-        public TokenRequest withId(UUID id) {
+        public TokenRequest withId(final UUID id) {
             this.id = id;
             return this;
         }
@@ -87,7 +85,7 @@ public class Auth {
         /**
          * {@link #polices}
          */
-        public TokenRequest withPolices(List<String> polices) {
+        public TokenRequest withPolices(final List<String> polices) {
             this.polices = polices;
             return this;
         }
@@ -95,7 +93,7 @@ public class Auth {
         /**
          * {@link #meta}
          */
-        public TokenRequest withMeta(Map<String, String> meta) {
+        public TokenRequest withMeta(final Map<String, String> meta) {
             this.meta = meta;
             return this;
         }
@@ -103,7 +101,7 @@ public class Auth {
         /**
          * {@link #noParent}
          */
-        public TokenRequest withNoParent(Boolean noParent) {
+        public TokenRequest withNoParent(final Boolean noParent) {
             this.noParent = noParent;
             return this;
         }
@@ -111,7 +109,7 @@ public class Auth {
         /**
          * {@link #noDefaultPolicy}
          */
-        public TokenRequest withNoDefaultPolicy(Boolean noDefaultPolicy) {
+        public TokenRequest withNoDefaultPolicy(final Boolean noDefaultPolicy) {
             this.noDefaultPolicy = noDefaultPolicy;
             return this;
         }
@@ -119,7 +117,7 @@ public class Auth {
         /**
          * {@link #ttl}
          */
-        public TokenRequest withTtl(String ttl) {
+        public TokenRequest withTtl(final String ttl) {
             this.ttl = ttl;
             return this;
         }
@@ -127,7 +125,7 @@ public class Auth {
         /**
          * {@link #displayName}
          */
-        public TokenRequest withDisplayName(String displayName) {
+        public TokenRequest withDisplayName(final String displayName) {
             this.displayName = displayName;
             return this;
         }
@@ -135,7 +133,7 @@ public class Auth {
         /**
          * {@link #numUses}
          */
-        public TokenRequest withNumUses(Long numUses) {
+        public TokenRequest withNumUses(final Long numUses) {
             this.numUses = numUses;
             return this;
         }
@@ -143,7 +141,7 @@ public class Auth {
         /**
          * {@link #role}
          */
-        public TokenRequest withRole(String role) {
+        public TokenRequest withRole(final String role) {
             this.role = role;
             return this;
         }

@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.io.UnsupportedEncodingException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests relating the REST client processing of GET requests.
@@ -129,6 +130,24 @@ public class GetTests {
         assertEquals("white", headers.getString("Black", null));
         assertEquals("night", headers.getString("Day", null));
         assertEquals("Note+that+headers+are+send+in+url-encoded+format", headers.getString("Two-Part", null));
+    }
+
+    /**
+     * <p>Verify that response body is retrieved when http status is error code</p>
+     *
+     * @throws RestException
+     * @throws UnsupportedEncodingException If there's a problem parsing the response JSON as UTF-8
+     */
+    @Test
+    public void testGet_RetrievesResponseBodyWhenStatusIs418() throws RestException, UnsupportedEncodingException {
+        final RestResponse restResponse = new Rest()
+                .url("http://httpbin.org/status/418")
+                .get();
+        assertEquals(418, restResponse.getStatus());
+
+        final String responseBody = new String(restResponse.getBody(), "UTF-8");
+        assertTrue("Response body is empty", responseBody.length() > 0);
+        assertTrue("Response body doesn't contain word teapot", responseBody.contains("teapot"));
     }
 
 }
