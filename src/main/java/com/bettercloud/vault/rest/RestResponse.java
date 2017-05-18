@@ -1,12 +1,13 @@
 package com.bettercloud.vault.rest;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * This class contains the metadata and data that was downloaded by <code>Rest</code>
  * from an HTTP response.
  */
-public class RestResponse {
+public class RestResponse implements Serializable {
 
     private int status;
     private String mimeType;

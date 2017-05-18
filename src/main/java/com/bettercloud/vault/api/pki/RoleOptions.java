@@ -1,5 +1,6 @@
 package com.bettercloud.vault.api.pki;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,7 @@ import java.util.List;
  * }</pre>
  * </blockquote>
  */
-public class RoleOptions {
+public class RoleOptions implements Serializable {
 
     private String ttl;
     private String maxTtl;

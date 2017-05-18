@@ -2,6 +2,8 @@ package com.bettercloud.vault.response;
 
 import com.bettercloud.vault.rest.RestResponse;
 
+import java.io.Serializable;
+
 /**
  * <p><code>VaultResponse</code> is a common base class for the response objects returned by
  * all API methods.  It contains the bare minimum of information common to all Vault
@@ -14,7 +16,7 @@ import com.bettercloud.vault.rest.RestResponse;
  * So the next major release will implement those fields directly in the subclasses where they're
  * used.
  */
-public class VaultResponse {
+public class VaultResponse implements Serializable {
 
     private RestResponse restResponse;
     private int retries;

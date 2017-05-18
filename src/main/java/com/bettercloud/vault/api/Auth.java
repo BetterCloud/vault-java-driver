@@ -9,6 +9,9 @@ import com.bettercloud.vault.response.LookupResponse;
 import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.rest.Rest;
 
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -26,7 +29,7 @@ public class Auth {
      *
      * <p>All properties are optional and can be <code>null</code>.</p>
      */
-    public static class TokenRequest {
+    public static class TokenRequest implements Serializable {
         /**
          * (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
          */
