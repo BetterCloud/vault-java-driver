@@ -144,6 +144,7 @@ should represent non-breaking changes.  The third number represents any very min
     options as separate parameters).
   * Includes the REST response body in `VaultException` messages for basic read and write operations.
   * Implements the `/v1/auth/token/lookup-self` endpoint.
+  * Makes numerous classes implement `Serializable`.
 * **2.0.0**: This is breaking-change release, with numerous deprecated items cleaned up.
   * Adds support for authentication via the AppRole auth backend.  
   * Adds support for renewing secret leases.
