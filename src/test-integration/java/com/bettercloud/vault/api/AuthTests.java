@@ -6,11 +6,14 @@ import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.response.LogicalResponse;
+import com.bettercloud.vault.response.LookupResponse;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNotSame;
@@ -165,4 +168,27 @@ public class AuthTests {
         assertEquals(20, explicitLeaseDuration);
     }
 
+    /**
+     * Tests token lookup-self for the token auth backend.
+     *
+     * @throws VaultException
+     */
+    @Test
+    public void testLookupSelf() throws VaultException, UnsupportedEncodingException {
+        // Generate a client token
+        final VaultConfig authConfig = new VaultConfig(address, rootToken);
+        final Vault authVault = new Vault(authConfig);
+        final AuthResponse createResponse = authVault.auth().createToken(null, null, null, null, null, "1h", null, null);
+        final String token = createResponse.getAuthClientToken();
+        assertNotNull(token);
+        assertNotSame("", token.trim());
+
+        // Lookup the client token
+        final VaultConfig lookupConfig = new VaultConfig(address, token);
+        final Vault lookupVault = new Vault(lookupConfig);
+        final LookupResponse lookupResponse = lookupVault.auth().lookupSelf();
+        assertEquals(token, lookupResponse.getId());
+        assertEquals(3600, lookupResponse.getCreationTTL());
+        assertTrue(lookupResponse.getTTL()<=3600);
+    }
 }
