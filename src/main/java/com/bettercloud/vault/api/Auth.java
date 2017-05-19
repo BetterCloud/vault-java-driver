@@ -681,7 +681,7 @@ public class Auth {
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslPemUTF8(config.getSslPemUTF8())
                         .sslVerification(config.isSslVerify())
-                        .post();
+                        .get();
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());

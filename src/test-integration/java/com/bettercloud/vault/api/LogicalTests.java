@@ -169,7 +169,7 @@ public class LogicalTests {
 
         final VaultConfig config = new VaultConfig(address, "invalid-token");
         final Vault vault = new Vault(config);
-        vault.logical().write("secret/null", new HashMap<String, String>() {{ put("value", null); }});
+        vault.logical().write("secret/null", new HashMap<String, Object>() {{ put("value", null); }});
     }
 
     /**
@@ -216,6 +216,7 @@ public class LogicalTests {
         final Vault vault = new Vault(config);
 
         vault.logical().read("secret/null");
+    }
 
     @Test
     public void testWriteAndRead_allDataTypes() throws VaultException {
