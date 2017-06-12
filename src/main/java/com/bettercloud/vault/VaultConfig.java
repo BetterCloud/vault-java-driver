@@ -41,6 +41,13 @@ import java.nio.file.Paths;
  */
 public class VaultConfig implements Serializable {
 
+    private static final String VAULT_ADDR = "VAULT_ADDR";
+    private static final String VAULT_TOKEN = "VAULT_TOKEN";
+    private static final String VAULT_SSL_CERT = "VAULT_SSL_CERT";
+    private static final String VAULT_SSL_VERIFY = "VAULT_SSL_VERIFY";
+    private static final String VAULT_OPEN_TIMEOUT = "VAULT_OPEN_TIMEOUT";
+    private static final String VAULT_READ_TIMEOUT = "VAULT_READ_TIMEOUT";
+
     /**
      * <p>The code used to load environment variables is encapsulated within an inner class,
      * so that a mock version of that environment loader can be used by unit tests.</p>
@@ -48,11 +55,11 @@ public class VaultConfig implements Serializable {
     static class EnvironmentLoader implements Serializable {
         public String loadVariable(final String name) {
             String value = null;
-            if ("VAULT_TOKEN".equals(name)) {
+            if (VAULT_TOKEN.equals(name)) {
 
                 // Special handling for the VAULT_TOKEN variable, since it can be read from the filesystem if it's not
                 // found in the environment
-                if (System.getenv("VAULT_TOKEN") != null) {
+                if (System.getenv(VAULT_TOKEN) != null) {
                     // Found it in the environment
                     value = System.getenv(name);
                 } else {
@@ -412,41 +419,41 @@ public class VaultConfig implements Serializable {
             this.environmentLoader = new EnvironmentLoader();
         }
         if (this.address == null) {
-            final String addressFromEnv = environmentLoader.loadVariable("VAULT_ADDR");
+            final String addressFromEnv = environmentLoader.loadVariable(VAULT_ADDR);
             if (addressFromEnv != null) {
                 this.address = addressFromEnv;
             } else {
                 throw new VaultException("No address is set");
             }
         }
-        if (this.token == null && environmentLoader.loadVariable("VAULT_TOKEN") != null) {
-            this.token = environmentLoader.loadVariable("VAULT_TOKEN");
+        if (this.token == null && environmentLoader.loadVariable(VAULT_TOKEN) != null) {
+            this.token = environmentLoader.loadVariable(VAULT_TOKEN);
         }
-        if (this.sslPemUTF8 == null && environmentLoader.loadVariable("VAULT_SSL_CERT") != null) {
-            final File pemFile = new File(environmentLoader.loadVariable("VAULT_SSL_CERT"));
+        if (this.sslPemUTF8 == null && environmentLoader.loadVariable(VAULT_SSL_CERT) != null) {
+            final File pemFile = new File(environmentLoader.loadVariable(VAULT_SSL_CERT));
             try (final InputStream input = new FileInputStream(pemFile)) {
                 this.sslPemUTF8 = inputStreamToUTF8(input);
             } catch (IOException e) {
                 throw new VaultException(e);
             }
         }
-        if (this.sslVerify == null && environmentLoader.loadVariable("VAULT_SSL_VERIFY") != null) {
-            this.sslVerify = Boolean.valueOf(environmentLoader.loadVariable("VAULT_SSL_VERIFY"));
+        if (this.sslVerify == null && environmentLoader.loadVariable(VAULT_SSL_VERIFY) != null) {
+            this.sslVerify = Boolean.valueOf(environmentLoader.loadVariable(VAULT_SSL_VERIFY));
         }
-        if (this.openTimeout == null && environmentLoader.loadVariable("VAULT_OPEN_TIMEOUT") != null) {
+        if (this.openTimeout == null && environmentLoader.loadVariable(VAULT_OPEN_TIMEOUT) != null) {
             try {
-                this.openTimeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_OPEN_TIMEOUT"));
+                this.openTimeout = Integer.valueOf(environmentLoader.loadVariable(VAULT_OPEN_TIMEOUT));
             } catch (NumberFormatException e) {
-                System.err.printf("The \"VAULT_OPEN_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
-                        environmentLoader.loadVariable("VAULT_OPEN_TIMEOUT"));
+                System.err.printf("The " + VAULT_OPEN_TIMEOUT + " environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
+                        environmentLoader.loadVariable(VAULT_OPEN_TIMEOUT));
             }
         }
-        if (this.readTimeout == null && environmentLoader.loadVariable("VAULT_READ_TIMEOUT") != null) {
+        if (this.readTimeout == null && environmentLoader.loadVariable(VAULT_READ_TIMEOUT) != null) {
             try {
-                this.readTimeout = Integer.valueOf(environmentLoader.loadVariable("VAULT_READ_TIMEOUT"));
+                this.readTimeout = Integer.valueOf(environmentLoader.loadVariable(VAULT_READ_TIMEOUT));
             } catch (NumberFormatException e) {
-                System.err.printf("The \"VAULT_READ_TIMEOUT\" environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
-                        environmentLoader.loadVariable("VAULT_READ_TIMEOUT"));
+                System.err.printf("The " + VAULT_READ_TIMEOUT + " environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
+                        environmentLoader.loadVariable(VAULT_READ_TIMEOUT));
             }
         }
         return this;
