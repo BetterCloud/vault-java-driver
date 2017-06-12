@@ -145,6 +145,9 @@ should represent non-breaking changes.  The third number represents any very min
   * Includes the REST response body in `VaultException` messages for basic read and write operations.
   * Implements the `/v1/auth/token/lookup-self` endpoint.
   * Makes numerous classes implement `Serializable`.
+  * Re-works the integration test suite, so that you no longer have to manually configure and run a Vault server 
+    instance.  The tests now use the [TestContainers](https://www.testcontainers.org/) to setup and launch a 
+    Vault server instance from within a Docker container, in a completely automated manner.
 * **2.0.0**: This is breaking-change release, with numerous deprecated items cleaned up.
   * Adds support for authentication via the AppRole auth backend.  
   * Adds support for renewing secret leases.
