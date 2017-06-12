@@ -10,8 +10,6 @@ import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.rest.Rest;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -78,7 +76,7 @@ public class Auth {
         /**
          * {@link #id}
          */
-        public TokenRequest withId(final UUID id) {
+        public TokenRequest id(final UUID id) {
             this.id = id;
             return this;
         }
@@ -86,7 +84,7 @@ public class Auth {
         /**
          * {@link #polices}
          */
-        public TokenRequest withPolices(final List<String> polices) {
+        public TokenRequest polices(final List<String> polices) {
             this.polices = polices;
             return this;
         }
@@ -94,7 +92,7 @@ public class Auth {
         /**
          * {@link #meta}
          */
-        public TokenRequest withMeta(final Map<String, String> meta) {
+        public TokenRequest meta(final Map<String, String> meta) {
             this.meta = meta;
             return this;
         }
@@ -102,7 +100,7 @@ public class Auth {
         /**
          * {@link #noParent}
          */
-        public TokenRequest withNoParent(final Boolean noParent) {
+        public TokenRequest noParent(final Boolean noParent) {
             this.noParent = noParent;
             return this;
         }
@@ -110,7 +108,7 @@ public class Auth {
         /**
          * {@link #noDefaultPolicy}
          */
-        public TokenRequest withNoDefaultPolicy(final Boolean noDefaultPolicy) {
+        public TokenRequest noDefaultPolicy(final Boolean noDefaultPolicy) {
             this.noDefaultPolicy = noDefaultPolicy;
             return this;
         }
@@ -118,7 +116,7 @@ public class Auth {
         /**
          * {@link #ttl}
          */
-        public TokenRequest withTtl(final String ttl) {
+        public TokenRequest ttl(final String ttl) {
             this.ttl = ttl;
             return this;
         }
@@ -126,7 +124,7 @@ public class Auth {
         /**
          * {@link #displayName}
          */
-        public TokenRequest withDisplayName(final String displayName) {
+        public TokenRequest displayName(final String displayName) {
             this.displayName = displayName;
             return this;
         }
@@ -134,7 +132,7 @@ public class Auth {
         /**
          * {@link #numUses}
          */
-        public TokenRequest withNumUses(final Long numUses) {
+        public TokenRequest numUses(final Long numUses) {
             this.numUses = numUses;
             return this;
         }
@@ -142,7 +140,7 @@ public class Auth {
         /**
          * {@link #role}
          */
-        public TokenRequest withRole(final String role) {
+        public TokenRequest role(final String role) {
             this.role = role;
             return this;
         }
@@ -259,14 +257,14 @@ public class Auth {
     ) throws VaultException {
         return createToken(
                 new TokenRequest()
-                        .withId(id)
-                        .withPolices(policies)
-                        .withMeta(meta)
-                        .withNoParent(noParent)
-                        .withNoDefaultPolicy(noDefaultPolicy)
-                        .withTtl(ttl)
-                        .withDisplayName(displayName)
-                        .withNumUses(numUses));
+                        .id(id)
+                        .polices(policies)
+                        .meta(meta)
+                        .noParent(noParent)
+                        .noDefaultPolicy(noDefaultPolicy)
+                        .ttl(ttl)
+                        .displayName(displayName)
+                        .numUses(numUses));
     }
 
 

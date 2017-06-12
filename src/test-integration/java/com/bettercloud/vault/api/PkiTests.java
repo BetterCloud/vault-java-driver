@@ -1,7 +1,6 @@
 package com.bettercloud.vault.api;
 
 import com.bettercloud.vault.Vault;
-import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.api.pki.CredentialFormat;
 import com.bettercloud.vault.api.pki.RoleOptions;
@@ -9,8 +8,10 @@ import com.bettercloud.vault.response.PkiResponse;
 import com.bettercloud.vault.rest.RestResponse;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static junit.framework.Assert.assertTrue;
@@ -18,29 +19,23 @@ import static junit.framework.TestCase.*;
 
 /**
  * <p>Integration tests for for operations on Vault's <code>/v1/pki/*</code> REST endpoints.</p>
- *
- * <p>These tests require a Vault server to be up and running.  See the setup notes in
- * "src/test-integration/README.md".</p>
  */
 public class PkiTests {
 
-    final static String address = System.getProperty("VAULT_ADDR");
-    final static String token = System.getProperty("VAULT_TOKEN");
+    @ClassRule
+    public static final VaultContainer container = new VaultContainer();
 
     @BeforeClass
-    public static void verifyEnv() {
-        assertNotNull(address);
-        assertNotNull(token);
+    public static void setupClass() throws IOException, InterruptedException {
+        container.setupPkiBackend();
     }
-
 
     @Before
     public void setup() throws VaultException {
-        final VaultConfig config = new VaultConfig(address, token);
-        final Vault vault = new Vault(config);
+        final Vault vault = container.getRootVault();
 
-        final PkiResponse defaultReponse = vault.pki().deleteRole("testRole");
-        final RestResponse defaultRestResponse = defaultReponse.getRestResponse();
+        final PkiResponse defaultResponse = vault.pki().deleteRole("testRole");
+        final RestResponse defaultRestResponse = defaultResponse.getRestResponse();
         assertEquals(204, defaultRestResponse.getStatus());
 
         final PkiResponse customResponse = vault.pki("other-pki").deleteRole("testRole");
@@ -50,8 +45,7 @@ public class PkiTests {
 
     @Test
     public void testCreateRole_Defaults() throws VaultException {
-        final VaultConfig config = new VaultConfig(address, token);
-        final Vault vault = new Vault(config);
+        final Vault vault = container.getRootVault();
 
         vault.pki().createOrUpdateRole("testRole");
         final PkiResponse response = vault.pki().getRole("testRole");
@@ -60,8 +54,7 @@ public class PkiTests {
 
     @Test
     public void testCreateRole_WithOptions() throws VaultException {
-        final VaultConfig config = new VaultConfig(address, token);
-        final Vault vault = new Vault(config);
+        final Vault vault = container.getRootVault();
 
         final RoleOptions options = new RoleOptions().allowAnyName(true);
         vault.pki().createOrUpdateRole("testRole", options);
@@ -71,8 +64,7 @@ public class PkiTests {
 
     @Test
     public void testDeleteRole() throws VaultException {
-        final VaultConfig config = new VaultConfig(address, token);
-        final Vault vault = new Vault(config);
+        final Vault vault = container.getRootVault();
 
         testCreateRole_Defaults();
         final PkiResponse deleteResponse = vault.pki().deleteRole("testRole");
@@ -83,8 +75,7 @@ public class PkiTests {
 
     @Test
     public void testIssueCredential() throws VaultException, InterruptedException {
-        final VaultConfig config = new VaultConfig(address, token);
-        final Vault vault = new Vault(config);
+        final Vault vault = container.getRootVault();
 
         // Create a role
         final PkiResponse createRoleResponse = vault.pki().createOrUpdateRole("testRole",
@@ -107,8 +98,7 @@ public class PkiTests {
 
     @Test
     public void testCustomMountPath() throws VaultException {
-        final VaultConfig config = new VaultConfig(address, token);
-        final Vault vault = new Vault(config);
+        final Vault vault = container.getRootVault();
 
         vault.pki("other-pki").createOrUpdateRole("testRole");
         final PkiResponse response = vault.pki("other-pki").getRole("testRole");
