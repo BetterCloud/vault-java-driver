@@ -12,16 +12,16 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.UUID;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNotSame;
-import static junit.framework.TestCase.assertNull;
 
 /**
  * Integration tests for the basic (i.e. "auth") Vault API operations.
+ *
+ * TODO:  Either break this class up by auth backend type, or else pull the "PkiTests.java" content into this test class
  */
 public class AuthTests {
 
@@ -33,6 +33,7 @@ public class AuthTests {
 
     @BeforeClass
     public static void setupClass() throws IOException, InterruptedException, VaultException {
+        container.initAndUnsealVault();
         container.setupAppIdBackend();
         container.setupUserPassBackend();
         container.setupAppRoleBackend();

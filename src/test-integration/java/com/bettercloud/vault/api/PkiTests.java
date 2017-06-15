@@ -27,6 +27,7 @@ public class PkiTests {
 
     @BeforeClass
     public static void setupClass() throws IOException, InterruptedException {
+        container.initAndUnsealVault();
         container.setupPkiBackend();
     }
 

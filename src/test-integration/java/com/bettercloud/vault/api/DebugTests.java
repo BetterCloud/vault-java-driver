@@ -4,8 +4,11 @@ import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.HealthResponse;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static junit.framework.TestCase.*;
 
@@ -18,6 +21,11 @@ public class DebugTests {
     public static final VaultContainer container = new VaultContainer();
 
     private Vault vault;
+
+    @BeforeClass
+    public static void setupClass() throws IOException, InterruptedException {
+        container.initAndUnsealVault();
+    }
 
     @Before
     public void setup() throws VaultException {
