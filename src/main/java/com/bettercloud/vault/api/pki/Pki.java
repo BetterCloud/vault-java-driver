@@ -105,8 +105,8 @@ public class Pki {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
                         .post();
 
                 // Validate restResponse
@@ -165,8 +165,8 @@ public class Pki {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
                         .get();
 
                 // Validate response
@@ -225,8 +225,8 @@ public class Pki {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
                         .delete();
 
                 // Validate response
@@ -333,8 +333,8 @@ public class Pki {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
                         .post();
 
                 // Validate response

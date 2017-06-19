@@ -183,7 +183,7 @@ public class Rest {
      * facilitate development or testing environments, where you might be using a self-signed cert that will not
      * pass verification.  However, even if you are using a self-signed cert on your server, you can still leave
      * SSL verification enabled and have your application supply the cert using <code>sslPemFile()</code>,
-     * <code>sslPemResource()</code>, or <code>sslPemUTF8()</code>.</p>
+     * <code>sslPemResource()</code>, or <code>pemUTF8()</code>.</p>
      *
      * @param sslVerification Whether or not to verify the SSL certificate used by the server with HTTPS connections.  Default is <code>true</code>.
      * @return This object, with sslVerification populated, ready for other builder-pattern config methods or an HTTP verb method
@@ -211,7 +211,7 @@ public class Rest {
      * </ul>
      *
      * @param pemFileContents An X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
-     * @return This object, with sslPemUTF8 populated, ready for other builder-pattern config methods or an HTTP verb method
+     * @return This object, with pemUTF8 populated, ready for other builder-pattern config methods or an HTTP verb method
      */
     public Rest sslPemUTF8(final String pemFileContents) {
         this.sslPemUTF8 = pemFileContents;
@@ -414,11 +414,13 @@ public class Rest {
             if (connection instanceof HttpsURLConnection) {
                 final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
                 // Cert file supplied
+                // TODO: Move this to the SslConfig.build() method
                 if (sslPemUTF8 != null) {
                     final SSLContext sslContext = initSSLContext();
                     httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
                 }
                 // SSL verification disabled
+                // TODO: Move this to the SslConfig.build() method
                 if (sslVerification != null && !sslVerification.booleanValue()) {
                     final SSLContext sslContext = SSLContext.getInstance("TLS");
                     sslContext.init(null, new TrustManager[]{new X509TrustManager() {

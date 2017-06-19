@@ -135,7 +135,9 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **3.0.0 (IN DEVELOPMENT)**: This is a (mildly) breaking-change release, with several updates.
+* **3.0.0 (IN DEVELOPMENT)**: This is a breaking-change release, with several updates.
+  * Refactors the `VaultConfig` class, forcing use of the builder pattern and breaking off SSL-related 
+    config into a separate `SslConfig` class.
   * Adds support for writing arbitrary objects to Vault, instead of just strings (i.e. the 
     `com.bettercloud.vault.api.Logical.write(...)` method now accepts a `Map<String. Object>` rather than a 
     `Map<String, String>`).

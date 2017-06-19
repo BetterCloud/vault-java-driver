@@ -1,5 +1,6 @@
 package com.bettercloud.vault.api;
 
+import com.bettercloud.vault.SslConfig;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
@@ -251,8 +252,8 @@ public class VaultContainer implements TestRule {
                         .address(getAddress())
                         .openTimeout(5)
                         .readTimeout(30)
-//                        .sslVerify(false)
-                        .sslPemFile(new File(ROOT_CA_PEMFILE))
+//                        .verify(false)
+                        .sslConfig(new SslConfig().sslPemFile(new File(ROOT_CA_PEMFILE)))
                         .build();
         return getVault(config, MAX_RETRIES, RETRY_MILLIS);
     }
@@ -272,8 +273,8 @@ public class VaultContainer implements TestRule {
                         .token(token)
                         .openTimeout(5)
                         .readTimeout(30)
-//                        .sslVerify(false)
-                        .sslPemFile(new File(ROOT_CA_PEMFILE))
+//                        .verify(false)
+                        .sslConfig(new SslConfig().sslPemFile(new File(ROOT_CA_PEMFILE)))
                         .build();
         return new Vault(config).withRetries(MAX_RETRIES, RETRY_MILLIS);
     }

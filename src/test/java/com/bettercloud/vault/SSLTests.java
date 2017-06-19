@@ -16,8 +16,8 @@ import java.util.HashMap;
 import static org.junit.Assert.assertEquals;
 
 /**
- * <p>Unit tests for the Vault driver, having no dependency on an actual Vault server instance being available.  The
- * tests in this class relate to handling of SSL certificates and SSL verification.</p>
+ * Unit tests for the Vault driver, having no dependency on an actual Vault server instance being available.  The
+ * tests in this class relate to handling of SSL certificates and SSL verification.
  */
 public class SSLTests {
 
@@ -27,7 +27,11 @@ public class SSLTests {
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 
-        final VaultConfig vaultConfig = new VaultConfig().address("https://127.0.0.1:9998").token("mock_token").sslVerify(false).build();
+        final VaultConfig vaultConfig = new VaultConfig()
+                .address("https://127.0.0.1:9998")
+                .token("mock_token")
+                .sslConfig(new SslConfig().verify(false))
+                .build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().read("secret/hello");
 
@@ -43,7 +47,10 @@ public class SSLTests {
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 
-        final VaultConfig vaultConfig = new VaultConfig().address("https://127.0.0.1:9998").token("mock_token").build();
+        final VaultConfig vaultConfig = new VaultConfig()
+                .address("https://127.0.0.1:9998")
+                .token("mock_token")
+                .build();
         final Vault vault = new Vault(vaultConfig);
 
         try {
@@ -60,7 +67,11 @@ public class SSLTests {
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 
-        final VaultConfig vaultConfig = new VaultConfig().address("https://127.0.0.1:9998").token("mock_token").sslVerify(false).build();
+        final VaultConfig vaultConfig = new VaultConfig()
+                .address("https://127.0.0.1:9998")
+                .sslConfig(new SslConfig().sslPemResource("/cert.pem"))
+                .token("mock_token")
+                .build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().write("secret/hello", new HashMap() {{ put("value", "world"); }});
         assertEquals(204, response.getRestResponse().getStatus());
@@ -105,7 +116,7 @@ public class SSLTests {
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")
                 .token("mock_token")
-                .sslPemFile(pem)
+                .sslConfig(new SslConfig().sslPemFile(pem).build())
                 .build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().read("secret/hello");
@@ -122,7 +133,7 @@ public class SSLTests {
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")
                 .token("mock_token")
-                .sslPemResource("/cert.pem")
+                .sslConfig(new SslConfig().sslPemResource("/cert.pem").build())
                 .build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().read("secret/hello");
@@ -139,7 +150,7 @@ public class SSLTests {
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")
                 .token("mock_token")
-                .sslPemResource("/cert.pem")
+                .sslConfig(new SslConfig().sslPemResource("/cert.pem").build())
                 .build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical()
@@ -164,7 +175,11 @@ public class SSLTests {
         in.close();
         final String pemUTF8 = utf8;
 
-        final VaultConfig vaultConfig = new VaultConfig().address("https://127.0.0.1:9998").token("mock_token").sslPemUTF8(pemUTF8).build();
+        final VaultConfig vaultConfig = new VaultConfig()
+                .address("https://127.0.0.1:9998")
+                .token("mock_token")
+                .sslConfig(new SslConfig().pemUTF8(pemUTF8))
+                .build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().read("secret/hello");
 

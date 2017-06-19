@@ -1,14 +1,12 @@
 package com.bettercloud.vault;
 
+import lombok.Getter;
+
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  * <p>A container for the configuration settings needed to initialize a <code>Vault</code> driver instance.</p>
@@ -21,7 +19,7 @@ import java.nio.file.Paths;
  * final VaultConfig config = new VaultConfig()
  *                              .address("http://127.0.0.1:8200")
  *                              .token("eace6676-4d78-c687-4e54-03cad00e3abf")
- *                              .sslVerify(true)
+ *                              .sslConfig(new SslConfig().verify(true).build())
  *                              .timeout(30)
  *                              .build();
  * }</pre>
@@ -41,54 +39,19 @@ import java.nio.file.Paths;
  */
 public class VaultConfig implements Serializable {
 
+    protected static final String VAULT_TOKEN = "VAULT_TOKEN";
     private static final String VAULT_ADDR = "VAULT_ADDR";
-    private static final String VAULT_TOKEN = "VAULT_TOKEN";
-    private static final String VAULT_SSL_CERT = "VAULT_SSL_CERT";
-    private static final String VAULT_SSL_VERIFY = "VAULT_SSL_VERIFY";
     private static final String VAULT_OPEN_TIMEOUT = "VAULT_OPEN_TIMEOUT";
     private static final String VAULT_READ_TIMEOUT = "VAULT_READ_TIMEOUT";
 
-    /**
-     * <p>The code used to load environment variables is encapsulated within an inner class,
-     * so that a mock version of that environment loader can be used by unit tests.</p>
-     */
-    static class EnvironmentLoader implements Serializable {
-        public String loadVariable(final String name) {
-            String value = null;
-            if (VAULT_TOKEN.equals(name)) {
-
-                // Special handling for the VAULT_TOKEN variable, since it can be read from the filesystem if it's not
-                // found in the environment
-                if (System.getenv(VAULT_TOKEN) != null) {
-                    // Found it in the environment
-                    value = System.getenv(name);
-                } else {
-                    // Not in the environment, looking for a ".vault-token" file in the executing user's home directory instead
-                    try {
-                        final byte[] bytes = Files.readAllBytes(Paths.get(System.getProperty("user.home")).resolve(".vault-token"));
-                        value = new String(bytes, "UTF-8").trim();
-                    } catch (IOException e) {
-                        // No-op... there simple isn't a token value available
-                    }
-                }
-            } else {
-
-                // Normal handling for all other variables.  We just check the environment.
-                value = System.getenv(name);
-            }
-            return value;
-        }
-    }
-
+    @Getter private String address;
+    @Getter private String token;
+    @Getter private SslConfig sslConfig;
+    @Getter private Integer openTimeout;
+    @Getter private Integer readTimeout;
+    @Getter private int maxRetries;
+    @Getter private int retryIntervalMilliseconds;
     private EnvironmentLoader environmentLoader;
-    private String address;
-    private String token;
-    private String sslPemUTF8;
-    private Boolean sslVerify;
-    private Integer openTimeout;
-    private Integer readTimeout;
-    private int maxRetries;
-    private int retryIntervalMilliseconds;
 
     /**
      * <p>Default constructor.  Should be used in conjunction with the builder pattern, calling additional
@@ -97,83 +60,12 @@ public class VaultConfig implements Serializable {
      * <p>Note that when using this builder pattern approach, you must either set <code>address</code>
      * and <code>token</code> explicitly, or else have them available as runtime environment variables.</p>
      */
-    public VaultConfig() {
+    public VaultConfig() throws VaultException {
     }
 
     /**
-     * <p>A convenience constructor, for quickly creating a <code>VaultConfig</code> instance with its
-     * <code>address</code> and <code>token</code> fields populated.</p>
-     *
-     * <p>Although <code>address</code> and <code>token</code> are the only two properties explicitly passed, the
-     * constructor will still look to the runtime environment variables to populate any other fields when values
-     * are present.</p>
-     *
-     * <p>When using this approach to creating a <code>VaultConfig</code> instance, you should NOT make additional
-     * setter method calls after construction.  If you need other properties set explicitly, then use the builder
-     * pattern approach.</p>
-     *
-     * @param address The URL of the target Vault server
-     * @param token The access token to enable Vault access
-     * @throws VaultException If any error occurs while loading and parsing config values
-     */
-    public VaultConfig(final String address, final String token) throws VaultException {
-        this(address, token, new EnvironmentLoader());
-    }
-
-    /**
-     * <p>A convenience constructor, for quickly creating a <code>VaultConfig</code> instance with its
-     * <code>address</code> field populated.</p>
-     *
-     * <p>While the other convenience constructor requires root token parameter, this constructor version does not.
-     * So it IS possible to construct a <code>VaultConfig</code> object with no root token present.  However, such
-     * an object will be of no use with most actual Vault API calls.  This constructor is therefore meant to be used
-     * when you plan to programmatically retrieve a token (e.g. from the "userpass" backend) and populate it prior
-     * to making other API calls.</p>
-     *
-     * <p>When using this approach to creating a <code>VaultConfig</code> instance, you should NOT make additional
-     * setter method calls after construction... other than the token scenario described immediately above.  If you
-     * need any other properties set explicitly, then use the builder pattern approach.</p>
-     *
-     * @param address The URL of the target Vault server
-     * @throws VaultException If any error occurs while loading and parsing config values
-     */
-    public VaultConfig(final String address) throws VaultException {
-        this(address, new EnvironmentLoader());
-    }
-
-    /**
-     * An overloaded version of the normal convenience constructor, used by unit tests to inject a mock environment
-     * variable loader and validate that loading logic.
-     *
-     * @param address The URL of the target Vault server
-     * @param token The access token to enable Vault access
-     * @param environmentLoader A (mock) environment loader implementation
-     * @throws VaultException If any error occurs while loading and parsing config values
-     */
-    protected VaultConfig(final String address, final String token, final EnvironmentLoader environmentLoader) throws VaultException {
-        this.address = address;
-        this.token = token;
-        this.environmentLoader = environmentLoader;
-        build();
-    }
-
-    /**
-     * An overloaded version of the normal convenience constructor, used by unit tests to inject a mock environment
-     * variable loader and validate that loading logic.
-     *
-     * @param address The URL of the target Vault server
-     * @param environmentLoader A (mock) environment loader implementation
-     * @throws VaultException If any error occurs while loading and parsing config values
-     */
-    protected VaultConfig(final String address, final EnvironmentLoader environmentLoader) throws VaultException {
-        this.address = address;
-        this.environmentLoader = environmentLoader;
-        build();
-    }
-
-    /**
-     * <p>The code used to load environment variables is encapsulated within an inner class, so that a mock version of
-     * that environment loader can be used by unit tests.</p>
+     * <p>The code used to load environment variables is encapsulated here, so that a mock version of that environment
+     * loader can be used by unit tests.</p>
      *
      * <p>This method is used by unit tests, to inject a mock environment variable when constructing a
      * <code>VaultConfig</code> instance using the builder pattern approach rather than the convenience constructor.
@@ -183,7 +75,7 @@ public class VaultConfig implements Serializable {
      * @param environmentLoader An environment variable loader implementation (presumably a mock)
      * @return This object, with environmentLoader populated, ready for additional builder-pattern method calls or else finalization with the {@link this#build()} method
      */
-    VaultConfig environmentLoader(final EnvironmentLoader environmentLoader) {
+    protected VaultConfig environmentLoader(final EnvironmentLoader environmentLoader) {
         this.environmentLoader = environmentLoader;
         return this;
     }
@@ -228,122 +120,13 @@ public class VaultConfig implements Serializable {
     }
 
     /**
-     * <p>An X.509 certificate, to use when communicating with Vault over HTTPS.  This method accepts a string
-     * containing the certificate data.  This string should meet the following requirements:</p>
+     * TODO: Document
      *
-     * <ul>
-     *     <li>Contain an unencrypted X.509 certificate, in PEM format.</li>
-     *     <li>Use UTF-8 encoding.</li>
-     *     <li>
-     *          Contain a line-break between the certificate header (e.g. "-----BEGIN CERTIFICATE-----") and the
-     *          rest of the certificate content.  It doesn't matter whether or not there are additional line
-     *          breaks within the certificate content, or whether there is a line break before the certificate
-     *          footer (e.g. "-----END CERTIFICATE-----").  But the Java standard library will fail to properly
-     *          process the certificate without a break following the header
-     *          (see http://www.doublecloud.org/2014/03/reading-x-509-certificate-in-java-how-to-handle-format-issue/).
-     *      </li>
-     * </ul>
-     *
-     * <p>If no certificate data is provided, either by this method or <code>sslPemFile()</code>
-     * or <code>sslPemResource()</code>, then <code>VaultConfig</code> will look to the
-     * <code>VAULT_SSL_CERT</code> environment variable.</p>
-     *
-     * @param sslPemUTF8 An X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
-     * @return This object, with sslPemUTF8 populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     * @param sslConfig
+     * @return
      */
-    public VaultConfig sslPemUTF8(final String sslPemUTF8) {
-        this.sslPemUTF8 = sslPemUTF8;
-        return this;
-    }
-
-    /**
-     * <p>An X.509 certificate, to use when communicating with Vault over HTTPS.  This method accepts the path of
-     * a file containing the certificate data.  This file's contents should meet the following requirements:</p>
-     *
-     * <ul>
-     *     <li>Contain an unencrypted X.509 certificate, in PEM format.</li>
-     *     <li>Use UTF-8 encoding.</li>
-     *     <li>
-     *          Contain a line-break between the certificate header (e.g. "-----BEGIN CERTIFICATE-----") and the
-     *          rest of the certificate content.  It doesn't matter whether or not there are additional line
-     *          breaks within the certificate content, or whether there is a line break before the certificate
-     *          footer (e.g. "-----END CERTIFICATE-----").  But the Java standard library will fail to properly
-     *          process the certificate without a break following the header
-     *          (see http://www.doublecloud.org/2014/03/reading-x-509-certificate-in-java-how-to-handle-format-issue/).
-     *      </li>
-     * </ul>
-     *
-     * <p>If no certificate data is provided, either by this method or <code>sslPemResource()</code>
-     * or <code>sslPemUTF8()</code>, then <code>VaultConfig</code> will look to the
-     * <code>VAULT_SSL_CERT</code> environment variable.</p>
-     *
-     * @param sslPemFile The path of a file containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
-     * @return This object, with sslPemFile populated, ready for additional builder-pattern method calls or else finalization with the build() method
-     * @throws VaultException If any error occurs while loading and parsing the PEM file
-     */
-    public VaultConfig sslPemFile(final File sslPemFile) throws VaultException {
-        try (final InputStream input = new FileInputStream(sslPemFile)){
-            this.sslPemUTF8 = inputStreamToUTF8(input);
-        } catch (IOException e) {
-            throw new VaultException(e);
-        }
-        return this;
-    }
-
-    /**
-     * <p>An X.509 certificate, to use when communicating with Vault over HTTPS.  This method accepts the path of
-     * a classpath resource containing the certificate data (e.g. you've bundled the cert into your library or
-     * application's JAR/WAR/EAR file).  This resource's contents should meet the following requirements:</p>
-     *
-     * <ul>
-     *     <li>Contain an unencrypted X.509 certificate, in PEM format.</li>
-     *     <li>Use UTF-8 encoding.</li>
-     *     <li>
-     *          Contain a line-break between the certificate header (e.g. "-----BEGIN CERTIFICATE-----") and the
-     *          rest of the certificate content.  It doesn't matter whether or not there are additional line
-     *          breaks within the certificate content, or whether there is a line break before the certificate
-     *          footer (e.g. "-----END CERTIFICATE-----").  But the Java standard library will fail to properly
-     *          process the certificate without a break following the header
-     *          (see http://www.doublecloud.org/2014/03/reading-x-509-certificate-in-java-how-to-handle-format-issue/).
-     *      </li>
-     * </ul>
-     *
-     * <p>If no certificate data is provided, either by this method or <code>sslPemFile()</code>
-     * or <code>sslPemUTF8()</code>, then <code>VaultConfig</code> will look to the
-     * <code>VAULT_SSL_CERT</code> environment variable.</p>
-     *
-     * @param classpathResource The path of a classpath resource containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
-     * @return This object, with sslPemResource populated, ready for additional builder-pattern method calls or else finalization with the build() method
-     * @throws VaultException If any error occurs while loading and parsing the PEM file
-     */
-    public VaultConfig sslPemResource(final String classpathResource) throws VaultException {
-        try (final InputStream input = this.getClass().getResourceAsStream(classpathResource)){
-            this.sslPemUTF8 = inputStreamToUTF8(input);
-        } catch (IOException e) {
-            throw new VaultException(e);
-        }
-        return this;
-    }
-
-    /**
-     * <p>Whether or not HTTPS connections to the Vault server should verify that a valid SSL certificate is being
-     * used.  Unless this is set to <code>false</code>, the default behavior is to always verify SSL certificates.</p>
-     *
-     * <p>SSL CERTIFICATE VERIFICATION SHOULD NOT BE DISABLED IN PRODUCTION!  This feature is made available to
-     * facilitate development or testing environments, where you might be using a self-signed cert that will not
-     * pass verification.  However, even if you are using a self-signed cert on your Vault server, you can still leave
-     * SSL verification enabled and have your application supply the cert using <code>sslPemFile()</code>,
-     * <code>sslPemResource()</code>, or <code>sslPemUTF8()</code>.</p>
-     *
-     * <p>If no sslVerify is explicitly set, either by this method in a builder pattern approach or else by one of the
-     * convenience constructors, then <code>VaultConfig</code> will look to the <code>VAULT_SSL_VERIFY</code>
-     * environment variable.</p>
-     *
-     * @param sslVerify Whether or not to verify the SSL certificate used by Vault with HTTPS connections.  Default is <code>true</code>.
-     * @return This object, with sslVerify populated, ready for additional builder-pattern method calls or else finalization with the build() method
-     */
-    public VaultConfig sslVerify(final Boolean sslVerify) {
-        this.sslVerify = sslVerify;
+    public VaultConfig sslConfig(final SslConfig sslConfig) {
+        this.sslConfig = sslConfig;
         return this;
     }
 
@@ -429,17 +212,6 @@ public class VaultConfig implements Serializable {
         if (this.token == null && environmentLoader.loadVariable(VAULT_TOKEN) != null) {
             this.token = environmentLoader.loadVariable(VAULT_TOKEN);
         }
-        if (this.sslPemUTF8 == null && environmentLoader.loadVariable(VAULT_SSL_CERT) != null) {
-            final File pemFile = new File(environmentLoader.loadVariable(VAULT_SSL_CERT));
-            try (final InputStream input = new FileInputStream(pemFile)) {
-                this.sslPemUTF8 = inputStreamToUTF8(input);
-            } catch (IOException e) {
-                throw new VaultException(e);
-            }
-        }
-        if (this.sslVerify == null && environmentLoader.loadVariable(VAULT_SSL_VERIFY) != null) {
-            this.sslVerify = Boolean.valueOf(environmentLoader.loadVariable(VAULT_SSL_VERIFY));
-        }
         if (this.openTimeout == null && environmentLoader.loadVariable(VAULT_OPEN_TIMEOUT) != null) {
             try {
                 this.openTimeout = Integer.valueOf(environmentLoader.loadVariable(VAULT_OPEN_TIMEOUT));
@@ -456,42 +228,20 @@ public class VaultConfig implements Serializable {
                         environmentLoader.loadVariable(VAULT_READ_TIMEOUT));
             }
         }
+        if (this.sslConfig == null) {
+            this.sslConfig = new SslConfig().environmentLoader(this.environmentLoader).build();
+        }
         return this;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public String getSslPemUTF8() {
-        return sslPemUTF8;
-    }
-
-    public Boolean isSslVerify() {
-        return sslVerify;
-    }
-
-    public Integer getOpenTimeout() {
-        return openTimeout;
-    }
-
-    public Integer getReadTimeout() {
-        return readTimeout;
-    }
-
-    public int getMaxRetries() {
-        return maxRetries;
-    }
-
-    public int getRetryIntervalMilliseconds() {
-        return retryIntervalMilliseconds;
-    }
-
-    private String inputStreamToUTF8(final InputStream input) throws IOException {
+    /**
+     * TODO: Document
+     *
+     * @param input
+     * @return
+     * @throws IOException
+     */
+    protected static String inputStreamToUTF8(final InputStream input) throws IOException {
         final BufferedReader in = new BufferedReader(new InputStreamReader(input, "UTF-8"));
         final StringBuilder utf8 = new StringBuilder("");
         String str;

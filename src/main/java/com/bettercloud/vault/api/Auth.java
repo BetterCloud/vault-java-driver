@@ -8,6 +8,7 @@ import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.response.LookupResponse;
 import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.rest.Rest;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.List;
@@ -22,191 +23,88 @@ import java.util.UUID;
  */
 public class Auth {
 
-    /**
-     * Builder-style class for use with {@link #createToken(TokenRequest)}
-     *
-     * <p>All properties are optional and can be <code>null</code>.</p>
-     */
+    /** Builder-style class for use with {@link #createToken(TokenRequest)}.  All properties are optional and can be <code>null</code>. */
     public static class TokenRequest implements Serializable {
-        /**
-         * (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
-         */
-        private UUID id;
 
-        /**
-         * (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token.
-         */
-        private List<String> polices;
+        /** (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID. */
+        @Getter private UUID id;
 
-        /**
-         * (optional) A map of string to string valued metadata. This is passed through to the audit backends.
-         */
-        private Map<String, String> meta;
+        /** (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token. */
+        @Getter private List<String> polices;
 
-        /**
-         * (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent.
-         */
-        private Boolean noParent;
+        /** (optional) A map of string to string valued metadata. This is passed through to the audit backends. */
+        @Getter private Map<String, String> meta;
 
-        /**
-         * (optional) If <code>true</code> the default policy will not be a part of this token's policy set.
-         */
-        private Boolean noDefaultPolicy;
+        /** (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent. */
+        @Getter private Boolean noParent;
 
-        /**
-         * (optional) The TTL period of the token, provided as "1h", where hour is the largest suffix. If not provided, the token is valid for the default lease TTL, or indefinitely if the root policy is used.
-         */
-        private String ttl;
+        /** (optional) If <code>true</code> the default policy will not be a part of this token's policy set. */
+        @Getter private Boolean noDefaultPolicy;
 
-        /**
-         * (optional) The display name of the token. Defaults to "token".
-         */
-        private String displayName;
+        /** (optional) The TTL period of the token, provided as "1h", where hour is the largest suffix. If not provided, the token is valid for the default lease TTL, or indefinitely if the root policy is used. */
+        @Getter private String ttl;
 
-        /**
-         * (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses.
-         */
-        private Long numUses;
+        /** (optional) The display name of the token. Defaults to "token". */
+        @Getter private String displayName;
 
-        /**
-         * (optional) The role the token will be created with. Default is no role.
-         */
-        private String role;
+        /** (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses. */
+        @Getter private Long numUses;
 
-        /**
-         * {@link #id}
-         */
+        /** (optional) The role the token will be created with. Default is no role. */
+        @Getter private String role;
+
+        /** {@link #id} */
         public TokenRequest id(final UUID id) {
             this.id = id;
             return this;
         }
 
-        /**
-         * {@link #polices}
-         */
+        /** {@link #polices} */
         public TokenRequest polices(final List<String> polices) {
             this.polices = polices;
             return this;
         }
 
-        /**
-         * {@link #meta}
-         */
+        /** {@link #meta} */
         public TokenRequest meta(final Map<String, String> meta) {
             this.meta = meta;
             return this;
         }
 
-        /**
-         * {@link #noParent}
-         */
+        /** {@link #noParent} */
         public TokenRequest noParent(final Boolean noParent) {
             this.noParent = noParent;
             return this;
         }
 
-        /**
-         * {@link #noDefaultPolicy}
-         */
+        /** {@link #noDefaultPolicy} */
         public TokenRequest noDefaultPolicy(final Boolean noDefaultPolicy) {
             this.noDefaultPolicy = noDefaultPolicy;
             return this;
         }
 
-        /**
-         * {@link #ttl}
-         */
+        /** {@link #ttl} */
         public TokenRequest ttl(final String ttl) {
             this.ttl = ttl;
             return this;
         }
 
-        /**
-         * {@link #displayName}
-         */
+        /** {@link #displayName} */
         public TokenRequest displayName(final String displayName) {
             this.displayName = displayName;
             return this;
         }
 
-        /**
-         * {@link #numUses}
-         */
+        /** {@link #numUses} */
         public TokenRequest numUses(final Long numUses) {
             this.numUses = numUses;
             return this;
         }
 
-        /**
-         * {@link #role}
-         */
+        /** {@link #role} */
         public TokenRequest role(final String role) {
             this.role = role;
             return this;
-        }
-
-
-        /**
-         * {@link #id}
-         */
-        public UUID getId() {
-            return id;
-        }
-
-        /**
-         * {@link #polices}
-         */
-        public List<String> getPolices() {
-            return polices;
-        }
-
-        /**
-         * {@link #meta}
-         */
-        public Map<String, String> getMeta() {
-            return meta;
-        }
-
-        /**
-         * {@link #noParent}
-         */
-        public Boolean getNoParent() {
-            return noParent;
-        }
-
-        /**
-         * {@link #noDefaultPolicy}
-         */
-        public Boolean getNoDefaultPolicy() {
-            return noDefaultPolicy;
-        }
-
-        /**
-         * {@link #ttl}
-         */
-        public String getTtl() {
-            return ttl;
-        }
-
-        /**
-         * {@link #displayName}
-         */
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        /**
-         * {@link #numUses}
-         */
-        public Long getNumUses() {
-            return numUses;
-        }
-
-        /**
-         * {@link #role}
-         */
-        public String getRole() {
-            return role;
         }
     }
 
@@ -316,8 +214,8 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
                         .post();
 
                 // Validate restResponse
@@ -381,8 +279,8 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
                         .post();
 
                 // Validate restResponse
@@ -442,8 +340,8 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
                         .post();
 
                 // Validate restResponse
@@ -502,8 +400,8 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
                         .post();
 
                 // Validate restResponse
@@ -564,8 +462,8 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
                         .post();
 
                 // Validate restResponse
@@ -629,8 +527,8 @@ public class Auth {
                         .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
                         .post();
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -677,8 +575,8 @@ public class Auth {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
                         .get();
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {

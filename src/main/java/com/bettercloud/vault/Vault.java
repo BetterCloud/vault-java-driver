@@ -7,6 +7,8 @@ import com.bettercloud.vault.api.Logical;
 import com.bettercloud.vault.api.pki.Pki;
 
 /**
+ * TODO: Fix up all of the JavaDoc code samples, now that VaultConfig has been refactored.
+ *
  * <p>The Vault driver class, the primary interface through which dependent applications will access Vault.</p>
  *
  * <p>This driver exposes a DSL, compartmentalizing the various endpoints of the HTTP API (e.g. "/", "sys/init",
