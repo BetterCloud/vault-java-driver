@@ -52,9 +52,9 @@ final VaultConfig config =
         .token("3c9fd6be-7bc2-9d1f-6fb3-cd746c0fc4e8")  // Defaults to "VAULT_TOKEN" environment variable
         .openTimeout(5)                                 // Defaults to "VAULT_OPEN_TIMEOUT" environment variable
         .readTimeout(30)                                // Defaults to "VAULT_READ_TIMEOUT" environment variable
+        .sslVerify(false)                               // Defaults to "VAULT_SSL_VERIFY" environment variable
         .sslPemFile("/path/on/disk.pem")                // Defaults to "VAULT_SSL_CERT" environment variable
                                                         //    See also: "sslPemUTF8()" and "sslPemResource()"
-        .sslVerify(false)                               // Defaults to "VAULT_SSL_VERIFY" environment variable
         .build();
 ```
 
@@ -151,6 +151,7 @@ should represent non-breaking changes.  The third number represents any very min
       manually configure and run a Vault server to use the test suite!
     * The tests are now going against a regular Vault server, rather than one running in "dev mode".  Therefore, 
       they are now able to use HTTPS connections rather than plain HTTP.
+    * Upgrades tests to use Java 8 (although the library itself still targets Java 7).
     
 * **2.0.0**: This is breaking-change release, with numerous deprecated items cleaned up.
   * Adds support for authentication via the AppRole auth backend.  

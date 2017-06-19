@@ -17,10 +17,8 @@ import java.util.ArrayList;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.*;
 
-/**
- * <p>Integration tests for for operations on Vault's <code>/v1/pki/*</code> REST endpoints.</p>
- */
-public class PkiTests {
+/** Integration tests for for operations on Vault's <code>/v1/pki/*</code> REST endpoints. */
+public class AuthBackendPkiTests {
 
     @ClassRule
     public static final VaultContainer container = new VaultContainer();

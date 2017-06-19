@@ -1,0 +1,93 @@
+package com.bettercloud.vault.api;
+
+import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.response.AuthResponse;
+import com.bettercloud.vault.response.LookupResponse;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+
+/** Integration tests for the token auth backend. */
+public class AuthBackendTokenTests {
+
+    @ClassRule
+    public static final VaultContainer container = new VaultContainer();
+
+    @BeforeClass
+    public static void setupClass() throws IOException, InterruptedException {
+        container.initAndUnsealVault();
+    }
+
+    /** Test creation of a new client auth token via a TokenRequest, using the Vault root token */
+    @Test
+    public void testCreateTokenWithRequest() throws VaultException {
+        final Vault vault = container.getRootVault();
+
+        final AuthResponse response = vault.auth().createToken(new Auth.TokenRequest().ttl("1h"));
+        final String token = response.getAuthClientToken();
+
+        assertNotNull(token);
+    }
+
+    /** Tests token self-renewal for the token auth backend. */
+    @Test
+    public void testRenewSelf() throws VaultException, UnsupportedEncodingException {
+        // Generate a client token
+        final Vault authVault = container.getRootVault();
+        final AuthResponse createResponse = authVault.auth().createToken(new Auth.TokenRequest().ttl("1h"));
+        final String token = createResponse.getAuthClientToken();
+
+        assertNotNull(token);
+        assertNotSame("", token.trim());
+
+        // Renew the client token
+        final Vault renewVault = container.getVault(token);
+        final AuthResponse renewResponse = renewVault.auth().renewSelf();
+        final String renewToken = renewResponse.getAuthClientToken();
+
+        assertEquals(token, renewToken);
+
+        // Renew the auth token, with an explicit increment value
+        final Vault explicitVault = container.getVault(token);
+        final AuthResponse explicitResponse = explicitVault.auth().renewSelf(20);
+        final String explicitToken = explicitResponse.getAuthClientToken();
+
+        assertEquals(token, explicitToken);
+
+        final String explicitJson = new String(explicitResponse.getRestResponse().getBody(), "UTF-8");
+        final long explicitLeaseDuration = Json.parse(explicitJson).asObject().get("auth").asObject().get("lease_duration").asLong();
+
+        assertEquals(20, explicitLeaseDuration);
+    }
+
+    /** Tests token lookup-self for the token auth backend. */
+    @Test
+    public void testLookupSelf() throws VaultException, UnsupportedEncodingException {
+        // Generate a client token
+        final Vault authVault = container.getRootVault();
+        final AuthResponse createResponse = authVault.auth().createToken(new Auth.TokenRequest().ttl("1h"));
+        final String token = createResponse.getAuthClientToken();
+
+        assertNotNull(token);
+        assertNotSame("", token.trim());
+
+        // Lookup the client token
+        final Vault lookupVault = container.getVault(token);
+        final LookupResponse lookupResponse = lookupVault.auth().lookupSelf();
+
+        assertEquals(token, lookupResponse.getId());
+        assertEquals(3600, lookupResponse.getCreationTTL());
+        assertTrue(lookupResponse.getTTL()<=3600);
+    }
+
+}
