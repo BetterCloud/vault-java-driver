@@ -215,7 +215,7 @@ public class Auth {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // Validate restResponse
@@ -280,7 +280,7 @@ public class Auth {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // Validate restResponse
@@ -341,7 +341,7 @@ public class Auth {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // Validate restResponse
@@ -401,7 +401,7 @@ public class Auth {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // Validate restResponse
@@ -463,7 +463,7 @@ public class Auth {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // Validate restResponse
@@ -528,7 +528,7 @@ public class Auth {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -576,7 +576,7 @@ public class Auth {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .get();
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {

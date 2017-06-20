@@ -69,7 +69,7 @@ public class SSLTests {
 
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")
-                .sslConfig(new SslConfig().sslPemResource("/cert.pem"))
+                .sslConfig(new SslConfig().pemResource("/cert.pem"))
                 .token("mock_token")
                 .build();
         final Vault vault = new Vault(vaultConfig);
@@ -116,7 +116,7 @@ public class SSLTests {
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")
                 .token("mock_token")
-                .sslConfig(new SslConfig().sslPemFile(pem).build())
+                .sslConfig(new SslConfig().pemFile(pem).build())
                 .build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().read("secret/hello");
@@ -133,7 +133,7 @@ public class SSLTests {
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")
                 .token("mock_token")
-                .sslConfig(new SslConfig().sslPemResource("/cert.pem").build())
+                .sslConfig(new SslConfig().pemResource("/cert.pem").build())
                 .build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().read("secret/hello");
@@ -150,7 +150,7 @@ public class SSLTests {
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")
                 .token("mock_token")
-                .sslConfig(new SslConfig().sslPemResource("/cert.pem").build())
+                .sslConfig(new SslConfig().pemResource("/cert.pem").build())
                 .build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical()

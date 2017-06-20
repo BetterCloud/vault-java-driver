@@ -253,7 +253,7 @@ public class VaultContainer implements TestRule {
                         .openTimeout(5)
                         .readTimeout(30)
 //                        .verify(false)
-                        .sslConfig(new SslConfig().sslPemFile(new File(ROOT_CA_PEMFILE)))
+                        .sslConfig(new SslConfig().pemFile(new File(ROOT_CA_PEMFILE)))
                         .build();
         return getVault(config, MAX_RETRIES, RETRY_MILLIS);
     }
@@ -274,7 +274,7 @@ public class VaultContainer implements TestRule {
                         .openTimeout(5)
                         .readTimeout(30)
 //                        .verify(false)
-                        .sslConfig(new SslConfig().sslPemFile(new File(ROOT_CA_PEMFILE)))
+                        .sslConfig(new SslConfig().pemFile(new File(ROOT_CA_PEMFILE)))
                         .build();
         return new Vault(config).withRetries(MAX_RETRIES, RETRY_MILLIS);
     }

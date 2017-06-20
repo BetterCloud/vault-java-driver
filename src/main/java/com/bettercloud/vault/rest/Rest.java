@@ -5,9 +5,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,9 +15,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.security.KeyStore;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,6 +62,29 @@ import java.util.TreeMap;
  */
 public class Rest {
 
+    private static SSLContext DISABLED_SSL_CONTEXT;
+    static {
+        try {
+            DISABLED_SSL_CONTEXT = SSLContext.getInstance("TLS");
+            DISABLED_SSL_CONTEXT.init(null, new TrustManager[]{new X509TrustManager() {
+                @Override
+                public void checkClientTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
+                }
+
+                @Override
+                public void checkServerTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
+                }
+
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[0];
+                }
+            }}, new java.security.SecureRandom());
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            e.printStackTrace();
+        }
+    }
+
     private String urlString;
     private byte[] body;
     private final Map<String, String> parameters = new TreeMap<String, String>();
@@ -72,7 +93,7 @@ public class Rest {
     private Integer connectTimeoutSeconds;
     private Integer readTimeoutSeconds;
     private Boolean sslVerification;
-    private String sslPemUTF8;
+    private SSLContext sslContext;
 
     /**
      * <p>Sets the base URL to which the HTTP request will be sent.  The URL may or may not include query parameters
@@ -182,39 +203,25 @@ public class Rest {
      * <p>SSL CERTIFICATE VERIFICATION SHOULD NOT BE DISABLED IN PRODUCTION!  This feature is made available to
      * facilitate development or testing environments, where you might be using a self-signed cert that will not
      * pass verification.  However, even if you are using a self-signed cert on your server, you can still leave
-     * SSL verification enabled and have your application supply the cert using <code>sslPemFile()</code>,
-     * <code>sslPemResource()</code>, or <code>pemUTF8()</code>.</p>
+     * SSL verification enabled and have your application supply the cert using <code>pemFile()</code>,
+     * <code>pemResource()</code>, or <code>pemUTF8()</code>.</p>
      *
      * @param sslVerification Whether or not to verify the SSL certificate used by the server with HTTPS connections.  Default is <code>true</code>.
      * @return This object, with sslVerification populated, ready for other builder-pattern config methods or an HTTP verb method
      */
-    public Rest sslVerification(final Boolean sslVerification) {
+    public Rest sslVerification(final Boolean sslVerification) throws RestException {
         this.sslVerification = sslVerification;
         return this;
     }
 
     /**
-     * <p>An X.509 certificate, to use when communicating with Vault over HTTPS.  This method accepts a string
-     * containing the certificate data.  This string should meet the following requirements:</p>
+     * TODO:  Document
      *
-     * <ul>
-     *     <li>Contain an unencrypted X.509 certificate, in PEM format.</li>
-     *     <li>Use UTF-8 encoding.</li>
-     *     <li>
-     *          Contain a line-break between the certificate header (e.g. "-----BEGIN CERTIFICATE-----") and the
-     *          rest of the certificate content.  It doesn't matter whether or not there are additional line
-     *          breaks within the certificate content, or whether there is a line break before the certificate
-     *          footer (e.g. "-----END CERTIFICATE-----").  But the Java standard library will fail to properly
-     *          process the certificate without a break following the header
-     *          (see http://www.doublecloud.org/2014/03/reading-x-509-certificate-in-java-how-to-handle-format-issue/).
-     *      </li>
-     * </ul>
-     *
-     * @param pemFileContents An X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
-     * @return This object, with pemUTF8 populated, ready for other builder-pattern config methods or an HTTP verb method
+     * @param sslContext
+     * @return
      */
-    public Rest sslPemUTF8(final String pemFileContents) {
-        this.sslPemUTF8 = pemFileContents;
+    public Rest sslContext(final SSLContext sslContext) {
+        this.sslContext = sslContext;
         return this;
     }
 
@@ -413,37 +420,18 @@ public class Rest {
             // SSL settings, if applicable
             if (connection instanceof HttpsURLConnection) {
                 final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
-                // Cert file supplied
-                // TODO: Move this to the SslConfig.build() method
-                if (sslPemUTF8 != null) {
-                    final SSLContext sslContext = initSSLContext();
-                    httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
-                }
-                // SSL verification disabled
-                // TODO: Move this to the SslConfig.build() method
                 if (sslVerification != null && !sslVerification.booleanValue()) {
-                    final SSLContext sslContext = SSLContext.getInstance("TLS");
-                    sslContext.init(null, new TrustManager[]{new X509TrustManager() {
-                        @Override
-                        public void checkClientTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
-                        }
-
-                        @Override
-                        public void checkServerTrusted(final X509Certificate[] x509Certificates, final String s) throws CertificateException {
-                        }
-
-                        @Override
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-                    }}, new java.security.SecureRandom());
-                    httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
+                    // SSL verification disabled
+                    httpsURLConnection.setSSLSocketFactory(DISABLED_SSL_CONTEXT.getSocketFactory());
                     httpsURLConnection.setHostnameVerifier(new HostnameVerifier() {
                         @Override
                         public boolean verify(final String s, final SSLSession sslSession) {
                             return true;
                         }
                     });
+                } else if (sslContext != null) {
+                    // Cert file supplied
+                    httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
                 }
                 httpsURLConnection.setRequestMethod(method);
             } else if (connection instanceof HttpURLConnection) {
@@ -453,37 +441,8 @@ public class Rest {
                 final String message = "URL string " + urlString + " cannot be parsed as an instance of HttpURLConnection or HttpsURLConnection";
                 throw new RestException(message);
             }
+
             return connection;
-        } catch (Exception e) {
-            throw new RestException(e);
-        }
-    }
-
-    /**
-     * <p>This helper method is used when a X.509 certificate PEM file has been provided, to configure the HTTPS
-     * connection with an in-memory keystore containing that certificate.</p>
-     *
-     * @return
-     * @throws RestException If there are any issues processing the SSL cert
-     */
-    private SSLContext initSSLContext() throws RestException {
-        try {
-            final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-
-            final ByteArrayInputStream pem = new ByteArrayInputStream(sslPemUTF8.getBytes("UTF-8"));
-            final X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(pem);
-            pem.close();
-
-            final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keyStore.load(null);
-            keyStore.setCertificateEntry("caCert", certificate);
-
-            trustManagerFactory.init(keyStore);
-
-            final SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
-            return sslContext;
         } catch (Exception e) {
             throw new RestException(e);
         }

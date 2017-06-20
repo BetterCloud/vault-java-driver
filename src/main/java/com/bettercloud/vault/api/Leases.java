@@ -47,7 +47,7 @@ public class Leases {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .put();
 
                 // Validate response
@@ -101,7 +101,7 @@ public class Leases {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .put();
 
                 // Validate response
@@ -158,7 +158,7 @@ public class Leases {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .put();
 
                 // Validate response
@@ -221,7 +221,7 @@ public class Leases {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .put();
                 // Validate response
                 if (restResponse.getStatus() != 200) {

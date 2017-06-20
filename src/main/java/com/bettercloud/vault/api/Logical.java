@@ -57,7 +57,7 @@ public class Logical {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .get();
 
                 // Validate response
@@ -144,7 +144,7 @@ public class Logical {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // HTTP Status should be either 200 (with content - e.g. PKI write) or 204 (no content)
@@ -236,7 +236,7 @@ public class Logical {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .delete();
 
                 // Validate response

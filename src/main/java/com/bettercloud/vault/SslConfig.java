@@ -1,11 +1,22 @@
 package com.bettercloud.vault;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 public class SslConfig {
 
@@ -13,7 +24,7 @@ public class SslConfig {
     private static final String VAULT_SSL_CERT = "VAULT_SSL_CERT";
 
     @Getter private Boolean verify;
-    @Getter private String pemUTF8;
+    @Getter(AccessLevel.PROTECTED) private String pemUTF8;
     private EnvironmentLoader environmentLoader;
 
     /**
@@ -40,8 +51,8 @@ public class SslConfig {
      * <p>SSL CERTIFICATE VERIFICATION SHOULD NOT BE DISABLED IN PRODUCTION!  This feature is made available to
      * facilitate development or testing environments, where you might be using a self-signed cert that will not
      * pass verification.  However, even if you are using a self-signed cert on your Vault server, you can still leave
-     * SSL verification enabled and have your application supply the cert using <code>sslPemFile()</code>,
-     * <code>sslPemResource()</code>, or <code>pemUTF8()</code>.</p>
+     * SSL verification enabled and have your application supply the cert using <code>pemFile()</code>,
+     * <code>pemResource()</code>, or <code>pemUTF8()</code>.</p>
      *
      * <p>If no verify is explicitly set, either by this method in a builder pattern approach or else by one of the
      * convenience constructors, then <code>SslConfig</code> will look to the <code>VAULT_SSL_VERIFY</code>
@@ -72,8 +83,8 @@ public class SslConfig {
      *      </li>
      * </ul>
      *
-     * <p>If no certificate data is provided, either by this method or <code>sslPemFile()</code>
-     * or <code>sslPemResource()</code>, then <code>SslConfig</code> will look to the
+     * <p>If no certificate data is provided, either by this method or <code>pemFile()</code>
+     * or <code>pemResource()</code>, then <code>SslConfig</code> will look to the
      * <code>VAULT_SSL_CERT</code> environment variable.</p>
      *
      * @param pemUTF8 An X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
@@ -101,15 +112,15 @@ public class SslConfig {
      *      </li>
      * </ul>
      *
-     * <p>If no certificate data is provided, either by this method or <code>sslPemResource()</code>
+     * <p>If no certificate data is provided, either by this method or <code>pemResource()</code>
      * or <code>pemUTF8()</code>, then <code>SslConfig</code> will look to the
      * <code>VAULT_SSL_CERT</code> environment variable.</p>
      *
      * @param sslPemFile The path of a file containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
-     * @return This object, with sslPemFile populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     * @return This object, with pemFile populated, ready for additional builder-pattern method calls or else finalization with the build() method
      * @throws VaultException If any error occurs while loading and parsing the PEM file
      */
-    public SslConfig sslPemFile(final File sslPemFile) throws VaultException {
+    public SslConfig pemFile(final File sslPemFile) throws VaultException {
         try (final InputStream input = new FileInputStream(sslPemFile)){
             this.pemUTF8 = VaultConfig.inputStreamToUTF8(input);
         } catch (IOException e) {
@@ -136,15 +147,15 @@ public class SslConfig {
      *      </li>
      * </ul>
      *
-     * <p>If no certificate data is provided, either by this method or <code>sslPemFile()</code>
+     * <p>If no certificate data is provided, either by this method or <code>pemFile()</code>
      * or <code>pemUTF8()</code>, then <code>SslConfig</code> will look to the
      * <code>VAULT_SSL_CERT</code> environment variable.</p>
      *
      * @param classpathResource The path of a classpath resource containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
-     * @return This object, with sslPemResource populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     * @return This object, with pemResource populated, ready for additional builder-pattern method calls or else finalization with the build() method
      * @throws VaultException If any error occurs while loading and parsing the PEM file
      */
-    public SslConfig sslPemResource(final String classpathResource) throws VaultException {
+    public SslConfig pemResource(final String classpathResource) throws VaultException {
         try (final InputStream input = this.getClass().getResourceAsStream(classpathResource)){
             this.pemUTF8 = VaultConfig.inputStreamToUTF8(input);
         } catch (IOException e) {
@@ -178,6 +189,38 @@ public class SslConfig {
             }
         }
         return this;
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @return
+     * @throws VaultException
+     */
+    public SSLContext getSslContext() throws VaultException {
+        if (pemUTF8 == null) {
+            return null;
+        }
+        try {
+            final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+
+            final ByteArrayInputStream pem = new ByteArrayInputStream(pemUTF8.getBytes("UTF-8"));
+            final X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(pem);
+            pem.close();
+
+            final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keyStore.load(null);
+            keyStore.setCertificateEntry("caCert", certificate);
+
+            trustManagerFactory.init(keyStore);
+
+            final SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+            return sslContext;
+        } catch (CertificateException | IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+            throw new VaultException(e);
+        }
     }
 
 }

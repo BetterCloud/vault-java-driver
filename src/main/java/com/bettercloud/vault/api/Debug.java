@@ -83,7 +83,7 @@ public class Debug {
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().getVerify())
-                        .sslPemUTF8(config.getSslConfig().getPemUTF8());
+                        .sslContext(config.getSslConfig().getSslContext());
                 // Add token if present
                 if (config.getToken() != null) {
                     rest.header("X-Vault-Token", config.getToken());
