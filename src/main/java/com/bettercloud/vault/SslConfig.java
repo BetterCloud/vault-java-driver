@@ -3,28 +3,43 @@ package com.bettercloud.vault;
 import lombok.AccessLevel;
 import lombok.Getter;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyFactory;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 public class SslConfig {
 
     private static final String VAULT_SSL_VERIFY = "VAULT_SSL_VERIFY";
     private static final String VAULT_SSL_CERT = "VAULT_SSL_CERT";
+    private static final String VAULT_SSL_CLIENT_CERT = "VAULT_SSL_CLIENT_CERT";
+    private static final String VAULT_SSL_CLIENT_KEY = "VAULT_SSL_CLIENT_KEY";
 
     @Getter private Boolean verify;
     @Getter(AccessLevel.PROTECTED) private String pemUTF8;
+    @Getter(AccessLevel.PROTECTED) private String clientPemUTF8;
+    @Getter(AccessLevel.PROTECTED) private String clientKeyPemUTF8;
     private EnvironmentLoader environmentLoader;
 
     /**
@@ -167,6 +182,92 @@ public class SslConfig {
     /**
      * TODO: Document
      *
+     * @param clientPemUTF8
+     * @return
+     */
+    public SslConfig clientPemUTF8(final String clientPemUTF8) {
+        this.clientPemUTF8 = clientPemUTF8;
+        return this;
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @param clientPemFile
+     * @return
+     * @throws VaultException
+     */
+    public SslConfig clientPemFile(final File clientPemFile) throws VaultException {
+        try (final InputStream input = new FileInputStream(clientPemFile)){
+            this.clientPemUTF8 = VaultConfig.inputStreamToUTF8(input);
+        } catch (IOException e) {
+            throw new VaultException(e);
+        }
+        return this;
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @param classpathResource
+     * @return
+     * @throws VaultException
+     */
+    public SslConfig clientPemResource(final String classpathResource) throws VaultException {
+        try (final InputStream input = this.getClass().getResourceAsStream(classpathResource)){
+            this.clientPemUTF8 = VaultConfig.inputStreamToUTF8(input);
+        } catch (IOException e) {
+            throw new VaultException(e);
+        }
+        return this;
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @param clientKeyPemUTF8
+     * @return
+     */
+    public SslConfig clientKeyPemUTF8(final String clientKeyPemUTF8) {
+        this.clientKeyPemUTF8 = clientKeyPemUTF8;
+        return this;
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @param clientKeyPemFile
+     * @return
+     * @throws VaultException
+     */
+    public SslConfig clientKeyPemFile(final File clientKeyPemFile) throws VaultException {
+        try (final InputStream input = new FileInputStream(clientKeyPemFile)){
+            this.clientKeyPemUTF8 = VaultConfig.inputStreamToUTF8(input);
+        } catch (IOException e) {
+            throw new VaultException(e);
+        }
+        return this;
+    }
+
+    /**
+     * TODO: Document
+     *
+     * @param classpathResource
+     * @return
+     * @throws VaultException
+     */
+    public SslConfig clientKeyPemResource(final String classpathResource) throws VaultException {
+        try (final InputStream input = this.getClass().getResourceAsStream(classpathResource)){
+            this.clientKeyPemUTF8 = VaultConfig.inputStreamToUTF8(input);
+        } catch (IOException e) {
+            throw new VaultException(e);
+        }
+        return this;
+    }
+
+    /**
+     * TODO: Document
+     *
      * @return
      * @throws VaultException
      */
@@ -188,37 +289,75 @@ public class SslConfig {
                 throw new VaultException(e);
             }
         }
+        // TODO:  Setup VAULT_SSL_CLIENT_CERT env variable
+        if (this.clientPemUTF8 == null && environmentLoader.loadVariable(VAULT_SSL_CLIENT_CERT) != null) {
+            final File pemFile = new File(environmentLoader.loadVariable(VAULT_SSL_CLIENT_CERT));
+            try (final InputStream input = new FileInputStream(pemFile)) {
+                this.clientPemUTF8 = VaultConfig.inputStreamToUTF8(input);
+            } catch (IOException e) {
+                throw new VaultException(e);
+            }
+        }
         return this;
     }
 
     /**
      * TODO: Document
+     * TODO: Move this logic to "build()"?
      *
      * @return
      * @throws VaultException
      */
     public SSLContext getSslContext() throws VaultException {
-        if (pemUTF8 == null) {
+        if (pemUTF8 == null && clientPemUTF8 == null) {
             return null;
         }
         try {
             final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 
-            final ByteArrayInputStream pem = new ByteArrayInputStream(pemUTF8.getBytes("UTF-8"));
-            final X509Certificate certificate = (X509Certificate) certificateFactory.generateCertificate(pem);
-            pem.close();
-
             final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keyStore.load(null);
-            keyStore.setCertificateEntry("caCert", certificate);
+            if (pemUTF8 != null) {
+                // Convert the trusted servers PEM data into an X509Certificate
+                X509Certificate certificate;
+                try (final ByteArrayInputStream pem = new ByteArrayInputStream(pemUTF8.getBytes("UTF-8"))) {
+                    certificate = (X509Certificate) certificateFactory.generateCertificate(pem);
+                }
+                // Build a truststore
+                final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                keyStore.load(null);
+                keyStore.setCertificateEntry("caCert", certificate);
+                trustManagerFactory.init(keyStore);
+            }
+            final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            if (clientPemUTF8 != null && clientKeyPemUTF8 != null) {  // TODO: Must they BOTH be non-null?
+                // Convert the client certificate PEM data into an X509Certificate
+                X509Certificate clientCertificate;
+                try (final ByteArrayInputStream pem = new ByteArrayInputStream(clientPemUTF8.getBytes("UTF-8"))) {
+                    clientCertificate = (X509Certificate) certificateFactory.generateCertificate(pem);
+                }
 
-            trustManagerFactory.init(keyStore);
+                // Convert the client private key into a PrivateKey
+                final String strippedKey = clientKeyPemUTF8.replace("-----BEGIN PRIVATE KEY-----", "")
+                                                     .replace("-----END PRIVATE KEY-----", "");
+                final byte[] keyBytes = DatatypeConverter.parseBase64Binary(strippedKey);
+                final PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(keyBytes);
+                final KeyFactory factory = KeyFactory.getInstance("RSA");
+                final PrivateKey privateKey = factory.generatePrivate(pkcs8EncodedKeySpec);
 
+                // Build a keystore
+                final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                keyStore.load(null, "password".toCharArray());
+                keyStore.setCertificateEntry("clientCert", clientCertificate);
+                keyStore.setKeyEntry("key", privateKey, "password".toCharArray(), new Certificate[] { clientCertificate });
+                keyManagerFactory.init(keyStore, "password".toCharArray()); // TODO
+            }
+
+            final KeyManager[] keyManagers = keyManagerFactory == null ? null : keyManagerFactory.getKeyManagers();
+            final TrustManager[] trustManagers = trustManagerFactory == null ? null : trustManagerFactory.getTrustManagers();
             final SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+            sslContext.init(keyManagers, trustManagers, null);
             return sslContext;
-        } catch (CertificateException | IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+        } catch (CertificateException | IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException | UnrecoverableKeyException | InvalidKeySpecException e) {
             throw new VaultException(e);
         }
     }

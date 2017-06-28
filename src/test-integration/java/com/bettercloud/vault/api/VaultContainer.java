@@ -216,6 +216,17 @@ public class VaultContainer implements TestRule {
     }
 
     /**
+     * TODO: Document
+     */
+    public void setupCertBackend() throws IOException, InterruptedException {
+        runCommand("vault", "auth", "-ca-cert=" + CONTAINER_ROOT_CA_PEMFILE, rootToken);
+
+        runCommand("vault", "auth-enable", "-ca-cert=" + CONTAINER_ROOT_CA_PEMFILE, "cert");
+        runCommand("vault", "write", "-ca-cert=" + CONTAINER_ROOT_CA_PEMFILE, "auth/cert/certs/web", "display_name=web",
+                   "policies=web,prod", "certificate=@" + CONTAINER_ROOT_CA_PEMFILE, "ttl=3600");
+    }
+
+    /**
      * <p>Constructs an instance of the Vault driver, providing maximum flexibility to control all options
      * explicitly.</p>
      *
@@ -253,7 +264,7 @@ public class VaultContainer implements TestRule {
                         .openTimeout(5)
                         .readTimeout(30)
 //                        .verify(false)
-                        .sslConfig(new SslConfig().pemFile(new File(ROOT_CA_PEMFILE)))
+                        .sslConfig(new SslConfig().pemFile(new File(ROOT_CA_PEMFILE)).clientPemFile(new File(ROOT_CA_PEMFILE)).clientKeyPemFile(new File(PRIVATE_KEY_PEMFILE)))
                         .build();
         return getVault(config, MAX_RETRIES, RETRY_MILLIS);
     }
@@ -274,7 +285,7 @@ public class VaultContainer implements TestRule {
                         .openTimeout(5)
                         .readTimeout(30)
 //                        .verify(false)
-                        .sslConfig(new SslConfig().pemFile(new File(ROOT_CA_PEMFILE)))
+                        .sslConfig(new SslConfig().pemFile(new File(ROOT_CA_PEMFILE)).clientPemFile(new File(ROOT_CA_PEMFILE)).clientKeyPemFile(new File(PRIVATE_KEY_PEMFILE)))
                         .build();
         return new Vault(config).withRetries(MAX_RETRIES, RETRY_MILLIS);
     }
@@ -436,7 +447,7 @@ public class VaultContainer implements TestRule {
      * the next release of this library to Maven Central.
      */
     @Deprecated
-    private File setupCertBackend() throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, KeyStoreException, IOException {
+    private File setupCertBackendOld() throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, KeyStoreException, IOException {
         final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", new BouncyCastleProvider());
         keyPairGenerator.initialize(4096);
         final KeyPair keyPair = keyPairGenerator.genKeyPair();
