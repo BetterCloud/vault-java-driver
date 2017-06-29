@@ -1,12 +1,12 @@
 package com.bettercloud.vault.api;
 
+import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.response.LookupResponse;
-import com.bettercloud.vault.rest.RestException;
 import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.rest.Rest;
 import lombok.Getter;
@@ -21,10 +21,20 @@ import java.util.UUID;
  *
  * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of <code>Vault</code>
  * in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code> method for usage examples.</p>
+ *
+ * @see Vault#auth()
  */
 public class Auth {
 
-    /** Builder-style class for use with {@link #createToken(TokenRequest)}.  All properties are optional and can be <code>null</code>. */
+    /**
+     * <p>A container for all of the options that can be passed to the {@link this#createToken(TokenRequest)} method, to
+     * avoid that method having an excessive number of parameters (with <code>null</code> typically passed to most
+     * of them).</p>
+     *
+     * <p>All properties here are optional.  Use of this class resembles a builder pattern (i.e. call the mutator method
+     * for each property you wish to set), but this class lacks a final <code>build()</code> method as no
+     * post-initialization logic is necessary.</p>
+     */
     public static class TokenRequest implements Serializable {
 
         /** (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID. */
@@ -123,59 +133,6 @@ public class Auth {
      * <pre>{@code
      * final VaultConfig config = new VaultConfig().address(...).token(...).build();
      * final Vault vault = new Vault(config);
-     * final AuthResponse response = vault.auth().createToken(null, null, null, null, null, "1h", null, null);
-     *
-     * final String token = response.getAuthClientToken();
-     * }</pre>
-     * </blockquote>
-     *
-     * <p>All parameters to this method are optional, and can be <code>null</code>.</p>
-     *
-     * @param id (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
-     * @param policies (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token.
-     * @param meta (optional) A map of string to string valued metadata. This is passed through to the audit backends.
-     * @param noParent (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent.
-     * @param noDefaultPolicy (optional) If <code>true</code> the default policy will not be a part of this token's policy set.
-     * @param ttl (optional) The TTL period of the token, provided as "1h", where hour is the largest suffix. If not provided, the token is valid for the default lease TTL, or indefinitely if the root policy is used.
-     * @param displayName (optional) The display name of the token. Defaults to "token".
-     * @param numUses (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses.
-     * @return The auth token
-     * @throws VaultException If any error occurs, or unexpected response received from Vault
-     * @deprecated Use {@link #createToken(TokenRequest)}
-     */
-    // TODO:  Just remove altogether?
-    @Deprecated
-    public AuthResponse createToken(
-            final UUID id,
-            final List<String> policies,
-            final Map<String, String> meta,
-            final Boolean noParent,
-            final Boolean noDefaultPolicy,
-            final String ttl,
-            final String displayName,
-            final Long numUses
-    ) throws VaultException {
-        return createToken(
-                new TokenRequest()
-                        .id(id)
-                        .polices(policies)
-                        .meta(meta)
-                        .noParent(noParent)
-                        .noDefaultPolicy(noDefaultPolicy)
-                        .ttl(ttl)
-                        .displayName(displayName)
-                        .numUses(numUses));
-    }
-
-
-    /**
-     * <p>Operation to create an authentication token.  Relies on another token already being present in
-     * the <code>VaultConfig</code> instance.  Example usage:</p>
-     *
-     * <blockquote>
-     * <pre>{@code
-     * final VaultConfig config = new VaultConfig().address(...).token(...).build();
-     * final Vault vault = new Vault(config);
      * final AuthResponse response = vault.auth().createToken(new TokenRequest().withTtl("1h"));
      *
      * final String token = response.getAuthClientToken();
@@ -265,7 +222,7 @@ public class Auth {
      * </blockquote>
      *
      * <strong>NOTE: </strong> As of Vault 0.6.1, Hashicorp has deprecated the App ID authentication backend in
-     * favor of AppRole.
+     * favor of AppRole.  This method will be removed at some point after this backend has been eliminated from Vault.
      *
      * @param path The path on which the authentication is performed (e.g. <code>auth/app-id/login</code>)
      * @param appId The app-id used for authentication

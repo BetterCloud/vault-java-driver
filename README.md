@@ -211,6 +211,8 @@ should represent non-breaking changes.  The third number represents any very min
     `Map<String, String>`).
   * Refactors the `VaultConfig` class, forcing use of the builder pattern and breaking off SSL-related 
     config into a separate `SslConfig` class.
+  * Refactors the `Auth.createToken()` method, to encapsulate the possible options within a config object 
+    rather than having the method signature contain 8 optional arguments.
   * Adds support for authenticating with the TLS Certificate auth backend.
   * Updates SSL support in general, allowing users to configure the driver with Java-friendly JKS keystore 
     and truststore files (in addition to continuing to support Vault-friendly PEM format).
