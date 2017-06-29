@@ -56,7 +56,7 @@ public class Logical {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .get();
 
@@ -143,7 +143,7 @@ public class Logical {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
@@ -235,7 +235,7 @@ public class Logical {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .delete();
 

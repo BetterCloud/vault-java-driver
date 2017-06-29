@@ -62,6 +62,10 @@ import java.util.TreeMap;
  */
 public class Rest {
 
+    /**
+     * A dummy SSLContext, for use when SSL verification is disabled.  Overwrites Java's default server certificate
+     * verification process, to always trust any certificates.
+     */
     private static SSLContext DISABLED_SSL_CONTEXT;
     static {
         try {
@@ -215,9 +219,12 @@ public class Rest {
     }
 
     /**
-     * TODO:  Document
+     * <p>An {@link SSLContext}, as constructed by {@link com.bettercloud.vault.SslConfig} within a
+     * {@link com.bettercloud.vault.VaultConfig} object.  Used when establishing an HTTPS connection, and provides
+     * access to trusted server X509 certificates (as well as client certificates and private keys when TLS
+     * client auth is used).</p>
      *
-     * @param sslContext
+     * @param sslContext An SSLContext object, constructed by SslConfig
      * @return
      */
     public Rest sslContext(final SSLContext sslContext) {

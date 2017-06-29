@@ -1,5 +1,6 @@
 package com.bettercloud.vault;
 
+import com.bettercloud.vault.api.Auth;
 import lombok.AccessLevel;
 import lombok.Getter;
 
@@ -9,11 +10,14 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.xml.bind.DatatypeConverter;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.security.KeyFactory;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -25,21 +29,28 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 
-public class SslConfig {
+/**
+ * <p>A container for SSL-related configuration options, meant to be stored within a {@link VaultConfig} instance.</p>
+ *
+ * <p>Construct instances of this class using a builder pattern, calling setter methods for each value and then
+ * terminating with a call to {@link this#build()}:</p>
+ */
+public class SslConfig implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private static final String VAULT_SSL_VERIFY = "VAULT_SSL_VERIFY";
     private static final String VAULT_SSL_CERT = "VAULT_SSL_CERT";
-    private static final String VAULT_SSL_CLIENT_CERT = "VAULT_SSL_CLIENT_CERT";
-    private static final String VAULT_SSL_CLIENT_KEY = "VAULT_SSL_CLIENT_KEY";
 
-    @Getter private Boolean verify;
+    @Getter private boolean verify;
+    @Getter private transient SSLContext sslContext;
     @Getter(AccessLevel.PROTECTED) private String pemUTF8;
     @Getter(AccessLevel.PROTECTED) private String clientPemUTF8;
     @Getter(AccessLevel.PROTECTED) private String clientKeyPemUTF8;
+    private Boolean verifyObject;
     private EnvironmentLoader environmentLoader;
 
     /**
@@ -77,7 +88,7 @@ public class SslConfig {
      * @return This object, with verify populated, ready for additional builder-pattern method calls or else finalization with the build() method
      */
     public SslConfig verify(final Boolean verify) {
-        this.verify = verify;
+        this.verifyObject = verify;
         return this;
     }
 
@@ -131,13 +142,13 @@ public class SslConfig {
      * or <code>pemUTF8()</code>, then <code>SslConfig</code> will look to the
      * <code>VAULT_SSL_CERT</code> environment variable.</p>
      *
-     * @param sslPemFile The path of a file containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
-     * @return This object, with pemFile populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     * @param pemFile The path of a file containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
+     * @return This object, with pemUTF8 populated, ready for additional builder-pattern method calls or else finalization with the build() method
      * @throws VaultException If any error occurs while loading and parsing the PEM file
      */
-    public SslConfig pemFile(final File sslPemFile) throws VaultException {
-        try (final InputStream input = new FileInputStream(sslPemFile)){
-            this.pemUTF8 = VaultConfig.inputStreamToUTF8(input);
+    public SslConfig pemFile(final File pemFile) throws VaultException {
+        try (final InputStream input = new FileInputStream(pemFile)){
+            this.pemUTF8 = inputStreamToUTF8(input);
         } catch (IOException e) {
             throw new VaultException(e);
         }
@@ -167,12 +178,12 @@ public class SslConfig {
      * <code>VAULT_SSL_CERT</code> environment variable.</p>
      *
      * @param classpathResource The path of a classpath resource containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
-     * @return This object, with pemResource populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     * @return This object, with pemUTF8 populated, ready for additional builder-pattern method calls or else finalization with the build() method
      * @throws VaultException If any error occurs while loading and parsing the PEM file
      */
     public SslConfig pemResource(final String classpathResource) throws VaultException {
         try (final InputStream input = this.getClass().getResourceAsStream(classpathResource)){
-            this.pemUTF8 = VaultConfig.inputStreamToUTF8(input);
+            this.pemUTF8 = inputStreamToUTF8(input);
         } catch (IOException e) {
             throw new VaultException(e);
         }
@@ -180,10 +191,13 @@ public class SslConfig {
     }
 
     /**
-     * TODO: Document
+     * <p>An X.509 client certificate, for use with Vault's TLS Certificate auth backend.  This string should meet
+     * the same formatting requirements as {@link this#pemUTF8(String)}.</p>
      *
-     * @param clientPemUTF8
-     * @return
+     * @param clientPemUTF8 An X.509 client certificate, in unencrypted PEM format with UTF-8 encoding.
+     * @return This object, with clientPemUTF8 populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     *
+     * @see Auth#loginByCert()
      */
     public SslConfig clientPemUTF8(final String clientPemUTF8) {
         this.clientPemUTF8 = clientPemUTF8;
@@ -191,15 +205,19 @@ public class SslConfig {
     }
 
     /**
-     * TODO: Document
+     * <p>An X.509 client certificate, for use with Vault's TLS Certificate auth backend.  This method accepts the
+     * path of a file containing the certificate data.  This file should meet the same requirements as
+     * {@link this#pemFile(File)}.</p>
      *
-     * @param clientPemFile
-     * @return
-     * @throws VaultException
+     * @param clientPemFile The path of a file containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
+     * @return This object, with clientPemUTF8 populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     * @throws VaultException If any error occurs while loading and parsing the PEM file
+     *
+     * @see Auth#loginByCert()
      */
     public SslConfig clientPemFile(final File clientPemFile) throws VaultException {
         try (final InputStream input = new FileInputStream(clientPemFile)){
-            this.clientPemUTF8 = VaultConfig.inputStreamToUTF8(input);
+            this.clientPemUTF8 = inputStreamToUTF8(input);
         } catch (IOException e) {
             throw new VaultException(e);
         }
@@ -207,15 +225,20 @@ public class SslConfig {
     }
 
     /**
-     * TODO: Document
+     * <p>An X.509 certificate, for use with Vault's TLS Certificate auth backend.  This method accepts the path of
+     * a classpath resource containing the certificate data (e.g. you've bundled the cert into your library or
+     * application's JAR/WAR/EAR file).  This resource's contents should meet the same requirements as
+     * {@link this#pemResource(String)}.</p>
      *
-     * @param classpathResource
-     * @return
-     * @throws VaultException
+     * @param classpathResource The path of a classpath resource containing an X.509 certificate, in unencrypted PEM format with UTF-8 encoding.
+     * @return This object, with clientPemUTF8 populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     * @throws VaultException If any error occurs while loading and parsing the PEM file
+     *
+     * @see Auth#loginByCert()
      */
     public SslConfig clientPemResource(final String classpathResource) throws VaultException {
         try (final InputStream input = this.getClass().getResourceAsStream(classpathResource)){
-            this.clientPemUTF8 = VaultConfig.inputStreamToUTF8(input);
+            this.clientPemUTF8 = inputStreamToUTF8(input);
         } catch (IOException e) {
             throw new VaultException(e);
         }
@@ -223,10 +246,16 @@ public class SslConfig {
     }
 
     /**
-     * TODO: Document
+     * <p>An RSA private key, for use with Vault's TLS Certificate auth backend.  The string should meet the following
+     * requirements:</p>
      *
-     * @param clientKeyPemUTF8
-     * @return
+     * <ul>
+     *     <li>Contain an unencrypted RSA private key, in PEM format.</li>
+     *     <li>Use UTF-8 encoding.</li>
+     * </ul>
+     *
+     * @param clientKeyPemUTF8 An RSA private key, in unencrypted PEM format with UTF-8 encoding.
+     * @return This object, with clientKeyPemUTF8 populated, ready for additional builder-pattern method calls or else finalization with the build() method
      */
     public SslConfig clientKeyPemUTF8(final String clientKeyPemUTF8) {
         this.clientKeyPemUTF8 = clientKeyPemUTF8;
@@ -234,15 +263,20 @@ public class SslConfig {
     }
 
     /**
-     * TODO: Document
+     * <p>An RSA private key, for use with Vault's TLS Certificate auth backend.  This method accepts the path of a
+     * file containing the private key data.  This file's contents should meet the following requirements:</p>
      *
-     * @param clientKeyPemFile
-     * @return
-     * @throws VaultException
+     * <ul>
+     *     <li>Contain an unencrypted RSA private key, in PEM format.</li>
+     *     <li>Use UTF-8 encoding.</li>
+     * </ul>
+     *
+     * @param clientKeyPemFile The path of a file containing an RSA private key, in unencrypted PEM format with UTF-8 encoding.
+     * @return This object, with clientKeyPemUTF8 populated, ready for additional builder-pattern method calls or else finalization with the build() method
      */
     public SslConfig clientKeyPemFile(final File clientKeyPemFile) throws VaultException {
         try (final InputStream input = new FileInputStream(clientKeyPemFile)){
-            this.clientKeyPemUTF8 = VaultConfig.inputStreamToUTF8(input);
+            this.clientKeyPemUTF8 = inputStreamToUTF8(input);
         } catch (IOException e) {
             throw new VaultException(e);
         }
@@ -250,15 +284,21 @@ public class SslConfig {
     }
 
     /**
-     * TODO: Document
+     * <p>An RSA private key, for use with Vault's TLS Certificate auth backend.  This method accepts the path of a
+     * classpath resource containing the private key data (e.g. you've bundled the private key into your library or
+     * application's JAR/WAR/EAR file).  This file's contents should meet the following requirements:</p>
      *
-     * @param classpathResource
-     * @return
-     * @throws VaultException
+     * <ul>
+     *     <li>Contain an unencrypted RSA private key, in PEM format.</li>
+     *     <li>Use UTF-8 encoding.</li>
+     * </ul>
+     *
+     * @param classpathResource The path of a classpath resource containing an RSA private key, in unencrypted PEM format with UTF-8 encoding.
+     * @return This object, with clientKeyPemUTF8 populated, ready for additional builder-pattern method calls or else finalization with the build() method
      */
     public SslConfig clientKeyPemResource(final String classpathResource) throws VaultException {
         try (final InputStream input = this.getClass().getResourceAsStream(classpathResource)){
-            this.clientKeyPemUTF8 = VaultConfig.inputStreamToUTF8(input);
+            this.clientKeyPemUTF8 = inputStreamToUTF8(input);
         } catch (IOException e) {
             throw new VaultException(e);
         }
@@ -266,57 +306,63 @@ public class SslConfig {
     }
 
     /**
-     * TODO: Document
+     * <p>This is the terminating method in the builder pattern.  The method that validates all of the fields that
+     * has been set already, uses environment variables when available to populate any unset fields, and returns
+     * a <code>SslConfig</code> object that is ready for use.</p>
      *
-     * @return
-     * @throws VaultException
+     * @return This object, with all available config options parsed and loaded
+     * @throws VaultException If SSL certificate verification is enabled, and any problem occurs while trying to build an SSLContext
      */
     public SslConfig build() throws VaultException {
         if (this.environmentLoader == null) {
             this.environmentLoader = new EnvironmentLoader();
         }
-        if (this.verify == null && environmentLoader.loadVariable(VAULT_SSL_VERIFY) != null) {
+        if (this.verifyObject == null && environmentLoader.loadVariable(VAULT_SSL_VERIFY) != null) {
             this.verify = Boolean.valueOf(environmentLoader.loadVariable(VAULT_SSL_VERIFY));
-        }
-        if (this.verify == null) {
+        } else if (this.verifyObject != null) {
+            this.verify = verifyObject;
+        } else {
             this.verify = true;
         }
-        if (this.pemUTF8 == null && environmentLoader.loadVariable(VAULT_SSL_CERT) != null) {
+        if (this.verify == true && this.pemUTF8 == null && environmentLoader.loadVariable(VAULT_SSL_CERT) != null) {
             final File pemFile = new File(environmentLoader.loadVariable(VAULT_SSL_CERT));
             try (final InputStream input = new FileInputStream(pemFile)) {
-                this.pemUTF8 = VaultConfig.inputStreamToUTF8(input);
+                this.pemUTF8 = inputStreamToUTF8(input);
             } catch (IOException e) {
                 throw new VaultException(e);
             }
         }
-        // TODO:  Setup VAULT_SSL_CLIENT_CERT env variable
-        if (this.clientPemUTF8 == null && environmentLoader.loadVariable(VAULT_SSL_CLIENT_CERT) != null) {
-            final File pemFile = new File(environmentLoader.loadVariable(VAULT_SSL_CLIENT_CERT));
-            try (final InputStream input = new FileInputStream(pemFile)) {
-                this.clientPemUTF8 = VaultConfig.inputStreamToUTF8(input);
-            } catch (IOException e) {
-                throw new VaultException(e);
-            }
+        if (this.verify == true) {
+            // TODO:  Add support for building this SSLContext from JKS data instead
+            this.sslContext = buildSslContextFromPem();
         }
         return this;
     }
 
     /**
-     * TODO: Document
-     * TODO: Move this logic to "build()"?
+     * <p>Constructs an {@link SSLContext} object to be passed to the {@link com.bettercloud.vault.rest.Rest} layer,
+     * where it will be used when establishing an HTTPS connection to provide access to trusted server X509
+     * certificates (as well as client certificates and private keys when TLS client auth is used).</p>
      *
-     * @return
+     * <p>This logic constructs a JKS keystore and/or truststore programmatically, from X509 certificates and
+     * RSA private keys in PEM format.  The truststore contains the server's certificate, to be used for basic SSL
+     * cert verification.  If a client certificate and private key are provided for client auth, then they will be
+     * stored in the keystore.  Either the keystore or truststore can be null if the relevant PEM data was not
+     * provided.</p>
+     *
+     * @return An SSLContext, constructed with the PEM data supplied.
      * @throws VaultException
      */
-    public SSLContext getSslContext() throws VaultException {
+    private SSLContext buildSslContextFromPem() throws VaultException {
         if (pemUTF8 == null && clientPemUTF8 == null) {
             return null;
         }
         try {
             final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 
-            final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            TrustManager[] trustManagers = null;
             if (pemUTF8 != null) {
+                final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 // Convert the trusted servers PEM data into an X509Certificate
                 X509Certificate certificate;
                 try (final ByteArrayInputStream pem = new ByteArrayInputStream(pemUTF8.getBytes("UTF-8"))) {
@@ -327,9 +373,11 @@ public class SslConfig {
                 keyStore.load(null);
                 keyStore.setCertificateEntry("caCert", certificate);
                 trustManagerFactory.init(keyStore);
+                trustManagers = trustManagerFactory.getTrustManagers();
             }
-            final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            if (clientPemUTF8 != null && clientKeyPemUTF8 != null) {  // TODO: Must they BOTH be non-null?
+            KeyManager[] keyManagers = null;
+            if (clientPemUTF8 != null && clientKeyPemUTF8 != null) {
+                final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
                 // Convert the client certificate PEM data into an X509Certificate
                 X509Certificate clientCertificate;
                 try (final ByteArrayInputStream pem = new ByteArrayInputStream(clientPemUTF8.getBytes("UTF-8"))) {
@@ -349,11 +397,10 @@ public class SslConfig {
                 keyStore.load(null, "password".toCharArray());
                 keyStore.setCertificateEntry("clientCert", clientCertificate);
                 keyStore.setKeyEntry("key", privateKey, "password".toCharArray(), new Certificate[] { clientCertificate });
-                keyManagerFactory.init(keyStore, "password".toCharArray()); // TODO
+                keyManagerFactory.init(keyStore, "password".toCharArray());
+                keyManagers = keyManagerFactory.getKeyManagers();
             }
 
-            final KeyManager[] keyManagers = keyManagerFactory == null ? null : keyManagerFactory.getKeyManagers();
-            final TrustManager[] trustManagers = trustManagerFactory == null ? null : trustManagerFactory.getTrustManagers();
             final SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(keyManagers, trustManagers, null);
             return sslContext;
@@ -362,4 +409,24 @@ public class SslConfig {
         }
     }
 
+    /**
+     * A utility method for extracting content from an {@link InputStream} into a UTF-8 encoded {@link String}.  Used
+     * by the various methods in this class that load PEM data from files or classpath resources.
+     *
+     * @param input An InputStream, presumably containing PEM data with UTF-8 encoding
+     * @return A UTF-8 encoded String, containing all of the InputStream's content
+     * @throws IOException
+     */
+    private static String inputStreamToUTF8(final InputStream input) throws IOException {
+        final BufferedReader in = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+        final StringBuilder utf8 = new StringBuilder("");
+        String str;
+        while ((str = in.readLine()) != null) {
+            // String concatenation is less efficient, but for some reason the line-breaks (which are necessary
+            // for Java to correctly parse SSL certs) are stripped off when using a StringBuilder.
+            utf8.append(str).append(System.lineSeparator());
+        }
+        in.close();
+        return utf8.toString();
+    }
 }

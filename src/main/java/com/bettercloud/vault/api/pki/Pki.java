@@ -50,7 +50,7 @@ public class Pki {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, token);
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
      * final PkiResponse response = vault.pki().createOrUpdateRole("testRole");
      *
@@ -75,7 +75,7 @@ public class Pki {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, token);
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
      *
      * final RoleOptions options = new RoleOptions()
@@ -105,7 +105,7 @@ public class Pki {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
@@ -143,7 +143,7 @@ public class Pki {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, token);
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
      * final PkiResponse response = vault.pki().getRole("testRole");
      *
@@ -165,7 +165,7 @@ public class Pki {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .get();
 
@@ -203,7 +203,7 @@ public class Pki {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, token);
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
      *
      * final PkiResponse response = vault.pki().deleteRole("testRole");
@@ -225,7 +225,7 @@ public class Pki {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .delete();
 
@@ -265,7 +265,7 @@ public class Pki {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, token);
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
      *
      * final PkiResponse response = vault.pki().deleteRole("testRole");
@@ -333,7 +333,7 @@ public class Pki {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
 

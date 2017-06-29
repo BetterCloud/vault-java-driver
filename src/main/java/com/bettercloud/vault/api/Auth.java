@@ -121,7 +121,7 @@ public class Auth {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, rootToken);
+     * final VaultConfig config = new VaultConfig().address(...).token(...).build();
      * final Vault vault = new Vault(config);
      * final AuthResponse response = vault.auth().createToken(null, null, null, null, null, "1h", null, null);
      *
@@ -143,6 +143,7 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      * @deprecated Use {@link #createToken(TokenRequest)}
      */
+    // TODO:  Just remove altogether?
     @Deprecated
     public AuthResponse createToken(
             final UUID id,
@@ -173,14 +174,15 @@ public class Auth {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, rootToken);
+     * final VaultConfig config = new VaultConfig().address(...).token(...).build();
      * final Vault vault = new Vault(config);
      * final AuthResponse response = vault.auth().createToken(new TokenRequest().withTtl("1h"));
      *
      * final String token = response.getAuthClientToken();
      * }</pre>
-     * </blockquote>     */
-    public AuthResponse createToken(TokenRequest tokenRequest) throws VaultException {
+     * </blockquote>
+     */
+    public AuthResponse createToken(final TokenRequest tokenRequest) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
@@ -205,8 +207,11 @@ public class Auth {
                 if (tokenRequest.numUses != null) jsonObject.add("num_uses", tokenRequest.numUses);
                 final String requestJson = jsonObject.toString();
 
-                String url = config.getAddress() + "/v1/auth/token/create";
-                if (tokenRequest.role != null) url += "/" + tokenRequest.role;
+                final StringBuilder urlBuilder = new StringBuilder(config.getAddress()).append("/v1/auth/token/create");//NOPMD
+                if (tokenRequest.role != null) {
+                    urlBuilder.append("/").append(tokenRequest.role);
+                }
+                final String url = urlBuilder.toString();
 
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
@@ -215,7 +220,7 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
@@ -228,7 +233,7 @@ public class Auth {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
                 return new AuthResponse(restResponse, retryCount);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
                     retryCount++;
@@ -280,7 +285,7 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
@@ -341,7 +346,7 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
@@ -401,7 +406,7 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
@@ -463,7 +468,7 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
@@ -497,9 +502,27 @@ public class Auth {
     }
 
     /**
-     * TODO: Document
+     * <p>Basic login operation to authenticate using Vault's TLS Certificate auth backend.  Example usage:</p>
      *
-     * @return
+     * <blockquote>
+     * <pre>{@code
+     * final SslConfig sslConfig = new SslConfig()
+     *                                  .keystore("keystore.jks")
+     *                                  .truststore("truststore.jks")
+     *                                  .build();
+     * final VaultConfig vaultConfig = new VaultConfig()
+     *                                  .address("https://127.0.0.1:8200")
+     *                                  .sslConfig(sslConfig)
+     *                                  .build();
+     * final Vault vault = new Vault(vaultConfig);
+     *
+     * final AuthResponse response = vault.auth().loginByCert();
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @return The auth token
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByCert() throws VaultException {
         int retryCount = 0;
@@ -509,7 +532,7 @@ public class Auth {
                         .url(config.getAddress() + "/v1/auth/cert/login")
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
                 // Validate restResponse
@@ -574,7 +597,7 @@ public class Auth {
                         .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
                 // Validate restResponse
@@ -622,7 +645,7 @@ public class Auth {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .get();
                 // Validate restResponse

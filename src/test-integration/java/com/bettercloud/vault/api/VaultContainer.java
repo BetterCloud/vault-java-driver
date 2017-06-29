@@ -80,7 +80,7 @@ public class VaultContainer implements TestRule {
 
     private static final int MAX_RETRIES = 5;
     private static final int RETRY_MILLIS = 1000;
-    private static final Logger log = LoggerFactory.getLogger(VaultContainer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(VaultContainer.class);
 
     private final GenericContainer container;
     private String rootToken;
@@ -122,7 +122,7 @@ public class VaultContainer implements TestRule {
      * @return
      */
     @Override
-    public Statement apply(Statement base, Description description) {
+    public Statement apply(final Statement base, final Description description) {
         return container.apply(base, description);
     }
 
@@ -141,7 +141,7 @@ public class VaultContainer implements TestRule {
      */
     public void initAndUnsealVault() throws IOException, InterruptedException {
 
-        final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
+        final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOGGER);
         container.followOutput(logConsumer);
 
         // Initialize the Vault server
@@ -216,7 +216,11 @@ public class VaultContainer implements TestRule {
     }
 
     /**
-     * TODO: Document
+     * Prepares the Vault server for testing of the TLS Certificate auth backend (i.e. mounts the backend and registers
+     * the certificate and private key for client auth).
+     *
+     * @throws IOException
+     * @throws InterruptedException
      */
     public void setupCertBackend() throws IOException, InterruptedException {
         runCommand("vault", "auth", "-ca-cert=" + CONTAINER_ROOT_CA_PEMFILE, rootToken);
@@ -264,7 +268,7 @@ public class VaultContainer implements TestRule {
                         .openTimeout(5)
                         .readTimeout(30)
 //                        .verify(false)
-                        .sslConfig(new SslConfig().pemFile(new File(ROOT_CA_PEMFILE)).clientPemFile(new File(ROOT_CA_PEMFILE)).clientKeyPemFile(new File(PRIVATE_KEY_PEMFILE)))
+                        .sslConfig(new SslConfig().pemFile(new File(ROOT_CA_PEMFILE)).clientPemFile(new File(ROOT_CA_PEMFILE)).clientKeyPemFile(new File(PRIVATE_KEY_PEMFILE)).build())
                         .build();
         return getVault(config, MAX_RETRIES, RETRY_MILLIS);
     }
@@ -277,7 +281,7 @@ public class VaultContainer implements TestRule {
      * @return
      * @throws VaultException
      */
-    public Vault getVault(String token) throws VaultException {
+    public Vault getVault(final String token) throws VaultException {
         final VaultConfig config =
                 new VaultConfig()
                         .address(getAddress())
@@ -285,7 +289,7 @@ public class VaultContainer implements TestRule {
                         .openTimeout(5)
                         .readTimeout(30)
 //                        .verify(false)
-                        .sslConfig(new SslConfig().pemFile(new File(ROOT_CA_PEMFILE)).clientPemFile(new File(ROOT_CA_PEMFILE)).clientKeyPemFile(new File(PRIVATE_KEY_PEMFILE)))
+                        .sslConfig(new SslConfig().pemFile(new File(ROOT_CA_PEMFILE)).clientPemFile(new File(ROOT_CA_PEMFILE)).clientKeyPemFile(new File(PRIVATE_KEY_PEMFILE)).build())
                         .build();
         return new Vault(config).withRetries(MAX_RETRIES, RETRY_MILLIS);
     }
@@ -334,11 +338,11 @@ public class VaultContainer implements TestRule {
      * @throws IOException
      * @throws InterruptedException
      */
-    private Container.ExecResult runCommand(String... command) throws IOException, InterruptedException {
-        log.info("Command: {}", String.join(" ", command));
+    private Container.ExecResult runCommand(final String... command) throws IOException, InterruptedException {
+        LOGGER.info("Command: {}", String.join(" ", command));
         final Container.ExecResult result = this.container.execInContainer(command);
-        log.info("Command stdout: {}", result.getStdout());
-        log.info("Command stderr: {}", result.getStderr());
+        LOGGER.info("Command stdout: {}", result.getStdout());
+        LOGGER.info("Command stderr: {}", result.getStderr());
         return result;
     }
 
@@ -408,12 +412,22 @@ public class VaultContainer implements TestRule {
 
         final File sslDir = new File(SSL_DIRECTORY);
         if (!sslDir.exists()) {
-            sslDir.mkdirs();
+            if (!sslDir.mkdirs()) {
+                LOGGER.error("Unable to create directory: " + SSL_DIRECTORY);
+            }
         }
         final File rootCaPemfile = new File(ROOT_CA_PEMFILE);
         final File privateKeyFile = new File(PRIVATE_KEY_PEMFILE);
-        if (rootCaPemfile.exists()) rootCaPemfile.delete();
-        if (privateKeyFile.exists()) privateKeyFile.delete();
+        if (rootCaPemfile.exists()) {
+            if (!rootCaPemfile.delete()) {
+                LOGGER.error("Unable to delete pre-existing file: " + ROOT_CA_PEMFILE);
+            }
+        }
+        if (privateKeyFile.exists()) {
+            if (!privateKeyFile.delete()) {
+                LOGGER.error("Unable to delete pre-existing file: " + PRIVATE_KEY_PEMFILE);
+            }
+        }
 
         final Base64.Encoder encoder = Base64.getEncoder();
 
@@ -470,7 +484,9 @@ public class VaultContainer implements TestRule {
         keyStore.load(null);
         final Certificate[] chain = { x509Certificate };
         keyStore.setKeyEntry("privateKey", privateKey, "testpassword".toCharArray(), chain);
-        keyStore.store(new FileOutputStream("keystore.jks"), "testpassword".toCharArray());
+        try (final FileOutputStream keystoreOutputStream = new FileOutputStream("keystore.jks")) {
+            keyStore.store(keystoreOutputStream, "testpassword".toCharArray());
+        }
 
         return new File("keystore.jks");
     }

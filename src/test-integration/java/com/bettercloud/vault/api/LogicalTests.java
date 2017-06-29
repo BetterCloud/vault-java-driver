@@ -191,7 +191,7 @@ public class LogicalTests {
         vault.logical().write(path, nameValuePairs);
 
         final Map<String, String> valuesRead = vault.logical().read(path).getData();
-        for (Map.Entry<String, String> entry : valuesRead.entrySet()) {
+        for (final Map.Entry<String, String> entry : valuesRead.entrySet()) {
             System.out.println(entry.getKey() + " - " + entry.getValue());
         }
     }

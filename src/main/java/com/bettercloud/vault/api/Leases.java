@@ -46,7 +46,7 @@ public class Leases {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .put();
 
@@ -100,7 +100,7 @@ public class Leases {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .put();
 
@@ -157,7 +157,7 @@ public class Leases {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .put();
 
@@ -220,7 +220,7 @@ public class Leases {
                         .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().getVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .put();
                 // Validate response

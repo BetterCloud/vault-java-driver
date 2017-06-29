@@ -7,8 +7,6 @@ import com.bettercloud.vault.api.Logical;
 import com.bettercloud.vault.api.pki.Pki;
 
 /**
- * TODO: Fix up all of the JavaDoc code samples, now that VaultConfig has been refactored.
- *
  * <p>The Vault driver class, the primary interface through which dependent applications will access Vault.</p>
  *
  * <p>This driver exposes a DSL, compartmentalizing the various endpoints of the HTTP API (e.g. "/", "sys/init",
@@ -18,7 +16,10 @@ import com.bettercloud.vault.api.pki.Pki;
  *
  * <blockquote>
  * <pre>{@code
- * final VaultConfig config = new VaultConfig("http://127.0.0.1:8200", "eace6676-4d78-c687-4e54-03cad00e3abf");
+ * final VaultConfig config = new VaultConfig
+ *                                    .address("http://127.0.0.1:8200")
+ *                                    .token("eace6676-4d78-c687-4e54-03cad00e3abf")
+ *                                    .build();
  * final Vault vault = new Vault(config);
  *
  * ...
@@ -103,7 +104,7 @@ public class Vault {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, token);
+     * final VaultConfig config = new VaultConfig().address(...).token(...).build();
      * final Vault vault = new Vault(config);
      * final PkiResponse response = vault.pki("root-ca").createOrUpdateRole("testRole");
      *

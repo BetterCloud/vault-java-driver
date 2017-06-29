@@ -27,7 +27,6 @@ public class AuthBackendCertTests {
     @Test
     public void testLoginByCert() throws VaultException {
         final Vault vault = container.getVault();
-//        final Vault vault = container.getRootVault();
 
         final String token = vault.auth().loginByCert().getAuthClientToken();
 

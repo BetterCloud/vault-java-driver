@@ -1,6 +1,7 @@
 package com.bettercloud.vault;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -8,7 +9,7 @@ import java.nio.file.Paths;
  * The code used to load environment variables is encapsulated within an inner class,
  * so that a mock version of that environment loader can be used by unit tests.
  */
-public class EnvironmentLoader {
+public class EnvironmentLoader implements Serializable {
 
     public String loadVariable(final String name) {
         String value = null;
