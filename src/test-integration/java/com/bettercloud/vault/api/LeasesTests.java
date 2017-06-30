@@ -4,11 +4,14 @@ import static junit.framework.TestCase.assertEquals;
 
 import com.bettercloud.vault.response.VaultResponse;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultException;
+
+import java.io.IOException;
 
 /**
  * <p>Integration tests for the basic (i.e. "sys") Vault API operations.</p>
@@ -34,6 +37,11 @@ public class LeasesTests {
     public static final VaultContainer container = new VaultContainer();
 
     private Vault vault;
+
+    @BeforeClass
+    public static void setupClass() throws IOException, InterruptedException {
+        container.initAndUnsealVault();
+    }
 
     @Before
     public void setup() throws VaultException {

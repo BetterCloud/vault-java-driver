@@ -8,6 +8,21 @@ retry handling.  It does so without relying on any other external libraries beyo
 and is compatible with Java 7 and up.  So it will play nice with all of your projects, greenfield and legacy
 alike, without causing conflicts with any other dependency.
 
+Table of Contents
+-----------------
+* Installing the Driver
+* Initializing a Driver Instance
+* SSL Config
+  * General Options
+  * Java Keystore (JKS) based config
+  * OpenSSL (PEM) based config
+* Using the driver
+* API Reference (Javadocs)
+* Version History
+* Development
+* License
+* Other Notes
+
 Installing the Driver
 ---------------------
 The driver is available from Maven Central, for all modern Java build systems.
@@ -52,31 +67,9 @@ final VaultConfig config =
         .token("3c9fd6be-7bc2-9d1f-6fb3-cd746c0fc4e8")  // Defaults to "VAULT_TOKEN" environment variable
         .openTimeout(5)                                 // Defaults to "VAULT_OPEN_TIMEOUT" environment variable
         .readTimeout(30)                                // Defaults to "VAULT_READ_TIMEOUT" environment variable
-        .sslPemFile("/path/on/disk.pem")                // Defaults to "VAULT_SSL_CERT" environment variable
-                                                        //    See also: "sslPemUTF8()" and "sslPemResource()"
-        .sslVerify(false)                               // Defaults to "VAULT_SSL_VERIFY" environment variable
+        .sslConfig(new SslConfig().build())             // See "SSL Config" section below
         .build();
 ```
-
-> NOTES ON SSL CONFIG
->
-> If your Vault server uses a SSL certificate, there are three different options for supplying that certificate to the
-> Vault driver:
->
-> `sslPemFile(path)` - Supply the path to an X.509 certificate in unencrypted PEM format, using UTF-8 encoding.
->
-> `sslPemResource(path)` - Same as above, but the path references a classpath resource rather than a filesystem path (e.g. if
->                        you've bundled the PEM file into your applications's JAR, WAR, or EAR file).
->
-> `sslPemUTF8(contents)` - The string contents extracted from the PEM file.  For Java to parse the certificate properly,
->                        there must be a line-break in between the certificate header and body (see the `VaultConfig`
->                        Javadocs for more detail).
->
-> If none of these three methods are called, then `VaultConfig` will by default check for a `VAULT_SSL_CERT` environment
-> variable, and if that's set then it will be treated as a filesystem path.
->
-> To disable SSL certificate verification altogether, set `sslVerify(false)`.  YOU SHOULD NOT DO THIS IS A REAL
-> PRODUCTION SETTING!  However, it can be useful in a development or testing server context.
 
 Once you have initialized a `VaultConfig` object, you can use it to construct an instance of the `Vault` primary
 driver class:
@@ -84,6 +77,97 @@ driver class:
 ```
 final Vault vault = new Vault(config);
 ```
+
+SSL Config
+----------
+If your Vault server uses a SSL certificate, then you must supply that certificate to establish connections.  Also, if 
+you are using certificate-based client authentication, then you must supply a client certificate and private key that 
+have been previously registered with your Vault server.
+
+SSL configuration has been broken off from the `VaultConfig` class, and placed in its own `SslConfig` class.  This 
+class likewise using a builder pattern.
+
+#### General Options
+
+```
+.verify(false)    // Defaults to "VAULT_SSL_VERIFY" environment variable (or else "true")
+```
+
+To disable SSL certificate verification altogether, set `sslVerify(false)`.  YOU SHOULD NOT DO THIS IS A REAL
+PRODUCTION SETTING!  However, it can be useful in a development or testing server context.  If this value is 
+explicitly set to `false`, then all other SSL config is basically unused.
+
+#### Java Keystore (JKS) based config
+
+You can provide the driver with a JKS truststore, containing Vault's server-side certificate for basic SSL, 
+using one of the following three options:
+
+`.trustStore(object)`       - Supply an in-memory `java.security.KeyStore` file, containing Vault server cert(s) that 
+                              can be trusted.
+
+`.trustStoreFile(path)`     - Same as the above, but the path references a JKS file on the filesystem.
+
+`.trustStoreResource(path)` - Same as the above, but the path references a classpath resource rather than a filesystem 
+                              path (e.g. if you've bundled the JKS file into your application's JAR, WAR, or EAR file).
+
+If you are only using basic SSL, then no keystore need be provided.  However, if you would like to use Vault's 
+TLS Certificate auth backend for client side auth, then you need to provide a JKS keystore containing your 
+client-side certificate and private key:
+
+`.keyStore(object, password)`       - Supply an in-memory `java.security.KeyStore` file containing a client 
+                                      certificate and private key, and the password needed to access it (can be null).
+                              can be trusted.
+
+`.keyStoreFile(path, password)`     - Same as the above, but the path references a JKS file on the filesystem.
+
+`.keyStoreResource(path, password)` - Same as the above, but the path references a classpath resource rather than a 
+                                      filesystem path (e.g. if you've bundled the JKS file into your application's JAR, 
+                                      WAR, or EAR file).
+
+NOTE:  JKS-based config trumps PEM-based config (see below).  If for some reason you build an `SslConfig` object 
+with both JKS and PEM data present, then only the JKS data will be used.  You cannot "mix-and-match", providing 
+a JKS-based truststore and PEM-based client auth data.
+
+#### OpenSSL (PEM) based config
+
+To supply Vault's server-side certificate for basic SSL, you can use one of the following three options:
+
+`.pemFile(path)` - Supply the path to an X.509 certificate in unencrypted PEM format, using UTF-8 encoding (defaults 
+                   to "VAULT_SSL_CERT" environment variable).
+
+`.pemResource(path)` - Same as above, but the path references a classpath resource rather than a filesystem path (e.g. if
+                       you've bundled the PEM file into your applications's JAR, WAR, or EAR file).
+
+`.pemUTF8(contents)` - The string contents extracted from the PEM file.  For Java to parse the certificate properly,
+                       there must be a line-break in between the certificate header and body (see the `SslConfig`
+                       Javadocs for more detail).
+                       
+If SSL verification is enabled, no JKS-based config is provided, AND none of these three methods are called, 
+then `SslConfig` will by default check for a `VAULT_SSL_CERT` environment variable.  If that's setw then it will be 
+treated as a filesystem path.
+                      
+To use Vault's TLS Certificate auth backend for SSL client auth, you must provide your client certificate and 
+private key, using some pair from the following options:
+
+`.clientPemUTF8(path)` - Supply the path to an X.509 certificate in unencrypted PEM format, using UTF-8 encoding.
+
+`.clientPemResource(path)` - Same as above, but the path references a classpath resource rather than a filesystem path (e.g. if
+                       you've bundled the PEM file into your applications's JAR, WAR, or EAR file).
+
+`.clientPemUTF8(contents)` - The string contents extracted from the PEM file.  For Java to parse the certificate properly,
+                       there must be a line-break in between the certificate header and body (see the `SslConfig`
+                       Javadocs for more detail).
+                       
+`.clientKeyPemUTF8(path)` - Supply the path to an RSA private key in unencrypted PEM format, using UTF-8 encoding.
+
+`.clientKeyPemResource(path)` - Same as above, but the path references a classpath resource rather than a filesystem path (e.g. if
+                       you've bundled the PEM file into your applications's JAR, WAR, or EAR file).
+
+`.clientKeyPemUTF8(contents)` - The string contents extracted from the PEM file.  For Java to parse the certificate properly,
+                       there must be a line-break in between the certificate header and body (see the `SslConfig`
+                       Javadocs for more detail).
+
+
 
 Using the Driver
 ----------------
@@ -124,8 +208,8 @@ final LogicalResponse response = vault.withRetries(5, 1000)
                                    .read("secret/hello");
 ```
 
-Reference
----------
+API Reference (Javadocs)
+------------------------
 Full [Javadoc documentation](http://bettercloud.github.io/vault-java-driver/javadoc/).
 
 Version History
@@ -135,19 +219,31 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **3.0.0 (IN DEVELOPMENT)**: This is a (mildly) breaking-change release, with several updates.
+* **3.0.0 (IN DEVELOPMENT)**: This is a breaking-change release, with several updates.
   * Adds support for writing arbitrary objects to Vault, instead of just strings (i.e. the 
     `com.bettercloud.vault.api.Logical.write(...)` method now accepts a `Map<String. Object>` rather than a 
     `Map<String, String>`).
+  * Refactors the `VaultConfig` class, forcing use of the builder pattern and breaking off SSL-related 
+    config into a separate `SslConfig` class.
+  * Refactors the `Auth.createToken()` method, to encapsulate the possible options within a config object 
+    rather than having the method signature contain 8 optional arguments.
+  * Adds support for authenticating with the TLS Certificate auth backend.
+  * Updates SSL support in general, allowing users to configure the driver with Java-friendly JKS keystore 
+    and truststore files (in addition to continuing to support Vault-friendly PEM format).
+  * Implements the `/v1/auth/token/lookup-self` endpoint.
   * Supports creating tokens against a role, and refactors the `com.bettercloud.vault.api.Auth.createToken(...)` 
     method to accept an options object (deprecating the previous version of the method, which took all of those 
     options as separate parameters).
   * Includes the REST response body in `VaultException` messages for basic read and write operations.
-  * Implements the `/v1/auth/token/lookup-self` endpoint.
   * Makes numerous classes implement `Serializable`.
-  * Re-works the integration test suite, so that you no longer have to manually configure and run a Vault server 
-    instance.  The tests now use the [TestContainers](https://www.testcontainers.org/) to setup and launch a 
-    Vault server instance from within a Docker container, in a completely automated manner.
+  * Major re-vamp of the integration test suite.
+    * The tests now use the [TestContainers](https://www.testcontainers.org/) library to setup and launch a 
+      Vault server instance from within a Docker container, in a completely automated manner.  You no longer have to 
+      manually configure and run a Vault server to use the test suite!
+    * The tests are now going against a regular Vault server, rather than one running in "dev mode".  Therefore, 
+      they are now able to use HTTPS connections rather than plain HTTP.
+    * Upgrades tests to use Java 8 (although the library itself still targets Java 7).
+    
 * **2.0.0**: This is breaking-change release, with numerous deprecated items cleaned up.
   * Adds support for authentication via the AppRole auth backend.  
   * Adds support for renewing secret leases.
@@ -207,8 +303,7 @@ instance (at least a Dev Server) up and running.
 Unit tests are located under the `src/test` directory, and can be run with the Grade `unitTest` task.
 
 Integration tests are located under the `src/test-integration` directory, and can be run with the Gradle
-`integrationTest` task.  See the additional `README.md` file in this directory for more detailed information on the
-Vault server setup steps required to run the integration test suite.
+`integrationTest` task.  See the additional `README.md` file in this directory for more detailed information.
 
 License
 -------

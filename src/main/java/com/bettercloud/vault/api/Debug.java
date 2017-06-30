@@ -34,7 +34,7 @@ public class Debug {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, rootToken);
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
      *
      * final HealthResponse response = vault.sys().debug().health();
@@ -82,8 +82,8 @@ public class Debug {
                         .url(config.getAddress() + "/v1/" + path)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null);
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext());
                 // Add token if present
                 if (config.getToken() != null) {
                     rest.header("X-Vault-Token", config.getToken());

@@ -56,8 +56,8 @@ public class Logical {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .get();
 
                 // Validate response
@@ -143,8 +143,8 @@ public class Logical {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // HTTP Status should be either 200 (with content - e.g. PKI write) or 204 (no content)
@@ -235,8 +235,8 @@ public class Logical {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .delete();
 
                 // Validate response

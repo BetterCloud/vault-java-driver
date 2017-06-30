@@ -50,7 +50,7 @@ public class Pki {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, token);
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
      * final PkiResponse response = vault.pki().createOrUpdateRole("testRole");
      *
@@ -75,7 +75,7 @@ public class Pki {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, token);
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
      *
      * final RoleOptions options = new RoleOptions()
@@ -105,8 +105,8 @@ public class Pki {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // Validate restResponse
@@ -143,7 +143,7 @@ public class Pki {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, token);
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
      * final PkiResponse response = vault.pki().getRole("testRole");
      *
@@ -165,8 +165,8 @@ public class Pki {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .get();
 
                 // Validate response
@@ -203,7 +203,7 @@ public class Pki {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, token);
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
      *
      * final PkiResponse response = vault.pki().deleteRole("testRole");
@@ -225,8 +225,8 @@ public class Pki {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .delete();
 
                 // Validate response
@@ -265,7 +265,7 @@ public class Pki {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, token);
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
      *
      * final PkiResponse response = vault.pki().deleteRole("testRole");
@@ -333,8 +333,8 @@ public class Pki {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // Validate response

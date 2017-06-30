@@ -1,5 +1,6 @@
 package com.bettercloud.vault.api;
 
+import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
@@ -8,6 +9,7 @@ import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.response.LookupResponse;
 import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.rest.Rest;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.List;
@@ -19,194 +21,101 @@ import java.util.UUID;
  *
  * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of <code>Vault</code>
  * in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code> method for usage examples.</p>
+ *
+ * @see Vault#auth()
  */
 public class Auth {
 
     /**
-     * Builder-style class for use with {@link #createToken(TokenRequest)}
+     * <p>A container for all of the options that can be passed to the {@link this#createToken(TokenRequest)} method, to
+     * avoid that method having an excessive number of parameters (with <code>null</code> typically passed to most
+     * of them).</p>
      *
-     * <p>All properties are optional and can be <code>null</code>.</p>
+     * <p>All properties here are optional.  Use of this class resembles a builder pattern (i.e. call the mutator method
+     * for each property you wish to set), but this class lacks a final <code>build()</code> method as no
+     * post-initialization logic is necessary.</p>
      */
     public static class TokenRequest implements Serializable {
-        /**
-         * (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
-         */
-        private UUID id;
 
-        /**
-         * (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token.
-         */
-        private List<String> polices;
+        /** (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID. */
+        @Getter private UUID id;
 
-        /**
-         * (optional) A map of string to string valued metadata. This is passed through to the audit backends.
-         */
-        private Map<String, String> meta;
+        /** (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token. */
+        @Getter private List<String> polices;
 
-        /**
-         * (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent.
-         */
-        private Boolean noParent;
+        /** (optional) A map of string to string valued metadata. This is passed through to the audit backends. */
+        @Getter private Map<String, String> meta;
 
-        /**
-         * (optional) If <code>true</code> the default policy will not be a part of this token's policy set.
-         */
-        private Boolean noDefaultPolicy;
+        /** (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent. */
+        @Getter private Boolean noParent;
 
-        /**
-         * (optional) The TTL period of the token, provided as "1h", where hour is the largest suffix. If not provided, the token is valid for the default lease TTL, or indefinitely if the root policy is used.
-         */
-        private String ttl;
+        /** (optional) If <code>true</code> the default policy will not be a part of this token's policy set. */
+        @Getter private Boolean noDefaultPolicy;
 
-        /**
-         * (optional) The display name of the token. Defaults to "token".
-         */
-        private String displayName;
+        /** (optional) The TTL period of the token, provided as "1h", where hour is the largest suffix. If not provided, the token is valid for the default lease TTL, or indefinitely if the root policy is used. */
+        @Getter private String ttl;
 
-        /**
-         * (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses.
-         */
-        private Long numUses;
+        /** (optional) The display name of the token. Defaults to "token". */
+        @Getter private String displayName;
 
-        /**
-         * (optional) The role the token will be created with. Default is no role.
-         */
-        private String role;
+        /** (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses. */
+        @Getter private Long numUses;
 
-        /**
-         * {@link #id}
-         */
+        /** (optional) The role the token will be created with. Default is no role. */
+        @Getter private String role;
+
+        /** {@link #id} */
         public TokenRequest id(final UUID id) {
             this.id = id;
             return this;
         }
 
-        /**
-         * {@link #polices}
-         */
+        /** {@link #polices} */
         public TokenRequest polices(final List<String> polices) {
             this.polices = polices;
             return this;
         }
 
-        /**
-         * {@link #meta}
-         */
+        /** {@link #meta} */
         public TokenRequest meta(final Map<String, String> meta) {
             this.meta = meta;
             return this;
         }
 
-        /**
-         * {@link #noParent}
-         */
+        /** {@link #noParent} */
         public TokenRequest noParent(final Boolean noParent) {
             this.noParent = noParent;
             return this;
         }
 
-        /**
-         * {@link #noDefaultPolicy}
-         */
+        /** {@link #noDefaultPolicy} */
         public TokenRequest noDefaultPolicy(final Boolean noDefaultPolicy) {
             this.noDefaultPolicy = noDefaultPolicy;
             return this;
         }
 
-        /**
-         * {@link #ttl}
-         */
+        /** {@link #ttl} */
         public TokenRequest ttl(final String ttl) {
             this.ttl = ttl;
             return this;
         }
 
-        /**
-         * {@link #displayName}
-         */
+        /** {@link #displayName} */
         public TokenRequest displayName(final String displayName) {
             this.displayName = displayName;
             return this;
         }
 
-        /**
-         * {@link #numUses}
-         */
+        /** {@link #numUses} */
         public TokenRequest numUses(final Long numUses) {
             this.numUses = numUses;
             return this;
         }
 
-        /**
-         * {@link #role}
-         */
+        /** {@link #role} */
         public TokenRequest role(final String role) {
             this.role = role;
             return this;
-        }
-
-
-        /**
-         * {@link #id}
-         */
-        public UUID getId() {
-            return id;
-        }
-
-        /**
-         * {@link #polices}
-         */
-        public List<String> getPolices() {
-            return polices;
-        }
-
-        /**
-         * {@link #meta}
-         */
-        public Map<String, String> getMeta() {
-            return meta;
-        }
-
-        /**
-         * {@link #noParent}
-         */
-        public Boolean getNoParent() {
-            return noParent;
-        }
-
-        /**
-         * {@link #noDefaultPolicy}
-         */
-        public Boolean getNoDefaultPolicy() {
-            return noDefaultPolicy;
-        }
-
-        /**
-         * {@link #ttl}
-         */
-        public String getTtl() {
-            return ttl;
-        }
-
-        /**
-         * {@link #displayName}
-         */
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        /**
-         * {@link #numUses}
-         */
-        public Long getNumUses() {
-            return numUses;
-        }
-
-        /**
-         * {@link #role}
-         */
-        public String getRole() {
-            return role;
         }
     }
 
@@ -222,66 +131,15 @@ public class Auth {
      *
      * <blockquote>
      * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, rootToken);
-     * final Vault vault = new Vault(config);
-     * final AuthResponse response = vault.auth().createToken(null, null, null, null, null, "1h", null, null);
-     *
-     * final String token = response.getAuthClientToken();
-     * }</pre>
-     * </blockquote>
-     *
-     * <p>All parameters to this method are optional, and can be <code>null</code>.</p>
-     *
-     * @param id (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
-     * @param policies (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token.
-     * @param meta (optional) A map of string to string valued metadata. This is passed through to the audit backends.
-     * @param noParent (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent.
-     * @param noDefaultPolicy (optional) If <code>true</code> the default policy will not be a part of this token's policy set.
-     * @param ttl (optional) The TTL period of the token, provided as "1h", where hour is the largest suffix. If not provided, the token is valid for the default lease TTL, or indefinitely if the root policy is used.
-     * @param displayName (optional) The display name of the token. Defaults to "token".
-     * @param numUses (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses.
-     * @return The auth token
-     * @throws VaultException If any error occurs, or unexpected response received from Vault
-     * @deprecated Use {@link #createToken(TokenRequest)}
-     */
-    @Deprecated
-    public AuthResponse createToken(
-            final UUID id,
-            final List<String> policies,
-            final Map<String, String> meta,
-            final Boolean noParent,
-            final Boolean noDefaultPolicy,
-            final String ttl,
-            final String displayName,
-            final Long numUses
-    ) throws VaultException {
-        return createToken(
-                new TokenRequest()
-                        .id(id)
-                        .polices(policies)
-                        .meta(meta)
-                        .noParent(noParent)
-                        .noDefaultPolicy(noDefaultPolicy)
-                        .ttl(ttl)
-                        .displayName(displayName)
-                        .numUses(numUses));
-    }
-
-
-    /**
-     * <p>Operation to create an authentication token.  Relies on another token already being present in
-     * the <code>VaultConfig</code> instance.  Example usage:</p>
-     *
-     * <blockquote>
-     * <pre>{@code
-     * final VaultConfig config = new VaultConfig(address, rootToken);
+     * final VaultConfig config = new VaultConfig().address(...).token(...).build();
      * final Vault vault = new Vault(config);
      * final AuthResponse response = vault.auth().createToken(new TokenRequest().withTtl("1h"));
      *
      * final String token = response.getAuthClientToken();
      * }</pre>
-     * </blockquote>     */
-    public AuthResponse createToken(TokenRequest tokenRequest) throws VaultException {
+     * </blockquote>
+     */
+    public AuthResponse createToken(final TokenRequest tokenRequest) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
@@ -306,8 +164,11 @@ public class Auth {
                 if (tokenRequest.numUses != null) jsonObject.add("num_uses", tokenRequest.numUses);
                 final String requestJson = jsonObject.toString();
 
-                String url = config.getAddress() + "/v1/auth/token/create";
-                if (tokenRequest.role != null) url += "/" + tokenRequest.role;
+                final StringBuilder urlBuilder = new StringBuilder(config.getAddress()).append("/v1/auth/token/create");//NOPMD
+                if (tokenRequest.role != null) {
+                    urlBuilder.append("/").append(tokenRequest.role);
+                }
+                final String url = urlBuilder.toString();
 
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
@@ -316,8 +177,8 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // Validate restResponse
@@ -329,7 +190,7 @@ public class Auth {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
                 return new AuthResponse(restResponse, retryCount);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
                     retryCount++;
@@ -361,7 +222,7 @@ public class Auth {
      * </blockquote>
      *
      * <strong>NOTE: </strong> As of Vault 0.6.1, Hashicorp has deprecated the App ID authentication backend in
-     * favor of AppRole.
+     * favor of AppRole.  This method will be removed at some point after this backend has been eliminated from Vault.
      *
      * @param path The path on which the authentication is performed (e.g. <code>auth/app-id/login</code>)
      * @param appId The app-id used for authentication
@@ -381,8 +242,8 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // Validate restResponse
@@ -442,8 +303,8 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // Validate restResponse
@@ -502,8 +363,8 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // Validate restResponse
@@ -564,13 +425,77 @@ public class Auth {
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                }
+                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+                if (!mimeType.equals("application/json")) {
+                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
+                }
+                return new AuthResponse(restResponse, retryCount);
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
+
+    /**
+     * <p>Basic login operation to authenticate using Vault's TLS Certificate auth backend.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final SslConfig sslConfig = new SslConfig()
+     *                                  .keystore("keystore.jks")
+     *                                  .truststore("truststore.jks")
+     *                                  .build();
+     * final VaultConfig vaultConfig = new VaultConfig()
+     *                                  .address("https://127.0.0.1:8200")
+     *                                  .sslConfig(sslConfig)
+     *                                  .build();
+     * final Vault vault = new Vault(vaultConfig);
+     *
+     * final AuthResponse response = vault.auth().loginByCert();
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @return The auth token
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse loginByCert() throws VaultException {
+        int retryCount = 0;
+        while (true) {
+            try {
+                final RestResponse restResponse = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/auth/cert/login")
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
+                // Validate restResponse
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(),
+                                             restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -629,8 +554,8 @@ public class Auth {
                         .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .post();
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -677,8 +602,8 @@ public class Auth {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .get();
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {

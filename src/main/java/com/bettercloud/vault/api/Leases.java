@@ -46,8 +46,8 @@ public class Leases {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .put();
 
                 // Validate response
@@ -100,8 +100,8 @@ public class Leases {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .put();
 
                 // Validate response
@@ -157,8 +157,8 @@ public class Leases {
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .put();
 
                 // Validate response
@@ -203,12 +203,12 @@ public class Leases {
      */
     public VaultResponse renew(final String leaseId, final long increment) throws VaultException {
 
-        // TODO:  Unfortunately, there is not currently a way to cover this in the integration test suite.
+        // TODO:  Update the integration test suite to provide coverate for this
         //        The "generic" backend does not support support lease renewal.  The only other backend
-        //        currently available to the integration test suite is the "pki" backend, which does
+        //        available when we were using Vault in "dev mode" was the "pki" backend, which does
         //        support renewal of credentials, etc.  But lease renewal in this context is talking about
-        //        secrets.  Perhaps revisit this at some point in the future if other backends are available
-        //        to the integration test suite (e.g. if we eventually start using Docker).
+        //        secrets.  Now that the integration tests use a "real" Vault instance hosted in a Docker
+        //        container, we can revisit this.
 
         int retryCount = 0;
         while (true) {
@@ -220,8 +220,8 @@ public class Leases {
                         .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
                         .put();
                 // Validate response
                 if (restResponse.getStatus() != 200) {

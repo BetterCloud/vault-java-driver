@@ -1,10 +1,12 @@
 package com.bettercloud.vault.api;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,6 +26,11 @@ public class LogicalTests {
 
     @ClassRule
     public static final VaultContainer container = new VaultContainer();
+
+    @BeforeClass
+    public static void setupClass() throws IOException, InterruptedException {
+        container.initAndUnsealVault();
+    }
 
     /**
      * Write a secret and verify that it can be read.
@@ -184,7 +191,7 @@ public class LogicalTests {
         vault.logical().write(path, nameValuePairs);
 
         final Map<String, String> valuesRead = vault.logical().read(path).getData();
-        for (Map.Entry<String, String> entry : valuesRead.entrySet()) {
+        for (final Map.Entry<String, String> entry : valuesRead.entrySet()) {
             System.out.println(entry.getKey() + " - " + entry.getValue());
         }
     }
