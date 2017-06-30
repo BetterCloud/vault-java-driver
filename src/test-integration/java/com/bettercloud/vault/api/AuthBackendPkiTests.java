@@ -26,7 +26,7 @@ public class AuthBackendPkiTests {
     @BeforeClass
     public static void setupClass() throws IOException, InterruptedException {
         container.initAndUnsealVault();
-        container.setupPkiBackend();
+        container.setupBackendPki();
     }
 
     @Before

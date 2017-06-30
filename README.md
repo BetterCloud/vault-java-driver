@@ -102,13 +102,27 @@ explicitly set to `false`, then all other SSL config is basically unused.
 You can provide the driver with a JKS truststore, containing Vault's server-side certificate for basic SSL, 
 using one of the following three options:
 
-TODO
+`.trustStore(object)`       - Supply an in-memory `java.security.KeyStore` file, containing Vault server cert(s) that 
+                              can be trusted.
+
+`.trustStoreFile(path)`     - Same as the above, but the path references a JKS file on the filesystem.
+
+`.trustStoreResource(path)` - Same as the above, but the path references a classpath resource rather than a filesystem 
+                              path (e.g. if you've bundled the JKS file into your application's JAR, WAR, or EAR file).
 
 If you are only using basic SSL, then no keystore need be provided.  However, if you would like to use Vault's 
 TLS Certificate auth backend for client side auth, then you need to provide a JKS keystore containing your 
 client-side certificate and private key:
 
-TODO
+`.keyStore(object, password)`       - Supply an in-memory `java.security.KeyStore` file containing a client 
+                                      certificate and private key, and the password needed to access it (can be null).
+                              can be trusted.
+
+`.keyStoreFile(path, password)`     - Same as the above, but the path references a JKS file on the filesystem.
+
+`.keyStoreResource(path, password)` - Same as the above, but the path references a classpath resource rather than a 
+                                      filesystem path (e.g. if you've bundled the JKS file into your application's JAR, 
+                                      WAR, or EAR file).
 
 NOTE:  JKS-based config trumps PEM-based config (see below).  If for some reason you build an `SslConfig` object 
 with both JKS and PEM data present, then only the JKS data will be used.  You cannot "mix-and-match", providing 

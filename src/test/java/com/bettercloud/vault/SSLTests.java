@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.KeyStore;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
@@ -69,7 +70,7 @@ public class SSLTests {
 
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")
-                .sslConfig(new SslConfig().pemResource("/cert.pem"))
+                .sslConfig(new SslConfig().pemResource("/cert.pem").build())
                 .token("mock_token")
                 .build();
         final Vault vault = new Vault(vaultConfig);
@@ -178,7 +179,92 @@ public class SSLTests {
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")
                 .token("mock_token")
-                .sslConfig(new SslConfig().pemUTF8(pemUTF8))
+                .sslConfig(new SslConfig().pemUTF8(pemUTF8).build())
+                .build();
+        final Vault vault = new Vault(vaultConfig);
+        final LogicalResponse response = vault.logical().read("secret/hello");
+
+        VaultTestUtils.shutdownMockVault(server);
+    }
+
+    @Test
+    public void testSslJks_loadTrustStoreFromClasspath() throws Exception {
+        final MockVault mockVault = new MockVault(200, "{\"data\":{\"value\":\"mock\"}}");
+        final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
+        server.start();
+
+        final VaultConfig vaultConfig = new VaultConfig()
+                .address("https://127.0.0.1:9998")
+                .token("mock_token")
+                .sslConfig(new SslConfig().trustStoreResource("/keystore.jks").build())
+                .build();
+        final Vault vault = new Vault(vaultConfig);
+        final LogicalResponse response = vault.logical().read("secret/hello");
+
+        VaultTestUtils.shutdownMockVault(server);
+    }
+
+    @Test
+    public void testSslJks_loadTrustStoreFromFile() throws Exception {
+        // Unfortunately, it's hard to build a filesystem path to the "src/test/resources/keystore.jks" file, because
+        // the current working directory might vary depend on how these tests are being run.  So even though it's a
+        // hassle, the most reliable approach is to lookup this file as a classpath resource, and copy it to a
+        // known location (i.e. the system temp directory).
+        final InputStream inputStream = this.getClass().getResourceAsStream("/keystore.jks");
+        final String tempDirectoryPath = System.getProperty("java.io.tmpdir");
+        final File jks = new File(tempDirectoryPath + File.separator + "keystore.jks");
+        final FileOutputStream outputStream = new FileOutputStream(jks);
+        final byte[] buffer = new byte[1024];
+        int noOfBytes = 0;
+        while ((noOfBytes = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, noOfBytes);
+        }
+
+        final MockVault mockVault = new MockVault(200, "{\"data\":{\"value\":\"mock\"}}");
+        final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
+        server.start();
+
+        final VaultConfig vaultConfig = new VaultConfig()
+                .address("https://127.0.0.1:9998")
+                .token("mock_token")
+                .sslConfig(new SslConfig().trustStoreFile(jks).build())
+                .build();
+        final Vault vault = new Vault(vaultConfig);
+        final LogicalResponse response = vault.logical().read("secret/hello");
+
+        VaultTestUtils.shutdownMockVault(server);
+    }
+
+    @Test
+    public void testSslJks_loadTrustStoreFromMemory() throws Exception {
+        final MockVault mockVault = new MockVault(200, "{\"data\":{\"value\":\"mock\"}}");
+        final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
+        server.start();
+
+        final KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        trustStore.load(this.getClass().getResourceAsStream("/keystore.jks"), "password".toCharArray());
+
+        final VaultConfig vaultConfig = new VaultConfig()
+                .address("https://127.0.0.1:9998")
+                .token("mock_token")
+                .sslConfig(new SslConfig().trustStore(trustStore).build())
+                .build();
+        final Vault vault = new Vault(vaultConfig);
+        final LogicalResponse response = vault.logical().read("secret/hello");
+
+        VaultTestUtils.shutdownMockVault(server);
+    }
+
+    @Test
+    public void testSslJks_loadKeyStoreAndTrustStore() throws Exception {
+        final MockVault mockVault = new MockVault(200, "{\"data\":{\"value\":\"mock\"}}");
+        final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
+        server.start();
+
+        final VaultConfig vaultConfig = new VaultConfig()
+                .address("https://127.0.0.1:9998")
+                .token("mock_token")
+                .sslConfig(new SslConfig().trustStoreResource("/keystore.jks").keyStoreResource("/keystore.jks", "password").build())
                 .build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().read("secret/hello");

@@ -21,7 +21,7 @@ public class AuthBackendUserPassTests {
     @BeforeClass
     public static void setupClass() throws IOException, InterruptedException {
         container.initAndUnsealVault();
-        container.setupUserPassBackend();
+        container.setupBackendUserPass();
     }
 
     /** Test Authentication with new userpass auth backend */

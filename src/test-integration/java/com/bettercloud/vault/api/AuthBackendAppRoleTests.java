@@ -24,7 +24,7 @@ public class AuthBackendAppRoleTests {
     @BeforeClass
     public static void setupClass() throws IOException, InterruptedException, VaultException {
         container.initAndUnsealVault();
-        container.setupAppRoleBackend();
+        container.setupBackendAppRole();
 
         final Vault vault = container.getRootVault();
 

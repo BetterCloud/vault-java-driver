@@ -20,7 +20,7 @@ public class AuthBackendAppIdTests {
     @BeforeClass
     public static void setupClass() throws IOException, InterruptedException {
         container.initAndUnsealVault();
-        container.setupAppIdBackend();
+        container.setupBackendAppId();
     }
 
     /** Test Authentication with app-id auth backend */

@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.security.KeyFactory;
 import java.security.KeyManagementException;
@@ -47,9 +48,12 @@ public class SslConfig implements Serializable {
 
     @Getter private boolean verify;
     @Getter private transient SSLContext sslContext;
-    @Getter(AccessLevel.PROTECTED) private String pemUTF8;
-    @Getter(AccessLevel.PROTECTED) private String clientPemUTF8;
-    @Getter(AccessLevel.PROTECTED) private String clientKeyPemUTF8;
+    private transient KeyStore trustStore;
+    private transient KeyStore keyStore;
+    private String keyStorePassword;
+    @Getter(AccessLevel.PROTECTED) private String pemUTF8;  // exposed to unit tests
+    private String clientPemUTF8;
+    private String clientKeyPemUTF8;
     private Boolean verifyObject;
     private EnvironmentLoader environmentLoader;
 
@@ -90,6 +94,130 @@ public class SslConfig implements Serializable {
     public SslConfig verify(final Boolean verify) {
         this.verifyObject = verify;
         return this;
+    }
+
+    /**
+     * <p>A Java keystore, containing a client certificate that's registered with Vault's TLS Certificate auth backend.
+     * If you are not using certificate based client auth, then this field may remain un-set.</p>
+     *
+     * <p>Note that you cannot mix-and-match JKS based config with PEM based config.  If any of the keyStore or
+     * trustStore setters are used, then the {@link this#build()} method will complete ignore any PEM data that was
+     * set.</p>
+     *
+     * @param keyStore A keystore, containing a client certificate registered with Vault's TLS Certificate auth backend
+     * @param password The password needed to access the keystore (can be <code>null</code>)
+     * @return This object, with keyStore and keyStorePassword populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     */
+    public SslConfig keyStore(final KeyStore keyStore, final String password) {
+        this.keyStore = keyStore;
+        this.keyStorePassword = password;
+        return this;
+    }
+
+    /**
+     * <p>A Java keystore, containing a client certificate that's registered with Vault's TLS Certificate auth backend.
+     * If you are not using certificate based client auth, then this field may remain un-set.  This method loads the
+     * keystore from a JKS file on the filesystem.</p>
+     *
+     * <p>Note that you cannot mix-and-match JKS based config with PEM based config.  If any of the keyStore or
+     * trustStore setters are used, then the {@link this#build()} method will complete ignore any PEM data that was
+     * set.</p>
+     *
+     * @param keyStoreFile A JKS keystore file, containing a client certificate registered with Vault's TLS Certificate auth backend
+     * @param password The password needed to access the keystore (can be <code>null</code>)
+     * @return This object, with keyStore and keyStorePassword populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     * @throws VaultException
+     */
+    public SslConfig keyStoreFile(final File keyStoreFile, final String password) throws VaultException  {
+        try (final InputStream inputStream = new FileInputStream(keyStoreFile)) {
+            this.keyStore = inputStreamToKeyStore(inputStream, password);
+            this.keyStorePassword = password;
+            return this;
+        } catch (IOException e) {
+            throw new VaultException(e);
+        }
+    }
+
+    /**
+     * <p>A Java keystore, containing a client certificate that's registered with Vault's TLS Certificate auth backend.
+     * If you are not using certificate based client auth, then this field may remain un-set.  This method loads the
+     * keystore from a classpath resource (e.g. you've bundled the JKS file into your library or application's
+     * JAR/WAR/EAR file).</p>
+     *
+     * <p>Note that you cannot mix-and-match JKS based config with PEM based config.  If any of the keyStore or
+     * trustStore setters are used, then the {@link this#build()} method will complete ignore any PEM data that was
+     * set.</p>
+     *
+     * @param classpathResource A JKS keystore file, containing a client certificate registered with Vault's TLS Certificate auth backend
+     * @param password The password needed to access the keystore (can be <code>null</code>)
+     * @return This object, with keyStore and keyStorePassword populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     * @throws VaultException
+     */
+    public SslConfig keyStoreResource(final String classpathResource, final String password) throws VaultException {
+        try (final InputStream inputStream = this.getClass().getResourceAsStream(classpathResource)) {
+            this.keyStore = inputStreamToKeyStore(inputStream, password);
+            this.keyStorePassword = password;
+            return this;
+        } catch (IOException e) {
+            throw new VaultException(e);
+        }
+    }
+
+    /**
+     * <p>A Java keystore, containing the X509 certificate used by Vault.  Used by the driver to trust SSL connections
+     * from the server using this cert.</p>
+     *
+     * <p>Note that you cannot mix-and-match JKS based config with PEM based config.  If any of the keyStore or
+     * trustStore setters are used, then the {@link this#build()} method will complete ignore any PEM data that was
+     * set.</p>
+     *
+     * @param trustStore A truststore, containing the Vault server's X509 certificate
+     * @return This object, with trustStore populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     */
+    public SslConfig trustStore(final KeyStore trustStore) {
+        this.trustStore = trustStore;
+        return this;
+    }
+
+    /**
+     * <p>A Java keystore, containing the X509 certificate used by Vault.  Used by the driver to trust SSL connections
+     * from the server using this cert.  This method load the truststore from a JKS file on the filesystem.</p>
+     *
+     * <p>Note that you cannot mix-and-match JKS based config with PEM based config.  If any of the keyStore or
+     * trustStore setters are used, then the {@link this#build()} method will complete ignore any PEM data that was
+     * set.</p>
+     *
+     * @param trustStoreFile A JKS truststore file, containing the Vault server's X509 certificate
+     * @return This object, with trustStore populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     */
+    public SslConfig trustStoreFile(final File trustStoreFile) throws VaultException  {
+        try (final InputStream inputStream = new FileInputStream(trustStoreFile)) {
+            this.trustStore = inputStreamToKeyStore(inputStream, null);
+            return this;
+        } catch (IOException e) {
+            throw new VaultException(e);
+        }
+    }
+
+    /**
+     * <p>A Java keystore, containing the X509 certificate used by Vault.  Used by the driver to trust SSL connections
+     * from the server using this cert.  This method load the truststore from a classpath resource (e.g. you've bundled
+     * the JKS file into your library or application's JAR/WAR/EAR file).</p>
+     *
+     * <p>Note that you cannot mix-and-match JKS based config with PEM based config.  If any of the keyStore or
+     * trustStore setters are used, then the {@link this#build()} method will complete ignore any PEM data that was
+     * set.</p>
+     *
+     * @param classpathResource A JKS truststore file, containing the Vault server's X509 certificate
+     * @return This object, with trustStore populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     */
+    public SslConfig trustStoreResource(final String classpathResource) throws VaultException {
+        try (final InputStream inputStream = this.getClass().getResourceAsStream(classpathResource)) {
+            this.trustStore = inputStreamToKeyStore(inputStream, null);
+            return this;
+        } catch (IOException e) {
+            throw new VaultException(e);
+        }
     }
 
     /**
@@ -332,31 +460,77 @@ public class SslConfig implements Serializable {
                 throw new VaultException(e);
             }
         }
-        if (this.verify == true) {
-            // TODO:  Add support for building this SSLContext from JKS data instead
-            this.sslContext = buildSslContextFromPem();
-        }
+        buildSsl();
         return this;
     }
 
     /**
-     * <p>Constructs an {@link SSLContext} object to be passed to the {@link com.bettercloud.vault.rest.Rest} layer,
+     * <p>Constructs the {@link this#sslContext} member field, if SSL verification is enabled and any JKS or PEM-based
+     * data was populated.  This method is broken off from {@link this#build()}, because the same process must
+     * occur both at build time, and when an <code>SslConfig</code> instance is deserialized (see
+     * {@link this#readObject(ObjectInputStream)}.</p>
+     *
+     * <p>This SSLContext object will be passed to the {@link com.bettercloud.vault.rest.Rest} layer,
      * where it will be used when establishing an HTTPS connection to provide access to trusted server X509
      * certificates (as well as client certificates and private keys when TLS client auth is used).</p>
      *
-     * <p>This logic constructs a JKS keystore and/or truststore programmatically, from X509 certificates and
-     * RSA private keys in PEM format.  The truststore contains the server's certificate, to be used for basic SSL
-     * cert verification.  If a client certificate and private key are provided for client auth, then they will be
-     * stored in the keystore.  Either the keystore or truststore can be null if the relevant PEM data was not
-     * provided.</p>
+     * @throws VaultException
+     */
+    private void buildSsl() throws VaultException {
+        if (verify == true) {
+            if (keyStore != null || trustStore != null) {
+                this.sslContext = buildSslContextFromJks();
+            } else if (pemUTF8 != null || clientPemUTF8 != null || clientKeyPemUTF8 != null) {
+                this.sslContext = buildSslContextFromPem();
+            }
+        }
+    }
+
+    /**
+     * Constructs an SSLContext, when keystore and/or truststore data was provided in JKS format.
+     *
+     * @return An SSLContext, constructed with the JKS data supplied.
+     * @throws VaultException
+     */
+    private SSLContext buildSslContextFromJks() throws VaultException {
+        TrustManager[] trustManagers = null;
+        if (trustStore != null) {
+            try {
+                final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                trustManagerFactory.init(trustStore);
+                trustManagers = trustManagerFactory.getTrustManagers();
+            } catch (NoSuchAlgorithmException | KeyStoreException e) {
+                throw new VaultException(e);
+            }
+        }
+
+        KeyManager[] keyManagers = null;
+        if (keyStore != null) {
+            try {
+                final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                keyManagerFactory.init(keyStore, keyStorePassword == null ? null : keyStorePassword.toCharArray());
+                keyManagers = keyManagerFactory.getKeyManagers();
+            } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException e) {
+                throw new VaultException(e);
+            }
+        }
+
+        try {
+            final SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(keyManagers, trustManagers, null);
+            return sslContext;
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            throw new VaultException(e);
+        }
+    }
+
+    /**
+     * Constructs an SSLContext, when server and/or client cert data was provided in JKS format.
      *
      * @return An SSLContext, constructed with the PEM data supplied.
      * @throws VaultException
      */
     private SSLContext buildSslContextFromPem() throws VaultException {
-        if (pemUTF8 == null && clientPemUTF8 == null) {
-            return null;
-        }
         try {
             final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 
@@ -410,6 +584,28 @@ public class SslConfig implements Serializable {
     }
 
     /**
+     * <p>A utility method for loading a JKS formatted {@link KeyStore} from an {@link InputStream}, presumably
+     * representing a file on the filesystem or a classpath resource.</p>
+     *
+     * <p>Note that this method does not close the InputStream when finished.  That responsibility falls to
+     * the caller.</p>
+     *
+     * @param inputStream An InputStream of JKS file content
+     * @param password The password, if any, needed to open this JKS file (can be <code>null</code>)
+     * @return
+     * @throws VaultException
+     */
+    private KeyStore inputStreamToKeyStore(final InputStream inputStream, final String password) throws VaultException {
+        try {
+            final KeyStore keyStore = KeyStore.getInstance("JKS");
+            keyStore.load(inputStream, password == null ? null : password.toCharArray());
+            return keyStore;
+        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
+            throw new VaultException(e);
+        }
+    }
+
+    /**
      * A utility method for extracting content from an {@link InputStream} into a UTF-8 encoded {@link String}.  Used
      * by the various methods in this class that load PEM data from files or classpath resources.
      *
@@ -429,4 +625,29 @@ public class SslConfig implements Serializable {
         in.close();
         return utf8.toString();
     }
+
+    /**
+     * <p>There was a community request to make {@link Vault} and its config class serializable
+     * (https://github.com/BetterCloud/vault-java-driver/pull/51).  However, this SslConfig class now contains
+     * a member field of type {@link SSLContext}, which cannot be serialized.</p>
+     *
+     * <p>Therefore, that member field is declared <code>transient</code>.  This means that if an SslConfig object is
+     * serialized, its member field will be <code>null</code> after deserialization.  Fortunately, the Java
+     * deserialization process provides this lifecycle hook, which is used here to re-populate the
+     * {@link this#sslContext} member field.</p>
+     *
+     * @see Serializable
+     *
+     * @param in
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {//NOPMD
+        try {
+            buildSsl();
+        } catch (VaultException e) {
+            throw new IOException(e);
+        }
+    }
+
 }

@@ -7,8 +7,8 @@
   "listener": {
     "tcp": {
       "address" : "127.0.0.1:8200",
-      "tls_cert_file" : "/vault/config/ssl/root-ca.crt",
-      "tls_key_file" : "/vault/config/ssl/private.key"
+      "tls_cert_file" : "/vault/config/ssl/cert.pem",
+      "tls_key_file" : "/vault/config/ssl/privatekey.pem"
     }
   },
   "default_lease_ttl" : "168h",
