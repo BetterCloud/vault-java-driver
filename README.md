@@ -220,29 +220,31 @@ may require modifications in your code to migrate.  Changes to the minor version
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
 * **3.0.0 (IN DEVELOPMENT)**: This is a breaking-change release, with several updates.
-  * Adds support for writing arbitrary objects to Vault, instead of just strings (i.e. the 
-    `com.bettercloud.vault.api.Logical.write(...)` method now accepts a `Map<String. Object>` rather than a 
-    `Map<String, String>`).
-  * Refactors the `VaultConfig` class, forcing use of the builder pattern and breaking off SSL-related 
-    config into a separate `SslConfig` class.
-  * Refactors the `Auth.createToken()` method, to encapsulate the possible options within a config object 
-    rather than having the method signature contain 8 optional arguments.
-  * Adds support for authenticating with the TLS Certificate auth backend.
-  * Updates SSL support in general, allowing users to configure the driver with Java-friendly JKS keystore 
-    and truststore files (in addition to continuing to support Vault-friendly PEM format).
-  * Implements the `/v1/auth/token/lookup-self` endpoint.
-  * Supports creating tokens against a role, and refactors the `com.bettercloud.vault.api.Auth.createToken(...)` 
-    method to accept an options object (deprecating the previous version of the method, which took all of those 
-    options as separate parameters).
-  * Includes the REST response body in `VaultException` messages for basic read and write operations.
-  * Makes numerous classes implement `Serializable`.
-  * Major re-vamp of the integration test suite.
+  * **API changes**:
+    * Adds support for writing arbitrary objects to Vault, instead of just strings (i.e. the 
+      `com.bettercloud.vault.api.Logical.write(...)` method now accepts a `Map<String. Object>` rather than a 
+      `Map<String, String>`).
+    * Refactors the `VaultConfig` class, forcing use of the builder pattern and breaking off SSL-related 
+      config into a separate `SslConfig` class.
+    * Refactors the `Auth.createToken()` method, to encapsulate the possible options within a config object 
+      rather than having the method signature contain 8 optional arguments.
+  * **SSL and Auth Backend support**:
+    * Adds support for authenticating with the TLS Certificate auth backend.
+    * Updates SSL support in general, allowing users to configure the driver with Java-friendly JKS keystore 
+      and truststore files (in addition to continuing to support Vault-friendly PEM format).
+    * Implements the `/v1/auth/token/lookup-self` endpoint.
+    * Supports creating tokens against a role.
+  * **Major re-vamp of the integration test suite**:
     * The tests now use the [TestContainers](https://www.testcontainers.org/) library to setup and launch a 
       Vault server instance from within a Docker container, in a completely automated manner.  You no longer have to 
       manually configure and run a Vault server to use the test suite!
     * The tests are now going against a regular Vault server, rather than one running in "dev mode".  Therefore, 
       they are now able to use HTTPS connections rather than plain HTTP.
     * Upgrades tests to use Java 8 (although the library itself still targets Java 7).
+  * **Misc / quality-of-life**:
+    * Includes the REST response body in `VaultException` messages for basic read and write operations.
+    * Makes numerous classes implement `Serializable`.
+    * Upgrades the project to Gradle 4.0.
     
 * **2.0.0**: This is breaking-change release, with numerous deprecated items cleaned up.
   * Adds support for authentication via the AppRole auth backend.  

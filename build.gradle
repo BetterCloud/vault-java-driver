@@ -34,7 +34,7 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.3'
+    gradleVersion = '4.0'
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
