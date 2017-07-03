@@ -412,9 +412,10 @@ public class Rest {
      * @throws RestException If the URL cannot be successfully parsed, or if there are errors processing an SSL cert, etc.
      */
     private URLConnection initURLConnection(final String urlString, final String method) throws RestException {
+        URLConnection connection = null;
         try {
             final URL url = new URL(urlString);
-            final URLConnection connection = url.openConnection();
+            connection = url.openConnection();
 
             // Timeout settings, if applicable
             if (connectTimeoutSeconds != null) {
@@ -452,6 +453,10 @@ public class Rest {
             return connection;
         } catch (Exception e) {
             throw new RestException(e);
+        } finally {
+            if (connection != null && connection instanceof HttpURLConnection) {
+                ((HttpURLConnection) connection).disconnect();
+            }
         }
     }
 
