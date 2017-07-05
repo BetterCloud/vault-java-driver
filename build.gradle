@@ -4,7 +4,7 @@ apply plugin: 'signing'
 
 group 'com.bettercloud'
 archivesBaseName = 'vault-java-driver'
-version '3.0.0-SNAPSHOT'
+version '3.0.0'
 ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 
 compileJava {
@@ -74,7 +74,7 @@ sourceSets {
 }
 
 task unitTest(type: Test) {
-    testClassesDir = sourceSets.unitTests.output.classesDir
+    testClassesDirs = sourceSets.unitTests.output.classesDirs
     classpath = sourceSets.unitTests.runtimeClasspath
     testLogging {
         events "passed", "skipped", "failed"
@@ -82,7 +82,7 @@ task unitTest(type: Test) {
 }
 
 task integrationTest(type: Test) {
-    testClassesDir = sourceSets.integrationTests.output.classesDir
+    testClassesDirs= sourceSets.integrationTests.output.classesDirs
     classpath = sourceSets.integrationTests.runtimeClasspath
     testLogging {
         events "passed", "skipped", "failed"
