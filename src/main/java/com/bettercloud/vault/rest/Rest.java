@@ -213,7 +213,7 @@ public class Rest {
      * @param sslVerification Whether or not to verify the SSL certificate used by the server with HTTPS connections.  Default is <code>true</code>.
      * @return This object, with sslVerification populated, ready for other builder-pattern config methods or an HTTP verb method
      */
-    public Rest sslVerification(final Boolean sslVerification) throws RestException {
+    public Rest sslVerification(final Boolean sslVerification) {
         this.sslVerification = sslVerification;
         return this;
     }
@@ -225,7 +225,7 @@ public class Rest {
      * client auth is used).</p>
      *
      * @param sslContext An SSLContext object, constructed by SslConfig
-     * @return
+     * @return This object, with sslContext populated, ready for other builder-pattern config methods or an HTTP verb method
      */
     public Rest sslContext(final SSLContext sslContext) {
         this.sslContext = sslContext;

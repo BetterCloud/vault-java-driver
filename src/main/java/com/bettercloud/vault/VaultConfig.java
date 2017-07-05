@@ -8,7 +8,7 @@ import java.io.Serializable;
  * <p>A container for the configuration settings needed to initialize a <code>Vault</code> driver instance.</p>
  *
  * <p>Construct instances of this class using a builder pattern, calling setter methods for each value and then
- * terminating with a call to {@link this#build()}:</p>
+ * terminating with a call to build():</p>
  *
  * <blockquote>
  * <pre>{@code
@@ -49,7 +49,7 @@ public class VaultConfig implements Serializable {
      * <code>protected</code> access level).</p>
      *
      * @param environmentLoader An environment variable loader implementation (presumably a mock)
-     * @return This object, with environmentLoader populated, ready for additional builder-pattern method calls or else finalization with the {@link this#build()} method
+     * @return This object, with environmentLoader populated, ready for additional builder-pattern method calls or else finalization with the build() method
      */
     protected VaultConfig environmentLoader(final EnvironmentLoader environmentLoader) {
         this.environmentLoader = environmentLoader;

@@ -27,7 +27,7 @@ import java.util.UUID;
 public class Auth {
 
     /**
-     * <p>A container for all of the options that can be passed to the {@link this#createToken(TokenRequest)} method, to
+     * <p>A container for all of the options that can be passed to the createToken(TokenRequest) method, to
      * avoid that method having an excessive number of parameters (with <code>null</code> typically passed to most
      * of them).</p>
      *
@@ -37,82 +37,93 @@ public class Auth {
      */
     public static class TokenRequest implements Serializable {
 
-        /** (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID. */
         @Getter private UUID id;
-
-        /** (optional) A list of policies for the token. This must be a subset of the policies belonging to the token making the request, unless root. If not specified, defaults to all the policies of the calling token. */
         @Getter private List<String> polices;
-
-        /** (optional) A map of string to string valued metadata. This is passed through to the audit backends. */
         @Getter private Map<String, String> meta;
-
-        /** (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent. */
         @Getter private Boolean noParent;
-
-        /** (optional) If <code>true</code> the default policy will not be a part of this token's policy set. */
         @Getter private Boolean noDefaultPolicy;
-
-        /** (optional) The TTL period of the token, provided as "1h", where hour is the largest suffix. If not provided, the token is valid for the default lease TTL, or indefinitely if the root policy is used. */
         @Getter private String ttl;
-
-        /** (optional) The display name of the token. Defaults to "token". */
         @Getter private String displayName;
-
-        /** (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses. */
         @Getter private Long numUses;
-
-        /** (optional) The role the token will be created with. Default is no role. */
         @Getter private String role;
 
-        /** {@link #id} */
+        /**
+         * @param id (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
+         * @return This object, with its id field populated
+         */
         public TokenRequest id(final UUID id) {
             this.id = id;
             return this;
         }
 
-        /** {@link #polices} */
+        /**
+         * @param polices (optional) A list of policies for the token. This must be a subset of the policies belonging to the token
+         * @return This object, with its polices field populated
+         */
         public TokenRequest polices(final List<String> polices) {
             this.polices = polices;
             return this;
         }
 
-        /** {@link #meta} */
+        /**
+         * @param meta (optional) A map of string to string valued metadata. This is passed through to the audit backends.
+         * @return This object, with its meta field populated
+         */
         public TokenRequest meta(final Map<String, String> meta) {
             this.meta = meta;
             return this;
         }
 
-        /** {@link #noParent} */
+        /**
+         * @param noParent (optional) If true and set by a root caller, the token will not have the parent token of the caller. This creates a token with no parent.
+         * @return This object, with its noParent field populated
+         */
         public TokenRequest noParent(final Boolean noParent) {
             this.noParent = noParent;
             return this;
         }
 
-        /** {@link #noDefaultPolicy} */
+        /**
+         * @param noDefaultPolicy (optional) If <code>true</code> the default policy will not be a part of this token's policy set.
+         * @return This object, with its noDefaultPolicy field populated
+         */
         public TokenRequest noDefaultPolicy(final Boolean noDefaultPolicy) {
             this.noDefaultPolicy = noDefaultPolicy;
             return this;
         }
 
-        /** {@link #ttl} */
+        /**
+         * @param ttl (optional) The TTL period of the token, provided as "1h", where hour is the largest suffix. If not provided, the token is valid for the default lease TTL, or indefinitely if the root policy is used.
+         * @return This object, with its ttl field populated
+         */
         public TokenRequest ttl(final String ttl) {
             this.ttl = ttl;
             return this;
         }
 
-        /** {@link #displayName} */
+        /**
+         *
+         * @param displayName (optional) The display name of the token. Defaults to "token".
+         * @return This object, with its displayName field populated
+         */
         public TokenRequest displayName(final String displayName) {
             this.displayName = displayName;
             return this;
         }
 
-        /** {@link #numUses} */
+        /**
+         * @param numUses (optional) The maximum uses for the given token. This can be used to create a one-time-token or limited use token. Defaults to 0, which has no limit to the number of uses.
+         * @return This object, with its numUses field populated
+         */
         public TokenRequest numUses(final Long numUses) {
             this.numUses = numUses;
             return this;
         }
 
-        /** {@link #role} */
+        /**
+         * @param role (optional) The role the token will be created with. Default is no role.
+         * @return This object, with its role field populated
+         */
         public TokenRequest role(final String role) {
             this.role = role;
             return this;
@@ -138,6 +149,10 @@ public class Auth {
      * final String token = response.getAuthClientToken();
      * }</pre>
      * </blockquote>
+     *
+     * @param tokenRequest A container of optional configuration parameters
+     * @return The auth token, with additional response metadata
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse createToken(final TokenRequest tokenRequest) throws VaultException {
         int retryCount = 0;
@@ -227,7 +242,7 @@ public class Auth {
      * @param path The path on which the authentication is performed (e.g. <code>auth/app-id/login</code>)
      * @param appId The app-id used for authentication
      * @param userId The user-id used for authentication
-     * @return The auth token
+     * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     @Deprecated
@@ -289,7 +304,7 @@ public class Auth {
      * @param path The path on which the authentication is performed (e.g. <code>auth/approle/login</code>)
      * @param roleId The role-id used for authentication
      * @param secretId The secret-id used for authentication
-     * @return The auth token
+     * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByAppRole(final String path, final String roleId, final String secretId) throws VaultException {
@@ -349,7 +364,7 @@ public class Auth {
      *
      * @param username The username used for authentication
      * @param password The password used for authentication
-     * @return The auth token
+     * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByUserPass(final String username, final String password) throws VaultException {
@@ -408,7 +423,7 @@ public class Auth {
      * </blockquote>
      *
      * @param githubToken The app-id used for authentication
-     * @return The auth token
+     * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByGithub(final String githubToken) throws VaultException {
@@ -478,7 +493,7 @@ public class Auth {
      * }</pre>
      * </blockquote>
      *
-     * @return The auth token
+     * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByCert() throws VaultException {

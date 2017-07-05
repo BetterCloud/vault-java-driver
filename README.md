@@ -30,7 +30,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    compile('com.bettercloud:vault-java-driver:2.0.0')
+    compile('com.bettercloud:vault-java-driver:3.0.0')
 }
 ```
 
@@ -39,7 +39,7 @@ Maven:
 <dependency>
     <groupId>com.bettercloud</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>2.0.0</version>
+    <version>3.0.0</version>
 </dependency>
 ```
 
@@ -219,7 +219,7 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **3.0.0 (IN DEVELOPMENT)**: This is a breaking-change release, with several updates.
+* **3.0.0**: This is a breaking-change release, with several updates.
   * **API changes**:
     * Adds support for writing arbitrary objects to Vault, instead of just strings (i.e. the 
       `com.bettercloud.vault.api.Logical.write(...)` method now accepts a `Map<String. Object>` rather than a 
