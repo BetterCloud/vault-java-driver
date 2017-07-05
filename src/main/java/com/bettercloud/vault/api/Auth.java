@@ -368,13 +368,34 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByUserPass(final String username, final String password) throws VaultException {
+        return loginByUserPass("userpass", username, password);
+    }
+    
+    /**
+     * <p>Basic login operation to authenticate to a Username &amp; Password backend at any path (for example ldap).  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().loginByUserPass("ldap", "test", "password");
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param path The authentication backend mount path
+     * @param username The username used for authentication
+     * @param password The password used for authentication
+     * @return The auth token
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse loginByUserPass(final String path, final String username, final String password) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
                 // HTTP request to Vault
                 final String requestJson = Json.object().add("password", password).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/auth/userpass/login/" + username)
+                        .url(config.getAddress() + "/v1/auth/" + path + "/login/" + username)
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
