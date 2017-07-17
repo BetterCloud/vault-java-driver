@@ -154,8 +154,33 @@ public class Auth {
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
-    public AuthResponse createToken(final TokenRequest tokenRequest) throws VaultException {
+    public AuthResponse createToken(final TokenRequest tokenRequest) throws VaultException{
+    	return createToken(tokenRequest, "token");
+    }
+    
+    /**
+     * <p>Operation to create an authentication token.  Relies on another token already being present in
+     * the <code>VaultConfig</code> instance.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final VaultConfig config = new VaultConfig().address(...).token(...).build();
+     * final Vault vault = new Vault(config);
+     * final AuthResponse response = vault.auth().createToken(new TokenRequest().withTtl("1h"));
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param tokenRequest A container of optional configuration parameters
+     * @param tokenAuthMount The mount name of the token authentication back end.  If null, defaults to "token"
+     * @return The auth token, with additional response metadata
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse createToken(final TokenRequest tokenRequest, final String tokenAuthMount) throws VaultException {
         int retryCount = 0;
+        
+        final String mount = tokenAuthMount != null ? tokenAuthMount : "token";
         while (true) {
             try {
                 // Parse parameters to JSON
@@ -178,8 +203,8 @@ public class Auth {
                 if (tokenRequest.displayName != null) jsonObject.add("display_name", tokenRequest.displayName);
                 if (tokenRequest.numUses != null) jsonObject.add("num_uses", tokenRequest.numUses);
                 final String requestJson = jsonObject.toString();
-
-                final StringBuilder urlBuilder = new StringBuilder(config.getAddress()).append("/v1/auth/token/create");//NOPMD
+                
+                final StringBuilder urlBuilder = new StringBuilder(config.getAddress()).append("/v1/auth/" + mount + "/create");//NOPMD
                 if (tokenRequest.role != null) {
                     urlBuilder.append("/").append(tokenRequest.role);
                 }
@@ -368,13 +393,36 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByUserPass(final String username, final String password) throws VaultException {
+    	return loginByUserPass(username, password, "userpass");
+    }
+    
+    /**
+     * <p>Basic login operation to authenticate to a Username &amp; Password backend.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().loginByUserPass("test", "password");
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param username The username used for authentication
+     * @param password The password used for authentication
+     * @param userpassAuthMount The mount name of the userpass authentication back end.  If null, defaults to "userpass"
+     * @return The auth token, with additional response metadata
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse loginByUserPass(final String username, final String password, final String userpassAuthMount) throws VaultException {
         int retryCount = 0;
+        
+        final String mount = userpassAuthMount != null ? userpassAuthMount : "userpass";
         while (true) {
             try {
                 // HTTP request to Vault
                 final String requestJson = Json.object().add("password", password).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/auth/userpass/login/" + username)
+                        .url(config.getAddress() + "/v1/auth/" + mount + "/login/" + username)
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -411,6 +459,25 @@ public class Auth {
         }
     }
 
+    /**
+    * <p>Basic login operation to authenticate to an github backend.  Example usage:</p>
+    *
+    * <blockquote>
+    * <pre>{@code
+    * final AuthResponse response = vault.auth().loginByGithub("githubToken");
+    *
+    * final String token = response.getAuthClientToken();
+    * }</pre>
+    * </blockquote>
+    *
+    * @param githubToken The app-id used for authentication
+    * @return The auth token, with additional response metadata
+    * @throws VaultException If any error occurs, or unexpected response received from Vault
+    */
+   public AuthResponse loginByGithub(final String githubToken) throws VaultException {
+	   return loginByGithub(githubToken, "github");
+   }
+    
      /**
      * <p>Basic login operation to authenticate to an github backend.  Example usage:</p>
      *
@@ -423,20 +490,23 @@ public class Auth {
      * </blockquote>
      *
      * @param githubToken The app-id used for authentication
+     * @param githubAuthMount The mount name of the github authentication back end.  If null, defaults to "github"
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
-    public AuthResponse loginByGithub(final String githubToken) throws VaultException {
+    public AuthResponse loginByGithub(final String githubToken, final String githubAuthMount) throws VaultException {
 
         // TODO:  Add (optional?) integration test coverage
 
         int retryCount = 0;
+        
+        final String mount = githubAuthMount != null ? githubAuthMount : "github";
         while (true) {
             try {
                 // HTTP request to Vault
                 final String requestJson = Json.object().add("token", githubToken).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/auth/github/login")
+                        .url(config.getAddress() + "/v1/auth/" + mount + "/login")
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -497,11 +567,41 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByCert() throws VaultException {
+    	return loginByCert("cert");
+    }
+    
+    /**
+     * <p>Basic login operation to authenticate using Vault's TLS Certificate auth backend.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final SslConfig sslConfig = new SslConfig()
+     *                                  .keystore("keystore.jks")
+     *                                  .truststore("truststore.jks")
+     *                                  .build();
+     * final VaultConfig vaultConfig = new VaultConfig()
+     *                                  .address("https://127.0.0.1:8200")
+     *                                  .sslConfig(sslConfig)
+     *                                  .build();
+     * final Vault vault = new Vault(vaultConfig);
+     *
+     * final AuthResponse response = vault.auth().loginByCert();
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param The mount name of the cert authentication back end.  If null, defaults to "cert"
+     * @return The auth token, with additional response metadata
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse loginByCert(final String certAuthMount) throws VaultException {
         int retryCount = 0;
+        
+        final String mount = certAuthMount != null ? certAuthMount : "cert";
         while (true) {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/auth/cert/login")
+                        .url(config.getAddress() + "/v1/auth/" + mount + "/login")
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -558,13 +658,29 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse renewSelf(final long increment) throws VaultException {
+    	return renewSelf(increment, "token");
+    }
+    
+    /**
+     * <p>Renews the lease associated with the calling token.  This version of the method accepts a parameter to
+     * explicitly declare how long the new lease period should be (in seconds).  The Vault documentation suggests
+     * that this value may be ignored, however.</p>
+     *
+     * @param increment The number of seconds requested for the new lease lifespan
+     * @param tokenAuthMount The mount name of the token authentication back end.  If null, defaults to "token"
+     * @return The response information returned from Vault
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse renewSelf(final long increment, final String tokenAuthMount) throws VaultException {
         int retryCount = 0;
+        
+        final String mount = tokenAuthMount != null ? tokenAuthMount : "token";
         while (true) {
             try {
                 // HTTP request to Vault
                 final String requestJson = Json.object().add("increment", increment).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/auth/token/renew-self")
+                        .url(config.getAddress() + "/v1/auth/" + mount + "/renew-self")
                         .header("X-Vault-Token", config.getToken())
                         .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -603,17 +719,29 @@ public class Auth {
 
     /**
      * <p>Returns information about the current client token.</p>
-     *
+     * 
      * @return The response information returned from Vault
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public LookupResponse lookupSelf() throws VaultException {
+    	return lookupSelf("token");
+    }
+    
+    /**
+     * <p>Returns information about the current client token.</p>
+     * 
+     * @param tokenAuthMount The mount name of the token authentication back end.  If null, defaults to "token"
+     * @return The response information returned from Vault
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public LookupResponse lookupSelf(final String tokenAuthMount) throws VaultException {
         int retryCount = 0;
+        final String mount = tokenAuthMount != null ? tokenAuthMount : "token";
         while (true) {
             try {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/auth/token/lookup-self")
+                        .url(config.getAddress() + "/v1/auth/" + mount + "/lookup-self")
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
