@@ -590,7 +590,7 @@ public class Auth {
      * }</pre>
      * </blockquote>
      *
-     * @param The mount name of the cert authentication back end.  If null, defaults to "cert"
+     * @param certAuthMount The mount name of the cert authentication back end.  If null, defaults to "cert"
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
