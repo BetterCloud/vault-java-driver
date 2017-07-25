@@ -1,9 +1,6 @@
 package com.bettercloud.vault;
 
-import com.bettercloud.vault.api.Auth;
-import com.bettercloud.vault.api.Debug;
-import com.bettercloud.vault.api.Leases;
-import com.bettercloud.vault.api.Logical;
+import com.bettercloud.vault.api.*;
 import com.bettercloud.vault.api.pki.Pki;
 
 /**
@@ -136,4 +133,11 @@ public class Vault {
     public Debug debug() {
         return new Debug(vaultConfig);
     }
+
+    /**
+     * Returns the implementing class for Vault's mount operations (e.g. list mount points)
+     *
+     * @return the implementing class for Vault's mount operations (e.g. list mount points)
+     */
+    public Mounts mounts() { return new Mounts(vaultConfig); }
 }
