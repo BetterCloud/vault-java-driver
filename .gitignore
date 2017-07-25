@@ -1,9 +1,12 @@
 .gradle
 .idea
+.classpath
+.project
+.settings/
+bin/
 vault-java-driver.iml
 gradle.properties
 build
 build.gradle
 classes
 ssl/
-
