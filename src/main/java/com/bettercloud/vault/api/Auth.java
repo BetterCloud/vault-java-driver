@@ -316,7 +316,30 @@ public class Auth {
     }
 
     /**
-     * <p>Basic login operation to authenticate to an app-role backend.  Example usage:</p>
+     * <p>Basic login operation to authenticate to an app-role backend.  This version of the overloaded method assumes
+     * that the auth backend is mounted on the default path (i.e. "/v1/auth/approle").  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().loginByAppRole(9e1aede8-dcc6-a293-8223-f0d824a467ed", "9ff4b26e-6460-834c-b925-a940eddb6880");
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param roleId The role-id used for authentication
+     * @param secretId The secret-id used for authentication
+     * @return The auth token, with additional response metadata
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse loginByAppRole(final String roleId, final String secretId) throws VaultException {
+        return loginByAppRole("approle", roleId, secretId);
+    }
+
+    /**
+     * <p>Basic login operation to authenticate to an app-role backend.  This version of the overloaded method
+     * requires you to explicitly specify the path on which the auth backend is mounted, following the "/v1/auth/"
+     * prefix.  Example usage:</p>
      *
      * <blockquote>
      * <pre>{@code
@@ -326,7 +349,16 @@ public class Auth {
      * }</pre>
      * </blockquote>
      *
-     * @param path The path on which the authentication is performed (e.g. <code>auth/approle/login</code>)
+     * NOTE:  I hate that this method takes the custom mount path as its first parameter, while all of the other
+     *        methods in this class take it as the last parameter (a better practice).  I just didn't think about it
+     *        during code review.  Now it's difficult to deprecate this, since a version of the method with path as
+     *        the final parameter would have the same method signature.
+     *
+     *        I may or may not change this in some future breaking-change major release, especially if we keep adding
+     *        similar overloaded methods elsewhere and need the global consistency.  At any rate, going forward no new
+     *        methods should take a custom path as the first parameter.
+     *
+     * @param path The path on which the authentication is performed, following the "/v1/auth/" prefix (e.g. "approle")
      * @param roleId The role-id used for authentication
      * @param secretId The secret-id used for authentication
      * @return The auth token, with additional response metadata
