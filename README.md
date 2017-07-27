@@ -49,7 +49,7 @@ The `com.bettercloud.vault.VaultConfig` class is used to initialize a driver ins
 In the most basic use cases, where you are only supplying a Vault server address and perhaps a root token, there
 are convenience constructor methods available:
 ```
-final VaultConfig config = new VaultConfig
+final VaultConfig config = new VaultConfig()
                                   .address("http://127.0.0.1:8200")
                                   .token("3c9fd6be-7bc2-9d1f-6fb3-cd746c0fc4e8")
                                   .build();
