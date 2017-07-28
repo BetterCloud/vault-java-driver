@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.bettercloud.vault.response.AuthResponse;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -27,9 +28,16 @@ public class LogicalTests {
     @ClassRule
     public static final VaultContainer container = new VaultContainer();
 
+    private static String NONROOT_TOKEN;
+
     @BeforeClass
-    public static void setupClass() throws IOException, InterruptedException {
+    public static void setupClass() throws IOException, InterruptedException, VaultException {
         container.initAndUnsealVault();
+        container.setupBackendUserPass();
+
+        final Vault vault = container.getVault();
+        final AuthResponse response = vault.auth().loginByUserPass(VaultContainer.USER_ID, VaultContainer.PASSWORD);
+        NONROOT_TOKEN = response.getAuthClientToken();
     }
 
     /**
@@ -110,7 +118,7 @@ public class LogicalTests {
         expectedEx.expect(VaultException.class);
         expectedEx.expectMessage("permission denied");
 
-        final Vault vault = container.getVault();
+        final Vault vault = container.getVault(NONROOT_TOKEN);
         vault.logical().read("secret/null");
     }
 
@@ -124,7 +132,7 @@ public class LogicalTests {
         expectedEx.expect(VaultException.class);
         expectedEx.expectMessage("permission denied");
 
-        final Vault vault = container.getVault();
+        final Vault vault = container.getVault(NONROOT_TOKEN);
         vault.logical().write("secret/null", new HashMap<String, Object>() {{ put("value", null); }});
     }
 
@@ -138,7 +146,7 @@ public class LogicalTests {
         expectedEx.expect(VaultException.class);
         expectedEx.expectMessage("permission denied");
 
-        final Vault vault = container.getVault();
+        final Vault vault = container.getVault(NONROOT_TOKEN);
         vault.logical().delete("secret/null");
     }
 
@@ -152,7 +160,7 @@ public class LogicalTests {
         expectedEx.expect(VaultException.class);
         expectedEx.expectMessage("permission denied");
 
-        final Vault vault = container.getVault();
+        final Vault vault = container.getVault(NONROOT_TOKEN);
         vault.logical().list("secret/null");
     }
 
