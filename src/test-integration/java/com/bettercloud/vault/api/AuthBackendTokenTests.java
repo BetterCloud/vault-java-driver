@@ -90,4 +90,22 @@ public class AuthBackendTokenTests {
         assertTrue(lookupResponse.getTTL()<=3600);
     }
 
+    /** Tests token revoke-self for the token auth backend. */
+    @Test(expected = VaultException.class)
+    public void testRevokeSelf() throws VaultException, UnsupportedEncodingException {
+        // Generate a client token
+        final Vault authVault = container.getRootVault();
+        final AuthResponse createResponse = authVault.auth().createToken(new Auth.TokenRequest().ttl("1h"));
+        final String token = createResponse.getAuthClientToken();
+
+        assertNotNull(token);
+        assertNotSame("", token.trim());
+
+        // Revoke the clieint token
+        container.getVault(token).auth().revokeSelf();
+        // Lookup the client token
+        final Vault lookupVault = container.getVault(token);
+        lookupVault.auth().lookupSelf();
+    }
+
 }
