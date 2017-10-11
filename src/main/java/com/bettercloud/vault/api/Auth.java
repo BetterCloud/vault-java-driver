@@ -531,7 +531,7 @@ public class Auth {
     public AuthResponse loginByLDAP(final String username, final String password, final String ldapAuthMount) throws VaultException {
         final String mount = ldapAuthMount != null ? ldapAuthMount : "ldap";
         // LDAP has the same API like Username & Password backend
-        return loginByUserPass(username, password, ldapAuthMount);
+        return loginByUserPass(username, password, mount);
     }
 
     /**
