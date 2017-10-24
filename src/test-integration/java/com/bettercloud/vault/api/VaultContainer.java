@@ -15,6 +15,7 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.Wait;
 import org.testcontainers.shaded.org.bouncycastle.asn1.x500.X500Name;
 import org.testcontainers.shaded.org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.testcontainers.shaded.org.bouncycastle.asn1.x509.Extension;
@@ -102,7 +103,7 @@ public class VaultContainer implements TestRule {
         }
 
         // Start Docker container
-        this.container = new GenericContainer("vault:0.7.3")
+        this.container = new GenericContainer("vault:0.8.3")
                 .withClasspathResourceMapping("/config.json", CONTAINER_CONFIG_FILE, BindMode.READ_ONLY)
                 .withFileSystemBind(SSL_DIRECTORY, CONTAINER_SSL_DIRECTORY, BindMode.READ_ONLY)
                 .withCreateContainerCmdModifier(new Consumer<CreateContainerCmd>() {
@@ -113,7 +114,8 @@ public class VaultContainer implements TestRule {
                     }
                 })
                 .withNetworkMode("host")  // .withExposedPorts(8200)
-                .withCommand("vault", "server", "-config", CONTAINER_CONFIG_FILE);
+                .withCommand("vault", "server", "-config", CONTAINER_CONFIG_FILE)
+                .waitingFor(Wait.forListeningPort());
     }
 
     /**
