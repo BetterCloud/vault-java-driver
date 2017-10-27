@@ -6,6 +6,7 @@ import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.Capability;
+import org.bouncycastle.openssl.PEMReader;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -15,7 +16,7 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.containers.wait.Wait;
+import org.testcontainers.containers.wait.HttpWaitStrategy;
 import org.testcontainers.shaded.org.bouncycastle.asn1.x500.X500Name;
 import org.testcontainers.shaded.org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.testcontainers.shaded.org.bouncycastle.asn1.x509.Extension;
@@ -38,9 +39,12 @@ import org.testcontainers.shaded.org.bouncycastle.operator.bc.BcRSAContentSigner
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -49,6 +53,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -56,6 +61,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /** Sets up and exposes utilities for dealing with a Docker-hosted instance of Vault, for integration tests. */
@@ -67,16 +73,21 @@ public class VaultContainer implements TestRule {
 
     public static final String CURRENT_WORKING_DIRECTORY = System.getProperty("user.dir");
     public static final String SSL_DIRECTORY = CURRENT_WORKING_DIRECTORY + File.separator + "ssl";
-    public static final String CERT_PEMFILE = SSL_DIRECTORY + File.separator + "cert.pem";
-    public static final String PRIVATE_KEY_PEMFILE = SSL_DIRECTORY + File.separator + "privatekey.pem";
+    public static final String CERT_PEMFILE = SSL_DIRECTORY + File.separator + "root-cert.pem";
+//    public static final String CERT_PEMFILE = SSL_DIRECTORY + File.separator + "vault-cert.pem";
+
+
+    public static final String PRIVATE_KEY_PEMFILE = SSL_DIRECTORY + File.separator + "vault-privkey.pem";
     public static final String CLIENT_CERT_PEMFILE = SSL_DIRECTORY + File.separator + "client-cert.pem";
     public static final String CLIENT_PRIVATE_KEY_PEMFILE = SSL_DIRECTORY + File.separator + "client-privatekey.pem";
     public static final String CLIENT_KEYSTORE = SSL_DIRECTORY + File.separator + "keystore.jks";
     public static final String CLIENT_TRUSTSTORE = SSL_DIRECTORY + File.separator + "truststore.jks";
 
+    public static final String CONTAINER_STARTUP_SCRIPT = "/vault/config/startup.sh";
     public static final String CONTAINER_CONFIG_FILE = "/vault/config/config.json";
+    public static final String CONTAINER_OPENSSL_CONFIG_FILE = "/vault/config/ssl/openssl.conf";
     public static final String CONTAINER_SSL_DIRECTORY = "/vault/config/ssl";
-    public static final String CONTAINER_CERT_PEMFILE = CONTAINER_SSL_DIRECTORY + "/cert.pem";
+    public static final String CONTAINER_CERT_PEMFILE = CONTAINER_SSL_DIRECTORY + "/vault-cert.pem";
     public static final String CONTAINER_CLIENT_CERT_PEMFILE = CONTAINER_SSL_DIRECTORY + "/client-cert.pem";
 
     public static final int MAX_RETRIES = 5;
@@ -93,19 +104,11 @@ public class VaultContainer implements TestRule {
 
     /** Establishes a running Docker container, hosting a Vault server instance. */
     public VaultContainer() {
-
-        // Generate SSL keys and certs
-        try {
-            createVaultCertAndKey();
-            createClientCertAndKey();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        // Start Docker container
-        this.container = new GenericContainer("vault:0.8.3")
+        container = new GenericContainer("vault:0.8.3")
+                .withClasspathResourceMapping("/startup.sh", CONTAINER_STARTUP_SCRIPT, BindMode.READ_ONLY)
                 .withClasspathResourceMapping("/config.json", CONTAINER_CONFIG_FILE, BindMode.READ_ONLY)
-                .withFileSystemBind(SSL_DIRECTORY, CONTAINER_SSL_DIRECTORY, BindMode.READ_ONLY)
+                .withClasspathResourceMapping("/openssl.conf", CONTAINER_OPENSSL_CONFIG_FILE, BindMode.READ_ONLY)
+                .withFileSystemBind(SSL_DIRECTORY, CONTAINER_SSL_DIRECTORY, BindMode.READ_WRITE)
                 .withCreateContainerCmdModifier(new Consumer<CreateContainerCmd>() {
                     // TODO: Why does the compiler freak out when this anonymous class is converted to a lambda?
                     @Override
@@ -114,8 +117,19 @@ public class VaultContainer implements TestRule {
                     }
                 })
                 .withNetworkMode("host")  // .withExposedPorts(8200)
-                .withCommand("vault", "server", "-config", CONTAINER_CONFIG_FILE)
-                .waitingFor(Wait.forListeningPort());
+                .withCommand("/bin/sh " + CONTAINER_STARTUP_SCRIPT)
+                .waitingFor(
+                        new CustomWaitStrategy()
+                                .forPath("/v1/sys/seal-status")
+                                .forStatusCode(HttpURLConnection.HTTP_BAD_REQUEST) // expected response when "vault init" has not yet run
+                );
+    }
+
+    class CustomWaitStrategy extends HttpWaitStrategy {
+        @Override
+        protected Integer getLivenessCheckPort() {
+            return 8280;
+        }
     }
 
     /**
@@ -155,10 +169,28 @@ public class VaultContainer implements TestRule {
         this.unsealKey = initLines[0].replace("Unseal Key 1: ", "");
         this.rootToken = initLines[1].replace("Initial Root Token: ", "");
 
-        System.out.println("Root token: " + rootToken);
+        System.out.println("Root token: " + rootToken.toString());
 
         // Unseal the Vault server
         runCommand("vault", "unseal", "-ca-cert=" + CONTAINER_CERT_PEMFILE, unsealKey);
+
+        try {
+            createClientCertAndKey();
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (OperatorCreationException e) {
+            e.printStackTrace();
+        } catch (NoSuchProviderException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (SignatureException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -272,7 +304,6 @@ public class VaultContainer implements TestRule {
                         .address(getAddress())
                         .openTimeout(5)
                         .readTimeout(30)
-//                        .verify(false)
                         .sslConfig(new SslConfig().pemFile(new File(CERT_PEMFILE)).build())
                         .build();
         return getVault(config, MAX_RETRIES, RETRY_MILLIS);
@@ -293,7 +324,6 @@ public class VaultContainer implements TestRule {
                         .token(token)
                         .openTimeout(5)
                         .readTimeout(30)
-//                        .verify(false)
                         .sslConfig(new SslConfig().pemFile(new File(CERT_PEMFILE)).build())
                         .build();
         return new Vault(config).withRetries(MAX_RETRIES, RETRY_MILLIS);
@@ -344,10 +374,10 @@ public class VaultContainer implements TestRule {
      * @throws InterruptedException
      */
     private Container.ExecResult runCommand(final String... command) throws IOException, InterruptedException {
-        LOGGER.info("Command: {}", String.join(" ", command));
+//        LOGGER.info("Command: {}", String.join(" ", command));
         final Container.ExecResult result = this.container.execInContainer(command);
-        LOGGER.info("Command stdout: {}", result.getStdout());
-        LOGGER.info("Command stderr: {}", result.getStderr());
+//        LOGGER.info("Command stdout: {}", result.getStdout());
+//        LOGGER.info("Command stderr: {}", result.getStderr());
         return result;
     }
 
@@ -369,6 +399,7 @@ public class VaultContainer implements TestRule {
      * @throws SignatureException
      * @throws IOException
      */
+    /*
     private void createVaultCertAndKey() throws NoSuchAlgorithmException, IOException, OperatorCreationException,
             CertificateException, InvalidKeyException, NoSuchProviderException, SignatureException {
 
@@ -399,6 +430,7 @@ public class VaultContainer implements TestRule {
         writeCertToPem(vaultCertificate, CERT_PEMFILE);
         writePrivateKeyToPem(keyPair.getPrivate(), PRIVATE_KEY_PEMFILE);
     }
+    */
 
     /**
      * <p>Constructs a Java truststore in JKS format, containing the Vault server certificate generated by
@@ -419,6 +451,12 @@ public class VaultContainer implements TestRule {
      */
     private void createClientCertAndKey() throws KeyStoreException, IOException, CertificateException,
             NoSuchAlgorithmException, OperatorCreationException, NoSuchProviderException, InvalidKeyException, SignatureException {
+
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        final FileReader fileReader = new FileReader(CERT_PEMFILE);
+        final PEMReader pemReader = new PEMReader(fileReader);
+        vaultCertificate = (X509Certificate) pemReader.readObject();
+
         // Store the Vault's server certificate as a trusted cert in the truststore
         final KeyStore trustStore = KeyStore.getInstance("jks");
         trustStore.load(null);

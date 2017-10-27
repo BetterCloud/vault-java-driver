@@ -1,14 +1,11 @@
 .gradle
 .idea
-.classpath
-.project
-.settings/
-bin/
+.testcontainers-tmp*
+
 vault-java-driver.iml
 gradle.properties
-build
-build.gradle
-classes
-ssl/
+
+build/
 node_modules/
+ssl/
 
