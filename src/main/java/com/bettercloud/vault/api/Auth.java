@@ -852,4 +852,58 @@ public class Auth {
         }
     }
 
+    /**
+     * <p>Revokes current client token.</p>
+     *
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public void revokeSelf() throws VaultException {
+        revokeSelf("token");
+    }
+
+    /**
+     * <p>Revokes current client token.</p>
+     *
+     * @param tokenAuthMount The mount name of the token authentication back end.  If null, defaults to "token"
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public void revokeSelf(final String tokenAuthMount) throws VaultException {
+        int retryCount = 0;
+        final String mount = tokenAuthMount != null ? tokenAuthMount : "token";
+        while (true) {
+            try {
+                // HTTP request to Vault
+                final RestResponse restResponse = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/auth/" + mount + "/revoke-self")
+                        .header("X-Vault-Token", config.getToken())
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
+                // Validate restResponse
+                if (restResponse.getStatus() != 204) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                }
+                return;
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace(); //NOPMD
+                    }
+                } else if (e instanceof VaultException) { //NOPMD
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
+
 }
