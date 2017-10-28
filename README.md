@@ -223,7 +223,8 @@ may require modifications in your code to migrate.  Changes to the minor version
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
 * **3.1.0 (IN PROGRESS)**:  Adds support for the LDAP Auth Backend.  Adds "revoke-self" capability for 
-  auth tokens.  Cleans up issues with the new Docker-based integration test suite.
+  auth tokens.  Cleans up issues with the new Docker-based integration test suite.  Updates all 
+  dependencies to their latest versions (including switching to Vault 0.8.3 for integration testing).
 
 * **3.0.0**: This is a breaking-change release, with several updates.
   * **API changes**:
