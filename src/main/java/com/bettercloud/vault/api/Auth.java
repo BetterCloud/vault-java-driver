@@ -492,6 +492,49 @@ public class Auth {
     }
 
     /**
+     * <p>Basic login operation to authenticate to a LDAP backend.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().loginByLDAP("test", "password");
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param username The username used for authentication
+     * @param password The password used for authentication
+     * @return The auth token, with additional response metadata
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse loginByLDAP(final String username, final String password) throws VaultException {
+        return loginByLDAP(username, password, "ldap");
+    }
+
+    /**
+     * <p>Basic login operation to authenticate to a LDAP backend.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().loginByLDAP("test", "password");
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param username The username used for authentication
+     * @param password The password used for authentication
+     * @param ldapAuthMount The mount name of the ldap authentication back end.  If null, defaults to "ldap"
+     * @return The auth token, with additional response metadata
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse loginByLDAP(final String username, final String password, final String ldapAuthMount) throws VaultException {
+        final String mount = ldapAuthMount != null ? ldapAuthMount : "ldap";
+        // LDAP has the same API like Username & Password backend
+        return loginByUserPass(username, password, mount);
+    }
+
+    /**
     * <p>Basic login operation to authenticate to an github backend.  Example usage:</p>
     *
     * <blockquote>
