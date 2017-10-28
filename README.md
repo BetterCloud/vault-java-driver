@@ -10,18 +10,18 @@ alike, without causing conflicts with any other dependency.
 
 Table of Contents
 -----------------
-* Installing the Driver
-* Initializing a Driver Instance
-* SSL Config
-  * General Options
-  * Java Keystore (JKS) based config
-  * OpenSSL (PEM) based config
-* Using the driver
-* API Reference (Javadocs)
-* Version History
-* Development
-* License
-* Other Notes
+* [Installing the Driver](#installing-the-driver)
+* [Initializing a Driver Instance](#initializing-a-driver-instance)
+* [SSL Config](#ssl-config)
+  * [General Options](#general-options)
+  * [Java Keystore (JKS) based config](#java-keystore-(jks)-based-config)
+  * [OpenSSL (PEM) based config](#openssl-(pem)-based-config)
+* [Using the driver](#using-the-driver)
+* [API Reference (Javadocs)](#api-reference-(javadocs))
+* [Version History](#version-history)
+* [Development](#development)
+* [License](#license)
+* [Other Notes](#other-notes)
 
 Installing the Driver
 ---------------------
