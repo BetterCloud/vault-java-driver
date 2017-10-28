@@ -3,6 +3,7 @@ package com.bettercloud.vault.api;
 import static junit.framework.TestCase.assertEquals;
 
 import com.bettercloud.vault.response.VaultResponse;
+import com.bettercloud.vault.util.VaultContainer;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;

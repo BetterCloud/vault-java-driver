@@ -6,6 +6,7 @@ import com.bettercloud.vault.api.pki.CredentialFormat;
 import com.bettercloud.vault.api.pki.RoleOptions;
 import com.bettercloud.vault.response.PkiResponse;
 import com.bettercloud.vault.rest.RestResponse;
+import com.bettercloud.vault.util.VaultContainer;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;

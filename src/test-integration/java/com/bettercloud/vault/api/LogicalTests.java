@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.bettercloud.vault.response.AuthResponse;
+import com.bettercloud.vault.util.VaultContainer;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
