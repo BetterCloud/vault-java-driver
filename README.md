@@ -17,7 +17,7 @@ Table of Contents
   * [Java Keystore (JKS) based config](#java-keystore-jks-based-config)
   * [OpenSSL (PEM) based config](#openssl-pem-based-config)
 * [Using the driver](#using-the-driver)
-* [API Reference (Javadocs)](#api-reference-(javadocs))
+* [API Reference (Javadocs)](#api-reference-javadocs)
 * [Version History](#version-history)
 * [Development](#development)
 * [License](#license)
@@ -222,7 +222,8 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **3.1.0 (IN PROGRESS)**:  Adds support for the LDAP Auth Backend.  Adds "revoke-self" capability for 
+* **3.1.0 (IN PROGRESS)**:  Allows auth backend methods to be configured for non-default mount points.  
+  Adds support for the LDAP Auth Backend.  Adds "revoke-self" capability for 
   auth tokens.  Cleans up issues with the new Docker-based integration test suite.  Updates all 
   dependencies to their latest versions (including switching to Vault 0.8.3 for integration testing).
 
