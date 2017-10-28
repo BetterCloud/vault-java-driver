@@ -222,6 +222,9 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
+* **3.1.0 (IN PROGRESS)**:  Adds support for the LDAP Auth Backend.  Cleans up issues with the new 
+  Docker-based integration test suite.
+
 * **3.0.0**: This is a breaking-change release, with several updates.
   * **API changes**:
     * Adds support for writing arbitrary objects to Vault, instead of just strings (i.e. the 

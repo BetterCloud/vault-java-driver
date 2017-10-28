@@ -508,6 +508,7 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByLDAP(final String username, final String password) throws VaultException {
+        // TODO:  Determine a way to feasibly add integration test coverage
         return loginByLDAP(username, password, "ldap");
     }
 
