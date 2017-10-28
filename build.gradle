@@ -29,7 +29,8 @@ dependencies {
     testCompile('org.testcontainers:testcontainers:1.4.3')
     testCompile('org.eclipse.jetty:jetty-server:9.3.21.v20170918')
     testCompile('org.slf4j:slf4j-api:1.7.25')
-    testCompile('bouncycastle:bcprov-jdk16:140')
+    testCompile('org.bouncycastle:bcprov-jdk15on:1.58')
+    testCompile('org.bouncycastle:bcpkix-jdk15on:1.58')
 
     testRuntime('org.slf4j:slf4j-simple:1.7.25')
 }

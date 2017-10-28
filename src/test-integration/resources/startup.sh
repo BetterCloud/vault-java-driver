@@ -3,7 +3,7 @@
 #####
 # (1) Install SSL dependencies
 #####
-apk add --no-cache ca-certificates openssl
+apk add --no-cache libressl
 
 
 #####
@@ -13,7 +13,7 @@ apk add --no-cache ca-certificates openssl
 # Clean up SSL workspace
 cd /vault/config/ssl
 rm -Rf *
-cp ../openssl.conf .
+cp ../libressl.conf .
 # Create a CA root certificate and key
 openssl req -newkey rsa:2048 -days 3650 -x509 -nodes -out root-cert.pem -keyout root-privkey.pem -subj '/C=US/ST=GA/L=Atlanta/O=BetterCloud/CN=127.0.0.1'
 # Create a private key, and a certificate-signing request
@@ -25,7 +25,7 @@ openssl ca -batch -config openssl.conf -notext -in vault-csr.pem -out vault-cert
 # Configure SSL at the OS level to trust the new certs
 cp root-cert.pem vault-cert.pem /usr/local/share/ca-certificates
 # Clean up temp files
-rm 0A.pem certindex certindex.attr certindex.old openssl.conf serialfile serialfile.old vault-csr.pem
+rm 0A.pem certindex certindex.attr certindex.old libressl.conf serialfile serialfile.old vault-csr.pem
 
 
 #####

@@ -26,7 +26,7 @@ interface TestConstants {
 
     String CONTAINER_STARTUP_SCRIPT = "/vault/config/startup.sh";
     String CONTAINER_CONFIG_FILE = "/vault/config/config.json";
-    String CONTAINER_OPENSSL_CONFIG_FILE = "/vault/config/ssl/openssl.conf";
+    String CONTAINER_OPENSSL_CONFIG_FILE = "/vault/config/ssl/libressl.conf";
     String CONTAINER_SSL_DIRECTORY = "/vault/config/ssl";
     String CONTAINER_CERT_PEMFILE = CONTAINER_SSL_DIRECTORY + "/vault-cert.pem";
     String CONTAINER_CLIENT_CERT_PEMFILE = CONTAINER_SSL_DIRECTORY + "/client-cert.pem";

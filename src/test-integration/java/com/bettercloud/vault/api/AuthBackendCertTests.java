@@ -6,10 +6,10 @@ import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.util.SSLUtils;
 import com.bettercloud.vault.util.VaultContainer;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.testcontainers.shaded.org.bouncycastle.operator.OperatorCreationException;
 
 import java.io.File;
 import java.io.IOException;

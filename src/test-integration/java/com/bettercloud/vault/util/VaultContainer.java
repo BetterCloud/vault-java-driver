@@ -31,31 +31,12 @@ public class VaultContainer implements TestRule, TestConstants {
     private String rootToken;
     private String unsealKey;
 
-    /**
-     * Establishes a running Docker container, hosting a Vault server instance.
-     *
-     * TODO: Move SSL generation to a separate Docker container, run only once per test suite.
-     *
-     * Right now, the "startup.sh" script uses OpenSSL commands to generate all of the private keys
-     * and certificates needed by the integration test suite... depositing them in the `[PROJECT_ROOT]/ssl`
-     * subdirectory, so they'll also be accessible by the Java code.
-     *
-     * This is an expensive operation.  Since the official Vault docker container (based on Alpine Linux)
-     * doesn't come with OpenSSL installed, the startup script has to download and install that before
-     * doing anything else.  This is about an 8 MB downloaded, and sluggish install process, and it is
-     * repeated separately for EVERY class in the test suite!
-     *
-     * It would be better to have a static method, with a static state variable to detect whether it's
-     * already been invoked once.  This method would launch a plain Alpine Linux container and install
-     * OpenSSL (or maybe just use some other lightweight distro with OpenSSL already installed).  It
-     * would do the SSL generation as a one-time operation per test suite invocation.  Then the regular
-     * Vault containers could just mount that `/ssl` subdirectory and find the artifacts already generated.
-     */
+    /** Establishes a running Docker container, hosting a Vault server instance. */
     public VaultContainer() {
         container = new GenericContainer("vault:0.8.3")
                 .withClasspathResourceMapping("/startup.sh", CONTAINER_STARTUP_SCRIPT, BindMode.READ_ONLY)
                 .withClasspathResourceMapping("/config.json", CONTAINER_CONFIG_FILE, BindMode.READ_ONLY)
-                .withClasspathResourceMapping("/openssl.conf", CONTAINER_OPENSSL_CONFIG_FILE, BindMode.READ_ONLY)
+                .withClasspathResourceMapping("/libressl.conf", CONTAINER_OPENSSL_CONFIG_FILE, BindMode.READ_ONLY)
                 .withFileSystemBind(SSL_DIRECTORY, CONTAINER_SSL_DIRECTORY, BindMode.READ_WRITE)
                 .withCreateContainerCmdModifier(new Consumer<CreateContainerCmd>() {
                     // TODO: Why does the compiler freak out when this anonymous class is converted to a lambda?

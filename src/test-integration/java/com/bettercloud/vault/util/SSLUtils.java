@@ -1,24 +1,24 @@
 package com.bettercloud.vault.util;
 
-import org.bouncycastle.openssl.PEMReader;
-import org.testcontainers.shaded.org.bouncycastle.asn1.x500.X500Name;
-import org.testcontainers.shaded.org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.testcontainers.shaded.org.bouncycastle.asn1.x509.Extension;
-import org.testcontainers.shaded.org.bouncycastle.asn1.x509.GeneralName;
-import org.testcontainers.shaded.org.bouncycastle.asn1.x509.GeneralNames;
-import org.testcontainers.shaded.org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.testcontainers.shaded.org.bouncycastle.cert.X509CertificateHolder;
-import org.testcontainers.shaded.org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.testcontainers.shaded.org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.testcontainers.shaded.org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.testcontainers.shaded.org.bouncycastle.crypto.util.PrivateKeyFactory;
-import org.testcontainers.shaded.org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.testcontainers.shaded.org.bouncycastle.operator.ContentSigner;
-import org.testcontainers.shaded.org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
-import org.testcontainers.shaded.org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
-import org.testcontainers.shaded.org.bouncycastle.operator.OperatorCreationException;
-import org.testcontainers.shaded.org.bouncycastle.operator.bc.BcContentSignerBuilder;
-import org.testcontainers.shaded.org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.bc.BcContentSignerBuilder;
+import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -69,12 +69,16 @@ public class SSLUtils implements TestConstants {
      * @throws NoSuchAlgorithmException
      */
     public static void createClientCertAndKey() throws KeyStoreException, IOException, CertificateException,
-            NoSuchAlgorithmException, OperatorCreationException, NoSuchProviderException, InvalidKeyException, SignatureException {
+            NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException,
+            OperatorCreationException {
 
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         final FileReader fileReader = new FileReader(CERT_PEMFILE);
-        final PEMReader pemReader = new PEMReader(fileReader);
-        final X509Certificate vaultCertificate = (X509Certificate) pemReader.readObject();
+        final PEMParser pemParser = new PEMParser(fileReader);
+        final X509CertificateHolder certificateHolder = (X509CertificateHolder) pemParser.readObject();
+        final X509Certificate vaultCertificate = new JcaX509CertificateConverter()
+                .setProvider(BouncyCastleProvider.PROVIDER_NAME)
+                .getCertificate(certificateHolder);
 
         // Store the Vault's server certificate as a trusted cert in the truststore
         final KeyStore trustStore = KeyStore.getInstance("jks");
@@ -120,7 +124,6 @@ public class SSLUtils implements TestConstants {
      * @param issuer The issuer (and subject) to use for the certificate
      * @return An X509 certificate
      * @throws IOException
-     * @throws OperatorCreationException
      * @throws CertificateException
      * @throws NoSuchProviderException
      * @throws NoSuchAlgorithmException
@@ -128,8 +131,8 @@ public class SSLUtils implements TestConstants {
      * @throws SignatureException
      */
     private static X509Certificate generateCert(final KeyPair keyPair, final String issuer) throws IOException,
-            OperatorCreationException, CertificateException, NoSuchProviderException, NoSuchAlgorithmException,
-            InvalidKeyException, SignatureException {
+            CertificateException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException,
+            SignatureException, OperatorCreationException {
         final String subject = issuer;
         final X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(
                 new X500Name(issuer),
