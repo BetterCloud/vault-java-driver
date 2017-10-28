@@ -5,6 +5,7 @@ import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.response.LookupResponse;
+import com.bettercloud.vault.util.VaultContainer;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;

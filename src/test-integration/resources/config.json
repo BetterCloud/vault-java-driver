@@ -1,4 +1,7 @@
 {
+  "disable_mlock" : true,
+  "default_lease_ttl" : "24h",
+  "max_lease_ttl" : "87600h",
   "backend": {
     "file": {
       "path": "/vault/file"
@@ -7,11 +10,14 @@
   "listener": {
     "tcp": {
       "address" : "127.0.0.1:8200",
-      "tls_cert_file" : "/vault/config/ssl/cert.pem",
-      "tls_key_file" : "/vault/config/ssl/privatekey.pem"
+      "tls_cert_file" : "/vault/config/ssl/vault-cert.pem",
+      "tls_key_file" : "/vault/config/ssl/vault-privkey.pem"
     }
   },
-  "default_lease_ttl" : "168h",
-  "max_lease_ttl" : "720h",
-  "disable_mlock" : true
+  "listener": {
+    "tcp": {
+      "address" : "127.0.0.1:8280",
+      "tls_disable" : "true"
+    }
+  }
 }

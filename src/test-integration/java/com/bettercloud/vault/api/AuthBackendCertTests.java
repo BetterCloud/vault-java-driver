@@ -4,12 +4,21 @@ import com.bettercloud.vault.SslConfig;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.util.SSLUtils;
+import com.bettercloud.vault.util.VaultContainer;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
@@ -27,8 +36,11 @@ public class AuthBackendCertTests {
     public static final VaultContainer container = new VaultContainer();
 
     @BeforeClass
-    public static void setupClass() throws IOException, InterruptedException {
+    public static void setupClass() throws IOException, InterruptedException, CertificateException, SignatureException,
+            NoSuchAlgorithmException, KeyStoreException, OperatorCreationException, NoSuchProviderException,
+            InvalidKeyException {
         container.initAndUnsealVault();
+        SSLUtils.createClientCertAndKey();
         container.setupBackendCert();
     }
 
