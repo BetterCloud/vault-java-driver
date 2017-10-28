@@ -21,7 +21,7 @@ openssl req -newkey rsa:1024 -nodes -out vault-csr.pem -keyout vault-privkey.pem
 # Create an X509 certificate for the Vault server
 echo 000a > serialfile
 touch certindex
-openssl ca -batch -config openssl.conf -notext -in vault-csr.pem -out vault-cert.pem
+openssl ca -batch -config libressl.conf -notext -in vault-csr.pem -out vault-cert.pem
 # Configure SSL at the OS level to trust the new certs
 cp root-cert.pem vault-cert.pem /usr/local/share/ca-certificates
 # Clean up temp files
