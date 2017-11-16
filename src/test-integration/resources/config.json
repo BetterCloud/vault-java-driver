@@ -9,14 +9,14 @@
   },
   "listener": {
     "tcp": {
-      "address" : "127.0.0.1:8200",
+      "address" : "0.0.0.0:8200",
       "tls_cert_file" : "/vault/config/ssl/vault-cert.pem",
       "tls_key_file" : "/vault/config/ssl/vault-privkey.pem"
     }
   },
   "listener": {
     "tcp": {
-      "address" : "127.0.0.1:8280",
+      "address" : "0.0.0.0:8280",
       "tls_disable" : "true"
     }
   }

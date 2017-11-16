@@ -45,26 +45,26 @@ public class VaultContainer implements TestRule, TestConstants {
                         createContainerCmd.withCapAdd(Capability.IPC_LOCK);
                     }
                 })
-                .withNetworkMode("host")  // .withExposedPorts(8200)
+                .withExposedPorts(8200, 8280)
                 .withCommand("/bin/sh " + CONTAINER_STARTUP_SCRIPT)
                 .waitingFor(
-                        // All of the tests in this integration test suite use HTTPS connections.  However, Vault
-                        // is configured to run a plain HTTP listener on port 8280, purely for purposes of detecting
-                        // when the Docker container is fully ready.
-                        //
-                        // Unfortunately, we can't use HTTPS at this point in the flow.  Because that would require
-                        // configuring SSL to trust the self-signed cert that's generated inside of the Docker
-                        // container.  A chicken-and-egg problem, as we need to wait for the container to be fully
-                        // ready before we access that cert.
-                        new HttpWaitStrategy() {
-                            @Override
-                            protected Integer getLivenessCheckPort() {
-                                return 8280;
-                            }
-                        }
+                // All of the tests in this integration test suite use HTTPS connections.  However, Vault
+                // is configured to run a plain HTTP listener on port 8280, purely for purposes of detecting
+                // when the Docker container is fully ready.
+                //
+                // Unfortunately, we can't use HTTPS at this point in the flow.  Because that would require
+                // configuring SSL to trust the self-signed cert that's generated inside of the Docker
+                // container.  A chicken-and-egg problem, as we need to wait for the container to be fully
+                // ready before we access that cert.
+                new HttpWaitStrategy() {
+                    @Override
+                    protected Integer getLivenessCheckPort() {
+                        return container.getMappedPort(8280);
+                    }
+                }
                         .forPath("/v1/sys/seal-status")
                         .forStatusCode(HttpURLConnection.HTTP_BAD_REQUEST) // The expected response when "vault init" has not yet run
-                );
+        );
     }
 
     /**
@@ -94,7 +94,6 @@ public class VaultContainer implements TestRule, TestConstants {
      * @throws InterruptedException
      */
     public void initAndUnsealVault() throws IOException, InterruptedException {
-
         final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOGGER);
         container.followOutput(logConsumer);
 
@@ -258,27 +257,16 @@ public class VaultContainer implements TestRule, TestConstants {
     }
 
     /**
-     * Initial this class was launching a Docker container with bridged networking, and port 8200 on the host
-     * machine mapped to whatever port Vault was actually using inside of the Docker container.  So this method
-     * was necessary to dynamically build a URL string to that port.
-     *
-     * Once SSL support was added, there were problems with Vault's SSL certificate not recognizing the host
-     * machine as a valid subject.  This could probably be overcome, by having the "createVaultCertAndKey()" method
-     * use "InetAddress.getLocalHost().getHostName()" to detect the host's hostname, and programmatically
-     * add it to the cert's subject alt names.
-     *
-     * However, switching Docker to use "setNetworkMode=host" does away with the problem by making Docker's
-     * view of the network identical to the host.  This would be considered insecure for production use, but
-     * should be fine for a container that runs on a developer workstation or build server only for the duration
-     * of this test suite.
-     *
-     * So at least for now, the original logic is commented out and the method returns a hardcoded string instead.jj
+     * The Docker container uses bridged networking.  Meaning that Vault listens on port 8200 inside the container,
+     * but the tests running on the host machine cannot reach that port directly.  Instead, the Vault connection
+     * config has to use a port that is mapped to the container's port 8200.  There is no telling what the mapped
+     * port will be until runtime, so this method is necessary to build a Vault connection URL with the appropriate
+     * values.
      *
      * @return The URL of the Vault instance
      */
     public String getAddress() {
-//        return String.format("https://%s:%d", container.getContainerIpAddress(), container.getMappedPort(8200));
-        return "https://127.0.0.1:8200";
+        return String.format("https://%s:%d", container.getContainerIpAddress(), container.getMappedPort(8200));
     }
 
     /**

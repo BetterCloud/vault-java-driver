@@ -15,9 +15,9 @@ cd /vault/config/ssl
 rm -Rf *
 cp ../libressl.conf .
 # Create a CA root certificate and key
-openssl req -newkey rsa:2048 -days 3650 -x509 -nodes -out root-cert.pem -keyout root-privkey.pem -subj '/C=US/ST=GA/L=Atlanta/O=BetterCloud/CN=127.0.0.1'
+openssl req -newkey rsa:2048 -days 3650 -x509 -nodes -out root-cert.pem -keyout root-privkey.pem -subj '/C=US/ST=GA/L=Atlanta/O=BetterCloud/CN=localhost'
 # Create a private key, and a certificate-signing request
-openssl req -newkey rsa:1024 -nodes -out vault-csr.pem -keyout vault-privkey.pem -subj '/C=US/ST=GA/L=Atlanta/O=BetterCloud/CN=127.0.0.1'
+openssl req -newkey rsa:1024 -nodes -out vault-csr.pem -keyout vault-privkey.pem -subj '/C=US/ST=GA/L=Atlanta/O=BetterCloud/CN=localhost'
 # Create an X509 certificate for the Vault server
 echo 000a > serialfile
 touch certindex
