@@ -2,28 +2,20 @@ package com.bettercloud.vault.api;
 
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
-import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
-import com.bettercloud.vault.response.AuthResponse;
-import com.bettercloud.vault.util.VaultContainer;
 import com.bettercloud.vault.vault.VaultTestUtils;
-import com.bettercloud.vault.vault.mock.AuthRequesValidatingMockVault;
+import com.bettercloud.vault.vault.mock.AuthRequestValidatingMockVault;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
-import org.testcontainers.shaded.com.google.common.collect.ImmutableCollection;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.function.Predicate;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
 
 public class AuthBackendAwsTests {
 
@@ -61,7 +53,7 @@ public class AuthBackendAwsTests {
                     requestBody.getString("iam_http_request_headers", "") == "headers";
         };
 
-        final AuthRequesValidatingMockVault mockVault =  new AuthRequesValidatingMockVault(new HashSet<Predicate<HttpServletRequest>>() {{
+        final AuthRequestValidatingMockVault mockVault =  new AuthRequestValidatingMockVault(new HashSet<Predicate<HttpServletRequest>>() {{
             add(isValidEc2pkcs7Request);
             add(isValidEc2IdRequest);
         }});
@@ -100,7 +92,7 @@ public class AuthBackendAwsTests {
                     requestBody.getString("iam_http_request_headers", "") == "headers";
         };
 
-        final AuthRequesValidatingMockVault mockVault =  new AuthRequesValidatingMockVault(new HashSet<Predicate<HttpServletRequest>>() {{
+        final AuthRequestValidatingMockVault mockVault =  new AuthRequestValidatingMockVault(new HashSet<Predicate<HttpServletRequest>>() {{
             add(isValidEc2IamRequest);
         }});
 

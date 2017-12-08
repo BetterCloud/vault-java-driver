@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public class AuthRequesValidatingMockVault extends MockVault {
+public class AuthRequestValidatingMockVault extends MockVault {
     private Set<Predicate<HttpServletRequest>> validators;
 
     private final String validResponse = "{\n" +
@@ -33,7 +33,7 @@ public class AuthRequesValidatingMockVault extends MockVault {
             "}";
 
 
-    public AuthRequesValidatingMockVault(Set<Predicate<HttpServletRequest>> validators) {
+    public AuthRequestValidatingMockVault(Set<Predicate<HttpServletRequest>> validators) {
         this.validators = validators;
     }
 
