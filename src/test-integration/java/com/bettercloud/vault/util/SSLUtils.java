@@ -19,29 +19,19 @@ import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.bc.BcContentSignerBuilder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
+import sun.security.pkcs10.PKCS10;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Security;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Date;
+
+import static java.security.Signature.getInstance;
 
 /**
  * Static utility methods for generating client-side SSL certs and keys, for tests that use Vault's TLS Certificate
@@ -201,5 +191,47 @@ public class SSLUtils implements TestConstants {
             out.println(keyPem);
         }
     }
+    /**
+     *
+     * @param CN
+     *            Common Name, is X.509 speak for the name that distinguishes
+     *            the Certificate best, and ties it to your Organization
+     * @param OU
+     *            Organizational unit
+     * @param O
+     *            Organization NAME
+     * @param L
+     *            Location
+     * @param S
+     *            State
+     * @param C
+     *            Country
+     * @return
+     * @throws Exception
+     */
+    public  static String generatePKCS10(KeyPair kp, String CN, String OU, String O,
+                                         String L, String S, String C) throws NoSuchAlgorithmException, InvalidKeyException, IOException, CertificateException, SignatureException {
+        // generate PKCS10 certificate request
+        String sigAlg = "SHA256withRSA";
+        PKCS10 pkcs10 = new PKCS10(kp.getPublic());
+        Signature signature = getInstance(sigAlg);
+        signature.initSign(kp.getPrivate());
+        // common, orgUnit, org, locality, state, country
+        sun.security.x509.X500Name x500Name = new sun.security.x509.X500Name(CN, OU, O, L, S, C);
+        pkcs10.encodeAndSign(x500Name, signature);
+        ByteArrayOutputStream bs = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(bs);
+        pkcs10.print(ps);
+        byte[] c = bs.toByteArray();
+        try {
+            if (ps != null)
+                ps.close();
+            if (bs != null)
+                bs.close();
+        } catch (Throwable th) {
+        }
+        return new String(c);
+    }
+
 
 }
