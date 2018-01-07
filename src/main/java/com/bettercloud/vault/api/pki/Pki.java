@@ -9,6 +9,7 @@ import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>The implementing class for operations on Vault's PKI backend.</p>
@@ -279,6 +280,7 @@ public class Pki {
      * @param ipSans (optional) Requested IP Subject Alternative Names, in a comma-delimited list. Only valid if the role allows IP SANs (which is the default).
      * @param ttl (optional) Requested Time To Live. Cannot be greater than the role's max_ttl value. If not provided, the role's ttl value will be used. Note that the role values default to system values if not explicitly set.
      * @param format (optional) Format for returned data. Can be pem, der, or pem_bundle; defaults to pem. If der, the output is base64 encoded. If pem_bundle, the certificate field will contain the private key, certificate, and issuing CA, concatenated.
+     * @param csr (optional) PEM Encoded CSR
      * @return A container for the information returned by Vault
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
@@ -288,7 +290,8 @@ public class Pki {
             final List<String> altNames,
             final List<String> ipSans,
             final String ttl,
-            final CredentialFormat format
+            final CredentialFormat format,
+            final String csr
     ) throws VaultException {
         int retryCount = 0;
         while (true) {
@@ -323,12 +326,16 @@ public class Pki {
             if (format != null) {
                 jsonObject.add("format", format.toString());
             }
+            if (csr != null) {
+                jsonObject.add("csr", csr.toString());
+            }
             final String requestJson = jsonObject.toString();
 
             // Make an HTTP request to Vault
             try {
+                String endpoint = csr.isEmpty() ?  "%s/v1/%s/issue/%s" : "%s/v1/%s/sign/%s";
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(String.format("%s/v1/%s/issue/%s", config.getAddress(), this.mountPath, roleName))
+                        .url(String.format(endpoint, config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
