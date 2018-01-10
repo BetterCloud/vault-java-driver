@@ -222,10 +222,13 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **3.1.0 (IN PROGRESS)**:  Allows auth backend methods to be configured for non-default mount points.  
-  Adds support for the LDAP Auth Backend.  Adds "revoke-self" capability for 
-  auth tokens.  Cleans up issues with the new Docker-based integration test suite.  Updates all 
-  dependencies to their latest versions (including switching to Vault 0.9.1 for integration testing).
+* **3.1.0 (IN PROGRESS)**:  Several updates.
+  * Adds support for seal-related operations (i.e. `/sys/seal`, `/sys/unseal`, `/sys/seal-status`).
+  * Adds support for the LDAP Auth Backend.  
+  * Allows auth backend methods to be configured for non-default mount points.  
+  * Adds "revoke-self" capability for auth tokens.  
+  * Cleans up issues with the new Docker-based integration test suite.  
+  * Updates all dependencies to their latest versions (including switching to Vault 0.9.1 for integration testing).
 
 * **3.0.0**: This is a breaking-change release, with several updates.
   * **API changes**:
@@ -263,6 +266,7 @@ should represent non-breaking changes.  The third number represents any very min
     including them only in the subclasses for specific response types where they are found.
   * Changes the `com.bettercloud.vault.response.AuthReponse` class field `authLeaseDuration` from type `int` to `long`.
   * Refactors and removes various deprecated `private` methods, with no change to the exposed API.
+  
 * **1.2.0**: This is a substantial release, with numerous additions.  It's a minor version number only because there 
              should be no breaking changes.  The changes include the following:
   * Switches from Vault 0.5.x to 0.6.x for automated tests.  
@@ -280,6 +284,7 @@ should represent non-breaking changes.  The third number represents any very min
     specific `com.bettercloud.vault.api.Debug` class instead.  
   * Implements some of the lease related endpoints (i.e. revoke, revoke-prefix, revoke-force).
   * Supports PKI backends that are mounted on non-default paths.
+  
 * **1.1.1**: Changes the `ttl` argument to `Pki.issue()` from `Integer` to `String`, to fix a bug preventing 
              you from specifying the time suffix (e.g. "1h").
 * **1.1.0**: Switches from Vault 0.4.x to 0.5.x for automated tests.  Adds support to the Logical
