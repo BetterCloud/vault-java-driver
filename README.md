@@ -225,7 +225,7 @@ should represent non-breaking changes.  The third number represents any very min
 * **3.1.0 (IN PROGRESS)**:  Allows auth backend methods to be configured for non-default mount points.  
   Adds support for the LDAP Auth Backend.  Adds "revoke-self" capability for 
   auth tokens.  Cleans up issues with the new Docker-based integration test suite.  Updates all 
-  dependencies to their latest versions (including switching to Vault 0.8.3 for integration testing).
+  dependencies to their latest versions (including switching to Vault 0.9.1 for integration testing).
 
 * **3.0.0**: This is a breaking-change release, with several updates.
   * **API changes**:
@@ -319,7 +319,7 @@ License
 -------
 The MIT License (MIT)
 
-Copyright (c) 2016-2017 BetterCloud
+Copyright (c) 2016-2018 BetterCloud
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation the

@@ -22,15 +22,15 @@ repositories {
 }
 
 dependencies {
-    compileOnly('org.projectlombok:lombok:1.16.18')
+    compileOnly('org.projectlombok:lombok:1.16.20')
 
     testCompile('junit:junit:4.12')
-    testCompile('org.mockito:mockito-core:2.11.0')
-    testCompile('org.testcontainers:testcontainers:1.4.3')
-    testCompile('org.eclipse.jetty:jetty-server:9.3.21.v20170918')
+    testCompile('org.mockito:mockito-core:2.13.0')
+    testCompile('org.testcontainers:testcontainers:1.5.1')
+    testCompile('org.eclipse.jetty:jetty-server:9.4.8.v20171121')
     testCompile('org.slf4j:slf4j-api:1.7.25')
-    testCompile('org.bouncycastle:bcprov-jdk15on:1.58')
-    testCompile('org.bouncycastle:bcpkix-jdk15on:1.58')
+    testCompile('org.bouncycastle:bcprov-jdk15on:1.59')
+    testCompile('org.bouncycastle:bcpkix-jdk15on:1.59')
 
     testRuntime('org.slf4j:slf4j-simple:1.7.25')
 }
@@ -161,13 +161,18 @@ uploadArchives {
                     }
                 }
 
-                developers {
+                developers {[
+                    developer {
+                        id 'steve-perkins'
+                        name 'Steve Perkins'
+                        email 'steve@steveperkins.com'
+                    },
                     developer {
                         id 'steve-perkins-bc'
                         name 'Steve Perkins'
                         email 'steve.perkins@bettercloud.com'
                     }
-                }
+                ]}
             }
         }
     }
