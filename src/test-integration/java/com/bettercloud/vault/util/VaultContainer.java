@@ -28,6 +28,7 @@ public class VaultContainer implements TestRule, TestConstants {
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultContainer.class);
 
     private final GenericContainer container;
+
     private String rootToken;
     private String unsealKey;
 
@@ -267,6 +268,18 @@ public class VaultContainer implements TestRule, TestConstants {
      */
     public String getAddress() {
         return String.format("https://%s:%d", container.getContainerIpAddress(), container.getMappedPort(8200));
+    }
+
+    /**
+     * Returns the master key for unsealing the Vault instance.  This method should really ONLY be used by tests
+     * specifically for sealing and unsealing functionality (i.e. SealTests.java).  Generally, tests should
+     * retrieve Vault instances from the "getVault(...)" or "getRootVault()" methods here, and never directly
+     * concern themselves with the root token or unseal key at all.
+     *
+     * @return The master key for unsealing this Vault instance
+     */
+    public String getUnsealKey() {
+        return unsealKey;
     }
 
     /**
