@@ -6,6 +6,7 @@ import com.bettercloud.vault.api.Leases;
 import com.bettercloud.vault.api.Logical;
 import com.bettercloud.vault.api.Seal;
 import com.bettercloud.vault.api.pki.Pki;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>The Vault driver class, the primary interface through which dependent applications will access Vault.</p>
@@ -44,14 +45,14 @@ import com.bettercloud.vault.api.pki.Pki;
  */
 public class Vault {
 
-    private final VaultConfig vaultConfig;
+    private @NotNull final VaultConfig vaultConfig;
 
     /**
      * Construct a Vault driver instance with the provided config settings.
      *
      * @param vaultConfig Configuration settings for Vault interaction (e.g. server address, token, etc)
      */
-    public Vault(final VaultConfig vaultConfig) {
+    public Vault(@NotNull final VaultConfig vaultConfig) {
         this.vaultConfig = vaultConfig;
     }
 
@@ -63,7 +64,7 @@ public class Vault {
      * @param retryIntervalMilliseconds The number of milliseconds that the driver will wait in between retries
      * @return This object, with maxRetries and retryIntervalMilliseconds populated
      */
-    public Vault withRetries(final int maxRetries, final int retryIntervalMilliseconds) {
+    public @NotNull Vault withRetries(final int maxRetries, final int retryIntervalMilliseconds) {
         this.vaultConfig.setMaxRetries(maxRetries);
         this.vaultConfig.setRetryIntervalMilliseconds(retryIntervalMilliseconds);
         return this;
@@ -74,7 +75,7 @@ public class Vault {
      *
      * @return The implementing class for Vault's core/logical operations (e.g. read, write)
      */
-    public Logical logical() {
+    public @NotNull Logical logical() {
         return new Logical(vaultConfig);
     }
 
@@ -83,7 +84,7 @@ public class Vault {
      *
      * @return The implementing class for Vault's auth operations.
      */
-    public Auth auth() {
+    public @NotNull Auth auth() {
         return new Auth(vaultConfig);
     }
 
@@ -92,7 +93,7 @@ public class Vault {
      *
      * @return The implementing class for Vault's PKI secret backend.
      */
-    public Pki pki() {
+    public @NotNull Pki pki() {
         return new Pki(vaultConfig);
     }
 
@@ -116,7 +117,7 @@ public class Vault {
      * @param mountPath The path on which your Vault PKI backend is mounted, without the <code>/v1/</code> prefix
      * @return The implementing class for Vault's PKI secret backend.
      */
-    public Pki pki(final String mountPath) {
+    public @NotNull Pki pki(final String mountPath) {
         return new Pki(vaultConfig, mountPath);
     }
 
@@ -125,7 +126,7 @@ public class Vault {
      *
      * @return The implementing class for Vault's lease operations (e.g. revoke, revoke-prefix).
      */
-    public Leases leases() {
+    public @NotNull Leases leases() {
         return new Leases(vaultConfig);
     }
 
@@ -134,7 +135,7 @@ public class Vault {
      *
      * @return The implementing class for Vault's debug operations (e.g. raw, health)
      */
-    public Debug debug() {
+    public @NotNull Debug debug() {
         return new Debug(vaultConfig);
     }
 
@@ -143,7 +144,7 @@ public class Vault {
      *
      * @return The implementing class for Vault's seal operations (e.g. seal, unseal, sealStatus).
      */
-    public Seal seal() {
+    public @NotNull Seal seal() {
         return new Seal(vaultConfig);
     }
 }

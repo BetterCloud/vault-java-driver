@@ -22,6 +22,7 @@ repositories {
 }
 
 dependencies {
+    compileOnly('org.jetbrains:annotations-java5:15.0')
     compileOnly('org.projectlombok:lombok:1.16.20')
 
     testCompile('junit:junit:4.12')
