@@ -224,7 +224,9 @@ should represent non-breaking changes.  The third number represents any very min
 
 * **3.1.0 (IN PROGRESS)**:  Several updates.
   * Adds support for seal-related operations (i.e. `/sys/seal`, `/sys/unseal`, `/sys/seal-status`).
-  * Adds support for the LDAP Auth Backend.  
+  * Adds support for the AWS auth backend.
+  * Adds support for the Google Cloud Platform auth backend.
+  * Adds support for the LDAP auth Backend.
   * Allows auth backend methods to be configured for non-default mount points.  
   * Adds "revoke-self" capability for auth tokens.  
   * Cleans up issues with the new Docker-based integration test suite.  

@@ -1,4 +1,4 @@
-package com.bettercloud.vault.api;
+package com.bettercloud.vault.vault.api;
 
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
@@ -8,6 +8,7 @@ import com.bettercloud.vault.vault.VaultTestUtils;
 import com.bettercloud.vault.vault.mock.AuthRequestValidatingMockVault;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,16 +20,7 @@ import static org.junit.Assert.assertNotNull;
 
 public class AuthBackendAwsTests {
 
-    private JsonObject readRequestBody(HttpServletRequest request) {
-        try {
-            StringBuilder requestBuffer = new StringBuilder();
-            IOUtils.readLines(request.getReader()).forEach(requestBuffer::append);
-            return Json.parse(requestBuffer.toString()).asObject();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
+    @Ignore
     @Test
     public void testLoginByAwsEc2() throws Exception {
         final Predicate<HttpServletRequest> isValidEc2pkcs7Request = (request) -> {
@@ -81,6 +73,7 @@ public class AuthBackendAwsTests {
         assertEquals("c9368254-3f21-aded-8a6f-7c818e81b17a", token2.trim());
     }
 
+    @Ignore
     @Test
     public void testLoginByAwsIam() throws Exception {
         final Predicate<HttpServletRequest> isValidEc2IamRequest = (request) -> {
@@ -111,4 +104,15 @@ public class AuthBackendAwsTests {
         assertNotNull(token);
         assertEquals("c9368254-3f21-aded-8a6f-7c818e81b17a", token.trim());
     }
+
+    private JsonObject readRequestBody(HttpServletRequest request) {
+        try {
+            StringBuilder requestBuffer = new StringBuilder();
+            IOUtils.readLines(request.getReader()).forEach(requestBuffer::append);
+            return Json.parse(requestBuffer.toString()).asObject();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }

@@ -556,6 +556,7 @@ public class Auth {
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
+    // TODO: Needs integration test coverage if possible
     public AuthResponse loginByAwsEc2(final String role, final String identity, final String signature, final String nonce, final String awsAuthMount) throws VaultException {
         int retryCount = 0;
 
@@ -630,6 +631,7 @@ public class Auth {
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
+    // TODO: Needs integration test coverage if possible
     public AuthResponse loginByAwsEc2(final String role, final String pkcs7, final String nonce, final String awsAuthMount) throws VaultException {
         int retryCount = 0;
 
@@ -860,6 +862,7 @@ public class Auth {
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
+     // TODO: Needs integration test coverage if possible
     public AuthResponse loginByGCP(final String role, final String jwt) throws VaultException {
         int retryCount = 0;
 
