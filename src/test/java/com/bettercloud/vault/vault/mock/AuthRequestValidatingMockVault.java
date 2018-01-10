@@ -6,15 +6,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Set;
 import java.util.function.Predicate;
 
 public class AuthRequestValidatingMockVault extends MockVault {
-    private Set<Predicate<HttpServletRequest>> validators;
+    private Predicate<HttpServletRequest> validator;
 
     private final String validResponse = "{\n" +
+            "  \"renewable\": true,\n" +
             "  \"auth\": {\n" +
-            "    \"renewable\": true,\n" +
             "    \"lease_duration\": 1800000,\n" +
             "    \"metadata\": {\n" +
             "      \"role_tag_max_ttl\": \"0\",\n" +
@@ -33,8 +32,8 @@ public class AuthRequestValidatingMockVault extends MockVault {
             "}";
 
 
-    public AuthRequestValidatingMockVault(Set<Predicate<HttpServletRequest>> validators) {
-        this.validators = validators;
+    public AuthRequestValidatingMockVault(Predicate<HttpServletRequest> validator) {
+        this.validator = validator;
     }
 
     @Override
@@ -44,7 +43,7 @@ public class AuthRequestValidatingMockVault extends MockVault {
                        HttpServletResponse response) throws IOException, ServletException {
         response.setContentType("application/json");
         baseRequest.setHandled(true);
-        if(validators.stream().anyMatch(p -> p.test(request))) {
+        if(validator.test(request)) {
             response.setStatus(200);
             response.getWriter().println(validResponse);
         } else {
