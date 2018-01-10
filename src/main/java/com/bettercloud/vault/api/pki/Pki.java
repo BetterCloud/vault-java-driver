@@ -9,6 +9,7 @@ import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>The implementing class for operations on Vault's PKI backend.</p>
@@ -288,7 +289,50 @@ public class Pki {
             final List<String> altNames,
             final List<String> ipSans,
             final String ttl,
-            final CredentialFormat format
+            final CredentialFormat format) throws VaultException {
+
+        return issue(roleName,commonName,altNames,ipSans, ttl, format, "");
+    }
+    /**
+     * <p>Operation to generate a new set of credentials or sign the embedded CSR, in the PKI backend. If CSR is passed the
+     *  sign function of the vault will be called if not, issue will be used.
+     *  The issuing CA certificate is returned as well, so that only the root CA need be in a
+     * client's trust store.</p>
+     *
+     * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will be thrown if
+     * the role does not exist, or if any other problem occurs.  Credential information will be populated in the
+     * <code>credential</code> field of the <code>PkiResponse</code> return value.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
+     * final Vault vault = new Vault(config);
+     *
+     * final PkiResponse response = vault.pki().deleteRole("testRole");
+     * assertEquals(204, response.getRestResponse().getStatus();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param roleName The role on which the credentials will be based.
+     * @param commonName The requested CN for the certificate. If the CN is allowed by role policy, it will be issued.
+     * @param altNames (optional) Requested Subject Alternative Names, in a comma-delimited list. These can be host names or email addresses; they will be parsed into their respective fields. If any requested names do not match role policy, the entire request will be denied.
+     * @param ipSans (optional) Requested IP Subject Alternative Names, in a comma-delimited list. Only valid if the role allows IP SANs (which is the default).
+     * @param ttl (optional) Requested Time To Live. Cannot be greater than the role's max_ttl value. If not provided, the role's ttl value will be used. Note that the role values default to system values if not explicitly set.
+     * @param format (optional) Format for returned data. Can be pem, der, or pem_bundle; defaults to pem. If der, the output is base64 encoded. If pem_bundle, the certificate field will contain the private key, certificate, and issuing CA, concatenated.
+     * @param csr (optional) PEM Encoded CSR
+     * @return A container for the information returned by Vault
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
+     */
+
+
+    public PkiResponse issue(
+            final String roleName,
+            final String commonName,
+            final List<String> altNames,
+            final List<String> ipSans,
+            final String ttl,
+            final CredentialFormat format,
+            final String csr
     ) throws VaultException {
         int retryCount = 0;
         while (true) {
@@ -323,12 +367,16 @@ public class Pki {
             if (format != null) {
                 jsonObject.add("format", format.toString());
             }
+            if (csr != null) {
+                jsonObject.add("csr", csr.toString());
+            }
             final String requestJson = jsonObject.toString();
 
             // Make an HTTP request to Vault
             try {
+                String endpoint = (csr == null || csr.isEmpty()) ?  "%s/v1/%s/issue/%s" : "%s/v1/%s/sign/%s";
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(String.format("%s/v1/%s/issue/%s", config.getAddress(), this.mountPath, roleName))
+                        .url(String.format(endpoint, config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())

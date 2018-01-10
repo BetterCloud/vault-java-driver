@@ -13,8 +13,11 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.security.*;
 import java.util.ArrayList;
+import java.util.Optional;
 
+import static com.bettercloud.vault.util.SSLUtils.generatePKCS10;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.*;
 
@@ -96,6 +99,39 @@ public class AuthBackendPkiTests {
         assertNotNull(issueResponse.getCredential().getIssuingCa());
     }
 
+    @Test
+    public void testIssueCredentialWithCsr() throws VaultException, InterruptedException, NoSuchAlgorithmException {
+
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(2048);
+        KeyPair kp = kpg.generateKeyPair();
+        PublicKey pub = kp.getPublic();
+        PrivateKey pvt = kp.getPrivate();
+        String csr = null;
+        try {
+            csr = generatePKCS10(kp, "","","","","","");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        final Vault vault = container.getRootVault();
+
+        // Create a role
+        final PkiResponse createRoleResponse = vault.pki().createOrUpdateRole("testRole",
+                new RoleOptions()
+                        .allowedDomains(new ArrayList<String>(){{ add("myvault.com"); }})
+                        .allowSubdomains(true)
+                        .maxTtl("9h")
+        );
+        assertEquals(204, createRoleResponse.getRestResponse().getStatus());
+        Thread.sleep(3000);
+
+        // Issue cert
+        final PkiResponse issueResponse = vault.pki().issue("testRole", "test.myvault.com", null, null, "1h", CredentialFormat.PEM, csr);
+        assertNotNull(issueResponse.getCredential().getCertificate());
+        assertNull(issueResponse.getCredential().getPrivateKey());
+        assertNotNull(issueResponse.getCredential().getSerialNumber());
+        assertNotNull(issueResponse.getCredential().getIssuingCa());
+    }
     @Test
     public void testCustomMountPath() throws VaultException {
         final Vault vault = container.getRootVault();
