@@ -47,6 +47,10 @@ public class Logical {
      * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
      */
     public LogicalResponse read(final String path) throws VaultException {
+        return read(path, true);
+    }
+
+    public LogicalResponse read(final String path, boolean shouldRetry) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
@@ -68,6 +72,8 @@ public class Logical {
 
                 return new LogicalResponse(restResponse, retryCount);
             } catch (RuntimeException | VaultException | RestException | UnsupportedEncodingException e) {
+                if(shouldRetry == false)
+                    throw new VaultException(e);
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
                     retryCount++;

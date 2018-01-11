@@ -13,14 +13,20 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.bc.BcContentSignerBuilder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
+import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import sun.security.pkcs10.PKCS10;
 
+import javax.security.auth.x500.X500Principal;
 import java.io.*;
 import java.math.BigInteger;
 import java.security.*;
@@ -210,27 +216,17 @@ public class SSLUtils implements TestConstants {
      * @throws Exception
      */
     public  static String generatePKCS10(KeyPair kp, String CN, String OU, String O,
-                                         String L, String S, String C) throws NoSuchAlgorithmException, InvalidKeyException, IOException, CertificateException, SignatureException {
-        // generate PKCS10 certificate request
-        String sigAlg = "SHA256withRSA";
-        PKCS10 pkcs10 = new PKCS10(kp.getPublic());
-        Signature signature = getInstance(sigAlg);
-        signature.initSign(kp.getPrivate());
-        // common, orgUnit, org, locality, state, country
-        sun.security.x509.X500Name x500Name = new sun.security.x509.X500Name(CN, OU, O, L, S, C);
-        pkcs10.encodeAndSign(x500Name, signature);
-        ByteArrayOutputStream bs = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(bs);
-        pkcs10.print(ps);
-        byte[] c = bs.toByteArray();
-        try {
-            if (ps != null)
-                ps.close();
-            if (bs != null)
-                bs.close();
-        } catch (Throwable th) {
-        }
-        return new String(c);
+                                         String L, String S, String C) throws NoSuchAlgorithmException, InvalidKeyException, IOException, CertificateException, SignatureException, OperatorCreationException {
+        X500Principal subject = new X500Principal(String.format("C=%s, ST=%s, L=%s, O=%s, OU=%s, CN=%S", C, S, L, O,OU, CN));
+        ContentSigner signGen = new JcaContentSignerBuilder("SHA256withRSA").build(kp.getPrivate());
+        PKCS10CertificationRequestBuilder builder = new JcaPKCS10CertificationRequestBuilder(subject, kp.getPublic());
+        PKCS10CertificationRequest csr = builder.build(signGen);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        Writer osWriter = new OutputStreamWriter(output);
+        JcaPEMWriter pem = new JcaPEMWriter(osWriter);
+        pem.writeObject(csr);
+        pem.close();
+        return new String(output.toByteArray());
     }
 
 
