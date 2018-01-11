@@ -719,7 +719,7 @@ public class Auth {
                 final JsonObject request = Json.object().add("iam_request_url", iamRequestUrl)
                         .add("iam_request_body", iamRequestBody)
                         .add("iam_request_headers", iamRequestHeaders)
-                        .add("iam_request_method", "POST");
+                        .add("iam_http_request_method", "POST");
                 if(role != null) {
                     request.add("role", role);
                 }
