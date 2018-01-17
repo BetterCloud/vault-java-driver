@@ -132,6 +132,26 @@ public class AuthBackendPkiTests {
         assertNotNull(issueResponse.getCredential().getSerialNumber());
         assertNotNull(issueResponse.getCredential().getIssuingCa());
     }
+
+    @Test
+    public void testRevocation() throws VaultException, InterruptedException, NoSuchAlgorithmException {
+        final Vault vault = container.getRootVault();
+
+        // Create a role
+        final PkiResponse createRoleResponse = vault.pki().createOrUpdateRole("testRole",
+                new RoleOptions()
+                        .allowedDomains(new ArrayList<String>(){{ add("myvault.com"); }})
+                        .allowSubdomains(true)
+                        .maxTtl("9h")
+        );
+        assertEquals(204, createRoleResponse.getRestResponse().getStatus());
+        Thread.sleep(3000);
+        // Issue cert
+        final PkiResponse issueResponse = vault.pki().issue("testRole", "test.myvault.com", null, null, "1h", CredentialFormat.PEM);
+        assertNotNull(issueResponse.getCredential().getSerialNumber());
+        vault.pki().revoke(issueResponse.getCredential().getSerialNumber());
+    }
+
     @Test
     public void testCustomMountPath() throws VaultException {
         final Vault vault = container.getRootVault();

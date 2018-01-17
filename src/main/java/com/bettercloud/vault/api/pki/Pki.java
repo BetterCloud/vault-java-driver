@@ -9,7 +9,6 @@ import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * <p>The implementing class for operations on Vault's PKI backend.</p>
@@ -172,6 +171,73 @@ public class Pki {
 
                 // Validate response
                 if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                }
+                return new PkiResponse(restResponse, retryCount);
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
+
+    /**
+     * <p>Operation to revike  a certificate in the vault using the PKI backend.
+     * Relies on an authentication token being present in
+     * the <code>VaultConfig</code> instance.</p>
+     *
+     * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will be thrown if
+     * the role does not exist, or if any other problem occurs.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
+     * final Vault vault = new Vault(config);
+     *
+     * final PkiResponse response = vault.pki().revoke("serialnumber");
+     * assertEquals(204, response.getRestResponse().getStatus();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param serialNumber The name of the role to delete
+     * @return A container for the information returned by Vault
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
+     */
+    public PkiResponse revoke(final String serialNumber) throws VaultException {
+        int retryCount = 0;
+        while (true) {
+            // Make an HTTP request to Vault
+            JsonObject jsonObject = new JsonObject();
+            if (serialNumber != null) {
+                jsonObject.add("serial_number", serialNumber);
+            }
+            final String requestJson = jsonObject.toString();
+            try {
+                final RestResponse restResponse = new Rest()//NOPMD
+                        .url(String.format("%s/v1/%s/revoke", config.getAddress(), this.mountPath))
+                        .header("X-Vault-Token", config.getToken())
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .body(requestJson.getBytes("UTF-8"))
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
+
+                // Validate response
+                if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
                 return new PkiResponse(restResponse, retryCount);

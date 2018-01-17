@@ -35,7 +35,7 @@ public class RoleOptions implements Serializable {
     private String keyType;
     private Long keyBits;
     private Boolean useCsrCommonName;
-
+    private Boolean useCsrSans;
     /**
      * @param ttl (optional) The Time To Live value provided as a string duration with time suffix. Hour is the largest suffix.  If not set, uses the system default value or the value of max_ttl, whichever is shorter.
      *
@@ -196,6 +196,15 @@ public class RoleOptions implements Serializable {
      */
     public RoleOptions useCsrCommonName(final Boolean useCsrCommonName) {
         this.useCsrCommonName = useCsrCommonName;
+        return this;
+    }
+    /**
+     * @param useCsrSans (optional) If set, when used with the CSR signing endpoint, the common name in the CSR will be used instead of taken from the JSON data. This does not include any requested SANs in the CSR. Defaults to false.
+     *
+     * @return This object, with useCsrCommonName populated, ready for other builder methods or immediate use.
+     */
+    public RoleOptions useCsrSans(final Boolean useCsrSans) {
+        this.useCsrSans = useCsrSans;
         return this;
     }
 
