@@ -505,6 +505,7 @@ public class Pki {
             addJsonFieldIfNotNull(jsonObject, "key_type", options.getKeyType());
             addJsonFieldIfNotNull(jsonObject, "key_bits", options.getKeyBits());
             addJsonFieldIfNotNull(jsonObject, "use_csr_common_name", options.getUseCsrCommonName());
+            addJsonFieldIfNotNull(jsonObject, "use_csr_sans", options.getUseCsrSans());
         }
         return jsonObject.toString();
     }
