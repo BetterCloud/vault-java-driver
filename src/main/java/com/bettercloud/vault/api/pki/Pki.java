@@ -493,6 +493,7 @@ public class Pki {
                 }
                 addJsonFieldIfNotNull(jsonObject, "allowed_domains", allowedDomains.toString());
             }
+            addJsonFieldIfNotNull(jsonObject, "allow_spiffe_name", options.getAllowSpiffename());
             addJsonFieldIfNotNull(jsonObject, "allow_bare_domains", options.getAllowBareDomains());
             addJsonFieldIfNotNull(jsonObject, "allow_subdomains", options.getAllowSubdomains());
             addJsonFieldIfNotNull(jsonObject, "allow_any_name", options.getAllowAnyName());

@@ -37,6 +37,8 @@ public class RoleOptions implements Serializable {
     private Boolean useCsrCommonName;
 
 
+    private Boolean allowSpiffename;
+
 
     private Boolean useCsrSans;
     /**
@@ -101,7 +103,15 @@ public class RoleOptions implements Serializable {
         this.allowSubdomains = allowSubdomains;
         return this;
     }
-
+    /**
+     * @param  allowSpiffename (optional)
+     *
+     * @return This object, with AllowSpiffename populated, ready for other builder methods or immediate use.
+     */
+    public RoleOptions allowSpiffeName(final Boolean allowSpiffename) {
+        this.allowSpiffename  = allowSpiffename ;
+        return this;
+    }
     /**
      * @param allowAnyName (optional) If set, clients can request any CN. Useful in some circumstances, but make sure you understand whether it is appropriate for your installation before enabling it. Defaults to false.
      *
@@ -281,5 +291,6 @@ public class RoleOptions implements Serializable {
         return useCsrCommonName;
     }
     public Boolean getUseCsrSans() {        return useCsrSans;    }
+    public Boolean getAllowSpiffename() {        return allowSpiffename;    }
 
 }
