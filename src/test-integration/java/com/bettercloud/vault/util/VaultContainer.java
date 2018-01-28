@@ -227,6 +227,22 @@ public class VaultContainer implements TestRule, TestConstants {
     }
 
     /**
+     * Constructs a VaultConfig that can be used to congiure your own tests
+     *
+     * @return
+     * @throws VaultException
+     */
+
+    public VaultConfig getVaultConfig() throws VaultException {
+        return new VaultConfig()
+                .address(getAddress())
+                .openTimeout(5)
+                .readTimeout(30)
+                .sslConfig(new SslConfig().pemFile(new File(CERT_PEMFILE)).build())
+                .build();
+    }
+
+    /**
      * Constructs an instance of the Vault driver with sensible defaults, configured to use the supplied token
      * for authentication.
      *
