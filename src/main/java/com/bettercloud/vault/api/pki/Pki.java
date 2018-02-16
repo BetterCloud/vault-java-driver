@@ -9,6 +9,8 @@ import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 /**
  * <p>The implementing class for operations on Vault's PKI backend.</p>
@@ -484,14 +486,7 @@ public class Pki {
             addJsonFieldIfNotNull(jsonObject, "max_ttl", options.getMaxTtl());
             addJsonFieldIfNotNull(jsonObject, "allow_localhost", options.getAllowLocalhost());
             if (options.getAllowedDomains() != null && options.getAllowedDomains().size() > 0) {
-                final StringBuilder allowedDomains = new StringBuilder();
-                for (int index = 0; index < options.getAllowedDomains().size(); index++) {
-                    allowedDomains.append(options.getAllowedDomains().get(index));
-                    if (index + 1 < options.getAllowedDomains().size()) {
-                        allowedDomains.append(',');
-                    }
-                }
-                addJsonFieldIfNotNull(jsonObject, "allowed_domains", allowedDomains.toString());
+                addJsonFieldIfNotNull(jsonObject, "allowed_domains", options.getAllowedDomains().stream().collect(Collectors.joining(",")));
             }
             addJsonFieldIfNotNull(jsonObject, "allow_spiffe_name", options.getAllowSpiffename());
             addJsonFieldIfNotNull(jsonObject, "allow_bare_domains", options.getAllowBareDomains());
@@ -507,6 +502,9 @@ public class Pki {
             addJsonFieldIfNotNull(jsonObject, "key_bits", options.getKeyBits());
             addJsonFieldIfNotNull(jsonObject, "use_csr_common_name", options.getUseCsrCommonName());
             addJsonFieldIfNotNull(jsonObject, "use_csr_sans", options.getUseCsrSans());
+            if (options.getKeyUsage() != null && options.getKeyUsage().size() > 0) {
+                addJsonFieldIfNotNull(jsonObject, "key_usage", options.getKeyUsage().stream().collect(Collectors.joining(",")));
+            }
         }
         return jsonObject.toString();
     }

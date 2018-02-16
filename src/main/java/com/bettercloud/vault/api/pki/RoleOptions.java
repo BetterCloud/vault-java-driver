@@ -35,12 +35,11 @@ public class RoleOptions implements Serializable {
     private String keyType;
     private Long keyBits;
     private Boolean useCsrCommonName;
-
-
     private Boolean allowSpiffename;
-
-
     private Boolean useCsrSans;
+    private List<String> keyUsage;
+
+
     /**
      * @param ttl (optional) The Time To Live value provided as a string duration with time suffix. Hour is the largest suffix.  If not set, uses the system default value or the value of max_ttl, whichever is shorter.
      *
@@ -293,4 +292,13 @@ public class RoleOptions implements Serializable {
     public Boolean getUseCsrSans() {        return useCsrSans;    }
     public Boolean getAllowSpiffename() {        return allowSpiffename;    }
 
+
+    public RoleOptions keyUsage(List<String> keyUsage) {
+        this.keyUsage = keyUsage;
+        return this;
+    }
+
+    public List<String> getKeyUsage() {
+        return keyUsage;
+    }
 }
