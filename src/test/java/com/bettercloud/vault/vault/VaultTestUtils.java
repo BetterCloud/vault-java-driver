@@ -1,6 +1,9 @@
 package com.bettercloud.vault.vault;
 
+import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.vault.mock.MockVault;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -9,6 +12,15 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * <p>Utilities used by all of the Vault-related unit test classes under
@@ -52,6 +64,21 @@ public class VaultTestUtils {
             server.stop();
             Thread.sleep(1000);
         }
+    }
+
+    public static Optional<JsonObject> readRequestBody(HttpServletRequest request) {
+        try {
+            StringBuilder requestBuffer = new StringBuilder();
+            IOUtils.readLines(request.getReader()).forEach(requestBuffer::append);
+            return Optional.of(Json.parse(requestBuffer.toString()).asObject());
+        } catch (IOException e) {
+            return Optional.empty();
+        }
+    }
+
+    public static Map<String, String> readRequestHeaders(HttpServletRequest request) {
+        return Collections.list(request.getHeaderNames()).stream()
+                .collect(toMap(identity(), request::getHeader));
     }
 
 }
