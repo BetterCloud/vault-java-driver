@@ -29,13 +29,17 @@ public class Seal {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public void seal() throws VaultException {
+        seal(config.getToken());
+    }
+    
+    public void seal(final String token) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/seal")
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())

@@ -14,6 +14,7 @@ import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestException;
 import com.bettercloud.vault.rest.RestResponse;
+import java.nio.charset.StandardCharsets;
 
 /**
  * <p>The implementing class for Vault's core/logical operations (e.g. read, write).</p>
@@ -47,17 +48,17 @@ public class Logical {
      * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
      */
     public LogicalResponse read(final String path) throws VaultException {
-        return read(path, true);
+        return read(path, config.getToken());
     }
 
-    public LogicalResponse read(final String path, boolean shouldRetry) throws VaultException {
+    public LogicalResponse read(final String path, String token) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -118,6 +119,10 @@ public class Logical {
      * @throws VaultException If any errors occurs with the REST request, and the maximum number of retries is exceeded.
      */
     public LogicalResponse write(final String path, final Map<String, Object> nameValuePairs) throws VaultException {
+        return write(path, nameValuePairs, config.getToken());
+    }
+
+    public LogicalResponse write(final String path, final Map<String, Object> nameValuePairs, String token) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
@@ -146,7 +151,7 @@ public class Logical {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
                         .body(requestJson.toString().getBytes("UTF-8"))
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -195,10 +200,14 @@ public class Logical {
      * @throws VaultException If any errors occur, or unexpected response received from Vault
      */
     public List<String> list(final String path) throws VaultException {
+        return list(path, config.getToken());
+    }
+
+    public List<String> list(final String path, String token) throws VaultException {
         final String fullPath = path == null ? "list=true" : path + "?list=true";
         LogicalResponse response = null;
         try {
-            response = read(fullPath);
+            response = read(fullPath, token);
         } catch (final VaultException e) {
             if (e.getHttpStatusCode() != 404) {
                 throw e;
@@ -232,13 +241,17 @@ public class Logical {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public LogicalResponse delete(final String path) throws VaultException {
+        return delete(path, config.getToken());
+    }
+
+    public LogicalResponse delete(final String path, String token) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -269,5 +282,73 @@ public class Logical {
                 }
             }
         }
+    }
+
+    public List<String> getCapabilitiesSelf(final String path) throws VaultException {
+        return getCapabilitiesSelf(path, config.getToken());
+    }
+
+    public List<String> getCapabilitiesSelf(final String path, String token) throws VaultException {
+        final List<String> returnValues = new ArrayList<>();
+        LogicalResponse response = null;
+        try {
+            int retryCount = 0;
+            while (true) {
+                try {
+                    final String payload = String.format("{\"path\":\"%s\"}", path);
+                    // Make an HTTP request to Vault
+                    final RestResponse restResponse = new Rest()//NOPMD
+                            .url(config.getAddress() + "/v1/sys/capabilities-self")
+                            .header("X-Vault-Token", token)
+                            .connectTimeoutSeconds(config.getOpenTimeout())
+                            .readTimeoutSeconds(config.getReadTimeout())
+                            .sslVerification(config.getSslConfig().isVerify())
+                            .sslContext(config.getSslConfig().getSslContext())
+                            .body(payload.getBytes(StandardCharsets.UTF_8))
+                            .post();
+
+                    // Validate response
+                    if (restResponse.getStatus() != 200) {
+                        throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                                + "\nResponse body: " + new String(restResponse.getBody(), "UTF-8"), restResponse.getStatus());
+                    }
+
+                    response = new LogicalResponse(restResponse, retryCount);
+                    if (response != null
+                            && response.getRestResponse().getStatus() != 404
+                            && response.getData() != null
+                            && response.getData().get("capabilities") != null) {
+
+                        final JsonArray keys = Json.parse(response.getData().get("capabilities")).asArray();
+                        for (int index = 0; index < keys.size(); index++) {
+                            returnValues.add(keys.get(index).asString());
+                        }
+                    }
+                    return returnValues;
+                } catch (RuntimeException | VaultException | RestException | UnsupportedEncodingException e) {
+                    // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                    if (retryCount < config.getMaxRetries()) {
+                        retryCount++;
+                        try {
+                            final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                            Thread.sleep(retryIntervalMilliseconds);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                    } else if (e instanceof VaultException) {
+                        // ... otherwise, give up.
+                        throw (VaultException) e;
+                    } else {
+                        throw new VaultException(e);
+                    }
+                }
+            }
+
+        } catch (final VaultException e) {
+            if (e.getHttpStatusCode() != 404) {
+                throw e;
+            }
+        }
+        return returnValues;
     }
 }
