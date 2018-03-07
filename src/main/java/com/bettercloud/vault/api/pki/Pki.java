@@ -8,6 +8,7 @@ import com.bettercloud.vault.response.PkiResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -455,7 +456,8 @@ public class Pki {
 
                 // Validate response
                 if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    String body = restResponse.getBody() != null ? new String(restResponse.getBody()) : "(no body)";
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus() + " " + body, restResponse.getStatus());
                 }
                 return new PkiResponse(restResponse, retryCount);
             } catch (Exception e) {
