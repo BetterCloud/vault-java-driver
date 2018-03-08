@@ -229,6 +229,7 @@ should represent non-breaking changes.  The third number represents any very min
   * Adds support for the LDAP auth Backend.
   * Allows auth backend methods to be configured for non-default mount points.  
   * Adds "revoke-self" capability for auth tokens.  
+  * Adds support for response-wrapping token validation 
   * Support for signing a new certificate based on a CSR (i.e. the `/v1/pki/sign` endpoint).
   * Gives `VaultConfig` the ability to disable loading from environment variables if desired.
   * Cleans up issues with the new Docker-based integration test suite.  
