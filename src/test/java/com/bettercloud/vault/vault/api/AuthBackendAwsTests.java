@@ -3,17 +3,16 @@ package com.bettercloud.vault.vault.api;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
-import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.vault.VaultTestUtils;
 import com.bettercloud.vault.vault.mock.AuthRequestValidatingMockVault;
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.junit.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.function.Predicate;
 
+import static com.bettercloud.vault.vault.VaultTestUtils.readRequestBody;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -23,7 +22,7 @@ public class AuthBackendAwsTests {
     public void testLoginByAwsEc2Id() throws Exception {
         final Predicate<HttpServletRequest> isValidEc2IdRequest = (request) -> {
             try {
-                JsonObject requestBody = readRequestBody(request);
+                JsonObject requestBody = readRequestBody(request).orElse(null);
                 return requestBody != null && request.getRequestURI().endsWith("/auth/aws/login") &&
                         requestBody.getString("identity", "").equals("identity") &&
                         requestBody.getString("signature", "").equals("signature");
@@ -59,7 +58,7 @@ public class AuthBackendAwsTests {
     public void testLoginByAwsEc2Pkcs7() throws Exception {
         final Predicate<HttpServletRequest> isValidEc2pkcs7Request = (request) -> {
             try {
-                JsonObject requestBody = readRequestBody(request);
+                JsonObject requestBody = readRequestBody(request).orElse(null);
                 return requestBody != null && request.getRequestURI().endsWith("/auth/aws/login") &&
                       requestBody.getString("pkcs7", "").equals("pkcs7");
             } catch (Exception e) {
@@ -95,7 +94,7 @@ public class AuthBackendAwsTests {
     @Test
     public void testLoginByAwsIam() throws Exception {
         final Predicate<HttpServletRequest> isValidEc2IamRequest = (request) -> {
-            JsonObject requestBody = readRequestBody(request);
+            JsonObject requestBody = readRequestBody(request).orElse(null);
             return requestBody != null && request.getRequestURI().endsWith("/auth/aws/login") &&
                     requestBody.getString("iam_http_request_method", "").equals("POST") &&
                     requestBody.getString("iam_request_url", "").equals("url") &&
@@ -121,16 +120,6 @@ public class AuthBackendAwsTests {
 
         assertNotNull(token);
         assertEquals("c9368254-3f21-aded-8a6f-7c818e81b17a", token.trim());
-    }
-
-    private JsonObject readRequestBody(HttpServletRequest request) {
-        try {
-            StringBuilder requestBuffer = new StringBuilder();
-            IOUtils.readLines(request.getReader()).forEach(requestBuffer::append);
-            return Json.parse(requestBuffer.toString()).asObject();
-        } catch (Exception e) {
-            return null;
-        }
     }
 
 }

@@ -1,12 +1,19 @@
 package com.bettercloud.vault.vault.mock;
 
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
+import static com.bettercloud.vault.vault.VaultTestUtils.readRequestBody;
+import static com.bettercloud.vault.vault.VaultTestUtils.readRequestHeaders;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+
+import com.bettercloud.vault.json.JsonObject;
 
 /**
  * <p>This class is used to mock out a Vault server in unit tests involving retry logic. As it extends Jetty's
@@ -22,7 +29,7 @@ import java.io.IOException;
  * server.setHandler( new MockVault(200, "{\"data\":{\"value\":\"mock\"}}") );
  * server.start();
  *
- * final VaultConfig vaultConfig = new VaultConfig("http://127.0.0.1:8999", "mock_token");
+ * final VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("mock_token").build();
  * final Vault vault = new Vault(vaultConfig);
  * final LogicalResponse response = vault.logical().read("secret/hello");
  *
@@ -37,13 +44,16 @@ public class MockVault extends AbstractHandler {
 
     private int mockStatus;
     private String mockResponse;
+    private JsonObject requestBody;
+    private Map<String, String> requestHeaders;
+    private String requestUrl;
+
+    MockVault() {
+    }
 
     public MockVault(final int mockStatus, final String mockResponse) {
         this.mockStatus = mockStatus;
         this.mockResponse = mockResponse;
-    }
-
-    protected MockVault() {
     }
 
     @Override
@@ -53,6 +63,9 @@ public class MockVault extends AbstractHandler {
             final HttpServletRequest request,
             final HttpServletResponse response
     ) throws IOException, ServletException {
+        requestBody = readRequestBody(request).orElse(null);
+        requestHeaders = readRequestHeaders(request);
+        requestUrl = request.getRequestURL().toString();
         response.setContentType("application/json");
         baseRequest.setHandled(true);
         System.out.println("MockVault is sending an HTTP " + mockStatus + " code, with expected success payload...");
@@ -60,6 +73,18 @@ public class MockVault extends AbstractHandler {
         if (mockResponse != null) {
             response.getWriter().println(mockResponse);
         }
+    }
+
+    public Optional<JsonObject> getRequestBody() {
+        return Optional.ofNullable(requestBody);
+    }
+
+    public Map<String, String> getRequestHeaders() {
+        return requestHeaders;
+    }
+
+    public String getRequestUrl() {
+        return requestUrl;
     }
 
 }
