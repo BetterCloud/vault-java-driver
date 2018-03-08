@@ -706,7 +706,7 @@ public class Auth {
      *                      Most likely just aHR0cHM6Ly9zdHMuYW1hem9uYXdzLmNvbS8= (base64-encoding of https://sts.amazonaws.com/) as most requests will
      *                      probably use POST with an empty URI.
      * @param iamRequestBody Base64-encoded body of the signed request. Most likely QWN0aW9uPUdldENhbGxlcklkZW50aXR5JlZlcnNpb249MjAxMS0wNi0xNQ== which is
-     *                          the base64 encoding of Action=GetCallerIdentity&Version=2011-06-15.
+     *                          the base64 encoding of Action=GetCallerIdentity&amp;Version=2011-06-15.
      * @param iamRequestHeaders
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault

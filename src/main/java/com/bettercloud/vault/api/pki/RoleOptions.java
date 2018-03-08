@@ -35,6 +35,10 @@ public class RoleOptions implements Serializable {
     private String keyType;
     private Long keyBits;
     private Boolean useCsrCommonName;
+    private Boolean allowSpiffename;
+    private Boolean useCsrSans;
+    private List<String> keyUsage;
+
 
     /**
      * @param ttl (optional) The Time To Live value provided as a string duration with time suffix. Hour is the largest suffix.  If not set, uses the system default value or the value of max_ttl, whichever is shorter.
@@ -98,7 +102,15 @@ public class RoleOptions implements Serializable {
         this.allowSubdomains = allowSubdomains;
         return this;
     }
-
+    /**
+     * @param  allowSpiffename (optional)
+     *
+     * @return This object, with AllowSpiffename populated, ready for other builder methods or immediate use.
+     */
+    public RoleOptions allowSpiffeName(final Boolean allowSpiffename) {
+        this.allowSpiffename  = allowSpiffename ;
+        return this;
+    }
     /**
      * @param allowAnyName (optional) If set, clients can request any CN. Useful in some circumstances, but make sure you understand whether it is appropriate for your installation before enabling it. Defaults to false.
      *
@@ -198,6 +210,15 @@ public class RoleOptions implements Serializable {
         this.useCsrCommonName = useCsrCommonName;
         return this;
     }
+    /**
+     * @param useCsrSans (optional) If set, when used with the CSR signing endpoint, the common name in the CSR will be used instead of taken from the JSON data. This does not include any requested SANs in the CSR. Defaults to false.
+     *
+     * @return This object, with useCsrCommonName populated, ready for other builder methods or immediate use.
+     */
+    public RoleOptions useCsrSans(final Boolean useCsrSans) {
+        this.useCsrSans = useCsrSans;
+        return this;
+    }
 
     public String getTtl() {
         return ttl;
@@ -268,5 +289,16 @@ public class RoleOptions implements Serializable {
     public Boolean getUseCsrCommonName() {
         return useCsrCommonName;
     }
+    public Boolean getUseCsrSans() {        return useCsrSans;    }
+    public Boolean getAllowSpiffename() {        return allowSpiffename;    }
 
+
+    public RoleOptions keyUsage(List<String> keyUsage) {
+        this.keyUsage = keyUsage;
+        return this;
+    }
+
+    public List<String> getKeyUsage() {
+        return keyUsage;
+    }
 }
