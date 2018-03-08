@@ -70,7 +70,8 @@ public class VaultTestUtils {
         try {
             StringBuilder requestBuffer = new StringBuilder();
             IOUtils.readLines(request.getReader()).forEach(requestBuffer::append);
-            return Optional.of(Json.parse(requestBuffer.toString()).asObject());
+            String string = requestBuffer.toString();
+            return string.isEmpty() ? Optional.empty() : Optional.of(Json.parse(string).asObject());
         } catch (IOException e) {
             return Optional.empty();
         }

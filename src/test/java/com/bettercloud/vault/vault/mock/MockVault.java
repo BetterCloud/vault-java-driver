@@ -5,6 +5,7 @@ import static com.bettercloud.vault.vault.VaultTestUtils.readRequestHeaders;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,6 +46,7 @@ public class MockVault extends AbstractHandler {
     private String mockResponse;
     private JsonObject requestBody;
     private Map<String, String> requestHeaders;
+    private String requestUrl;
 
     MockVault() {
     }
@@ -63,6 +65,7 @@ public class MockVault extends AbstractHandler {
     ) throws IOException, ServletException {
         requestBody = readRequestBody(request).orElse(null);
         requestHeaders = readRequestHeaders(request);
+        requestUrl = request.getRequestURL().toString();
         response.setContentType("application/json");
         baseRequest.setHandled(true);
         System.out.println("MockVault is sending an HTTP " + mockStatus + " code, with expected success payload...");
@@ -72,12 +75,16 @@ public class MockVault extends AbstractHandler {
         }
     }
 
-    public JsonObject getRequestBody() {
-        return requestBody;
+    public Optional<JsonObject> getRequestBody() {
+        return Optional.ofNullable(requestBody);
     }
 
     public Map<String, String> getRequestHeaders() {
         return requestHeaders;
+    }
+
+    public String getRequestUrl() {
+        return requestUrl;
     }
 
 }
