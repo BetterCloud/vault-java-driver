@@ -222,7 +222,7 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **3.1.0 (IN PROGRESS)**:  Several updates.
+* **3.1.0**:  Several updates.
   * Adds support for seal-related operations (i.e. `/sys/seal`, `/sys/unseal`, `/sys/seal-status`).
   * Adds support for the AWS auth backend.
   * Adds support for the Google Cloud Platform auth backend.
