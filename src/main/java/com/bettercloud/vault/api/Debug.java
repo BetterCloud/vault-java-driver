@@ -73,6 +73,16 @@ public class Debug {
             final Integer standbyCode,
             final Integer sealedCode
     ) throws VaultException {
+        return health(standbyOk, activeCode, standbyCode, sealedCode, config.getToken());
+    }
+    
+    public HealthResponse health(
+            final Boolean standbyOk,
+            final Integer activeCode,
+            final Integer standbyCode,
+            final Integer sealedCode,
+            final String token
+    ) throws VaultException {
         final String path = "sys/health";
         int retryCount = 0;
         while (true) {
@@ -85,8 +95,8 @@ public class Debug {
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext());
                 // Add token if present
-                if (config.getToken() != null) {
-                    rest.header("X-Vault-Token", config.getToken());
+                if (token != null) {
+                    rest.header("X-Vault-Token", token);
                 }
                 // Add params if present
                 if (standbyOk != null) rest.parameter("standbyok", standbyOk.toString());

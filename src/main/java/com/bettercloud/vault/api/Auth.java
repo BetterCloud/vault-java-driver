@@ -180,6 +180,10 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse createToken(final TokenRequest tokenRequest, final String tokenAuthMount) throws VaultException {
+        return createToken(tokenRequest, tokenAuthMount, tokenAuthMount, config.getToken());
+    }
+    
+    public AuthResponse createToken(final TokenRequest tokenRequest, final String tokenAuthMount, final String token) throws VaultException {
         int retryCount = 0;
         
         final String mount = tokenAuthMount != null ? tokenAuthMount : "token";
@@ -215,7 +219,7 @@ public class Auth {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(url)
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -1048,6 +1052,10 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse renewSelf(final long increment, final String tokenAuthMount) throws VaultException {
+        return renewSelf(increment, tokenAuthMount, config.getToken());
+    }
+    
+    public AuthResponse renewSelf(final long increment, final String tokenAuthMount, final String token) throws VaultException {
         int retryCount = 0;
         
         final String mount = tokenAuthMount != null ? tokenAuthMount : "token";
@@ -1057,7 +1065,7 @@ public class Auth {
                 final String requestJson = Json.object().add("increment", increment).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/renew-self")
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -1111,6 +1119,10 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public LookupResponse lookupSelf(final String tokenAuthMount) throws VaultException {
+        return lookupSelf(tokenAuthMount, config.getToken())
+    }
+    
+    public LookupResponse lookupSelf(final String tokenAuthMount, final String token) throws VaultException {
         int retryCount = 0;
         final String mount = tokenAuthMount != null ? tokenAuthMount : "token";
         while (true) {
@@ -1118,7 +1130,7 @@ public class Auth {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/lookup-self")
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -1231,6 +1243,10 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public void revokeSelf(final String tokenAuthMount) throws VaultException {
+        revokeSelf(tokenAuthMount, config.getToken());
+    }
+    
+    public void revokeSelf(final String tokenAuthMount, final String token) throws VaultException {
         int retryCount = 0;
         final String mount = tokenAuthMount != null ? tokenAuthMount : "token";
         while (true) {
@@ -1238,7 +1254,7 @@ public class Auth {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/revoke-self")
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())

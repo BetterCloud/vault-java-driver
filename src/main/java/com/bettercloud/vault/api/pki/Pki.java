@@ -97,6 +97,10 @@ public class Pki {
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public PkiResponse createOrUpdateRole(final String roleName, final RoleOptions options) throws VaultException {
+        return createOrUpdateRole(roleName, options, config.getToken());
+    }
+    
+    public PkiResponse createOrUpdateRole(final String roleName, final RoleOptions options, final String token) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
@@ -104,7 +108,7 @@ public class Pki {
 
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -159,13 +163,17 @@ public class Pki {
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public PkiResponse getRole(final String roleName) throws VaultException {
+        return getRole(roleName, config.getToken());
+    }
+    
+    public PkiResponse getRole(final String roleName, final String token) throws VaultException {
         int retryCount = 0;
         while (true) {
             // Make an HTTP request to Vault
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -286,13 +294,17 @@ public class Pki {
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public PkiResponse deleteRole(final String roleName) throws VaultException {
+        return deleteRole(roleName, config.getToken());
+    }
+    
+    public PkiResponse deleteRole(final String roleName, final String token) throws VaultException {
         int retryCount = 0;
         while (true) {
             // Make an HTTP request to Vault
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -403,6 +415,19 @@ public class Pki {
             final CredentialFormat format,
             final String csr
     ) throws VaultException {
+        return issue(roleName, commonName, altNames, ipSans, ttl, format, csr, config.getToken());
+    }
+    
+    public PkiResponse issue(
+            final String roleName,
+            final String commonName,
+            final List<String> altNames,
+            final List<String> ipSans,
+            final String ttl,
+            final CredentialFormat format,
+            final String csr,
+            final String token
+    ) throws VaultException {
         int retryCount = 0;
         while (true) {
             // Construct a JSON body from inputs
@@ -446,7 +471,7 @@ public class Pki {
                 String endpoint = (csr == null || csr.isEmpty()) ?  "%s/v1/%s/issue/%s" : "%s/v1/%s/sign/%s";
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format(endpoint, config.getAddress(), this.mountPath, roleName))
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())

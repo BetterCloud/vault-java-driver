@@ -38,12 +38,16 @@ public class Leases {
      * @throws VaultException If an error occurs, or unexpected reponse received from Vault
      */
     public VaultResponse revoke(final String leaseId) throws VaultException {
+        return revoke(leaseId, config.getToken());
+    }
+
+    public VaultResponse revoke(final String leaseId, final String token) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke/" + leaseId)
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -92,12 +96,16 @@ public class Leases {
      * @throws VaultException If an error occurs, or unexpected reponse received from Vault
      */
     public VaultResponse revokePrefix(final String prefix) throws VaultException {
+        return revokePrefix(prefix, config.getToken());
+    }
+
+    public VaultResponse revokePrefix(final String prefix, final String token) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-prefix/" + prefix)
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -149,12 +157,16 @@ public class Leases {
      * @throws VaultException If an error occurs, or unexpected reponse received from Vault
      */
     public VaultResponse revokeForce(final String prefix) throws VaultException {
+        return revokeForce(prefix, config.getToken());
+    }
+
+    public VaultResponse revokeForce(final String prefix, final String token) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-force/" + prefix)
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -202,6 +214,10 @@ public class Leases {
      * @throws VaultException The response information returned from Vault
      */
     public VaultResponse renew(final String leaseId, final long increment) throws VaultException {
+        return renew(leaseId, increment, config.getToken());
+    }
+
+    public VaultResponse renew(final String leaseId, final long increment, final String token) throws VaultException {
 
         // TODO:  Update the integration test suite to provide coverate for this
         //        The "generic" backend does not support support lease renewal.  The only other backend
@@ -216,7 +232,7 @@ public class Leases {
                 final String requestJson = Json.object().add("increment", increment).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
-                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", token)
                         .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
