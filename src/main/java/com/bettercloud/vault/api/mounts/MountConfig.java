@@ -1,0 +1,96 @@
+package com.bettercloud.vault.api.mounts;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import lombok.Getter;
+
+/**
+ * <p>A container for options returned by mounts endpoints on the Secret Engine backend. This class is
+ * meant for use with a builder pattern style.  Example usage:</p>
+ * 
+ * <p>Most of the time this will be wrapped inside <code>Mount</code> object rather than directly sent to Vault backend
+ * or back to the user.</p>
+ * 
+ * <blockquote>
+ * <pre>{@code
+ * final MountConfig config = new MountConfig()
+ *                                  .defaultLeaseTtl(2628000)
+ *                                  .maxLeaseTtl(2628000)
+ *                                  .description("description of pki");
+ * }</pre>
+ * </blockquote>
+ */
+public class MountConfig implements Serializable {
+    private static final long serialVersionUID = 839595627039704093L;
+
+    @Getter private Integer defaultLeaseTtl;
+    @Getter private Integer maxLeaseTtl;
+    @Getter private String description;
+    @Getter private Boolean forceNoCache;
+    @Getter private String pluginName;
+    private List<String> auditNonHmacRequestKeys;
+    private List<String> auditNonHmacResponseKeys;
+
+    public MountConfig defaultLeaseTtl(final Integer defaultLeaseTtl) {
+        this.defaultLeaseTtl = defaultLeaseTtl;
+        return this;
+    }
+
+    public MountConfig maxLeaseTtl(final Integer maxLeaseTtl) {
+        this.maxLeaseTtl = maxLeaseTtl;
+        return this;
+    }
+
+    public MountConfig description(final String description) {
+        this.description = description;
+        return this;
+    }
+
+    public MountConfig forceNoCache(final Boolean forceNoCache) {
+        this.forceNoCache = forceNoCache;
+        return this;
+    }
+
+    public MountConfig pluginName(final String pluginName) {
+        this.pluginName = pluginName;
+        return this;
+    }
+
+    public MountConfig auditNonHmacRequestKeys(final List<String> auditNonHmacRequestKeys) {
+        if (auditNonHmacRequestKeys != null) {
+            this.auditNonHmacRequestKeys = new ArrayList<>();
+            this.auditNonHmacRequestKeys.addAll(auditNonHmacRequestKeys);
+        }
+        return this;
+    }
+
+    public MountConfig auditNonHmacResponseKeys(final List<String> auditNonHmacResponseKeys) {
+        if (auditNonHmacResponseKeys != null) {
+            this.auditNonHmacResponseKeys = new ArrayList<>();
+            this.auditNonHmacResponseKeys.addAll(auditNonHmacResponseKeys);
+        }
+        return this;
+    }
+
+    public List<String> getAuditNonHmacRequestKeys() {
+        if (auditNonHmacRequestKeys == null) {
+            return null;
+        } else {
+            final List<String> clone = new ArrayList<>();
+            clone.addAll(auditNonHmacRequestKeys);
+            return clone;
+        }
+    }
+
+    public List<String> getAuditNonHmacResponseKeys() {
+        if (auditNonHmacResponseKeys == null) {
+            return null;
+        } else {
+            final List<String> clone = new ArrayList<>();
+            clone.addAll(auditNonHmacResponseKeys);
+            return clone;
+        }
+    }
+}

@@ -17,6 +17,7 @@ import java.util.Map;
 public class LogicalResponse extends VaultResponse {
 
     private Map<String, String> data = new HashMap<>();
+    private JsonObject dataObject = null;
     private String leaseId;
     private Boolean renewable;
     private Long leaseDuration;
@@ -34,6 +35,10 @@ public class LogicalResponse extends VaultResponse {
 
     public Map<String, String> getData() {
         return data;
+    }
+
+    public JsonObject getDataObject() {
+        return dataObject;
     }
 
     public String getLeaseId() {
@@ -68,7 +73,8 @@ public class LogicalResponse extends VaultResponse {
                 jsonObject = jsonObject.get("data").asObject();
             }
             data = new HashMap<>();
-            for (final JsonObject.Member member : jsonObject.get("data").asObject()) {
+            dataObject = jsonObject.get("data").asObject();
+            for (final JsonObject.Member member : dataObject) {
                 final JsonValue jsonValue = member.getValue();
                 if (jsonValue == null || jsonValue.isNull()) {
                     continue;

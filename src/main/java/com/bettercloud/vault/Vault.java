@@ -5,6 +5,7 @@ import com.bettercloud.vault.api.Debug;
 import com.bettercloud.vault.api.Leases;
 import com.bettercloud.vault.api.Logical;
 import com.bettercloud.vault.api.Seal;
+import com.bettercloud.vault.api.mounts.Mounts;
 import com.bettercloud.vault.api.pki.Pki;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
@@ -207,6 +208,15 @@ public class Vault {
      */
     public Debug debug() {
         return new Debug(vaultConfig);
+    }
+
+    /**
+     * Returns the implementing class for Vault's sys mounts operations (i.e. <code>/v1/sys/mounts/*</code> REST endpoints).
+     *
+     * @return the implementing class for Vault's sys mounts operations
+     */
+    public Mounts mounts() {
+        return new Mounts(vaultConfig);
     }
 
     /**
