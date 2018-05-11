@@ -13,7 +13,6 @@ import com.bettercloud.vault.rest.RestResponse;
 import lombok.Getter;
 
 import java.io.Serializable;
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -225,7 +224,7 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw createFailedRestCallException(restResponse);
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -290,7 +289,7 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw createFailedRestCallException(restResponse);
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -383,7 +382,7 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw createFailedRestCallException(restResponse);
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -466,7 +465,7 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw createFailedRestCallException(restResponse);
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -589,7 +588,7 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw createFailedRestCallException(restResponse);
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -666,7 +665,7 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw createFailedRestCallException(restResponse);
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -691,6 +690,11 @@ public class Auth {
                 }
             }
         }
+    }
+
+    private VaultException createFailedRestCallException(RestResponse restResponse) {
+        return new VaultException(String.format("Vault responded with HTTP status code: %s - Response Body: %s",
+                restResponse.getStatus(), new String(restResponse.getBody())), restResponse.getStatus());
     }
 
     /**
