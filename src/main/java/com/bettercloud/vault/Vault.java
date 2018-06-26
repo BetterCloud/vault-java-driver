@@ -167,9 +167,19 @@ public class Vault {
     public Sys sys() { return new Sys(vaultConfig); }
 
     /**
-     * TODO
+     * Makes a REST call to Vault, to collect information on which secret engine version (if any) is used by each available
+     * mount point.  Possibilities are:
      *
-     * @return
+     * <ul>
+     *     <li>"2" - A mount point running on Vault 0.10 or higher, configured to use the engine 2 API</li>
+     *     <li>"1" - A mount point running on Vault 0.10 or higher, configured to use the engine 1 API</li>
+     *     <li>"unknown" - A mount point running on an older version of Vault.  Can more or less be treated as "1".</li>
+     * </ul>
+     *
+     * IMPORTANT:  Whichever authentication mechanism is being used with the <code>VaultConfig</code> object, that principal
+     *             needs permission to access the <code>/v1/sys/mounts</code> REST endpoint.
+     *
+     * @return A map of mount points (e.g. "/secret") to secret engine version numbers (e.g. "2")
      */
     protected Map<String, String> collectSecretEngineVersions() {
         try {

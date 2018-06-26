@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
@@ -146,7 +147,7 @@ public class Logical {
                 if (restStatus == 204) {
                     return new LogicalResponse(restResponse, retryCount);
                 } else if (restStatus == 200) {
-                    final Map<String, String> data = parseWriteResponseData(restResponse);
+                    final Map<String, String> data = parseWriteOrListResponseData(restResponse);
                     return new LogicalResponse(restResponse, retryCount, data);
                 } else {
                     throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus, restStatus);
@@ -208,7 +209,7 @@ public class Logical {
                         throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                     }
 
-                    final Map<String, String> data = parseListResponseData(restResponse);
+                    final Map<String, String> data = parseWriteOrListResponseData(restResponse);
                     response = new LogicalResponse(restResponse, retryCount, data);
                     break;
                 } catch (RuntimeException | VaultException | RestException e) {
@@ -321,31 +322,24 @@ public class Logical {
     }
 
     /**
-     * TODO
+     * Convenience method to parse the payload of a write or list operation.  Unlike read operations, whose payloads vary depending on
+     * whether the mount point uses a version 1 or 2 secret backend... writes and lists always use a version 1 style payload.
      *
      * @param restResponse
      * @return
      * @throws VaultException
      */
-    private Map<String, String> parseWriteResponseData(final RestResponse restResponse) throws VaultException {
-        final String jsonString = getJsonDataFromResponse(restResponse);
-        JsonObject jsonData = Json.parse(jsonString).asObject().get("data").asObject();
-        return buildResponseDataMap(jsonData);
+    private Map<String, String> parseWriteOrListResponseData(final RestResponse restResponse) throws VaultException {
+        return parseReadResponseData(restResponse, "1");
     }
 
     /**
-     * TODO
+     * Performs basic validation, and extracts a JSON payload from a REST response body.
      *
      * @param restResponse
      * @return
      * @throws VaultException
      */
-    private Map<String, String> parseListResponseData(final RestResponse restResponse) throws VaultException {
-        final String jsonString = getJsonDataFromResponse(restResponse);
-        final JsonObject jsonData = Json.parse(jsonString).asObject().get("data").asObject();
-        return buildResponseDataMap(jsonData);
-    }
-
     private String getJsonDataFromResponse(final RestResponse restResponse) throws VaultException {
         final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
         if (!mimeType.equals("application/json")) {
@@ -358,6 +352,12 @@ public class Logical {
         }
     }
 
+    /**
+     * Converts a parsed response payload into a Java map of name/value secret pairs.
+     *
+     * @param jsonData
+     * @return
+     */
     private Map<String, String> buildResponseDataMap(final JsonObject jsonData) {
         final Map<String, String> data = new HashMap<String, String>();//NOPMD
         for (final JsonObject.Member member : jsonData) {
@@ -374,7 +374,9 @@ public class Logical {
     }
 
     /**
-     * TODO
+     * In version 1 style secret engines, the same path is used for all CRUD operations on a secret.  In version 2 though, the
+     * path varies depending on the operation being performed.  When reading or writing a secret, you must inject the path
+     * segment "data" right after the lowest-level path segment.
      *
      * @param path
      * @return
@@ -396,7 +398,9 @@ public class Logical {
     }
 
     /**
-     * TODO
+     * In version 1 style secret engines, the same path is used for all CRUD operations on a secret.  In version 2 though, the
+     * path varies depending on the operation being performed.  When listing secrets available beneath a path, you must inject the
+     * path segment "metadata" right after the lowest-level path segment.
      *
      * @param path
      * @return
@@ -420,7 +424,9 @@ public class Logical {
     }
 
     /**
-     * TODO
+     * In version 1 style secret engines, the same path is used for all CRUD operations on a secret.  In version 2 though, the
+     * path varies depending on the operation being performed.  When deleting secrets, you must inject the  path segment "metadata"
+     * right after the lowest-level path segment.
      *
      * @param path
      * @return
@@ -440,7 +446,7 @@ public class Logical {
     }
 
     /**
-     * TODO
+     * Convenience method to split a Vault path into its path segments.
      *
      * @param path
      * @return
@@ -455,7 +461,8 @@ public class Logical {
     }
 
     /**
-     * TODO
+     * For a given mount point, looks up the corresponding secret engine version that was found during the "pre-flight check".
+     * {@link Vault#collectSecretEngineVersions()}
      *
      * @param pathRoot
      * @return
@@ -465,7 +472,8 @@ public class Logical {
     }
 
     /**
-     * TODO
+     * Injects the supplied qualifier (either "data" or "metadata") into the second-from-the-root segment position, for a Vault
+     * path to be converted for use with a version 2 secret engine.
      *
      * @param segments
      * @param qualifier
