@@ -6,6 +6,16 @@ import com.bettercloud.vault.api.Leases;
 import com.bettercloud.vault.api.Logical;
 import com.bettercloud.vault.api.Sys;
 import com.bettercloud.vault.api.pki.Pki;
+import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.json.JsonObject;
+import com.bettercloud.vault.json.JsonValue;
+import com.bettercloud.vault.rest.Rest;
+import com.bettercloud.vault.rest.RestException;
+import com.bettercloud.vault.rest.RestResponse;
+
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>The Vault driver class, the primary interface through which dependent applications will access Vault.</p>
@@ -50,6 +60,12 @@ public class Vault {
      */
     public Vault(final VaultConfig vaultConfig) {
         this.vaultConfig = vaultConfig;
+
+        if (this.vaultConfig.getSecretEngineVersions().isEmpty()) {
+            final Map<String, String> secretEngineVersions = collectSecretEngineVersions();
+            this.vaultConfig.getSecretEngineVersions().clear();
+            this.vaultConfig.getSecretEngineVersions().putAll(secretEngineVersions);
+        }
     }
 
     /**
@@ -149,4 +165,43 @@ public class Vault {
      */
     @Deprecated
     public Sys sys() { return new Sys(vaultConfig); }
+
+    /**
+     * TODO
+     *
+     * @return
+     */
+    protected Map<String, String> collectSecretEngineVersions() {
+        try {
+            final RestResponse restResponse = new Rest()//NOPMD
+                                                        .url(vaultConfig.getAddress() + "/v1/sys/mounts")
+                                                        .header("X-Vault-Token", vaultConfig.getToken())
+                                                        .connectTimeoutSeconds(vaultConfig.getOpenTimeout())
+                                                        .readTimeoutSeconds(vaultConfig.getReadTimeout())
+                                                        .sslPemUTF8(vaultConfig.getSslPemUTF8())
+                                                        .sslVerification(vaultConfig.isSslVerify() != null ? vaultConfig.isSslVerify() : null)
+                                                        .get();
+
+            final String jsonString = new String(restResponse.getBody(), "UTF-8");
+            final Map<String, String> data = new HashMap<String, String>();
+            final JsonObject jsonData = Json.parse(jsonString).asObject().get("data").asObject();
+            for (JsonObject.Member member : jsonData) {
+                final String name = member.getName();
+                String version = "unknown";
+
+                final JsonValue options = member.getValue().asObject().get("options");
+                if (options != null && options.isObject()) {
+                    final JsonValue ver = options.asObject().get("version");
+                    if (ver != null && ver.isString()) {
+                        version = ver.asString();
+                    }
+                }
+                data.put(name, version);
+            }
+            return data;
+        } catch (RestException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

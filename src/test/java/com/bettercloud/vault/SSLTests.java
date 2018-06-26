@@ -28,6 +28,8 @@ public class SSLTests {
         server.start();
 
         final VaultConfig vaultConfig = new VaultConfig().address("https://127.0.0.1:9998").token("mock_token").sslVerify(false).build();
+        vaultConfig.getSecretEngineVersions().put("secret/", "1");
+
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().read("secret/hello");
 
@@ -44,6 +46,8 @@ public class SSLTests {
         server.start();
 
         final VaultConfig vaultConfig = new VaultConfig().address("https://127.0.0.1:9998").token("mock_token").build();
+        vaultConfig.getSecretEngineVersions().put("secret/", "1");
+
         final Vault vault = new Vault(vaultConfig);
 
         try {
@@ -61,6 +65,8 @@ public class SSLTests {
         server.start();
 
         final VaultConfig vaultConfig = new VaultConfig().address("https://127.0.0.1:9998").token("mock_token").sslVerify(false).build();
+        vaultConfig.getSecretEngineVersions().put("secret/", "1");
+
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().write("secret/hello", new HashMap() {{ put("value", "world"); }});
         assertEquals(204, response.getRestResponse().getStatus());
@@ -75,6 +81,8 @@ public class SSLTests {
         server.start();
 
         final VaultConfig vaultConfig = new VaultConfig().address("https://127.0.0.1:9998").token("mock_token").build();
+        vaultConfig.getSecretEngineVersions().put("secret/", "1");
+
         final Vault vault = new Vault(vaultConfig);
 
         try {
@@ -107,6 +115,8 @@ public class SSLTests {
                 .token("mock_token")
                 .sslPemFile(pem)
                 .build();
+        vaultConfig.getSecretEngineVersions().put("secret/", "1");
+
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().read("secret/hello");
 
@@ -124,6 +134,8 @@ public class SSLTests {
                 .token("mock_token")
                 .sslPemResource("/cert.pem")
                 .build();
+        vaultConfig.getSecretEngineVersions().put("secret/", "1");
+
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().read("secret/hello");
 
@@ -141,6 +153,8 @@ public class SSLTests {
                 .token("mock_token")
                 .sslPemResource("/cert.pem")
                 .build();
+        vaultConfig.getSecretEngineVersions().put("secret/", "1");
+
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical()
                 .write("secret/hello", new HashMap() {{ put("value", "world"); }});
@@ -165,6 +179,8 @@ public class SSLTests {
         final String pemUTF8 = utf8;
 
         final VaultConfig vaultConfig = new VaultConfig().address("https://127.0.0.1:9998").token("mock_token").sslPemUTF8(pemUTF8).build();
+        vaultConfig.getSecretEngineVersions().put("secret/", "1");
+
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().read("secret/hello");
 

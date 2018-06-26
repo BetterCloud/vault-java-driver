@@ -26,6 +26,8 @@ public class TimeoutTests {
                 .token("mock_token")
                 .openTimeout(3)
                 .build();
+        vaultConfig.getSecretEngineVersions().put("secret/", "1");
+
         final Vault vault = new Vault(vaultConfig);
 
         // The Vault call should succeed
@@ -47,6 +49,8 @@ public class TimeoutTests {
                 .token("mock_token")
                 .openTimeout(1)
                 .build();
+        vaultConfig.getSecretEngineVersions().put("secret/", "1");
+
         final Vault vault = new Vault(vaultConfig);
 
         // The Vault call should time out
@@ -71,6 +75,8 @@ public class TimeoutTests {
                 .token("mock_token")
                 .readTimeout(3)
                 .build();
+        vaultConfig.getSecretEngineVersions().put("secret/", "1");
+
         final Vault vault = new Vault(vaultConfig);
 
         // The Vault call should succeed
@@ -92,6 +98,8 @@ public class TimeoutTests {
                 .token("mock_token")
                 .readTimeout(1)
                 .build();
+        vaultConfig.getSecretEngineVersions().put("secret/", "1");
+
         final Vault vault = new Vault(vaultConfig);
 
         // The Vault call should time out

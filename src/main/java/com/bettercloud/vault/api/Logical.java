@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
@@ -49,25 +50,27 @@ public class Logical {
      * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
      */
     public LogicalResponse read(final String path) throws VaultException {
+        final String version = getSecretEngineVersion(getPathSegments(path).get(0));
+        final String adjustedPath = adjustPathForReadOrWrite(path);
         int retryCount = 0;
         while (true) {
             try {
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + path)
-                        .header("X-Vault-Token", config.getToken())
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslPemUTF8(config.getSslPemUTF8())
-                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
-                        .get();
+                                                            .url(config.getAddress() + "/v1/" + adjustedPath)
+                                                            .header("X-Vault-Token", config.getToken())
+                                                            .connectTimeoutSeconds(config.getOpenTimeout())
+                                                            .readTimeoutSeconds(config.getReadTimeout())
+                                                            .sslPemUTF8(config.getSslPemUTF8())
+                                                            .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                                                            .get();
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
 
-                final Map<String, String> data = parseResponseData(restResponse);
+                final Map<String, String> data = parseReadResponseData(restResponse, version);
                 return new LogicalResponse(restResponse, retryCount, data);
             } catch (RuntimeException | VaultException | RestException e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
@@ -112,13 +115,24 @@ public class Logical {
         int retryCount = 0;
         while (true) {
             try {
-                JsonObject requestJson = Json.object();
+                final String version = getSecretEngineVersion(getPathSegments(path).get(0));
+                final String adjustedPath = adjustPathForReadOrWrite(path);
+
+                JsonObject dataJson = Json.object();
                 for (final Map.Entry<String, String> pair : nameValuePairs.entrySet()) {
-                    requestJson = requestJson.add(pair.getKey(), pair.getValue());
+                    dataJson = dataJson.add(pair.getKey(), pair.getValue());
+                }
+                JsonObject requestJson = Json.object();
+                if ("2".equals(version)) {
+                    // For version 2 secret backends, the payload goes inside of an additional nested "data" object
+//                    requestJson = requestJson.add("data", Json.object().add("data", dataJson));
+                    requestJson = requestJson.add("data", dataJson);
+                } else {
+                    requestJson = dataJson;
                 }
 
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + path)
+                        .url(config.getAddress() + "/v1/" + adjustedPath)
                         .body(requestJson.toString().getBytes("UTF-8"))
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -132,7 +146,7 @@ public class Logical {
                 if (restStatus == 204) {
                     return new LogicalResponse(restResponse, retryCount);
                 } else if (restStatus == 200) {
-                    final Map<String, String> data = parseResponseData(restResponse);
+                    final Map<String, String> data = parseWriteResponseData(restResponse);
                     return new LogicalResponse(restResponse, retryCount, data);
                 } else {
                     throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus, restStatus);
@@ -171,10 +185,50 @@ public class Logical {
      * @throws VaultException If any errors occur, or unexpected response received from Vault
      */
     public List<String> list(final String path) throws VaultException {
-        final String fullPath = path == null ? "list=true" : path + "?list=true";
+
+        final String adjustedPath = adjustPathForList(path);
+
         LogicalResponse response = null;
+        int retryCount = 0;
         try {
-            response = read(fullPath);
+            while (true) {
+                try {
+                    // Make an HTTP request to Vault
+                    final RestResponse restResponse = new Rest()//NOPMD
+                                                                .url(config.getAddress() + "/v1/" + adjustedPath)
+                                                                .header("X-Vault-Token", config.getToken())
+                                                                .connectTimeoutSeconds(config.getOpenTimeout())
+                                                                .readTimeoutSeconds(config.getReadTimeout())
+                                                                .sslPemUTF8(config.getSslPemUTF8())
+                                                                .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                                                                .get();
+
+                    // Validate response
+                    if (restResponse.getStatus() != 200) {
+                        throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    }
+
+                    final Map<String, String> data = parseListResponseData(restResponse);
+                    response = new LogicalResponse(restResponse, retryCount, data);
+                    break;
+                } catch (RuntimeException | VaultException | RestException e) {
+                    // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                    if (retryCount < config.getMaxRetries()) {
+                        retryCount++;
+                        try {
+                            final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                            Thread.sleep(retryIntervalMilliseconds);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                    } else if (e instanceof VaultException) {
+                        // ... otherwise, give up.
+                        throw (VaultException) e;
+                    } else {
+                        throw new VaultException(e);
+                    }
+                }
+            }
         } catch (final VaultException e) {
             if (e.getHttpStatusCode() != 404) {
                 throw e;
@@ -211,9 +265,11 @@ public class Logical {
         int retryCount = 0;
         while (true) {
             try {
+                final String adjustedPath = adjustPathForDelete(path);
+
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + path)
+                        .url(config.getAddress() + "/v1/" + adjustedPath)
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -254,21 +310,57 @@ public class Logical {
      * @throws VaultException
      */
     @Deprecated
-    private Map<String, String> parseResponseData(final RestResponse restResponse) throws VaultException {
+    private Map<String, String> parseReadResponseData(final RestResponse restResponse, final String version) throws VaultException {
+        final String jsonString = getJsonDataFromResponse(restResponse);
+        JsonObject jsonData = Json.parse(jsonString).asObject().get("data").asObject();
+        if ("2".equals(version)) {
+            // A version 2 secret engine places the data within an additional nested "data" object
+            jsonData = jsonData.get("data").asObject();
+        }
+        return buildResponseDataMap(jsonData);
+    }
+
+    /**
+     * TODO
+     *
+     * @param restResponse
+     * @return
+     * @throws VaultException
+     */
+    private Map<String, String> parseWriteResponseData(final RestResponse restResponse) throws VaultException {
+        final String jsonString = getJsonDataFromResponse(restResponse);
+        JsonObject jsonData = Json.parse(jsonString).asObject().get("data").asObject();
+        return buildResponseDataMap(jsonData);
+    }
+
+    /**
+     * TODO
+     *
+     * @param restResponse
+     * @return
+     * @throws VaultException
+     */
+    private Map<String, String> parseListResponseData(final RestResponse restResponse) throws VaultException {
+        final String jsonString = getJsonDataFromResponse(restResponse);
+        final JsonObject jsonData = Json.parse(jsonString).asObject().get("data").asObject();
+        return buildResponseDataMap(jsonData);
+    }
+
+    private String getJsonDataFromResponse(final RestResponse restResponse) throws VaultException {
         final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
         if (!mimeType.equals("application/json")) {
             throw new VaultException("Vault responded with MIME type: " + mimeType);
         }
-        String jsonString;
         try {
-            jsonString = new String(restResponse.getBody(), "UTF-8");//NOPMD
+            return new String(restResponse.getBody(), "UTF-8");//NOPMD
         } catch (UnsupportedEncodingException e) {
             throw new VaultException(e);
         }
+    }
 
-        // Parse JSON
+    private Map<String, String> buildResponseDataMap(final JsonObject jsonData) {
         final Map<String, String> data = new HashMap<String, String>();//NOPMD
-        for (final JsonObject.Member member : Json.parse(jsonString).asObject().get("data").asObject()) {
+        for (final JsonObject.Member member : jsonData) {
             final JsonValue jsonValue = member.getValue();
             if (jsonValue == null || jsonValue.isNull()) {
                 continue;
@@ -280,4 +372,114 @@ public class Logical {
         }
         return data;
     }
+
+    /**
+     * TODO
+     *
+     * @param path
+     * @return
+     */
+    private String adjustPathForReadOrWrite(final String path) {
+        final List<String> pathSegments = getPathSegments(path);
+        final String version = getSecretEngineVersion(pathSegments.get(0));
+        if ("2".equals(version)) {
+            // Version 2
+            final StringBuilder adjustedPath = new StringBuilder(addQualifierToPath(pathSegments, "data"));
+            if (path.endsWith("/")) {
+                adjustedPath.append("/");
+            }
+            return adjustedPath.toString();
+        } else {
+            // Version 1
+            return path;
+        }
+    }
+
+    /**
+     * TODO
+     *
+     * @param path
+     * @return
+     */
+    private String adjustPathForList(final String path) {
+        final List<String> pathSegments = getPathSegments(path);
+        final String version = getSecretEngineVersion(pathSegments.get(0));
+        final StringBuilder adjustedPath = new StringBuilder();
+        if ("2".equals(version)) {
+            // Version 2
+            adjustedPath.append(addQualifierToPath(pathSegments, "metadata"));
+            if (path.endsWith("/")) {
+                adjustedPath.append("/");
+            }
+        } else {
+            // Version 1
+            adjustedPath.append(path);
+        }
+        adjustedPath.append("?list=true");
+        return adjustedPath.toString();
+    }
+
+    /**
+     * TODO
+     *
+     * @param path
+     * @return
+     */
+    private String adjustPathForDelete(final String path) {
+        final List<String> pathSegments = getPathSegments(path);
+        final String version = getSecretEngineVersion(pathSegments.get(0));
+        if ("2".equals(version)) {
+            final StringBuilder adjustedPath = new StringBuilder(addQualifierToPath(pathSegments, "metadata"));
+            if (path.endsWith("/")) {
+                adjustedPath.append("/");
+            }
+            return adjustedPath.toString();
+        } else {
+            return path;
+        }
+    }
+
+    /**
+     * TODO
+     *
+     * @param path
+     * @return
+     */
+    private List<String> getPathSegments(final String path) {
+        final List<String> segments = new ArrayList<>();
+        final StringTokenizer tokenizer = new StringTokenizer(path, "/");
+        while (tokenizer.hasMoreTokens()) {
+            segments.add(tokenizer.nextToken());
+        }
+        return segments;
+    }
+
+    /**
+     * TODO
+     *
+     * @param pathRoot
+     * @return
+     */
+    private String getSecretEngineVersion(final String pathRoot) {
+        return config.getSecretEngineVersions().containsKey(pathRoot + "/") ? config.getSecretEngineVersions().get(pathRoot + "/") : "null";
+    }
+
+    /**
+     * TODO
+     *
+     * @param segments
+     * @param qualifier
+     * @return
+     */
+    private String addQualifierToPath(final List<String> segments, final String qualifier) {
+        final StringBuilder adjustedPath = new StringBuilder(segments.get(0)).append('/').append(qualifier).append('/');
+        for (int index = 1; index < segments.size(); index++) {
+            adjustedPath.append(segments.get(index));
+            if (index + 1 < segments.size()) {
+                adjustedPath.append('/');
+            }
+        }
+        return adjustedPath.toString();
+    }
+
 }

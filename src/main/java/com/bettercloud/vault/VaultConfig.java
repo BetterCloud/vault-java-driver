@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <p>A container for the configuration settings needed to initialize a <code>Vault</code> driver instance.</p>
@@ -81,6 +83,7 @@ public class VaultConfig {
     private Integer readTimeout;
     private int maxRetries;
     private int retryIntervalMilliseconds;
+    private final Map<String, String> secretEngineVersions = new ConcurrentHashMap<>();
 
     /**
      * <p>Default constructor.  Should be used in conjunction with the builder pattern, calling additional
@@ -481,6 +484,10 @@ public class VaultConfig {
 
     public int getRetryIntervalMilliseconds() {
         return retryIntervalMilliseconds;
+    }
+
+    public Map<String, String> getSecretEngineVersions() {
+        return secretEngineVersions;
     }
 
     private String inputStreamToUTF8(final InputStream input) throws IOException {
