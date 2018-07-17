@@ -40,7 +40,7 @@ public class Auth {
     public static class TokenRequest implements Serializable {
 
         @Getter private UUID id;
-        @Getter private List<String> polices;
+        @Getter private List<String> policies;
         @Getter private Map<String, String> meta;
         @Getter private Boolean noParent;
         @Getter private Boolean noDefaultPolicy;
@@ -59,11 +59,11 @@ public class Auth {
         }
 
         /**
-         * @param polices (optional) A list of policies for the token. This must be a subset of the policies belonging to the token
-         * @return This object, with its polices field populated
+         * @param policies (optional) A list of policies for the token. This must be a subset of the policies belonging to the token
+         * @return This object, with its policies field populated
          */
-        public TokenRequest polices(final List<String> polices) {
-            this.polices = polices;
+        public TokenRequest policies(final List<String> policies) {
+            this.policies = policies;
             return this;
         }
 
@@ -189,8 +189,8 @@ public class Auth {
                 final JsonObject jsonObject = Json.object();
               
                 if (tokenRequest.id != null) jsonObject.add("id", tokenRequest.id.toString());
-                if (tokenRequest.polices != null && !tokenRequest.polices.isEmpty()) {
-                    jsonObject.add("policies", Json.array(tokenRequest.polices.toArray(new String[tokenRequest.polices.size()])));//NOPMD
+                if (tokenRequest.policies != null && !tokenRequest.policies.isEmpty()) {
+                    jsonObject.add("policies", Json.array(tokenRequest.policies.toArray(new String[tokenRequest.policies.size()])));//NOPMD
                 }
                 if (tokenRequest.meta != null && !tokenRequest.meta.isEmpty()) {
                     final JsonObject metaMap = Json.object();
