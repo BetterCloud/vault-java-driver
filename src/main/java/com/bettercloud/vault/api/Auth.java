@@ -920,6 +920,89 @@ public class Auth {
     }
 
     /**
+     * <p>Basic login operation to authenticate to a kubernetes backend.  This version of the overloaded method assumes
+     * that the auth backend is mounted on the default path (i.e. "/v1/auth/kubernetes").  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().loginByKubernetes("dev", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...");
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param role The kubernetes role used for authentication
+     * @param jwt The JWT token for the role
+     * @return The auth token, with additional response metadata
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse loginByKubernetes(final String role, final String jwt) throws VaultException {
+        return loginByKubernetes(role, jwt, "kubernetes");
+    }
+
+    /**
+     * <p>Basic login operation to authenticate to a Kubernetes backend.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().loginByKubernetes("dev", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...");
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param role The kubernetes role used for authentication
+     * @param jwt The JWT token for the role
+     * @param path The path on which the authentication is performed, following the "/v1/auth/" prefix (e.g. "kubernetes")
+     * @return The auth token, with additional response metadata
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse loginByKubernetes(final String role, final String jwt, final String path) throws VaultException {
+        int retryCount = 0;
+
+        while (true) {
+            try {
+                // HTTP request to Vault
+                final String requestJson = Json.object().add("role", role).add("jwt", jwt).toString();
+                final RestResponse restResponse = new Rest()
+                        .url(config.getAddress() + "/v1/auth/" + path + "/login")
+                        .body(requestJson.getBytes("UTF-8"))
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
+
+                // Validate restResponse
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                }
+                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+                if (!mimeType.equals("application/json")) {
+                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
+                }
+                return new AuthResponse(restResponse, retryCount);
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
+
+    /**
      * <p>Basic login operation to authenticate using Vault's TLS Certificate auth backend.  Example usage:</p>
      *
      * <blockquote>
