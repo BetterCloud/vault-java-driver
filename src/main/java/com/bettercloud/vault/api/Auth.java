@@ -750,7 +750,7 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw createFailedRestCallException(restResponse);
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
