@@ -73,7 +73,10 @@ public class VaultConfig implements Serializable {
      * @return This object, with address populated, ready for additional builder-pattern method calls or else finalization with the build() method
      */
     public VaultConfig address(final String address) {
-        this.address = address;
+        this.address = address.trim();
+        if (this.address.endsWith("/")) {
+            this.address = this.address.substring(0, this.address.length() - 1);
+        }
         return this;
     }
 
