@@ -34,7 +34,7 @@ public class VaultContainer implements TestRule, TestConstants {
 
     /** Establishes a running Docker container, hosting a Vault server instance. */
     public VaultContainer() {
-        container = new GenericContainer("vault:0.9.1")
+        container = new GenericContainer("vault:0.10.4")
                 .withClasspathResourceMapping("/startup.sh", CONTAINER_STARTUP_SCRIPT, BindMode.READ_ONLY)
                 .withClasspathResourceMapping("/config.json", CONTAINER_CONFIG_FILE, BindMode.READ_ONLY)
                 .withClasspathResourceMapping("/libressl.conf", CONTAINER_OPENSSL_CONFIG_FILE, BindMode.READ_ONLY)
