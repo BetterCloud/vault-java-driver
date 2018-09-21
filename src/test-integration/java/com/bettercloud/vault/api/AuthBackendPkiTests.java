@@ -126,7 +126,7 @@ public class AuthBackendPkiTests {
         Thread.sleep(3000);
 
         // Issue cert
-        final PkiResponse issueResponse = vault.pki().issue("testRole", "test.myvault.com", null, null, "1h", CredentialFormat.PEM, csr);
+        final PkiResponse issueResponse = vault.pki().issue("testRole", "test.myvault.com", null, null, "1h", CredentialFormat.PEM, csr, null);
         assertNotNull(issueResponse.getCredential().getCertificate());
         assertNull(issueResponse.getCredential().getPrivateKey());
         assertNotNull(issueResponse.getCredential().getSerialNumber());
