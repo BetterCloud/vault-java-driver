@@ -51,6 +51,18 @@ public class Logical {
      * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
      */
     public LogicalResponse read(final String path) throws VaultException {
+        return read(path, 0);
+    }
+
+    /**
+     * <p>Basic read operation to retrieve a secret of specific version</p>
+     *
+     * @param path          The Vault key value from which to read
+     * @param secretVersion version number of key-value secret
+     * @return The response information returned from Vault
+     * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
+     */
+    public LogicalResponse read(final String path, final int secretVersion) throws VaultException {
         final String version = getSecretEngineVersion(getPathSegments(path).get(0));
         final String adjustedPath = adjustPathForReadOrWrite(path);
         int retryCount = 0;
@@ -58,13 +70,13 @@ public class Logical {
             try {
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
-                                                            .url(config.getAddress() + "/v1/" + adjustedPath)
-                                                            .header("X-Vault-Token", config.getToken())
-                                                            .connectTimeoutSeconds(config.getOpenTimeout())
-                                                            .readTimeoutSeconds(config.getReadTimeout())
-                                                            .sslPemUTF8(config.getSslPemUTF8())
-                                                            .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
-                                                            .get();
+                        .url(config.getAddress() + "/v1/" + adjustedPath + "?version=" + String.valueOf(secretVersion))
+                        .header("X-Vault-Token", config.getToken())
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslPemUTF8(config.getSslPemUTF8())
+                        .sslVerification(config.isSslVerify() != null ? config.isSslVerify() : null)
+                        .get();
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {
