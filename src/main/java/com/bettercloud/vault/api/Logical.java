@@ -28,6 +28,7 @@ import com.bettercloud.vault.rest.RestResponse;
 public class Logical {
 
     private final VaultConfig config;
+    private static final int defaultSecretVersion = 0; //set as logical flag to read latest secrets of kv v1 and v2 without a given version number
 
     public Logical(final VaultConfig config) {
         this.config = config;
@@ -51,26 +52,30 @@ public class Logical {
      * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
      */
     public LogicalResponse read(final String path) throws VaultException {
-        return read(path, 0);
+        return read(path, defaultSecretVersion);
     }
 
     /**
      * <p>Basic read operation to retrieve a secret of specific version</p>
      *
      * @param path          The Vault key value from which to read
-     * @param secretVersion version number of key-value secret
+     * @param secretVersion version number of key-value secret, set to 0 for kv version-1, set greater than 0 for kv version-2
      * @return The response information returned from Vault
      * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
      */
     public LogicalResponse read(final String path, final int secretVersion) throws VaultException {
         final String version = getSecretEngineVersion(getPathSegments(path).get(0));
+        if (secretVersion > 0 && "1".equals(version)) {
+            throw new VaultException("Detected vault v1 which doesn't support kv v2 secret versioning, please enable KV Secrets Engine - Version 2 \n");
+        }
         final String adjustedPath = adjustPathForReadOrWrite(path);
+        final String url = getVersionedUrl(secretVersion, adjustedPath);
         int retryCount = 0;
         while (true) {
             try {
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + adjustedPath + "?version=" + String.valueOf(secretVersion))
+                        .url(url)
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -103,6 +108,11 @@ public class Logical {
                 }
             }
         }
+    }
+
+    private String getVersionedUrl(int secretVersion, String adjustedPath) {
+        return secretVersion > 0 ? String.format("%s/v1/%s?version=%d", config.getAddress(), adjustedPath, secretVersion) :
+                String.format("%s/v1/%s", config.getAddress(), adjustedPath);
     }
 
     /**
