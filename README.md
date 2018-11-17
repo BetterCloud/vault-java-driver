@@ -65,7 +65,7 @@ environment variables.
 
 ```
 final VaultConfig config =
-    new VaultConfig().
+    new VaultConfig()
         .address("http://127.0.0.1:8200")               // Defaults to "VAULT_ADDR" environment variable
         .token("3c9fd6be-7bc2-9d1f-6fb3-cd746c0fc4e8")  // Defaults to "VAULT_TOKEN" environment variable
         .openTimeout(5)                                 // Defaults to "VAULT_OPEN_TIMEOUT" environment variable
