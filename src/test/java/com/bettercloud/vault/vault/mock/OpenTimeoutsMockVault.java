@@ -30,7 +30,7 @@ import java.io.IOException;
  * <blockquote>
  * <pre>{@code
  * final Server server = new Server(8999);
- * server.setHandler( new OpenTimeoutsMockVault(2, 200, "{\"data\":{\"value\":\"mock\"}}") );
+ * server.setHandler( new OpenTimeoutsMockVault(2, 200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}") );
  * server.start();
  *
  * final VaultConfig vaultConfig = new VaultConfig("http://127.0.0.1:8999", "mock_token");

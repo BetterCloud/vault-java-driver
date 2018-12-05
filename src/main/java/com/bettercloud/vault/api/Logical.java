@@ -47,10 +47,14 @@ public class Logical {
      * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
      */
     public LogicalResponse read(final String path) throws VaultException {
-        return read(path, true);
+        return read(path, true, true);
     }
 
     public LogicalResponse read(final String path, boolean shouldRetry) throws VaultException {
+      return read(path, shouldRetry, true);
+  }
+
+    public LogicalResponse read(final String path, boolean shouldRetry, boolean isNested) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
@@ -70,7 +74,7 @@ public class Logical {
                             + "\nResponse body: " + new String(restResponse.getBody(), "UTF-8"), restResponse.getStatus());
                 }
 
-                return new LogicalResponse(restResponse, retryCount);
+                return new LogicalResponse(restResponse, retryCount, isNested);
             } catch (RuntimeException | VaultException | RestException | UnsupportedEncodingException e) {
                 if(shouldRetry == false)
                     throw new VaultException(e);
@@ -143,6 +147,9 @@ public class Logical {
                     }
                 }
 
+                // nesting data
+                requestJson = Json.object().add("data", requestJson);
+
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
                         .body(requestJson.toString().getBytes("UTF-8"))
@@ -198,7 +205,7 @@ public class Logical {
         final String fullPath = path == null ? "list=true" : path + "?list=true";
         LogicalResponse response = null;
         try {
-            response = read(fullPath);
+            response = read(fullPath, true, false);
         } catch (final VaultException e) {
             if (e.getHttpStatusCode() != 404) {
                 throw e;

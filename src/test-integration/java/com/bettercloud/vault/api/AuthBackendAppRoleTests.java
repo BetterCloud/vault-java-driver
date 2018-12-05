@@ -29,7 +29,7 @@ public class AuthBackendAppRoleTests {
 
         final Vault vault = container.getRootVault();
 
-        final LogicalResponse roleIdResponse = vault.logical().read("auth/approle/role/testrole/role-id");
+        final LogicalResponse roleIdResponse = vault.logical().read("auth/approle/role/testrole/role-id", false, false);
         appRoleId = roleIdResponse.getData().get("role_id");
         final LogicalResponse secretIdResponse = vault.logical().write("auth/approle/role/testrole/secret-id", null);
         secretId = secretIdResponse.getData().get("secret_id");

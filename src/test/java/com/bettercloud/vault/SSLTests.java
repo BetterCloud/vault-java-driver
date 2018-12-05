@@ -24,7 +24,7 @@ public class SSLTests {
 
     @Test
     public void testSslVerify_Enabled_Get() throws Exception {
-        final MockVault mockVault = new MockVault(200, "{\"data\":{\"value\":\"mock\"}}");
+        final MockVault mockVault = new MockVault(200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 
@@ -44,7 +44,7 @@ public class SSLTests {
 
     @Test(expected = VaultException.class)
     public void testSslVerify_Disabled_Get() throws Exception {
-        final MockVault mockVault = new MockVault(200, "{\"data\":{\"value\":\"mock\"}}");
+        final MockVault mockVault = new MockVault(200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 
@@ -99,7 +99,7 @@ public class SSLTests {
 
     @Test
     public void testSslPem_File() throws Exception {
-        final MockVault mockVault = new MockVault(200, "{\"data\":{\"value\":\"mock\"}}");
+        final MockVault mockVault = new MockVault(200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 
@@ -127,7 +127,7 @@ public class SSLTests {
 
     @Test
     public void testSslPem_Resource_Get() throws Exception {
-        final MockVault mockVault = new MockVault(200, "{\"data\":{\"value\":\"mock\"}}");
+        final MockVault mockVault = new MockVault(200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 
@@ -162,7 +162,7 @@ public class SSLTests {
 
     @Test
     public void testSslPem_UTF8() throws Exception {
-        final MockVault mockVault = new MockVault(200, "{\"data\":{\"value\":\"mock\"}}");
+        final MockVault mockVault = new MockVault(200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 
@@ -189,7 +189,7 @@ public class SSLTests {
 
     @Test
     public void testSslJks_loadTrustStoreFromClasspath() throws Exception {
-        final MockVault mockVault = new MockVault(200, "{\"data\":{\"value\":\"mock\"}}");
+        final MockVault mockVault = new MockVault(200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 
@@ -220,7 +220,7 @@ public class SSLTests {
             outputStream.write(buffer, 0, noOfBytes);
         }
 
-        final MockVault mockVault = new MockVault(200, "{\"data\":{\"value\":\"mock\"}}");
+        final MockVault mockVault = new MockVault(200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 
@@ -237,7 +237,7 @@ public class SSLTests {
 
     @Test
     public void testSslJks_loadTrustStoreFromMemory() throws Exception {
-        final MockVault mockVault = new MockVault(200, "{\"data\":{\"value\":\"mock\"}}");
+        final MockVault mockVault = new MockVault(200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 
@@ -257,7 +257,7 @@ public class SSLTests {
 
     @Test
     public void testSslJks_loadKeyStoreAndTrustStore() throws Exception {
-        final MockVault mockVault = new MockVault(200, "{\"data\":{\"value\":\"mock\"}}");
+        final MockVault mockVault = new MockVault(200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 

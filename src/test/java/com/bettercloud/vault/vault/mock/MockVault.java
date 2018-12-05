@@ -26,7 +26,7 @@ import com.bettercloud.vault.json.JsonObject;
  * <blockquote>
  * <pre>{@code
  * final Server server = new Server(8999);
- * server.setHandler( new MockVault(200, "{\"data\":{\"value\":\"mock\"}}") );
+ * server.setHandler( new MockVault(200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}") );
  * server.start();
  *
  * final VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("mock_token").build();

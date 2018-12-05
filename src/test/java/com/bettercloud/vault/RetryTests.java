@@ -19,7 +19,7 @@ public class RetryTests {
 
     @Test
     public void testRetries_Read() throws Exception {
-        final RetriesMockVault retriesMockVault = new RetriesMockVault(5, 200, "{\"lease_id\":\"12345\",\"renewable\":false,\"lease_duration\":10000,\"data\":{\"value\":\"mock\"}}");
+        final RetriesMockVault retriesMockVault = new RetriesMockVault(5, 200, "{\"lease_id\":\"12345\",\"renewable\":false,\"lease_duration\":10000,\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpMockVault(retriesMockVault);
         server.start();
 

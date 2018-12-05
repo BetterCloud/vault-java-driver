@@ -24,9 +24,13 @@ public class LogicalResponse extends VaultResponse {
      * @param retries The number of retry attempts that occurred during the API call (can be zero).
      */
     public LogicalResponse(final RestResponse restResponse, final int retries) {
+      this(restResponse, retries, false);
+    }
+
+    public LogicalResponse(final RestResponse restResponse, final int retries, boolean isNested) {
         super(restResponse, retries);
         parseMetadataFields();
-        parseResponseData();
+        parseResponseData(isNested);
     }
 
     public Map<String, String> getData() {
@@ -57,11 +61,18 @@ public class LogicalResponse extends VaultResponse {
         }
     }
 
-    private void parseResponseData() {
+    private void parseResponseData(boolean isNested) {
         try {
             final String jsonString = new String(getRestResponse().getBody(), "UTF-8");
-            final JsonObject jsonObject = Json.parse(jsonString).asObject();
+            JsonObject jsonObject = Json.parse(jsonString).asObject();
+            
+            // get to nested data
             data = new HashMap<>();
+            
+            if(isNested) {
+              jsonObject = jsonObject.get("data").asObject();
+            }
+            
             for (final JsonObject.Member member : jsonObject.get("data").asObject()) {
                 final JsonValue jsonValue = member.getValue();
                 if (jsonValue == null || jsonValue.isNull()) {

@@ -16,7 +16,7 @@ public class TimeoutTests {
     @Test
     public void testOpenTimeout_WithinThreshold() throws Exception {
         // Mock Vault takes 2 seconds to respond
-        final OpenTimeoutsMockVault openTimeoutsMockVault = new OpenTimeoutsMockVault(2, 200, "{\"data\":{\"value\":\"mock\"}}");
+        final OpenTimeoutsMockVault openTimeoutsMockVault = new OpenTimeoutsMockVault(2, 200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpMockVault(openTimeoutsMockVault);
         server.start();
 
@@ -37,7 +37,7 @@ public class TimeoutTests {
     @Test(expected = VaultException.class)
     public void testOpenTimeout_BeyondThreshold() throws Exception {
         // Mock Vault takes 2 seconds to respond
-        final OpenTimeoutsMockVault openTimeoutsMockVault = new OpenTimeoutsMockVault(2, 200, "{\"data\":{\"value\":\"mock\"}}");
+        final OpenTimeoutsMockVault openTimeoutsMockVault = new OpenTimeoutsMockVault(2, 200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpMockVault(openTimeoutsMockVault);
         server.start();
 
@@ -61,7 +61,7 @@ public class TimeoutTests {
     @Test
     public void testReadTimeout_WithinThreshold() throws Exception {
         // Mock Vault takes 2 seconds to respond
-        final ReadTimeoutsMockVault readTimeoutsMockVault = new ReadTimeoutsMockVault(2, 200, "{\"data\":{\"value\":\"mock\"}}");
+        final ReadTimeoutsMockVault readTimeoutsMockVault = new ReadTimeoutsMockVault(2, 200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpMockVault(readTimeoutsMockVault);
         server.start();
 
@@ -82,7 +82,7 @@ public class TimeoutTests {
     @Test(expected = VaultException.class)
     public void testReadTimeout_BeyondThreshold() throws Exception {
         // Mock Vault takes 2 seconds to respond
-        final ReadTimeoutsMockVault readTimeoutsMockVault = new ReadTimeoutsMockVault(3, 200, "{\"data\":{\"value\":\"mock\"}}");
+        final ReadTimeoutsMockVault readTimeoutsMockVault = new ReadTimeoutsMockVault(3, 200, "{\"data\":{\"data\":{\"value\":\"mock\"}}}");
         final Server server = VaultTestUtils.initHttpMockVault(readTimeoutsMockVault);
         server.start();
 
