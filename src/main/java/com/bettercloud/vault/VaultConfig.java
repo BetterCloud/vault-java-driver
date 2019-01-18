@@ -29,6 +29,7 @@ public class VaultConfig implements Serializable {
     private static final String VAULT_ADDR = "VAULT_ADDR";
     private static final String VAULT_OPEN_TIMEOUT = "VAULT_OPEN_TIMEOUT";
     private static final String VAULT_READ_TIMEOUT = "VAULT_READ_TIMEOUT";
+    private static final String VAULT_NAMESPACE = "VAULT_NAMESPACE";
 
     @Getter private String address;
     @Getter private String token;
@@ -37,6 +38,7 @@ public class VaultConfig implements Serializable {
     @Getter private Integer readTimeout;
     @Getter private int maxRetries;
     @Getter private int retryIntervalMilliseconds;
+    @Getter private String namespace;
     private EnvironmentLoader environmentLoader;
 
     /**
@@ -166,6 +168,18 @@ public class VaultConfig implements Serializable {
      */
     protected void setRetryIntervalMilliseconds(final int retryIntervalMilliseconds) {
         this.retryIntervalMilliseconds = retryIntervalMilliseconds;
+    }
+
+
+    /**
+     * <p>Vault Enterprise allows the use of Namespaces to separate vault into different logic vaults-within-a-vault.</p>
+     *
+     * @param namespace The Vault Namespace to use
+     * @return This object, with namnespace populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     */
+    public VaultConfig namespace(final String namespace) {
+        this.namespace = namespace;
+        return this;
     }
 
 

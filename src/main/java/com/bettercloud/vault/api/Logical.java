@@ -58,6 +58,7 @@ public class Logical {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
                         .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -147,6 +148,7 @@ public class Logical {
                         .url(config.getAddress() + "/v1/" + path)
                         .body(requestJson.toString().getBytes("UTF-8"))
                         .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -239,6 +241,7 @@ public class Logical {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
                         .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())

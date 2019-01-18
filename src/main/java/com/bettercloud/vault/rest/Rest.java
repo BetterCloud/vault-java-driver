@@ -169,10 +169,12 @@ public class Rest {
      * @throws RestException If any error occurs, or unexpected response received from Vault
      */
     public Rest header(final String name, final String value) throws RestException {
-        try {
-            this.headers.put(URLEncoder.encode(name, "UTF-8"), URLEncoder.encode(value, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new RestException(e);
+        if (value != null) {
+            try {
+                this.headers.put(URLEncoder.encode(name, "UTF-8"), URLEncoder.encode(value, "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                throw new RestException(e);
+            }
         }
         return this;
     }

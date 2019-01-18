@@ -44,6 +44,7 @@ public class Leases {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke/" + leaseId)
                         .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -98,6 +99,7 @@ public class Leases {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-prefix/" + prefix)
                         .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -155,6 +157,7 @@ public class Leases {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-force/" + prefix)
                         .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -217,6 +220,7 @@ public class Leases {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
                         .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())

@@ -216,6 +216,7 @@ public class Auth {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(url)
                         .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -281,6 +282,7 @@ public class Auth {
                 final String requestJson = Json.object().add("app_id", appId).add("user_id", userId).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + path)
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -339,6 +341,70 @@ public class Auth {
     }
 
     /**
+     * <p>Basic login operation to authenticate to an app-role backend.  This version of the overloaded method assumes
+     * that the auth backend is mounted on the default path (i.e. "/v1/auth/approle").  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().loginByAppRole(9e1aede8-dcc6-a293-8223-f0d824a467ed", "9ff4b26e-6460-834c-b925-a940eddb6880", "auth-ns");
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param roleId The role-id used for authentication
+     * @param secretId The secret-id used for authentication
+     * @param namespace The namespace to use for authentication
+     * @return The auth token, with additional response metadata
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse loginByAppRoleWithNamespace(final String roleId, final String secretId, final String namespace) throws VaultException {
+        final String path = "approle";
+        int retryCount = 0;
+        while (true) {
+            try {
+                // HTTP request to Vault
+                final String requestJson = Json.object().add("role_id", roleId).add("secret_id", secretId).toString();
+                final RestResponse restResponse = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/auth/" + path + "/login")
+                        .header("X-Vault-Namespace", namespace)
+                        .body(requestJson.getBytes("UTF-8"))
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
+
+                // Validate restResponse
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                }
+                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+                if (!mimeType.equals("application/json")) {
+                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
+                }
+                return new AuthResponse(restResponse, retryCount);
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
+
+    /**
      * <p>Basic login operation to authenticate to an app-role backend.  This version of the overloaded method
      * requires you to explicitly specify the path on which the auth backend is mounted, following the "/v1/auth/"
      * prefix.  Example usage:</p>
@@ -374,6 +440,7 @@ public class Auth {
                 final String requestJson = Json.object().add("role_id", roleId).add("secret_id", secretId).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + path + "/login")
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -457,6 +524,7 @@ public class Auth {
                 final String requestJson = Json.object().add("password", password).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login/" + username)
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -580,6 +648,7 @@ public class Auth {
                 final String requestJson = request.toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -657,6 +726,7 @@ public class Auth {
                 final String requestJson = request.toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -737,6 +807,7 @@ public class Auth {
                 final String requestJson = request.toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -821,6 +892,7 @@ public class Auth {
                 final String requestJson = Json.object().add("token", githubToken).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -883,6 +955,7 @@ public class Auth {
                 final String requestJson = Json.object().add("role", role).add("jwt", jwt).toString();
                 final RestResponse restResponse = new Rest()
                         .url(config.getAddress() + "/v1/auth/gcp/login")
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -978,6 +1051,7 @@ public class Auth {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -1058,6 +1132,7 @@ public class Auth {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/renew-self")
                         .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -1119,6 +1194,7 @@ public class Auth {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/lookup-self")
                         .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -1179,6 +1255,7 @@ public class Auth {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/wrapping/lookup")
                         .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -1239,6 +1316,7 @@ public class Auth {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/revoke-self")
                         .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", config.getNamespace())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -1338,6 +1416,7 @@ public class Auth {
                 final RestResponse restResponse = new Rest()
                                 .url(url)
                                 .header("X-Vault-Token", config.getToken())
+                                .header("X-Vault-Namespace", config.getNamespace())
                                 .body(requestJson.getBytes("UTF-8"))
                                 .connectTimeoutSeconds(config.getOpenTimeout())
                                 .readTimeoutSeconds(config.getReadTimeout())
