@@ -90,10 +90,10 @@ public class VaultContainer implements TestRule, TestConstants {
      * when placed inside of the constructor or {@link this#apply(Statement, Description)} methods here, presumably
      * because the Docker container spawned by TestContainers is not ready to accept commonds until after those
      * methods complete.
-     * <p>
-     * This method initializes the Vault server, capturing the unseal key and root token that are displayed on the
+     *
+     * <p>This method initializes the Vault server, capturing the unseal key and root token that are displayed on the
      * console.  It then uses the key to unseal the Vault instance, and stores the token in a member field so it
-     * will be available to other methods.
+     * will be available to other methods.</p>
      *
      * @throws IOException
      * @throws InterruptedException

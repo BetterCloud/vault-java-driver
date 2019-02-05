@@ -60,10 +60,10 @@ public class VaultConfig implements Serializable {
      * constructing a <code>VaultConfig</code> instance using the builder pattern approach rather than the convenience
      * constructor.  This method's access level was therefore originally set to <code>protected</code>, but was bumped
      * up to <code>public</code> due to community request for the ability to disable environment loading altogether
-     * (see https://github.com/BetterCloud/vault-java-driver/issues/77).
-     * <p>
-     * Note that if you do override this, however, then obviously all of the environment checking discussed in the
-     * documentation becomes disabled.
+     * (see https://github.com/BetterCloud/vault-java-driver/issues/77).</p>
+     *
+     * <p>Note that if you do override this, however, then obviously all of the environment checking discussed in the
+     * documentation becomes disabled.</p>
      *
      * @param environmentLoader An environment variable loader implementation (presumably a mock)
      * @return This object, with environmentLoader populated, ready for additional builder-pattern method calls or else finalization with the build() method
