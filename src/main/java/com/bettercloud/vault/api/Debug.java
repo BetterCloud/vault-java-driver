@@ -10,7 +10,6 @@ import com.bettercloud.vault.rest.RestResponse;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.bettercloud.vault.api.LogicalUtilities.retry;
 
 /**
  * <p>The implementing class for operations on REST endpoints, under the "Debug" section of the Vault HTTP API
@@ -24,9 +23,17 @@ public class Debug {
 
     private final VaultConfig config;
 
+    private String nameSpace;
+
     public Debug(final VaultConfig config) {
         this.config = config;
     }
+
+    public Debug withNameSpace(final String nameSpace) {
+        this.nameSpace = nameSpace;
+        return this;
+    }
+
 
     /**
      * <p>Returns the health status of Vault. This matches the semantics of a Consul HTTP
@@ -89,6 +96,9 @@ public class Debug {
                 if (config.getToken() != null) {
                     rest.header("X-Vault-Token", config.getToken());
                 }
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    rest.header("X-Vault-Namespace", this.nameSpace);
+                }
                 // Add params if present
                 if (standbyOk != null) rest.parameter("standbyok", standbyOk.toString());
                 if (activeCode != null) rest.parameter("activecode", activeCode.toString());
@@ -111,7 +121,20 @@ public class Debug {
                 return new HealthResponse(restResponse, retryCount);
             } catch (RuntimeException | VaultException | RestException e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-               retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }

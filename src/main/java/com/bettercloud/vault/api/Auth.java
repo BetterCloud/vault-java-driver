@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.bettercloud.vault.api.LogicalUtilities.retry;
 
 /**
  * <p>The implementing class for operations on Vault's <code>/v1/auth/*</code> REST endpoints.</p>
@@ -144,8 +143,15 @@ public class Auth {
 
     private final VaultConfig config;
 
+    private String nameSpace;
+
     public Auth(final VaultConfig config) {
         this.config = config;
+    }
+
+    public Auth withNameSpace(final String nameSpace) {
+        this.nameSpace = nameSpace;
+        return this;
     }
 
     /**
@@ -224,15 +230,23 @@ public class Auth {
                 final String url = urlBuilder.toString();
 
                 // HTTP request to Vault
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(url)
                         .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -245,7 +259,20 @@ public class Auth {
                 return new AuthResponse(restResponse, retryCount);
             } catch (final Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -276,15 +303,23 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
+                final RestResponse restResponse;
                 final String requestJson = Json.object().add("app_id", appId).add("user_id", userId).toString();
-                final RestResponse restResponse = new Rest()//NOPMD
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + path)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -297,7 +332,20 @@ public class Auth {
                 return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -356,15 +404,23 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
+                final RestResponse restResponse;
                 final String requestJson = Json.object().add("role_id", roleId).add("secret_id", secretId).toString();
-                final RestResponse restResponse = new Rest()//NOPMD
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + path + "/login")
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -376,7 +432,20 @@ public class Auth {
                 }
                 return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -425,15 +494,23 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
+                final RestResponse restResponse;
                 final String requestJson = Json.object().add("password", password).toString();
-                final RestResponse restResponse = new Rest()//NOPMD
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login/" + username)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -445,7 +522,20 @@ public class Auth {
                 }
                 return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -533,14 +623,23 @@ public class Auth {
                     request.add("nonce", nonce);
                 }
                 final String requestJson = request.toString();
-                final RestResponse restResponse = new Rest()//NOPMD
+
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -553,7 +652,20 @@ public class Auth {
                 return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -595,14 +707,22 @@ public class Auth {
                     request.add("nonce", nonce);
                 }
                 final String requestJson = request.toString();
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -615,7 +735,20 @@ public class Auth {
                 return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -660,14 +793,22 @@ public class Auth {
                     request.add("role", role);
                 }
                 final String requestJson = request.toString();
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -680,7 +821,20 @@ public class Auth {
                 return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -730,15 +884,23 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
+                final RestResponse restResponse;
                 final String requestJson = Json.object().add("token", githubToken).toString();
-                final RestResponse restResponse = new Rest()//NOPMD
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -751,7 +913,20 @@ public class Auth {
                 return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -779,15 +954,23 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
+                final RestResponse restResponse;
                 final String requestJson = Json.object().add("role", role).add("jwt", jwt).toString();
-                final RestResponse restResponse = new Rest()
+                final Rest rest = new Rest()
                         .url(config.getAddress() + "/v1/auth/gcp/login")
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -800,7 +983,20 @@ public class Auth {
                 return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -862,13 +1058,21 @@ public class Auth {
         final String mount = certAuthMount != null ? certAuthMount : "cert";
         while (true) {
             try {
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(),
@@ -881,7 +1085,20 @@ public class Auth {
                 return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -928,15 +1145,24 @@ public class Auth {
             try {
                 // HTTP request to Vault
                 final String requestJson = Json.object().add("increment", increment).toString();
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/renew-self")
                         .header("X-Vault-Token", config.getToken())
                         .body(increment < 0 ? null : requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
+
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
@@ -948,7 +1174,20 @@ public class Auth {
                 return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -976,14 +1215,23 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/lookup-self")
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .get();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .get();
+                } else {
+                    restResponse = rest.get();
+                }
+
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
@@ -995,7 +1243,20 @@ public class Auth {
                 return new LookupResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -1023,14 +1284,23 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/wrapping/lookup")
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .get();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .get();
+                } else {
+                    restResponse = rest.get();
+                }
+
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(),
@@ -1044,7 +1314,20 @@ public class Auth {
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop
                 // again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -1070,14 +1353,23 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/revoke-self")
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
+
                 // Validate restResponse
                 if (restResponse.getStatus() != 204) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
@@ -1085,7 +1377,20 @@ public class Auth {
                 return;
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -1156,15 +1461,23 @@ public class Auth {
                 final String url = config.getAddress() + "/v1/sys/wrapping/unwrap";
 
                 // HTTP request to Vault
-                final RestResponse restResponse = new Rest()
+                final RestResponse restResponse;
+                final Rest rest = new Rest()
                         .url(url)
                         .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -1179,7 +1492,20 @@ public class Auth {
             } catch (final Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the
                 // loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }

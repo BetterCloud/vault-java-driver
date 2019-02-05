@@ -1,40 +1,13 @@
 package com.bettercloud.vault.api;
 
-import com.bettercloud.vault.VaultConfig;
-import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-public class LogicalUtilities {
 
-    /**
-     * Allows the calling method to retry it's operation, usually through another REST attempt.
-     *
-     * @param retryCount
-     * @param e
-     * @param config
-     * @return
-     */
-    public static void retry(int retryCount, final Exception e, final VaultConfig config) throws VaultException {
-        while (retryCount < config.getMaxRetries()) {
-            retryCount++;
-            try {
-                final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                Thread.sleep(retryIntervalMilliseconds);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
-            }
-        }
-        if (e instanceof VaultException) {
-            // ... otherwise, give up.
-            throw (VaultException) e;
-        } else {
-            throw new VaultException(e);
-        }
-    }
+public class LogicalUtilities {
 
     /**
      * Convenience method to split a Vault path into its path segments.

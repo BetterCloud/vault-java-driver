@@ -111,21 +111,4 @@ public class LogicalUtilitiesTests {
         JsonObject jsonObjectFromEngineVersionV1 = LogicalUtilities.jsonObjectToWriteFromEngineVersion(Logical.logicalOperations.writeV1, jsonObjectV1);
         Assert.assertNull(jsonObjectFromEngineVersionV1.get("data"));
     }
-
-    @Test
-    public void retryTests() {
-        VaultConfig vaultConfig = new VaultConfig();
-        vaultConfig.setRetryIntervalMilliseconds(1000);
-        try {
-            LogicalUtilities.retry(1, new VaultException("e"), vaultConfig);
-        } catch (Exception e) {
-            Assert.assertEquals(e.getClass(), VaultException.class);
-        }
-
-        try {
-            LogicalUtilities.retry(1, new InterruptedException("e"), new VaultConfig());
-        } catch (Exception e) {
-            Assert.assertEquals(e.getClass(), VaultException.class);
-        }
-    }
 }

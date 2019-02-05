@@ -1,6 +1,7 @@
 package com.bettercloud.vault.api;
 
 import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.util.VaultContainer;
@@ -29,7 +30,7 @@ public class AuthBackendAppRoleTests {
         container.initAndUnsealVault();
         container.setupBackendAppRole();
 
-        final Vault vault = container.getRootVault();
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
 
         final LogicalResponse roleIdResponse = vault.logical().read("auth/approle/role/testrole/role-id");
         appRoleId = roleIdResponse.getData().get("role_id");
