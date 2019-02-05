@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
+
 public class LogicalUtilitiesTests {
 
     @Test
