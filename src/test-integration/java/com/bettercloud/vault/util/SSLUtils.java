@@ -130,7 +130,7 @@ public class SSLUtils implements TestConstants {
      * See http://www.programcreek.com/java-api-examples/index.php?api=org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder
      *
      * @param keyPair The RSA keypair with which to generate the certificate
-     * @param issuer The issuer (and subject) to use for the certificate
+     * @param issuer  The issuer (and subject) to use for the certificate
      * @return An X509 certificate
      * @throws IOException
      * @throws CertificateException
@@ -173,7 +173,7 @@ public class SSLUtils implements TestConstants {
      * See https://stackoverflow.com/questions/3313020/write-x509-certificate-into-pem-formatted-string-in-java
      *
      * @param certificate An X509 certificate
-     * @param filename The name (including path) of a file to which the certificate will be written in PEM format
+     * @param filename    The name (including path) of a file to which the certificate will be written in PEM format
      * @throws CertificateEncodingException
      * @throws FileNotFoundException
      */
@@ -186,7 +186,7 @@ public class SSLUtils implements TestConstants {
         final byte[] certBytes = certificate.getEncoded();
         final String certContents = new String(encoder.encode(certBytes));
         final String certPem = certHeader + certContents + certFooter;
-        try (final PrintWriter out = new PrintWriter(filename)){
+        try (final PrintWriter out = new PrintWriter(filename)) {
             out.println(certPem);
         }
     }
@@ -194,7 +194,7 @@ public class SSLUtils implements TestConstants {
     /**
      * See https://stackoverflow.com/questions/3313020/write-x509-certificate-into-pem-formatted-string-in-java
      *
-     * @param key An RSA private key
+     * @param key      An RSA private key
      * @param filename The name (including path) of a file to which the private key will be written in PEM format
      * @throws FileNotFoundException
      */
@@ -206,31 +206,25 @@ public class SSLUtils implements TestConstants {
         final byte[] keyBytes = key.getEncoded();
         final String keyContents = new String(encoder.encode(keyBytes));
         final String keyPem = keyHeader + keyContents + keyFooter;
-        try (final PrintWriter out = new PrintWriter(filename)){
+        try (final PrintWriter out = new PrintWriter(filename)) {
             out.println(keyPem);
         }
     }
+
     /**
-     *
-     * @param CN
-     *            Common Name, is X.509 speak for the name that distinguishes
-     *            the Certificate best, and ties it to your Organization
-     * @param OU
-     *            Organizational unit
-     * @param O
-     *            Organization NAME
-     * @param L
-     *            Location
-     * @param S
-     *            State
-     * @param C
-     *            Country
+     * @param CN Common Name, is X.509 speak for the name that distinguishes
+     *           the Certificate best, and ties it to your Organization
+     * @param OU Organizational unit
+     * @param O  Organization NAME
+     * @param L  Location
+     * @param S  State
+     * @param C  Country
      * @return
      * @throws Exception
      */
-    public  static String generatePKCS10(KeyPair kp, String CN, String OU, String O,
-                                         String L, String S, String C) throws NoSuchAlgorithmException, InvalidKeyException, IOException, CertificateException, SignatureException, OperatorCreationException {
-        X500Principal subject = new X500Principal(String.format("C=%s, ST=%s, L=%s, O=%s, OU=%s, CN=%S", C, S, L, O,OU, CN));
+    public static String generatePKCS10(KeyPair kp, String CN, String OU, String O,
+                                        String L, String S, String C) throws IOException, OperatorCreationException {
+        X500Principal subject = new X500Principal(String.format("C=%s, ST=%s, L=%s, O=%s, OU=%s, CN=%S", C, S, L, O, OU, CN));
         ContentSigner signGen = new JcaContentSignerBuilder("SHA256withRSA").build(kp.getPrivate());
         PKCS10CertificationRequestBuilder builder = new JcaPKCS10CertificationRequestBuilder(subject, kp.getPublic());
         PKCS10CertificationRequest csr = builder.build(signGen);

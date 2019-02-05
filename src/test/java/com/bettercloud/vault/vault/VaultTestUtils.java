@@ -51,7 +51,7 @@ public class VaultTestUtils {
                 new HttpConnectionFactory(https)
         );
         sslConnector.setPort(9998);
-        server.setConnectors(new Connector[] { sslConnector });
+        server.setConnectors(new Connector[]{sslConnector});
 
         server.setHandler(mock);
         return server;

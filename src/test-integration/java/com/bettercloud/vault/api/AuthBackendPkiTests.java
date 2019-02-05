@@ -15,13 +15,13 @@ import org.junit.Test;
 import java.io.IOException;
 import java.security.*;
 import java.util.ArrayList;
-import java.util.Optional;
 
 import static com.bettercloud.vault.util.SSLUtils.generatePKCS10;
-import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.*;
 
-/** Integration tests for for operations on Vault's <code>/v1/pki/*</code> REST endpoints. */
+/**
+ * Integration tests for for operations on Vault's <code>/v1/pki/*</code> REST endpoints.
+ */
 public class AuthBackendPkiTests {
 
     @ClassRule
@@ -83,7 +83,9 @@ public class AuthBackendPkiTests {
         // Create a role
         final PkiResponse createRoleResponse = vault.pki().createOrUpdateRole("testRole",
                 new RoleOptions()
-                        .allowedDomains(new ArrayList<String>(){{ add("myvault.com"); }})
+                        .allowedDomains(new ArrayList<String>() {{
+                            add("myvault.com");
+                        }})
                         .allowSubdomains(true)
                         .maxTtl("9h")
         );
@@ -109,7 +111,7 @@ public class AuthBackendPkiTests {
         PrivateKey pvt = kp.getPrivate();
         String csr = null;
         try {
-            csr = generatePKCS10(kp, "","","","","","");
+            csr = generatePKCS10(kp, "", "", "", "", "", "");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -118,7 +120,9 @@ public class AuthBackendPkiTests {
         // Create a role
         final PkiResponse createRoleResponse = vault.pki().createOrUpdateRole("testRole",
                 new RoleOptions()
-                        .allowedDomains(new ArrayList<String>(){{ add("myvault.com"); }})
+                        .allowedDomains(new ArrayList<String>() {{
+                            add("myvault.com");
+                        }})
                         .allowSubdomains(true)
                         .maxTtl("9h")
         );
@@ -140,7 +144,9 @@ public class AuthBackendPkiTests {
         // Create a role
         final PkiResponse createRoleResponse = vault.pki().createOrUpdateRole("testRole",
                 new RoleOptions()
-                        .allowedDomains(new ArrayList<String>(){{ add("myvault.com"); }})
+                        .allowedDomains(new ArrayList<String>() {{
+                            add("myvault.com");
+                        }})
                         .allowSubdomains(true)
                         .maxTtl("9h")
         );
@@ -162,27 +168,33 @@ public class AuthBackendPkiTests {
     }
 
     private boolean compareRoleOptions(final RoleOptions expected, final RoleOptions actual) {
-        if (expected.getAllowAnyName() != null && !expected.getAllowAnyName().equals(actual.getAllowAnyName())) return false;
-        if (expected.getAllowBareDomains() != null && !expected.getAllowBareDomains().equals(actual.getAllowBareDomains())) return false;
+        if (expected.getAllowAnyName() != null && !expected.getAllowAnyName().equals(actual.getAllowAnyName()))
+            return false;
+        if (expected.getAllowBareDomains() != null && !expected.getAllowBareDomains().equals(actual.getAllowBareDomains()))
+            return false;
         if (expected.getAllowedDomains() != null) {
             if (!expected.getAllowedDomains().containsAll(actual.getAllowedDomains())
                     || !actual.getAllowedDomains().containsAll(expected.getAllowedDomains())) {
                 return false;
             }
         }
-        if (expected.getAllowIpSans() != null && !expected.getAllowIpSans().equals(actual.getAllowIpSans())) return false;
-        if (expected.getAllowLocalhost() != null && !expected.getAllowLocalhost().equals(actual.getAllowLocalhost())) return false;
-        if (expected.getAllowSubdomains() != null && !expected.getAllowSubdomains().equals(actual.getAllowSubdomains())) return false;
+        if (expected.getAllowIpSans() != null && !expected.getAllowIpSans().equals(actual.getAllowIpSans()))
+            return false;
+        if (expected.getAllowLocalhost() != null && !expected.getAllowLocalhost().equals(actual.getAllowLocalhost()))
+            return false;
+        if (expected.getAllowSubdomains() != null && !expected.getAllowSubdomains().equals(actual.getAllowSubdomains()))
+            return false;
         if (expected.getClientFlag() != null && !expected.getClientFlag().equals(actual.getClientFlag())) return false;
-        if (expected.getCodeSigningFlag() != null && !expected.getCodeSigningFlag().equals(actual.getCodeSigningFlag())) return false;
-        if (expected.getEmailProtectionFlag() != null && !expected.getEmailProtectionFlag().equals(actual.getEmailProtectionFlag())) return false;
+        if (expected.getCodeSigningFlag() != null && !expected.getCodeSigningFlag().equals(actual.getCodeSigningFlag()))
+            return false;
+        if (expected.getEmailProtectionFlag() != null && !expected.getEmailProtectionFlag().equals(actual.getEmailProtectionFlag()))
+            return false;
         if (expected.getKeyBits() != null && !expected.getKeyBits().equals(actual.getKeyBits())) return false;
         if (expected.getKeyType() != null && !expected.getKeyType().equals(actual.getKeyType())) return false;
         if (expected.getMaxTtl() != null && !expected.getMaxTtl().equals(actual.getMaxTtl())) return false;
         if (expected.getServerFlag() != null && !expected.getServerFlag().equals(actual.getServerFlag())) return false;
         if (expected.getTtl() != null && !expected.getTtl().equals(actual.getTtl())) return false;
-        if (expected.getUseCsrCommonName() != null && !expected.getUseCsrCommonName().equals(actual.getUseCsrCommonName())) return false;
-        return true;
+        return expected.getUseCsrCommonName() == null || expected.getUseCsrCommonName().equals(actual.getUseCsrCommonName());
     }
 
 }

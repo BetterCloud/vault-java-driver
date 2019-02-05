@@ -7,6 +7,10 @@ import com.bettercloud.vault.response.SealResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
 
+import java.nio.charset.StandardCharsets;
+
+import static com.bettercloud.vault.api.LogicalUtilities.retry;
+
 /**
  * <p>The implementing class for operations on REST endpoints, under the "seal/unseal/seal-status" section of the Vault HTTP API
  * docs (https://www.vaultproject.io/api/system/index.html).</p>
@@ -48,20 +52,7 @@ public class Seal {
                 return;
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace(); //NOPMD
-                    }
-                } else if (e instanceof VaultException) { //NOPMD
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+                retry(retryCount, e, this.config);
             }
         }
     }
@@ -81,7 +72,7 @@ public class Seal {
     /**
      * <p>Enter a single master key share to progress the unsealing of the Vault.</p>
      *
-     * @param key Single master key share
+     * @param key   Single master key share
      * @param reset Specifies if previously-provided unseal keys are discarded and the unseal process is reset
      * @return The response information returned from Vault
      * @throws VaultException If any error occurs, or unexpected response received from Vault
@@ -94,37 +85,17 @@ public class Seal {
                 final String requestJson = Json.object().add("key", key).add("reset", reset).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/unseal")
-                        .body(requestJson.getBytes("UTF-8"))
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
                 // Validate restResponse
-                if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
-                }
-                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
-                if (!mimeType.equals("application/json")) {
-                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
-                }
-                return new SealResponse(restResponse, retryCount);
+                return getSealResponse(retryCount, restResponse);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+                retry(retryCount, e, this.config);
             }
         }
     }
@@ -148,31 +119,22 @@ public class Seal {
                         .sslContext(config.getSslConfig().getSslContext())
                         .get();
                 // Validate restResponse
-                if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
-                }
-                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
-                if (!mimeType.equals("application/json")) {
-                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
-                }
-                return new SealResponse(restResponse, retryCount);
+                return getSealResponse(retryCount, restResponse);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+                retry(retryCount, e, this.config);
             }
         }
+    }
+
+    private SealResponse getSealResponse(final int retryCount, final RestResponse restResponse) throws VaultException {
+        if (restResponse.getStatus() != 200) {
+            throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+        }
+        final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+        if (!mimeType.equals("application/json")) {
+            throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
+        }
+        return new SealResponse(restResponse, retryCount);
     }
 }

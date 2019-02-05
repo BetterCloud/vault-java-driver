@@ -61,7 +61,7 @@ public class RetriesMockVault extends MockVault {
             final Request baseRequest,
             final HttpServletRequest request,
             final HttpServletResponse response
-    ) throws IOException, ServletException {
+    ) throws IOException {
         response.setContentType("application/json");
         baseRequest.setHandled(true);
         if (failureCount > 0) {

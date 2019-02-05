@@ -13,7 +13,9 @@ import java.io.IOException;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
-/** Integration tests for the Username/Password auth backend. */
+/**
+ * Integration tests for the Username/Password auth backend.
+ */
 public class AuthBackendUserPassTests {
 
     @ClassRule
@@ -25,7 +27,9 @@ public class AuthBackendUserPassTests {
         container.setupBackendUserPass();
     }
 
-    /** Test Authentication with new userpass auth backend */
+    /**
+     * Test Authentication with new userpass auth backend
+     */
     @Test
     public void testLoginByUserPass() throws VaultException {
         final Vault vault = container.getVault();

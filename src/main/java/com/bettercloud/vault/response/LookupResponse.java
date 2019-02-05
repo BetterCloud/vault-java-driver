@@ -1,6 +1,7 @@
 package com.bettercloud.vault.response;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class LookupResponse extends VaultResponse {
         super(restResponse, retries);
 
         try {
-            final String responseJson = new String(restResponse.getBody(), "UTF-8");
+            final String responseJson = new String(restResponse.getBody(), StandardCharsets.UTF_8);
             final JsonObject jsonObject = Json.parse(responseJson).asObject();
             final JsonObject dataJsonObject = jsonObject.get("data").asObject();
 
@@ -66,7 +67,7 @@ public class LookupResponse extends VaultResponse {
             renewable = dataJsonObject.getBoolean("renewable", false);
             ttl = dataJsonObject.getLong("ttl", 0);
 
-        } catch (UnsupportedEncodingException | ParseException e) {
+        } catch (ParseException e) {
         }
     }
 

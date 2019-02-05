@@ -13,11 +13,13 @@ import java.io.IOException;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
-/** Integration tests for the AppRole auth backend. */
+/**
+ * Integration tests for the AppRole auth backend.
+ */
 public class AuthBackendAppRoleTests {
 
-    static String appRoleId;
-    static String secretId;
+    private static String appRoleId;
+    private static String secretId;
 
     @ClassRule
     public static final VaultContainer container = new VaultContainer();
@@ -38,7 +40,9 @@ public class AuthBackendAppRoleTests {
         assertNotNull(secretId);
     }
 
-    /** Tests authentication with the app role auth backend */
+    /**
+     * Tests authentication with the app role auth backend
+     */
     @Test
     public void testLoginByAppRole() throws VaultException {
         final Vault vault = container.getVault();

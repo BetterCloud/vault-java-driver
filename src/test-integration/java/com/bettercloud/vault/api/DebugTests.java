@@ -60,11 +60,13 @@ public class DebugTests {
      *
      * <p>For example... Vault still returns a valid JSON payload when you change activeCode to 212 (see test above),
      * but returns an empty payload when you set it to use 204.</p>
+     *
      * @throws VaultException
      */
     @Test
     public void testHealth_WonkyActiveCode() throws VaultException {
-        final HealthResponse response = vault.debug().health(null, 204, null, null);
+        final HealthResponse response = vault.debug().health(null, 204, null,
+                null);
         assertNull(response.getInitialized());
         assertNull(response.getSealed());
         assertNull(response.getStandby());

@@ -7,6 +7,10 @@ import com.bettercloud.vault.response.VaultResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
 
+import java.nio.charset.StandardCharsets;
+
+import static com.bettercloud.vault.api.LogicalUtilities.retry;
+
 /**
  * <p>The implementing class for operations on REST endpoints, under the "Leases" section of the Vault HTTP API
  * docs (https://www.vaultproject.io/docs/http/index.html).</p>
@@ -57,20 +61,7 @@ public class Leases {
                 return new VaultResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+                retry(retryCount, e, this.config);
             }
         }
     }
@@ -111,20 +102,7 @@ public class Leases {
                 return new VaultResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+                retry(retryCount, e, this.config);
             }
         }
     }
@@ -168,20 +146,7 @@ public class Leases {
                 return new VaultResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+                retry(retryCount, e, this.config);
             }
         }
     }
@@ -217,7 +182,7 @@ public class Leases {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
                         .header("X-Vault-Token", config.getToken())
-                        .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
+                        .body(increment < 0 ? null : requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -229,20 +194,7 @@ public class Leases {
                 }
                 return new VaultResponse(restResponse, retryCount);
             } catch (Exception e) {
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+                retry(retryCount, e, this.config);
             }
         }
     }
