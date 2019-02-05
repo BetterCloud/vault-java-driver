@@ -1,7 +1,8 @@
 package com.bettercloud.vault.api;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,8 @@ import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestException;
 import com.bettercloud.vault.rest.RestResponse;
 
+import static com.bettercloud.vault.api.LogicalUtilities.*;
+
 /**
  * <p>The implementing class for Vault's core/logical operations (e.g. read, write).</p>
  *
@@ -25,8 +28,24 @@ public class Logical {
 
     private final VaultConfig config;
 
+    private String nameSpace;
+
+    public enum logicalOperations {authentication, deleteV1, deleteV2, destroy, listV1, listV2, readV1, readV2, writeV1, writeV2, unDelete}
+
     public Logical(final VaultConfig config) {
         this.config = config;
+        nameSpace = null;
+    }
+
+    /**
+     * <p>Adds the requested namespace to the logical operation, which is then passed into the REST headers for said operation.</p>
+     *
+     * @param nameSpace The Vault namespace to access (e.g. <code>secret/</code>).
+     * @return The Logical instance, with the namespace set.
+     */
+    public Logical withNameSpace(final String nameSpace) {
+        this.nameSpace = nameSpace;
+        return this;
     }
 
     /**
@@ -44,51 +63,114 @@ public class Logical {
      *
      * @param path The Vault key value from which to read (e.g. <code>secret/hello</code>)
      * @return The response information returned from Vault
-     * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
+     * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload,
+     *                        etc), and the maximum number of retries is exceeded.
      */
     public LogicalResponse read(final String path) throws VaultException {
-        return read(path, true);
+        if (this.engineVersionForSecretPath(path).equals(2)) {
+            return read(path, true, logicalOperations.readV2);
+        } else return read(path, true, logicalOperations.readV1);
     }
 
-    public LogicalResponse read(final String path, boolean shouldRetry) throws VaultException {
+    private LogicalResponse read(final String path, Boolean shouldRetry, final logicalOperations operation)
+            throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + path)
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, operation))
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .get();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .get();
+                } else {
+                    restResponse = rest.get();
+                }
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
-                            + "\nResponse body: " + new String(restResponse.getBody(), "UTF-8"), restResponse.getStatus());
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
 
-                return new LogicalResponse(restResponse, retryCount);
-            } catch (RuntimeException | VaultException | RestException | UnsupportedEncodingException e) {
-                if(shouldRetry == false)
+                return new LogicalResponse(restResponse, retryCount, operation);
+            } catch (RuntimeException | VaultException | RestException e) {
+                if (!shouldRetry)
                     throw new VaultException(e);
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
+                retry(retryCount, e, this.config);
+            }
+        }
+    }
+
+    /**
+     * <p>Basic read operation to retrieve a specified secret version for KV engine version 2. A single secret key version
+     * can map to multiple name-value pairs, which can be retrieved from the response object.  E.g.:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final LogicalResponse response = vault.logical().read("secret/hello", true, 1);
+     *
+     * final String value = response.getData().get("value");
+     * final String otherValue = response.getData().get("other_value");
+     * }</pre>
+     * </blockquote>
+     *
+     * @param path        The Vault key value from which to read (e.g. <code>secret/hello</code>
+     * @param shouldRetry Whether to try more than once
+     * @param version     The Integer version number of the secret to read, e.g. "1"
+     * @return The response information returned from Vault
+     * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload,
+     *                        etc), and the maximum number of retries is exceeded.
+     */
+    public LogicalResponse read(final String path, Boolean shouldRetry, final Integer version) throws VaultException {
+        if (this.engineVersionForSecretPath(path) != 2) {
+            throw new VaultException("Version reads are only supported in KV Engine version 2.");
+        }
+        int retryCount = 0;
+        while (true) {
+            try {
+                // Make an HTTP request to Vault
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, logicalOperations.readV2))
+                        .header("X-Vault-Token", config.getToken())
+                        .parameter("version", version.toString())
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .get();
                 } else {
-                    throw new VaultException(e);
+                    restResponse = rest.get();
                 }
+
+                // Validate response
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
+                }
+
+                return new LogicalResponse(restResponse, retryCount, logicalOperations.readV2);
+            } catch (RuntimeException | VaultException | RestException e) {
+                if (!shouldRetry)
+                    throw new VaultException(e);
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                retry(retryCount, e, this.config);
             }
         }
     }
@@ -112,12 +194,20 @@ public class Logical {
      * JSON objects to Vault... then you should parse them to JSON outside of this method, and pass them here as JSON
      * strings.</p>
      *
-     * @param path The Vault key value to which to write (e.g. <code>secret/hello</code>)
-     * @param nameValuePairs Secret name and value pairs to store under this Vault key (can be <code>null</code> for writing to keys that do not need or expect any fields to be specified)
+     * @param path           The Vault key value to which to write (e.g. <code>secret/hello</code>)
+     * @param nameValuePairs Secret name and value pairs to store under this Vault key (can be <code>null</code> for
+     *                       writing to keys that do not need or expect any fields to be specified)
      * @return The response information received from Vault
      * @throws VaultException If any errors occurs with the REST request, and the maximum number of retries is exceeded.
      */
     public LogicalResponse write(final String path, final Map<String, Object> nameValuePairs) throws VaultException {
+        if (engineVersionForSecretPath(path).equals(2)) {
+            return write(path, nameValuePairs, logicalOperations.writeV2);
+        } else return write(path, nameValuePairs, logicalOperations.writeV1);
+    }
+
+    private LogicalResponse write(final String path, final Map<String, Object> nameValuePairs,
+                                  final logicalOperations operation) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
@@ -142,41 +232,36 @@ public class Logical {
                         }
                     }
                 }
-
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + path)
-                        .body(requestJson.toString().getBytes("UTF-8"))
+                // Make an HTTP request to Vault
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, operation))
+                        .body(jsonObjectToWriteFromEngineVersion(operation, requestJson).toString().getBytes(StandardCharsets.UTF_8))
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // HTTP Status should be either 200 (with content - e.g. PKI write) or 204 (no content)
                 final int restStatus = restResponse.getStatus();
                 if (restStatus == 200 || restStatus == 204) {
-                    return new LogicalResponse(restResponse, retryCount);
+                    return new LogicalResponse(restResponse, retryCount, operation);
                 } else {
                     throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus
-                            + "\nResponse body: " + new String(restResponse.getBody(), "UTF-8"), restStatus);
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8), restStatus);
                 }
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+                retry(retryCount, e, this.config);
             }
         }
     }
@@ -195,10 +280,15 @@ public class Logical {
      * @throws VaultException If any errors occur, or unexpected response received from Vault
      */
     public List<String> list(final String path) throws VaultException {
-        final String fullPath = path == null ? "list=true" : path + "?list=true";
+        if (engineVersionForSecretPath(path).equals(2)) {
+            return list(path, logicalOperations.listV2);
+        } else return list(path, logicalOperations.listV1);
+    }
+
+    private List<String> list(final String path, final logicalOperations operation) throws VaultException {
         LogicalResponse response = null;
         try {
-            response = read(fullPath);
+            response = read(adjustPathForList(path, operation), true, operation);
         } catch (final VaultException e) {
             if (e.getHttpStatusCode() != 404) {
                 throw e;
@@ -208,9 +298,9 @@ public class Logical {
         final List<String> returnValues = new ArrayList<>();
         if (
                 response != null
-                && response.getRestResponse().getStatus() != 404
-                && response.getData() != null
-                && response.getData().get("keys") != null
+                        && response.getRestResponse().getStatus() != 404
+                        && response.getData() != null
+                        && response.getData().get("keys") != null
         ) {
 
             final JsonArray keys = Json.parse(response.getData().get("keys")).asArray();
@@ -232,42 +322,285 @@ public class Logical {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public LogicalResponse delete(final String path) throws VaultException {
+        if (engineVersionForSecretPath(path).equals(2)) {
+            return delete(path, logicalOperations.deleteV2);
+        } else return delete(path, logicalOperations.deleteV1);
+    }
+
+    private LogicalResponse delete(final String path, final Logical.logicalOperations operation) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + path)
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/" + adjustPathForDelete(path, operation))
+                        .header("X-Vault-Token", config.getToken())
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .delete();
+                } else {
+                    restResponse = rest.delete();
+                }
+
+                // Validate response
+                if (restResponse.getStatus() != 204) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
+                }
+                return new LogicalResponse(restResponse, retryCount, operation);
+            } catch (RuntimeException | VaultException | RestException e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                retry(retryCount, e, this.config);
+            }
+        }
+    }
+
+    /**
+     * <p>Soft deletes the specified version of the key/value pair located at the provided path.</p>
+     * <p>
+     * Only supported for KV Engine version 2. If the data is desired, it can be recovered with a matching unDelete operation.
+     *
+     * <p>If the path represents a sub-path, then all of its contents must be deleted prior to deleting the empty
+     * sub-path itself.</p>
+     *
+     * @param path     The Vault key value to delete (e.g. <code>secret/hello</code>).
+     * @param versions An array of Integers corresponding to the versions you wish to delete, e.g. [1, 2] etc.
+     * @return The response information received from Vault
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public LogicalResponse delete(final String path, final int[] versions) throws VaultException {
+        if (this.engineVersionForSecretPath(path) != 2) {
+            throw new VaultException("Version deletes are only supported for KV Engine 2.");
+        }
+        intArrayCheck(versions);
+        int retryCount = 0;
+        while (true) {
+            try {
+                // Make an HTTP request to Vault
+                final RestResponse restResponse;
+                JsonObject versionsToDelete = new JsonObject().add("versions", versions);
+                final Rest rest = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/" + adjustPathForVersionDelete(path))
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
-                        .delete();
+                        .body(versionsToDelete.toString().getBytes(StandardCharsets.UTF_8));
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
+
+                // Validate response
+                return getLogicalResponse(retryCount, restResponse);
+            } catch (RuntimeException | VaultException | RestException e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                retry(retryCount, e, this.config);
+            }
+        }
+    }
+
+    private LogicalResponse getLogicalResponse(int retryCount, RestResponse restResponse) throws VaultException {
+        if (restResponse.getStatus() != 204) {
+            throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                    + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                    restResponse.getStatus());
+        }
+        return new LogicalResponse(restResponse, retryCount, logicalOperations.deleteV2);
+    }
+
+    private void intArrayCheck(int[] versions) {
+        for (int i : versions) {
+            if (i < 1) {
+                throw new IllegalArgumentException("The document version must be 1 or greater.");
+            }
+        }
+        Arrays.sort(versions);
+    }
+
+    /**
+     * <p>Recovers a soft delete of the specified version of the key/value pair located at the provided path.</p>
+     * <p>
+     * Only supported for KV Engine version 2.
+     *
+     * @param path     The Vault key value to undelete (e.g. <code>secret/hello</code>).
+     * @param versions An array of Integers corresponding to the versions you wish to undelete, e.g. [1, 2] etc.
+     * @return The response information received from Vault
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public LogicalResponse unDelete(final String path, final int[] versions) throws VaultException {
+        if (this.engineVersionForSecretPath(path) != 2) {
+            throw new VaultException("Version undeletes are only supported for KV Engine 2.");
+        }
+        intArrayCheck(versions);
+        int retryCount = 0;
+        while (true) {
+            try {
+                // Make an HTTP request to Vault
+                final RestResponse restResponse;
+                JsonObject versionsToUnDelete = new JsonObject().add("versions", versions);
+                final Rest rest = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/" + adjustPathForVersionUnDelete(path))
+                        .header("X-Vault-Token", config.getToken())
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .body(versionsToUnDelete.toString().getBytes(StandardCharsets.UTF_8));
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
-                            + "\nResponse body: " + new String(restResponse.getBody(), "UTF-8"), restResponse.getStatus());
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
-                return new LogicalResponse(restResponse, retryCount);
-            } catch (RuntimeException | VaultException | RestException | UnsupportedEncodingException e) {
+                return new LogicalResponse(restResponse, retryCount, logicalOperations.unDelete);
+            } catch (RuntimeException | VaultException | RestException e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+                retry(retryCount, e, this.config);
             }
         }
+    }
+
+    /**
+     * <p>Performs a hard delete of the specified version of the key/value pair located at the provided path.</p>
+     * <p>
+     * Only supported for KV Engine version 2. There are no recovery options for the specified version of the data deleted
+     * in this method.
+     *
+     * @param path     The Vault key value to destroy (e.g. <code>secret/hello</code>).
+     * @param versions An array of Integers corresponding to the versions you wish to destroy, e.g. [1, 2] etc.
+     * @return The response information received from Vault
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public LogicalResponse destroy(final String path, final int[] versions) throws VaultException {
+        if (this.engineVersionForSecretPath(path) != 2) {
+            throw new VaultException("Secret destroys are only supported for KV Engine 2.");
+        }
+        intArrayCheck(versions);
+        int retryCount = 0;
+        while (true) {
+            try {
+                // Make an HTTP request to Vault
+                RestResponse restResponse;
+                JsonObject versionsToDestroy = new JsonObject().add("versions", versions);
+                final Rest rest = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/" + adjustPathForVersionDestroy(path))
+                        .header("X-Vault-Token", config.getToken())
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .body(versionsToDestroy.toString().getBytes(StandardCharsets.UTF_8));
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
+
+                // Validate response
+                return getLogicalResponse(retryCount, restResponse);
+            } catch (RuntimeException | VaultException | RestException e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                retry(retryCount, e, this.config);
+            }
+        }
+    }
+
+    /**
+     * <p>Performs an upgrade of the secrets engine version of the specified KV store to version 2.</p>
+     * <p>
+     * There is no downgrading this operation back to version 1.
+     *
+     * @param kvPath The Vault kv engine to upgrade (e.g. <code>secret/</code>).
+     * @return The response information received from Vault
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public LogicalResponse upgrade(final String kvPath) throws VaultException {
+        if (this.engineVersionForSecretPath(kvPath) == 2) {
+            throw new VaultException("This KV engine is already version 2.");
+        }
+        int retryCount = 0;
+        while (true) {
+            try {
+                // Make an HTTP request to Vault
+                RestResponse restResponse;
+                JsonObject kvToUpgrade = new JsonObject().add("options", new JsonObject().add("version", 2));
+                final Rest rest = new Rest()//NOPMD
+                        .url(config.getAddress() + "/v1/sys/mounts/" + (kvPath.replaceAll("/", "") + "/tune"))
+                        .header("X-Vault-Token", config.getToken())
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .body(kvToUpgrade.toString().getBytes(StandardCharsets.UTF_8));
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
+
+                // Validate response
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
+                }
+                return new LogicalResponse(restResponse, retryCount, logicalOperations.authentication);
+            } catch (RuntimeException | VaultException | RestException e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                retry(retryCount, e, this.config);
+            }
+        }
+    }
+
+    private Integer engineVersionForSecretPath(final String secretPath) {
+        if (!this.config.getSecretsEnginePathMap().isEmpty()) {
+            return this.config.getSecretsEnginePathMap().containsKey(secretPath + "/") ?
+                    Integer.valueOf(this.config.getSecretsEnginePathMap().get(secretPath + "/"))
+                    : this.config.getGlobalEngineVersion();
+        }
+        return this.config.getGlobalEngineVersion();
+    }
+
+    /**
+     * <p>Provides the version of the secrets engine of the specified path, e.g. 1 or 2.</p>
+     * First checks if the Vault config secrets engine path map contains the path.
+     * If not, then defaults to the Global Engine version fallback.
+     * <p>
+     *
+     * @param path The Vault secret path to check (e.g. <code>secret/</code>).
+     * @return The response information received from Vault
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public Integer getEngineVersionForSecretPath(final String path) {
+        return this.engineVersionForSecretPath(path);
     }
 }

@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.function.Consumer;
 
-/** Sets up and exposes utilities for dealing with a Docker-hosted instance of Vault, for integration tests. */
+/**
+ * Sets up and exposes utilities for dealing with a Docker-hosted instance of Vault, for integration tests.
+ */
 public class VaultContainer implements TestRule, TestConstants {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultContainer.class);
@@ -32,9 +34,11 @@ public class VaultContainer implements TestRule, TestConstants {
     private String rootToken;
     private String unsealKey;
 
-    /** Establishes a running Docker container, hosting a Vault server instance. */
+    /**
+     * Establishes a running Docker container, hosting a Vault server instance.
+     */
     public VaultContainer() {
-        container = new GenericContainer("vault:0.9.1")
+        container = new GenericContainer("vault:1.0.2")
                 .withClasspathResourceMapping("/startup.sh", CONTAINER_STARTUP_SCRIPT, BindMode.READ_ONLY)
                 .withClasspathResourceMapping("/config.json", CONTAINER_CONFIG_FILE, BindMode.READ_ONLY)
                 .withClasspathResourceMapping("/libressl.conf", CONTAINER_OPENSSL_CONFIG_FILE, BindMode.READ_ONLY)
@@ -49,23 +53,23 @@ public class VaultContainer implements TestRule, TestConstants {
                 .withExposedPorts(8200, 8280)
                 .withCommand("/bin/sh " + CONTAINER_STARTUP_SCRIPT)
                 .waitingFor(
-                // All of the tests in this integration test suite use HTTPS connections.  However, Vault
-                // is configured to run a plain HTTP listener on port 8280, purely for purposes of detecting
-                // when the Docker container is fully ready.
-                //
-                // Unfortunately, we can't use HTTPS at this point in the flow.  Because that would require
-                // configuring SSL to trust the self-signed cert that's generated inside of the Docker
-                // container.  A chicken-and-egg problem, as we need to wait for the container to be fully
-                // ready before we access that cert.
-                new HttpWaitStrategy() {
-                    @Override
-                    protected Integer getLivenessCheckPort() {
-                        return container.getMappedPort(8280);
-                    }
-                }
-                        .forPath("/v1/sys/seal-status")
-                        .forStatusCode(HttpURLConnection.HTTP_BAD_REQUEST) // The expected response when "vault init" has not yet run
-        );
+                        // All of the tests in this integration test suite use HTTPS connections.  However, Vault
+                        // is configured to run a plain HTTP listener on port 8280, purely for purposes of detecting
+                        // when the Docker container is fully ready.
+                        //
+                        // Unfortunately, we can't use HTTPS at this point in the flow.  Because that would require
+                        // configuring SSL to trust the self-signed cert that's generated inside of the Docker
+                        // container.  A chicken-and-egg problem, as we need to wait for the container to be fully
+                        // ready before we access that cert.
+                        new HttpWaitStrategy() {
+                            @Override
+                            protected Integer getLivenessCheckPort() {
+                                return container.getMappedPort(8280);
+                            }
+                        }
+                                .forPath("/v1/sys/seal-status")
+                                .forStatusCode(HttpURLConnection.HTTP_OK) // The expected response when "vault init" has not yet run
+                );
     }
 
     /**
@@ -86,7 +90,7 @@ public class VaultContainer implements TestRule, TestConstants {
      * when placed inside of the constructor or {@link this#apply(Statement, Description)} methods here, presumably
      * because the Docker container spawned by TestContainers is not ready to accept commonds until after those
      * methods complete.
-     *
+     * <p>
      * This method initializes the Vault server, capturing the unseal key and root token that are displayed on the
      * console.  It then uses the key to unseal the Vault instance, and stores the token in a member field so it
      * will be available to other methods.
@@ -99,15 +103,16 @@ public class VaultContainer implements TestRule, TestConstants {
         container.followOutput(logConsumer);
 
         // Initialize the Vault server
-        final Container.ExecResult initResult = runCommand("vault", "init", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-key-shares=1", "-key-threshold=1");
+        final Container.ExecResult initResult = runCommand("vault", "operator", "init", "-ca-cert=" +
+                CONTAINER_CERT_PEMFILE, "-key-shares=1", "-key-threshold=1");
         final String[] initLines = initResult.getStdout().split(System.lineSeparator());
         this.unsealKey = initLines[0].replace("Unseal Key 1: ", "");
-        this.rootToken = initLines[1].replace("Initial Root Token: ", "");
+        this.rootToken = initLines[2].replace("Initial Root Token: ", "");
 
         System.out.println("Root token: " + rootToken.toString());
 
         // Unseal the Vault server
-        runCommand("vault", "unseal", "-ca-cert=" + CONTAINER_CERT_PEMFILE, unsealKey);
+        runCommand("vault", "operator", "unseal", "-ca-cert=" + CONTAINER_CERT_PEMFILE, unsealKey);
     }
 
     /**
@@ -118,11 +123,13 @@ public class VaultContainer implements TestRule, TestConstants {
      * @throws InterruptedException
      */
     public void setupBackendAppId() throws IOException, InterruptedException {
-        runCommand("vault", "auth", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
+        runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
 
-        runCommand("vault", "auth-enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "app-id");
-        runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "auth/app-id/map/app-id/" + APP_ID, "display_name=" + APP_ID);
-        runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "auth/app-id/map/user-id/" + USER_ID, "value=" + APP_ID);
+        runCommand("vault", "auth", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "app-id");
+        runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "auth/app-id/map/app-id/" + APP_ID,
+                "display_name=" + APP_ID);
+        runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "auth/app-id/map/user-id/" + USER_ID,
+                "value=" + APP_ID);
     }
 
     /**
@@ -133,10 +140,11 @@ public class VaultContainer implements TestRule, TestConstants {
      * @throws InterruptedException
      */
     public void setupBackendUserPass() throws IOException, InterruptedException {
-        runCommand("vault", "auth", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
+        runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
 
-        runCommand("vault", "auth-enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "userpass");
-        runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "auth/userpass/users/" + USER_ID, "password=" + PASSWORD);
+        runCommand("vault", "auth", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "userpass");
+        runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "auth/userpass/users/" + USER_ID,
+                "password=" + PASSWORD);
     }
 
     /**
@@ -147,11 +155,11 @@ public class VaultContainer implements TestRule, TestConstants {
      * @throws InterruptedException
      */
     public void setupBackendAppRole() throws IOException, InterruptedException {
-        runCommand("vault", "auth", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
+        runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
 
-        runCommand("vault", "auth-enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "approle");
+        runCommand("vault", "auth", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "approle");
         runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "auth/approle/role/testrole",
-                   "secret_id_ttl=10m", "token_ttl=20m", "token_max_ttl=30m", "secret_id_num_uses=40");
+                "secret_id_ttl=10m", "token_ttl=20m", "token_max_ttl=30m", "secret_id_num_uses=40");
     }
 
     /**
@@ -161,12 +169,12 @@ public class VaultContainer implements TestRule, TestConstants {
      * @throws InterruptedException
      */
     public void setupBackendPki() throws IOException, InterruptedException {
-        runCommand("vault", "auth", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
+        runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
 
-        runCommand("vault", "mount", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=pki", "pki");
-        runCommand("vault", "mount", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=other-pki", "pki");
+        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=pki", "pki");
+        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=other-pki", "pki");
         runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "pki/root/generate/internal",
-                   "common_name=myvault.com", "ttl=99h");
+                "common_name=myvault.com", "ttl=99h");
     }
 
     /**
@@ -177,11 +185,18 @@ public class VaultContainer implements TestRule, TestConstants {
      * @throws InterruptedException
      */
     public void setupBackendCert() throws IOException, InterruptedException {
-        runCommand("vault", "auth", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
+        runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
 
-        runCommand("vault", "auth-enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "cert");
+        runCommand("vault", "auth", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "cert");
         runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "auth/cert/certs/web", "display_name=web",
-                   "policies=web,prod", "certificate=@" + CONTAINER_CLIENT_CERT_PEMFILE, "ttl=3600");
+                "policies=web,prod", "certificate=@" + CONTAINER_CLIENT_CERT_PEMFILE, "ttl=3600");
+    }
+
+    public void setEngineVersions() throws IOException, InterruptedException {
+        //Upgrade default secrets/ Engine to V2, set a new V1 secrets path at "kv-v1/"
+        runCommand("vault", "kv", "enable-versioning", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "secret/");
+        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=kv-v1", "-version=1", "kv");
+        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=kv-v1-Upgrade-Test", "-version=1", "kv");
     }
 
     /**
@@ -201,9 +216,9 @@ public class VaultContainer implements TestRule, TestConstants {
         Vault vault = new Vault(config);
         if (maxRetries != null && retryMillis != null) {
             vault = vault.withRetries(maxRetries, retryMillis);
-        } else if (maxRetries != null && retryMillis == null) {
+        } else if (maxRetries != null) {
             vault = vault.withRetries(maxRetries, RETRY_MILLIS);
-        } else if (maxRetries == null && retryMillis != null) {
+        } else if (retryMillis != null) {
             vault = vault.withRetries(MAX_RETRIES, retryMillis);
         }
         return vault;
@@ -227,7 +242,7 @@ public class VaultContainer implements TestRule, TestConstants {
     }
 
     /**
-     * Constructs a VaultConfig that can be used to congiure your own tests
+     * Constructs a VaultConfig that can be used to configure your own tests
      *
      * @return
      * @throws VaultException
@@ -255,6 +270,24 @@ public class VaultContainer implements TestRule, TestConstants {
                 new VaultConfig()
                         .address(getAddress())
                         .token(token)
+                        .openTimeout(5)
+                        .readTimeout(30)
+                        .sslConfig(new SslConfig().pemFile(new File(CERT_PEMFILE)).build())
+                        .build();
+        return new Vault(config).withRetries(MAX_RETRIES, RETRY_MILLIS);
+    }
+
+    /**
+     * Constructs an instance of the Vault driver using a custom Vault config.
+     *
+     * @return
+     * @throws VaultException
+     */
+    public Vault getRootVaultWithCustomVaultConfig(VaultConfig vaultConfig) throws VaultException {
+        final VaultConfig config =
+                vaultConfig
+                        .address(getAddress())
+                        .token(rootToken)
                         .openTimeout(5)
                         .readTimeout(30)
                         .sslConfig(new SslConfig().pemFile(new File(CERT_PEMFILE)).build())
@@ -320,5 +353,4 @@ public class VaultContainer implements TestRule, TestConstants {
         }
         return result;
     }
-
 }

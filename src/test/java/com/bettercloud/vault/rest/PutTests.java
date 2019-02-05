@@ -4,7 +4,7 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import org.junit.Test;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,17 +17,16 @@ public class PutTests {
      * Verify a basic PUT request, with no parameters or headers.
      *
      * @throws RestException
-     * @throws UnsupportedEncodingException If there's a problem parsing the response JSON as UTF-8
      */
     @Test
-    public void testPut_Plain() throws RestException, UnsupportedEncodingException {
+    public void testPut_Plain() throws RestException {
         final RestResponse restResponse = new Rest()
                 .url("https://httpbin.org/put")
                 .put();
         assertEquals(200, restResponse.getStatus());
         assertEquals("application/json", restResponse.getMimeType());
 
-        final String jsonString = new String(restResponse.getBody(), "UTF-8");
+        final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/put", jsonObject.getString("url", null));
     }
@@ -38,10 +37,9 @@ public class PutTests {
      * sent with the request body.
      *
      * @throws RestException
-     * @throws UnsupportedEncodingException If there's a problem parsing the response JSON as UTF-8
      */
     @Test
-    public void testPut_InsertParams() throws RestException, UnsupportedEncodingException {
+    public void testPut_InsertParams() throws RestException {
         final RestResponse restResponse = new Rest()
                 .url("https://httpbin.org/put")
                 .parameter("foo", "bar")
@@ -51,7 +49,7 @@ public class PutTests {
         assertEquals(200, restResponse.getStatus());
         assertEquals("application/json", restResponse.getMimeType());
 
-        final String jsonString = new String(restResponse.getBody(), "UTF-8");
+        final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/put", jsonObject.getString("url", null));
 
@@ -69,10 +67,9 @@ public class PutTests {
      * sent with the request body.
      *
      * @throws RestException
-     * @throws UnsupportedEncodingException If there's a problem parsing the response JSON as UTF-8
      */
     @Test
-    public void testPut_UpdateParams() throws RestException, UnsupportedEncodingException {
+    public void testPut_UpdateParams() throws RestException {
         final RestResponse restResponse = new Rest()
                 .url("https://httpbin.org/put?hot=cold")
                 .parameter("foo", "bar")
@@ -82,7 +79,7 @@ public class PutTests {
         assertEquals(200, restResponse.getStatus());
         assertEquals("application/json", restResponse.getMimeType());
 
-        final String jsonString = new String(restResponse.getBody(), "UTF-8");
+        final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/put?hot=cold", jsonObject.getString("url", null));
         final JsonObject args = jsonObject.get("args").asObject();
@@ -100,10 +97,9 @@ public class PutTests {
      * converts them to camel case (e.g. <code>two-part</code> to <code>Two-Part</code>).</p>
      *
      * @throws RestException
-     * @throws UnsupportedEncodingException If there's a problem parsing the response JSON as UTF-8
      */
     @Test
-    public void testPut_WithHeaders() throws RestException, UnsupportedEncodingException {
+    public void testPut_WithHeaders() throws RestException {
         final RestResponse restResponse = new Rest()
                 .url("https://httpbin.org/put")
                 .header("black", "white")
@@ -113,7 +109,7 @@ public class PutTests {
         assertEquals(200, restResponse.getStatus());
         assertEquals("application/json", restResponse.getMimeType());
 
-        final String jsonString = new String(restResponse.getBody(), "UTF-8");
+        final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals("https://httpbin.org/put", jsonObject.getString("url", null));
         final JsonObject headers = jsonObject.get("headers").asObject();

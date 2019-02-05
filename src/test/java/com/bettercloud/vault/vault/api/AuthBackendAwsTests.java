@@ -30,7 +30,7 @@ public class AuthBackendAwsTests {
                 return false;
             }
         };
-        final AuthRequestValidatingMockVault mockVault =  new AuthRequestValidatingMockVault(isValidEc2IdRequest);
+        final AuthRequestValidatingMockVault mockVault = new AuthRequestValidatingMockVault(isValidEc2IdRequest);
 
         final Server server = VaultTestUtils.initHttpMockVault(mockVault);
         server.start();
@@ -43,9 +43,10 @@ public class AuthBackendAwsTests {
         String token = null;
         try {
             token = vault.auth()
-                    .loginByAwsEc2("role","identity","signature", null, null)
+                    .loginByAwsEc2("role", "identity", "signature", null, null)
                     .getAuthClientToken();
-        } catch(VaultException e) { }
+        } catch (VaultException ignored) {
+        }
 
         server.stop();
 
@@ -60,13 +61,13 @@ public class AuthBackendAwsTests {
             try {
                 JsonObject requestBody = readRequestBody(request).orElse(null);
                 return requestBody != null && request.getRequestURI().endsWith("/auth/aws/login") &&
-                      requestBody.getString("pkcs7", "").equals("pkcs7");
+                        requestBody.getString("pkcs7", "").equals("pkcs7");
             } catch (Exception e) {
                 e.printStackTrace(System.out);
                 return false;
             }
         };
-        final AuthRequestValidatingMockVault mockVault =  new AuthRequestValidatingMockVault(isValidEc2pkcs7Request);
+        final AuthRequestValidatingMockVault mockVault = new AuthRequestValidatingMockVault(isValidEc2pkcs7Request);
 
         final Server server = VaultTestUtils.initHttpMockVault(mockVault);
         server.start();
@@ -81,9 +82,10 @@ public class AuthBackendAwsTests {
         String token = null;
         try {
             token = vault.auth()
-                    .loginByAwsEc2("role","pkcs7",null,null)
+                    .loginByAwsEc2("role", "pkcs7", null, null)
                     .getAuthClientToken();
-        } catch(VaultException e) { }
+        } catch (VaultException ignored) {
+        }
 
         server.stop();
 
@@ -102,7 +104,7 @@ public class AuthBackendAwsTests {
                     requestBody.getString("iam_request_headers", "").equals("headers");
         };
 
-        final AuthRequestValidatingMockVault mockVault =  new AuthRequestValidatingMockVault(isValidEc2IamRequest);
+        final AuthRequestValidatingMockVault mockVault = new AuthRequestValidatingMockVault(isValidEc2IamRequest);
 
         final Server server = VaultTestUtils.initHttpMockVault(mockVault);
         server.start();
@@ -113,7 +115,8 @@ public class AuthBackendAwsTests {
         final Vault vault = new Vault(vaultConfig);
 
         final String token = vault.auth()
-                .loginByAwsIam("role","url","body","headers",null)
+                .loginByAwsIam("role", "url", "body", "headers",
+                        null)
                 .getAuthClientToken();
 
         server.stop();

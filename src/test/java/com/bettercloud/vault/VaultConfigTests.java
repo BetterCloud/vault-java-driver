@@ -7,12 +7,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static junit.framework.Assert.assertSame;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
@@ -38,12 +40,12 @@ public class VaultConfigTests {
         final String mockHomeDirectory;
 
         public MockEnvironmentLoader() {
-            overrides = new HashMap<String, String>();
+            overrides = new HashMap<>();
             mockHomeDirectory = "";
         }
 
-        public MockEnvironmentLoader(final String mockHomeDirectory) {
-            overrides = new HashMap<String, String>();
+        private MockEnvironmentLoader(final String mockHomeDirectory) {
+            overrides = new HashMap<>();
             this.mockHomeDirectory = mockHomeDirectory;
         }
 
@@ -55,7 +57,7 @@ public class VaultConfigTests {
          * @param name Mock environment variable name
          * @param value Mock environment variable value
          */
-        public void override(final String name, final String value) {
+        private void override(final String name, final String value) {
             this.overrides.put(name, value);
         }
 
@@ -68,7 +70,7 @@ public class VaultConfigTests {
                 } else {
                     try {
                         final byte[] bytes = Files.readAllBytes(Paths.get(mockHomeDirectory).resolve(".vault-token"));
-                        value = new String(bytes, "UTF-8").trim();
+                        value = new String(bytes, StandardCharsets.UTF_8).trim();
                     } catch (IOException e) {
                     }
                 }
@@ -112,13 +114,18 @@ public class VaultConfigTests {
      */
     @Test
     public void testConfigBuilder() throws VaultException {
+        Map<String, String> testMap = new HashMap<>();
         final VaultConfig config =
                 new VaultConfig()
                         .address("address")
                         .token("token")
+                        .engineVersion(1)
+                        .secretsEnginePathMap(testMap)
                         .build();
         assertEquals("address", config.getAddress());
         assertEquals("token", config.getToken());
+        assertEquals("1", config.getGlobalEngineVersion().toString());
+        assertSame(testMap, config.getSecretsEnginePathMap());
     }
 
     /**

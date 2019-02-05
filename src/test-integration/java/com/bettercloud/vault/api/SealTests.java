@@ -24,7 +24,7 @@ public class SealTests {
     private static String unsealKey = null;
 
     @BeforeClass
-    public static void setupClass() throws IOException, InterruptedException, VaultException {
+    public static void setupClass() throws IOException, InterruptedException {
         container.initAndUnsealVault();
         unsealKey = container.getUnsealKey();
     }

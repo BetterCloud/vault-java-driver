@@ -8,8 +8,8 @@ version '3.1.0'
 ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 
 compileJava {
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 }
 
 compileTestJava {
@@ -22,21 +22,21 @@ repositories {
 }
 
 dependencies {
-    compileOnly('org.projectlombok:lombok:1.16.20')
+    compileOnly('org.projectlombok:lombok:1.18.4')
 
     testCompile('junit:junit:4.12')
-    testCompile('org.mockito:mockito-core:2.13.0')
-    testCompile('org.testcontainers:testcontainers:1.5.1')
-    testCompile('org.eclipse.jetty:jetty-server:9.4.8.v20171121')
+    testCompile('org.mockito:mockito-core:2.23.4')
+    testCompile('org.testcontainers:testcontainers:1.6.0')
+    testCompile('org.eclipse.jetty:jetty-server:9.4.14.v20181114')
     testCompile('org.slf4j:slf4j-api:1.7.25')
-    testCompile('org.bouncycastle:bcprov-jdk15on:1.59')
-    testCompile('org.bouncycastle:bcpkix-jdk15on:1.59')
+    testCompile('org.bouncycastle:bcprov-jdk15on:1.60')
+    testCompile('org.bouncycastle:bcpkix-jdk15on:1.60')
 
     testRuntime('org.slf4j:slf4j-simple:1.7.25')
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.2.1'
+    gradleVersion = '4.10.2'
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {

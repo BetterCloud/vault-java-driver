@@ -6,6 +6,7 @@ import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.rest.RestResponse;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 
 /**
  * This class is a container for the information returned by Vault in <code>v1/sys/health</code>
@@ -52,7 +53,7 @@ public class HealthResponse implements Serializable {
                 throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
             }
             try {
-                final String jsonString = new String(restResponse.getBody(), "UTF-8");//NOPMD
+                final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);//NOPMD
                 final JsonObject jsonObject = Json.parse(jsonString).asObject();
                 this.initialized = jsonObject.get("initialized") == null ? null : jsonObject.get("initialized").asBoolean();
                 this.sealed = jsonObject.get("sealed") == null ? null : jsonObject.get("sealed").asBoolean();
@@ -85,7 +86,8 @@ public class HealthResponse implements Serializable {
     }
 
     /**
-     * @return A value representing the number of milliseconds since the epoch.  With all of the changes in date API's between Java 8 and pre-Java 8, it seemed best for the library not to convert this value into any particular one.
+     * @return A value representing the number of milliseconds since the epoch.  With all of the changes in date API's between Java 8 and
+     * pre-Java 8, it seemed best for the library not to convert this value into any particular one.
      */
     public Long getServerTimeUTC() {
         return serverTimeUTC;
