@@ -9,7 +9,6 @@ import com.bettercloud.vault.rest.RestResponse;
 
 import java.nio.charset.StandardCharsets;
 
-import static com.bettercloud.vault.api.LogicalUtilities.retry;
 
 /**
  * <p>The implementing class for operations on REST endpoints, under the "Leases" section of the Vault HTTP API
@@ -23,8 +22,15 @@ public class Leases {
 
     private final VaultConfig config;
 
+    private String nameSpace;
+
     public Leases(final VaultConfig config) {
         this.config = config;
+    }
+
+    public Leases withNameSpace(final String nameSpace) {
+        this.nameSpace = nameSpace;
+        return this;
     }
 
     /**
@@ -45,14 +51,22 @@ public class Leases {
         int retryCount = 0;
         while (true) {
             try {
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke/" + leaseId)
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .put();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .put();
+                } else {
+                    restResponse = rest.put();
+                }
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
@@ -61,7 +75,20 @@ public class Leases {
                 return new VaultResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -86,14 +113,22 @@ public class Leases {
         int retryCount = 0;
         while (true) {
             try {
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-prefix/" + prefix)
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .put();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .put();
+                } else {
+                    restResponse = rest.put();
+                }
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
@@ -102,7 +137,20 @@ public class Leases {
                 return new VaultResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -130,14 +178,22 @@ public class Leases {
         int retryCount = 0;
         while (true) {
             try {
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-force/" + prefix)
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .put();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .put();
+                } else {
+                    restResponse = rest.put();
+                }
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
@@ -146,7 +202,20 @@ public class Leases {
                 return new VaultResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -179,22 +248,44 @@ public class Leases {
         while (true) {
             try {
                 final String requestJson = Json.object().add("increment", increment).toString();
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
                         .header("X-Vault-Token", config.getToken())
                         .body(increment < 0 ? null : requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .put();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
+
                 // Validate response
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Expecting HTTP status 200, but instead receiving " + restResponse.getStatus(), restResponse.getStatus());
                 }
                 return new VaultResponse(restResponse, retryCount);
             } catch (Exception e) {
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }

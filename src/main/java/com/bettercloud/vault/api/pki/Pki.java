@@ -11,7 +11,6 @@ import com.bettercloud.vault.rest.RestResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static com.bettercloud.vault.api.LogicalUtilities.retry;
 
 /**
  * <p>The implementing class for operations on Vault's PKI backend.</p>
@@ -23,6 +22,12 @@ public class Pki {
 
     private final VaultConfig config;
     private final String mountPath;
+    private String nameSpace;
+
+    public Pki withNameSpace(final String nameSpace) {
+        this.nameSpace = nameSpace;
+        return this;
+    }
 
     /**
      * Constructor for use when the PKI backend is mounted on the default path (i.e. <code>/v1/pki</code>).
@@ -119,7 +124,20 @@ public class Pki {
                 return new PkiResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -150,14 +168,22 @@ public class Pki {
         while (true) {
             // Make an HTTP request to Vault
             try {
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .get();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .get();
+                } else {
+                    restResponse = rest.get();
+                }
 
                 // Validate response
                 if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
@@ -166,7 +192,20 @@ public class Pki {
                 return new PkiResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -203,15 +242,23 @@ public class Pki {
             }
             final String requestJson = jsonObject.toString();
             try {
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/revoke", config.getAddress(), this.mountPath))
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {
@@ -220,7 +267,20 @@ public class Pki {
                 return new PkiResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -251,14 +311,22 @@ public class Pki {
         while (true) {
             // Make an HTTP request to Vault
             try {
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .delete();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .delete();
+                } else {
+                    restResponse = rest.delete();
+                }
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
@@ -267,7 +335,20 @@ public class Pki {
                 return new PkiResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -393,15 +474,23 @@ public class Pki {
             // Make an HTTP request to Vault
             try {
                 String endpoint = (csr == null || csr.isEmpty()) ? "%s/v1/%s/issue/%s" : "%s/v1/%s/sign/%s";
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(String.format(endpoint, config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
 
                 // Validate response
                 if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
@@ -411,7 +500,20 @@ public class Pki {
                 return new PkiResponse(restResponse, retryCount);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }

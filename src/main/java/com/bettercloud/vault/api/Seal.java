@@ -9,8 +9,6 @@ import com.bettercloud.vault.rest.RestResponse;
 
 import java.nio.charset.StandardCharsets;
 
-import static com.bettercloud.vault.api.LogicalUtilities.retry;
-
 /**
  * <p>The implementing class for operations on REST endpoints, under the "seal/unseal/seal-status" section of the Vault HTTP API
  * docs (https://www.vaultproject.io/api/system/index.html).</p>
@@ -23,8 +21,15 @@ public class Seal {
 
     private final VaultConfig config;
 
+    private String nameSpace;
+
     public Seal(final VaultConfig config) {
         this.config = config;
+    }
+
+    public Seal withNameSpace(final String nameSpace) {
+        this.nameSpace = nameSpace;
+        return this;
     }
 
     /**
@@ -37,14 +42,23 @@ public class Seal {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/seal")
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
+
                 // Validate restResponse
                 if (restResponse.getStatus() != 204) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
@@ -52,7 +66,20 @@ public class Seal {
                 return;
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -82,20 +109,42 @@ public class Seal {
         while (true) {
             try {
                 // HTTP request to Vault
+                final RestResponse restResponse;
                 final String requestJson = Json.object().add("key", key).add("reset", reset).toString();
-                final RestResponse restResponse = new Rest()//NOPMD
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/unseal")
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .post();
+                } else {
+                    restResponse = rest.post();
+                }
+
                 // Validate restResponse
                 return getSealResponse(retryCount, restResponse);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
@@ -111,18 +160,39 @@ public class Seal {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse = new Rest()//NOPMD
+                final RestResponse restResponse;
+                final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/seal-status")
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .get();
+                        .sslContext(config.getSslConfig().getSslContext());
+
+                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
+                    restResponse = rest
+                            .header("X-Vault-Namespace", this.nameSpace)
+                            .get();
+                } else {
+                    restResponse = rest.get();
+                }
                 // Validate restResponse
                 return getSealResponse(retryCount, restResponse);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                retry(retryCount, e, this.config);
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
             }
         }
     }
