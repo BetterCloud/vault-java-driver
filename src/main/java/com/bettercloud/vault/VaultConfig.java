@@ -84,9 +84,11 @@ public class VaultConfig implements Serializable {
      * @return This object, with the namespace populated, ready for additional builder-pattern method calls or else
      * finalization with the build() method
      */
-    public VaultConfig nameSpace(final String nameSpace) {
-        this.nameSpace = nameSpace;
-        return this;
+    public VaultConfig nameSpace(final String nameSpace) throws VaultException {
+        if (nameSpace != null && !nameSpace.isEmpty()) {
+            this.nameSpace = nameSpace;
+            return this;
+        } else throw new VaultException("A namespace cannot be empty.");
     }
 
     /**
