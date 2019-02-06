@@ -29,7 +29,7 @@ public class VaultTests {
     }
 
     @Test
-    public void testNameSpaceProvidedVaultConstructor() {
+    public void testNameSpaceProvidedVaultConstructor() throws VaultException {
         VaultConfig vaultConfig = new VaultConfig().nameSpace("testNameSpace");
         Vault vault = new Vault(vaultConfig, 1);
         Assert.assertNotNull(vault);
@@ -39,17 +39,9 @@ public class VaultTests {
     public void testNameSpaceProvidedVaultConstructorCannotBeEmpty() {
         try {
             VaultConfig vaultConfig = new VaultConfig().nameSpace("");
-        } catch (AssertionError e) {
-            Assert.assertEquals(e.getClass(), AssertionError.class);
+        } catch (VaultException e) {
+            Assert.assertEquals(e.getMessage(), "A namespace cannot be empty.");
         }
-    }
-
-
-    @Test
-    public void testNameSpaceNotProvidedVaultConstructor() {
-        VaultConfig vaultConfig = new VaultConfig().nameSpace(null);
-        Vault vault = new Vault(vaultConfig, 1);
-        Assert.assertNotNull(vault);
     }
 
     @Test(expected = IllegalArgumentException.class)
