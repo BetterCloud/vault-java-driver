@@ -65,6 +65,9 @@ public class Vault {
      */
     public Vault(final VaultConfig vaultConfig) {
         this.vaultConfig = vaultConfig;
+        if (this.vaultConfig.getNameSpace() != null && !this.vaultConfig.getNameSpace().isEmpty()) {
+            System.out.println(String.format("The NameSpace %s has been bound to this Vault instance. Please keep this in mind when running operations.", this.vaultConfig.getNameSpace()));
+        }
         if (this.vaultConfig.getSecretsEnginePathMap().isEmpty() && this.vaultConfig.getGlobalEngineVersion() == null) {
             System.out.println("Constructing a Vault instance with no provided Engine version, defaulting to version 2.");
             this.vaultConfig.setEngineVersion(2);
@@ -81,6 +84,9 @@ public class Vault {
         }
         vaultConfig.setEngineVersion(engineVersion);
         this.vaultConfig = vaultConfig;
+        if (this.vaultConfig.getNameSpace() != null && !this.vaultConfig.getNameSpace().isEmpty()) {
+            System.out.println(String.format("The Namespace %s has been bound to this Vault instance. Please keep this in mind when running operations.", this.vaultConfig.getNameSpace()));
+        }
     }
 
     /**
@@ -97,6 +103,9 @@ public class Vault {
     public Vault(final VaultConfig vaultConfig, final Boolean useSecretsEnginePathMap, final Integer globalFallbackVersion)
             throws VaultException {
         this.vaultConfig = vaultConfig;
+        if (this.vaultConfig.getNameSpace() != null && !this.vaultConfig.getNameSpace().isEmpty()) {
+            System.out.println(String.format("The Namespace %s has been bound to this Vault instance. Please keep this in mind when running operations.", this.vaultConfig.getNameSpace()));
+        }
         this.vaultConfig.setEngineVersion(globalFallbackVersion);
         if (useSecretsEnginePathMap && this.vaultConfig.getSecretsEnginePathMap().isEmpty()) {
             try {

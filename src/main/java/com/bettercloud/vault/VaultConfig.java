@@ -85,6 +85,7 @@ public class VaultConfig implements Serializable {
      * finalization with the build() method
      */
     public VaultConfig nameSpace(final String nameSpace) {
+        assert !nameSpace.isEmpty();
         this.nameSpace = nameSpace;
         return this;
     }

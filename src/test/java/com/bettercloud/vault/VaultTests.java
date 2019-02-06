@@ -30,10 +30,20 @@ public class VaultTests {
 
     @Test
     public void testNameSpaceProvidedVaultConstructor() {
-        VaultConfig vaultConfig = new VaultConfig().nameSpace("namespace");
+        VaultConfig vaultConfig = new VaultConfig().nameSpace("testNameSpace");
         Vault vault = new Vault(vaultConfig, 1);
         Assert.assertNotNull(vault);
     }
+
+    @Test
+    public void testNameSpaceProvidedVaultConstructorCannotBeEmpty() {
+        try {
+            VaultConfig vaultConfig = new VaultConfig().nameSpace("");
+        } catch (AssertionError e) {
+            Assert.assertEquals(e.getClass(), AssertionError.class);
+        }
+    }
+
 
     @Test
     public void testNameSpaceNotProvidedVaultConstructor() {
