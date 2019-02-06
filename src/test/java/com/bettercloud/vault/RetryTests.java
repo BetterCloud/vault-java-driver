@@ -31,7 +31,7 @@ public class RetryTests {
         assertEquals("mock", response.getData().get("value"));
         assertEquals("12345", response.getLeaseId());
         assertEquals(false, response.getRenewable());
-        assertTrue(10000L == response.getLeaseDuration());
+        assertEquals(10000L, (long) response.getLeaseDuration());
 
         VaultTestUtils.shutdownMockVault(server);
     }
@@ -45,7 +45,7 @@ public class RetryTests {
         final VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("mock_token").build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.withRetries(5, 100).logical()
-                .write("secret/hello", new HashMap() {{
+                .write("secret/hello", new HashMap<String, Object>() {{
                     put("value", "world");
                 }});
         assertEquals(5, response.getRetries());

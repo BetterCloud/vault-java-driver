@@ -28,6 +28,20 @@ public class VaultTests {
         Assert.assertEquals(String.valueOf(1), vault.logical().getEngineVersionForSecretPath("*").toString());
     }
 
+    @Test
+    public void testNameSpaceProvidedVaultConstructor() {
+        VaultConfig vaultConfig = new VaultConfig().nameSpace("namespace");
+        Vault vault = new Vault(vaultConfig, 1);
+        Assert.assertNotNull(vault);
+    }
+
+    @Test
+    public void testNameSpaceNotProvidedVaultConstructor() {
+        VaultConfig vaultConfig = new VaultConfig().nameSpace(null);
+        Vault vault = new Vault(vaultConfig, 1);
+        Assert.assertNotNull(vault);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidGlobalEngineVersionVaultConstructor() {
         VaultConfig vaultConfig = new VaultConfig();

@@ -18,6 +18,7 @@ import com.bettercloud.vault.rest.RestResponse;
 
 import static com.bettercloud.vault.api.LogicalUtilities.*;
 
+
 /**
  * <p>The implementing class for Vault's core/logical operations (e.g. read, write).</p>
  *
@@ -34,7 +35,9 @@ public class Logical {
 
     public Logical(final VaultConfig config) {
         this.config = config;
-        nameSpace = null;
+        if (this.config.getNameSpace() != null && !this.config.getNameSpace().isEmpty()) {
+            this.nameSpace = this.config.getNameSpace();
+        }
     }
 
     /**
@@ -78,22 +81,15 @@ public class Logical {
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, operation))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .get();
-                } else {
-                    restResponse = rest.get();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .get();
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {
@@ -153,23 +149,16 @@ public class Logical {
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, logicalOperations.readV2))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .parameter("version", version.toString())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .get();
-                } else {
-                    restResponse = rest.get();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .get();
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {
@@ -259,23 +248,16 @@ public class Logical {
                     }
                 }
                 // Make an HTTP request to Vault
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, operation))
                         .body(jsonObjectToWriteFromEngineVersion(operation, requestJson).toString().getBytes(StandardCharsets.UTF_8))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // HTTP Status should be either 200 (with content - e.g. PKI write) or 204 (no content)
                 final int restStatus = restResponse.getStatus();
@@ -371,22 +353,15 @@ public class Logical {
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForDelete(path, operation))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .delete();
-                } else {
-                    restResponse = rest.delete();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .delete();
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
@@ -437,24 +412,17 @@ public class Logical {
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                final RestResponse restResponse;
                 JsonObject versionsToDelete = new JsonObject().add("versions", versions);
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForVersionDelete(path))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
-                        .body(versionsToDelete.toString().getBytes(StandardCharsets.UTF_8));
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .body(versionsToDelete.toString().getBytes(StandardCharsets.UTF_8))
+                        .post();
 
                 // Validate response
                 return getLogicalResponse(retryCount, restResponse);
@@ -515,24 +483,17 @@ public class Logical {
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                final RestResponse restResponse;
                 JsonObject versionsToUnDelete = new JsonObject().add("versions", versions);
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForVersionUnDelete(path))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
-                        .body(versionsToUnDelete.toString().getBytes(StandardCharsets.UTF_8));
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .body(versionsToUnDelete.toString().getBytes(StandardCharsets.UTF_8))
+                        .post();
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
@@ -581,24 +542,17 @@ public class Logical {
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                RestResponse restResponse;
                 JsonObject versionsToDestroy = new JsonObject().add("versions", versions);
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForVersionDestroy(path))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
-                        .body(versionsToDestroy.toString().getBytes(StandardCharsets.UTF_8));
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .body(versionsToDestroy.toString().getBytes(StandardCharsets.UTF_8))
+                        .post();
 
                 // Validate response
                 return getLogicalResponse(retryCount, restResponse);
@@ -639,24 +593,17 @@ public class Logical {
         while (true) {
             try {
                 // Make an HTTP request to Vault
-                RestResponse restResponse;
                 JsonObject kvToUpgrade = new JsonObject().add("options", new JsonObject().add("version", 2));
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/mounts/" + (kvPath.replaceAll("/", "") + "/tune"))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
-                        .body(kvToUpgrade.toString().getBytes(StandardCharsets.UTF_8));
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .body(kvToUpgrade.toString().getBytes(StandardCharsets.UTF_8))
+                        .post();
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {

@@ -50,6 +50,8 @@ public class VaultConfig implements Serializable {
     private int retryIntervalMilliseconds;
     @Getter
     private Integer globalEngineVersion;
+    @Getter
+    private String nameSpace;
     private EnvironmentLoader environmentLoader;
 
     /**
@@ -70,6 +72,20 @@ public class VaultConfig implements Serializable {
      */
     public VaultConfig environmentLoader(final EnvironmentLoader environmentLoader) {
         this.environmentLoader = environmentLoader;
+        return this;
+    }
+
+    /**
+     * <p>Optional. Sets a global namespace to the Vault server instance, if desired. Otherwise, namespace can be applied individually to any read / write / auth call.
+     *
+     * <p>Namespace support requires Vault Enterprise Pro, please see https://learn.hashicorp.com/vault/operations/namespaces</p>
+     *
+     * @param nameSpace The namespace to use globally in this VaultConfig instance.
+     * @return This object, with the namespace populated, ready for additional builder-pattern method calls or else
+     * finalization with the build() method
+     */
+    public VaultConfig nameSpace(final String nameSpace) {
+        this.nameSpace = nameSpace;
         return this;
     }
 
