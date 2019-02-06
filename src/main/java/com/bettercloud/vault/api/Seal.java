@@ -25,6 +25,9 @@ public class Seal {
 
     public Seal(final VaultConfig config) {
         this.config = config;
+        if (this.config.getNameSpace() != null && !this.config.getNameSpace().isEmpty()) {
+            this.nameSpace = this.config.getNameSpace();
+        }
     }
 
     public Seal withNameSpace(final String nameSpace) {
@@ -42,22 +45,15 @@ public class Seal {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/seal")
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 204) {
@@ -109,23 +105,16 @@ public class Seal {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse;
                 final String requestJson = Json.object().add("key", key).add("reset", reset).toString();
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/unseal")
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 return getSealResponse(retryCount, restResponse);
@@ -160,21 +149,15 @@ public class Seal {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/seal-status")
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .get();
 
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .get();
-                } else {
-                    restResponse = rest.get();
-                }
                 // Validate restResponse
                 return getSealResponse(retryCount, restResponse);
             } catch (Exception e) {

@@ -27,6 +27,9 @@ public class Debug {
 
     public Debug(final VaultConfig config) {
         this.config = config;
+        if (this.config.getNameSpace() != null && !this.config.getNameSpace().isEmpty()) {
+            this.nameSpace = this.config.getNameSpace();
+        }
     }
 
     public Debug withNameSpace(final String nameSpace) {
@@ -96,9 +99,7 @@ public class Debug {
                 if (config.getToken() != null) {
                     rest.header("X-Vault-Token", config.getToken());
                 }
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    rest.header("X-Vault-Namespace", this.nameSpace);
-                }
+                rest.optionalHeader("X-Vault-Namespace", this.nameSpace);
                 // Add params if present
                 if (standbyOk != null) rest.parameter("standbyok", standbyOk.toString());
                 if (activeCode != null) rest.parameter("activecode", activeCode.toString());

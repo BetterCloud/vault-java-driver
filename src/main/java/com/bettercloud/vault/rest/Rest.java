@@ -157,25 +157,37 @@ public class Rest {
     }
 
     /**
-     * <p>Adds a header to be send with the HTTP request.</p>
+     * <p>Adds a header to be sent with the HTTP request.</p>
+     * *
+     * <p>This method may be chained together repeatedly, to pass multiple headers with a request.  When the request
+     * is ultimately sent, the headers will be sorted by their names.</p>
      *
-     * <p>Both the header name and value will be automatically url-encoded by the Rest client.</p>
+     * @param name  The raw header name
+     * @param value The raw header value
+     * @return This object, with a header added, ready for other builder-pattern config methods or an HTTP verb method
+     */
+    public Rest header(final String name, final String value) {
+        this.headers.put(name, value);
+        return this;
+    }
+
+    /**
+     * <p>Adds an optional header to be sent with the HTTP request.</p>
+     * *
+     * <p> The value, if null, will skip adding this header to the request.</p>
      *
      * <p>This method may be chained together repeatedly, to pass multiple headers with a request.  When the request
      * is ultimately sent, the headers will be sorted by their names.</p>
      *
-     * @param name  The raw header name (not url-encoded)
-     * @param value The raw header value (not url-encoded)
+     * @param name  The raw header name
+     * @param value The raw header value
      * @return This object, with a header added, ready for other builder-pattern config methods or an HTTP verb method
-     * @throws RestException If any error occurs, or unexpected response received from Vault
      */
-    public Rest header(final String name, final String value) throws RestException {
-        try {
-            this.headers.put(URLEncoder.encode(name, "UTF-8"), URLEncoder.encode(value, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new RestException(e);
-        }
-        return this;
+    public Rest optionalHeader(final String name, final String value) {
+        if (value != null && !value.isEmpty()) {
+            this.headers.put(name, value);
+            return this;
+        } else return this;
     }
 
     /**

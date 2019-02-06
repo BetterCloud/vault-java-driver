@@ -12,8 +12,8 @@ public class LogicalUtilities {
     /**
      * Convenience method to split a Vault path into its path segments.
      *
-     * @param path
-     * @return
+     * @param path The Vault path to check or mutate, based on the operation.
+     * @return The path potentially mutated, based on the operation
      */
     private static List<String> getPathSegments(final String path) {
         final List<String> segments = new ArrayList<>();
@@ -26,11 +26,11 @@ public class LogicalUtilities {
 
     /**
      * Injects the supplied qualifier (either "data" or "metadata") into the second-from-the-root segment position, for a Vault
-     * path to be converted for use with a version 2 secret engine.
+     * path to be converted for use with a Version 2 secret engine.
      *
-     * @param segments
-     * @param qualifier
-     * @return
+     * @param segments The Vault path split into segments.
+     * @param qualifier The String to add to the path, based on the operation.
+     * @return The final path with the needed qualifier.
      */
     public static String addQualifierToPath(final List<String> segments, final String qualifier) {
         final StringBuilder adjustedPath = new StringBuilder(segments.get(0)).append('/').append(qualifier).append('/');
@@ -48,9 +48,9 @@ public class LogicalUtilities {
      * path varies depending on the operation being performed.  When reading or writing a secret, you must inject the path
      * segment "data" right after the lowest-level path segment.
      *
-     * @param path
-     * @param operation
-     * @return
+     * @param path      The Vault path to check or mutate, based on the operation.
+     * @param operation The operation being performed, e.g. readV2 or writeV1.
+     * @return The Vault path mutated based on the operation.
      */
     public static String adjustPathForReadOrWrite(final String path, final Logical.logicalOperations operation) {
         final List<String> pathSegments = getPathSegments(path);
@@ -72,9 +72,9 @@ public class LogicalUtilities {
      * path varies depending on the operation being performed.  When listing secrets available beneath a path, you must inject the
      * path segment "metadata" right after the lowest-level path segment.
      *
-     * @param path
-     * @param operation
-     * @return
+     * @param path      The Vault path to check or mutate, based on the operation.
+     * @param operation The operation being performed, e.g. readV2 or writeV1.
+     * @return The Vault path mutated based on the operation.
      */
     public static String adjustPathForList(final String path, final Logical.logicalOperations operation) {
         final List<String> pathSegments = getPathSegments(path);
@@ -98,8 +98,8 @@ public class LogicalUtilities {
      * path varies depending on the operation being performed.  When deleting secrets, you must inject the  path segment "metadata"
      * right after the lowest-level path segment.
      *
-     * @param path
-     * @return
+     * @param path      The Vault path to check or mutate, based on the operation.
+     * @param operation The operation being performed, e.g. readV2 or writeV1.
      */
     public static String adjustPathForDelete(final String path, final Logical.logicalOperations operation) {
         final List<String> pathSegments = getPathSegments(path);
@@ -117,8 +117,7 @@ public class LogicalUtilities {
     /**
      * When deleting secret versions, you must inject the path segment "delete" right after the lowest-level path segment.
      *
-     * @param path
-     * @return
+     * @param path The Vault path to check or mutate, based on the operation.
      */
     public static String adjustPathForVersionDelete(final String path) {
         final List<String> pathSegments = getPathSegments(path);
@@ -132,8 +131,8 @@ public class LogicalUtilities {
     /**
      * When undeleting secret versions, you must inject the path segment "undelete" right after the lowest-level path segment.
      *
-     * @param path
-     * @return
+     * @param path The Vault path to check or mutate, based on the operation.
+     * @return The path mutated depending on the operation.
      */
     public static String adjustPathForVersionUnDelete(final String path) {
         final List<String> pathSegments = getPathSegments(path);
@@ -147,8 +146,8 @@ public class LogicalUtilities {
     /**
      * When destroying secret versions, you must inject the path segment "destroy" right after the lowest-level path segment.
      *
-     * @param path
-     * @return
+     * @param path The Vault path to check or mutate, based on the operation.
+     * @return The path mutated depending on the operation.
      */
     public static String adjustPathForVersionDestroy(final String path) {
         final List<String> pathSegments = getPathSegments(path);
@@ -162,9 +161,9 @@ public class LogicalUtilities {
     /**
      * In version two, when writing a secret, the JSONObject must be nested with "data" as the key.
      *
-     * @param operation
-     * @param jsonObject
-     * @return
+     * @param operation  The operation being performed, e.g. writeV1, or writeV2.
+     * @param jsonObject The jsonObject that is going to be written.
+     * @return This jsonObject mutated for the operation.
      */
     public static JsonObject jsonObjectToWriteFromEngineVersion(final Logical.logicalOperations operation, final JsonObject jsonObject) {
         if (operation.equals(Logical.logicalOperations.writeV2)) {

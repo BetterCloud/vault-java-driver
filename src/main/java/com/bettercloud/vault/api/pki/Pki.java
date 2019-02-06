@@ -37,6 +37,9 @@ public class Pki {
     public Pki(final VaultConfig config) {
         this.config = config;
         this.mountPath = "pki";
+        if (this.config.getNameSpace() != null && !this.config.getNameSpace().isEmpty()) {
+            this.nameSpace = this.config.getNameSpace();
+        }
     }
 
     /**
@@ -48,6 +51,9 @@ public class Pki {
     public Pki(final VaultConfig config, final String mountPath) {
         this.config = config;
         this.mountPath = mountPath;
+        if (this.config.getNameSpace() != null && !this.config.getNameSpace().isEmpty()) {
+            this.nameSpace = this.config.getNameSpace();
+        }
     }
 
     /**
@@ -110,6 +116,7 @@ public class Pki {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -168,22 +175,15 @@ public class Pki {
         while (true) {
             // Make an HTTP request to Vault
             try {
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .get();
-                } else {
-                    restResponse = rest.get();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .get();
 
                 // Validate response
                 if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
@@ -242,23 +242,16 @@ public class Pki {
             }
             final String requestJson = jsonObject.toString();
             try {
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/revoke", config.getAddress(), this.mountPath))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {
@@ -311,22 +304,15 @@ public class Pki {
         while (true) {
             // Make an HTTP request to Vault
             try {
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .delete();
-                } else {
-                    restResponse = rest.delete();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .delete();
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
@@ -467,30 +453,23 @@ public class Pki {
                 jsonObject.add("format", format.toString());
             }
             if (csr != null) {
-                jsonObject.add("csr", csr.toString());
+                jsonObject.add("csr", csr);
             }
             final String requestJson = jsonObject.toString();
 
             // Make an HTTP request to Vault
             try {
                 String endpoint = (csr == null || csr.isEmpty()) ? "%s/v1/%s/issue/%s" : "%s/v1/%s/sign/%s";
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format(endpoint, config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
-                        .body(requestJson.getBytes("UTF-8"))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate response
                 if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {

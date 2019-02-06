@@ -26,6 +26,9 @@ public class Leases {
 
     public Leases(final VaultConfig config) {
         this.config = config;
+        if (this.config.getNameSpace() != null && !this.config.getNameSpace().isEmpty()) {
+            this.nameSpace = this.config.getNameSpace();
+        }
     }
 
     public Leases withNameSpace(final String nameSpace) {
@@ -51,22 +54,15 @@ public class Leases {
         int retryCount = 0;
         while (true) {
             try {
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke/" + leaseId)
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .put();
-                } else {
-                    restResponse = rest.put();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .put();
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
@@ -113,22 +109,15 @@ public class Leases {
         int retryCount = 0;
         while (true) {
             try {
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-prefix/" + prefix)
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .put();
-                } else {
-                    restResponse = rest.put();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .put();
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
@@ -178,22 +167,15 @@ public class Leases {
         int retryCount = 0;
         while (true) {
             try {
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-force/" + prefix)
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .put();
-                } else {
-                    restResponse = rest.put();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .put();
 
                 // Validate response
                 if (restResponse.getStatus() != 204) {
@@ -248,23 +230,16 @@ public class Leases {
         while (true) {
             try {
                 final String requestJson = Json.object().add("increment", increment).toString();
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(increment < 0 ? null : requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {

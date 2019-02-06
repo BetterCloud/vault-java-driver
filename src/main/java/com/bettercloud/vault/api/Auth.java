@@ -147,6 +147,9 @@ public class Auth {
 
     public Auth(final VaultConfig config) {
         this.config = config;
+        if (this.config.getNameSpace() != null && !this.config.getNameSpace().isEmpty()) {
+            this.nameSpace = this.config.getNameSpace();
+        }
     }
 
     public Auth withNameSpace(final String nameSpace) {
@@ -230,23 +233,16 @@ public class Auth {
                 final String url = urlBuilder.toString();
 
                 // HTTP request to Vault
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(url)
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -303,23 +299,16 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse;
                 final String requestJson = Json.object().add("app_id", appId).add("user_id", userId).toString();
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + path)
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -404,23 +393,16 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse;
                 final String requestJson = Json.object().add("role_id", roleId).add("secret_id", secretId).toString();
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + path + "/login")
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -494,23 +476,16 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse;
                 final String requestJson = Json.object().add("password", password).toString();
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login/" + username)
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -624,22 +599,15 @@ public class Auth {
                 }
                 final String requestJson = request.toString();
 
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -707,22 +675,15 @@ public class Auth {
                     request.add("nonce", nonce);
                 }
                 final String requestJson = request.toString();
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -793,22 +754,15 @@ public class Auth {
                     request.add("role", role);
                 }
                 final String requestJson = request.toString();
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -884,23 +838,16 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse;
                 final String requestJson = Json.object().add("token", githubToken).toString();
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -954,23 +901,16 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse;
                 final String requestJson = Json.object().add("role", role).add("jwt", jwt).toString();
-                final Rest rest = new Rest()
+                final RestResponse restResponse = new Rest()
                         .url(config.getAddress() + "/v1/auth/gcp/login")
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -1058,21 +998,15 @@ public class Auth {
         final String mount = certAuthMount != null ? certAuthMount : "cert";
         while (true) {
             try {
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(),
@@ -1145,23 +1079,16 @@ public class Auth {
             try {
                 // HTTP request to Vault
                 final String requestJson = Json.object().add("increment", increment).toString();
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/renew-self")
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(increment < 0 ? null : requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -1215,22 +1142,15 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/lookup-self")
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .get();
-                } else {
-                    restResponse = rest.get();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .get();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -1284,22 +1204,15 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/wrapping/lookup")
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .get();
-                } else {
-                    restResponse = rest.get();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .get();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
@@ -1353,22 +1266,15 @@ public class Auth {
         while (true) {
             try {
                 // HTTP request to Vault
-                final RestResponse restResponse;
-                final Rest rest = new Rest()//NOPMD
+                final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/revoke-self")
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 204) {
@@ -1461,23 +1367,16 @@ public class Auth {
                 final String url = config.getAddress() + "/v1/sys/wrapping/unwrap";
 
                 // HTTP request to Vault
-                final RestResponse restResponse;
-                final Rest rest = new Rest()
+                final RestResponse restResponse = new Rest()
                         .url(url)
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext());
-
-                if (this.nameSpace != null && !this.nameSpace.isEmpty()) {
-                    restResponse = rest
-                            .header("X-Vault-Namespace", this.nameSpace)
-                            .post();
-                } else {
-                    restResponse = rest.post();
-                }
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {

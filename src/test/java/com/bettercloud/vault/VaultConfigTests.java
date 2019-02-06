@@ -1,5 +1,6 @@
 package com.bettercloud.vault;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
@@ -54,7 +55,7 @@ public class VaultConfigTests {
          * repeatedly, to populate multiple variables.  This method should be called prior to passing the object
          * instance to a <code>VaultConfig</code> constructor, or calling the <code>build()</code> method on that class.
          *
-         * @param name Mock environment variable name
+         * @param name  Mock environment variable name
          * @param value Mock environment variable value
          */
         private void override(final String name, final String value) {
@@ -166,8 +167,8 @@ public class VaultConfigTests {
                 final FileOutputStream output = new FileOutputStream(pemPath)
         ) {
             int nextChar;
-            while ( (nextChar = input.read()) != -1 ) {
-                output.write( (char) nextChar );
+            while ((nextChar = input.read()) != -1) {
+                output.write((char) nextChar);
             }
         }
 
@@ -230,11 +231,17 @@ public class VaultConfigTests {
         assertEquals("http://127.0.0.1:8200", config.getAddress());
         assertEquals("d24e2469-298a-6c64-6a71-5b47c9ba459a", config.getToken());
         assertTrue(config.getSslConfig().isVerify());
-        assertTrue(30 == config.getOpenTimeout());
-        assertTrue(30 == config.getReadTimeout());
+        assertEquals(30, (int) config.getOpenTimeout());
+        assertEquals(30, (int) config.getReadTimeout());
 
         assertTrue(mockTokenFile.delete());
         assertTrue(new File(mockHomeDirectory).delete());
+    }
+
+    @Test
+    public void testConfigBuilder_WithNamespace() throws VaultException {
+        VaultConfig vaultConfig = new VaultConfig().nameSpace("namespace").address("address").build();
+        Assert.assertEquals(vaultConfig.getNameSpace(), "namespace");
     }
 
 }

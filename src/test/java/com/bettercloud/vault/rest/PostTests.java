@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests relating the REST client processing of POST requests.
@@ -104,7 +104,7 @@ public class PostTests {
                 .url("https://httpbin.org/post")
                 .header("black", "white")
                 .header("day", "night")
-                .header("two-part", "Note that headers are send in url-encoded format")
+                .header("two-part", "Header value")
                 .post();
         assertEquals(200, restResponse.getStatus());
         assertEquals("application/json", restResponse.getMimeType());
@@ -115,7 +115,38 @@ public class PostTests {
         final JsonObject headers = jsonObject.get("headers").asObject();
         assertEquals("white", headers.getString("Black", null));
         assertEquals("night", headers.getString("Day", null));
-        assertEquals("Note+that+headers+are+send+in+url-encoded+format", headers.getString("Two-Part", null));
+        assertEquals("Header value", headers.getString("Two-Part", null));
     }
+
+    /**
+     * <p>Verify a POST request that passes optional HTTP headers.</p>
+     *
+     * <p>Note that even though our header names are all lowercase, the round-trip process
+     * converts them to camel case (e.g. <code>two-part</code> to <code>Two-Part</code>).</p>
+     *
+     * @throws RestException
+     */
+    @Test
+    public void testPost_WithOptionalHeaders() throws RestException {
+        final RestResponse restResponse = new Rest()
+                .url("https://httpbin.org/post")
+                .optionalHeader("black", "white")
+                .optionalHeader("day", "night")
+                .optionalHeader("two-part", "Header value")
+                .optionalHeader("I am null", null)
+                .post();
+        assertEquals(200, restResponse.getStatus());
+        assertEquals("application/json", restResponse.getMimeType());
+
+        final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
+        final JsonObject jsonObject = Json.parse(jsonString).asObject();
+        assertEquals("https://httpbin.org/post", jsonObject.getString("url", null));
+        final JsonObject headers = jsonObject.get("headers").asObject();
+        assertEquals("white", headers.getString("Black", null));
+        assertEquals("night", headers.getString("Day", null));
+        assertEquals("Header value", headers.getString("Two-Part", null));
+        assertNull(headers.getString( "I am null", null));
+    }
+
 
 }
