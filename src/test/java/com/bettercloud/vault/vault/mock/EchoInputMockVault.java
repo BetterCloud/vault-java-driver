@@ -4,7 +4,6 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import org.eclipse.jetty.server.Request;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -38,7 +37,7 @@ public class EchoInputMockVault extends MockVault {
             final Request baseRequest,
             final HttpServletRequest request,
             final HttpServletResponse response
-    ) throws IOException, ServletException {
+    ) throws IOException {
         final JsonObject headers = Json.object();
         final Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
@@ -52,7 +51,8 @@ public class EchoInputMockVault extends MockVault {
                 .append(request.getServerName())
                 .append(request.getServerPort() == 0 ? "" : ":" + request.getServerPort())
                 .append(request.getRequestURI())
-                .append(request.getQueryString() == null || request.getQueryString().isEmpty() ? "" : "?" + request.getQueryString());
+                .append(request.getQueryString() == null || request.getQueryString().isEmpty() ? "" : "?" +
+                        request.getQueryString());
         final String mockResponse = Json.object()
                 .add("method", request.getMethod())
                 .add("URL", url.toString())

@@ -21,7 +21,6 @@
  ******************************************************************************/
 package com.bettercloud.vault.json;
 
-import static com.bettercloud.vault.json.TestUtil.assertException;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -35,148 +34,149 @@ import org.junit.Test;
 @SuppressWarnings("PMD")
 public class JsonNumber_Test {
 
-  private StringWriter output;
-  private JsonWriter writer;
+    private StringWriter output;
+    private JsonWriter writer;
 
-  @Before
-  public void setUp() {
-    output = new StringWriter();
-    writer = new JsonWriter(output);
-  }
+    @Before
+    public void setUp() {
+        output = new StringWriter();
+        writer = new JsonWriter(output);
+    }
 
-  @Test
-  public void constructor_failsWithNull() {
-    TestUtil.assertException(NullPointerException.class, "string is null", new Runnable() {
-      public void run() {
-        new JsonNumber(null);
-      }
-    });
-  }
+    @Test
+    public void constructor_failsWithNull() {
+        TestUtil.assertException(NullPointerException.class, "string is null", new Runnable() {
+            public void run() {
+                new JsonNumber(null);
+            }
+        });
+    }
 
-  @Test
-  public void write() throws IOException {
-    new JsonNumber("23").write(writer);
+    @Test
+    public void write() throws IOException {
+        new JsonNumber("23").write(writer);
 
-    assertEquals("23", output.toString());
-  }
+        assertEquals("23", output.toString());
+    }
 
-  @Test
-  public void toString_returnsInputString() {
-    assertEquals("foo", new JsonNumber("foo").toString());
-  }
+    @Test
+    public void toString_returnsInputString() {
+        assertEquals("foo", new JsonNumber("foo").toString());
+    }
 
-  @Test
-  public void isNumber() {
-    assertTrue(new JsonNumber("23").isNumber());
-  }
+    @Test
+    public void isNumber() {
+        assertTrue(new JsonNumber("23").isNumber());
+    }
 
-  @Test
-  public void asInt() {
-    assertEquals(23, new JsonNumber("23").asInt());
-  }
+    @Test
+    public void asInt() {
+        assertEquals(23, new JsonNumber("23").asInt());
+    }
 
-  @Test(expected = NumberFormatException.class)
-  public void asInt_failsWithExceedingValues() {
-    new JsonNumber("10000000000").asInt();
-  }
+    @Test(expected = NumberFormatException.class)
+    public void asInt_failsWithExceedingValues() {
+        new JsonNumber("10000000000").asInt();
+    }
 
-  @Test(expected = NumberFormatException.class)
-  public void asInt_failsWithExponent() {
-    new JsonNumber("1e5").asInt();
-  }
+    @Test(expected = NumberFormatException.class)
+    public void asInt_failsWithExponent() {
+        new JsonNumber("1e5").asInt();
+    }
 
-  @Test(expected = NumberFormatException.class)
-  public void asInt_failsWithFractional() {
-    new JsonNumber("23.5").asInt();
-  }
+    @Test(expected = NumberFormatException.class)
+    public void asInt_failsWithFractional() {
+        new JsonNumber("23.5").asInt();
+    }
 
-  @Test
-  public void asLong() {
-    assertEquals(23l, new JsonNumber("23").asLong());
-  }
+    @Test
+    public void asLong() {
+        assertEquals(23L, new JsonNumber("23").asLong());
+    }
 
-  @Test(expected = NumberFormatException.class)
-  public void asLong_failsWithExceedingValues() {
-    new JsonNumber("10000000000000000000").asLong();
-  }
+    @Test(expected = NumberFormatException.class)
+    public void asLong_failsWithExceedingValues() {
+        new JsonNumber("10000000000000000000").asLong();
+    }
 
-  @Test(expected = NumberFormatException.class)
-  public void asLong_failsWithExponent() {
-    new JsonNumber("1e5").asLong();
-  }
+    @Test(expected = NumberFormatException.class)
+    public void asLong_failsWithExponent() {
+        new JsonNumber("1e5").asLong();
+    }
 
-  @Test(expected = NumberFormatException.class)
-  public void asLong_failsWithFractional() {
-    new JsonNumber("23.5").asLong();
-  }
+    @Test(expected = NumberFormatException.class)
+    public void asLong_failsWithFractional() {
+        new JsonNumber("23.5").asLong();
+    }
 
-  @Test
-  public void asFloat() {
-    assertEquals(23.05f, new JsonNumber("23.05").asFloat(), 0);
-  }
+    @Test
+    public void asFloat() {
+        assertEquals(23.05f, new JsonNumber("23.05").asFloat(), 0);
+    }
 
-  @Test
-  public void asFloat_returnsInfinityForExceedingValues() {
-    assertEquals(Float.POSITIVE_INFINITY, new JsonNumber("1e50").asFloat(), 0);
-    assertEquals(Float.NEGATIVE_INFINITY, new JsonNumber("-1e50").asFloat(), 0);
-  }
+    @Test
+    public void asFloat_returnsInfinityForExceedingValues() {
+        assertEquals(Float.POSITIVE_INFINITY, new JsonNumber("1e50").asFloat(), 0);
+        assertEquals(Float.NEGATIVE_INFINITY, new JsonNumber("-1e50").asFloat(), 0);
+    }
 
-  @Test
-  public void asDouble() {
-    double result = new JsonNumber("23.05").asDouble();
+    @Test
+    public void asDouble() {
+        double result = new JsonNumber("23.05").asDouble();
 
-    assertEquals(23.05, result, 0);
-  }
+        assertEquals(23.05, result, 0);
+    }
 
-  @Test
-  public void asDouble_returnsInfinityForExceedingValues() {
-    assertEquals(Double.POSITIVE_INFINITY, new JsonNumber("1e500").asDouble(), 0);
-    assertEquals(Double.NEGATIVE_INFINITY, new JsonNumber("-1e500").asDouble(), 0);
-  }
+    @Test
+    public void asDouble_returnsInfinityForExceedingValues() {
+        assertEquals(Double.POSITIVE_INFINITY, new JsonNumber("1e500").asDouble(), 0);
+        assertEquals(Double.NEGATIVE_INFINITY, new JsonNumber("-1e500").asDouble(), 0);
+    }
 
-  @Test
-  public void equals_trueForSameInstance() {
-    JsonNumber number = new JsonNumber("23");
+    @Test
+    public void equals_trueForSameInstance() {
+        JsonNumber number = new JsonNumber("23");
 
-    assertTrue(number.equals(number));
-  }
+        assertEquals(number, number);
+    }
 
-  @Test
-  public void equals_trueForEqualNumberStrings() {
-    assertTrue(new JsonNumber("23").equals(new JsonNumber("23")));
-  }
+    @Test
+    public void equals_trueForEqualNumberStrings() {
+        assertEquals(new JsonNumber("23"), new JsonNumber("23"));
+    }
 
-  @Test
-  public void equals_falseForDifferentNumberStrings() {
-    assertFalse(new JsonNumber("23").equals(new JsonNumber("42")));
-    assertFalse(new JsonNumber("1e+5").equals(new JsonNumber("1e5")));
-  }
+    @Test
+    public void equals_falseForDifferentNumberStrings() {
+        assertNotEquals(new JsonNumber("23"), new JsonNumber("42"));
+        assertNotEquals(new JsonNumber("1e+5"), new JsonNumber("1e5"));
+    }
 
-  @Test
-  public void equals_falseForNull() {
-    assertFalse(new JsonNumber("23").equals(null));
-  }
+    @Test
+    public void equals_falseForNull() {
+        assertNotEquals(null, new JsonNumber("23"));
+    }
 
-  @Test
-  public void equals_falseForSubclass() {
-    assertFalse(new JsonNumber("23").equals(new JsonNumber("23") {}));
-  }
+    @Test
+    public void equals_falseForSubclass() {
+        assertNotEquals(new JsonNumber("23"), new JsonNumber("23") {
+        });
+    }
 
-  @Test
-  public void hashCode_equalsForEqualStrings() {
-    assertTrue(new JsonNumber("23").hashCode() == new JsonNumber("23").hashCode());
-  }
+    @Test
+    public void hashCode_equalsForEqualStrings() {
+        assertEquals(new JsonNumber("23").hashCode(), new JsonNumber("23").hashCode());
+    }
 
-  @Test
-  public void hashCode_differsForDifferentStrings() {
-    assertFalse(new JsonNumber("23").hashCode() == new JsonNumber("42").hashCode());
-  }
+    @Test
+    public void hashCode_differsForDifferentStrings() {
+        assertNotEquals(new JsonNumber("23").hashCode(), new JsonNumber("42").hashCode());
+    }
 
-  @Test
-  public void canBeSerializedAndDeserialized() throws Exception {
-    JsonNumber number = new JsonNumber("3.14");
+    @Test
+    public void canBeSerializedAndDeserialized() throws Exception {
+        JsonNumber number = new JsonNumber("3.14");
 
-    Assert.assertEquals(number, TestUtil.serializeAndDeserialize(number));
-  }
+        Assert.assertEquals(number, TestUtil.serializeAndDeserialize(number));
+    }
 
 }

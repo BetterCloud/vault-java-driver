@@ -28,10 +28,10 @@ import java.util.TreeMap;
 /**
  * <p>A simple client for issuing HTTP requests.  Supports the HTTP verbs:</p>
  * <ul>
- *     <li>GET</li>
- *     <li>POST</li>
- *     <li>PUT</li>
- *     <li>DELETE</li>
+ * <li>GET</li>
+ * <li>POST</li>
+ * <li>PUT</li>
+ * <li>DELETE</li>
  * </ul>
  *
  * <p><code>Rest</code> uses the Builder pattern to provide a basic DSL for usage.  Methods for configuring an HTTP
@@ -67,6 +67,7 @@ public class Rest {
      * verification process, to always trust any certificates.
      */
     private static SSLContext DISABLED_SSL_CONTEXT;
+
     static {
         try {
             DISABLED_SSL_CONTEXT = SSLContext.getInstance("TLS");
@@ -91,8 +92,8 @@ public class Rest {
 
     private String urlString;
     private byte[] body;
-    private final Map<String, String> parameters = new TreeMap<String, String>();
-    private final Map<String, String> headers = new TreeMap<String, String>();
+    private final Map<String, String> parameters = new TreeMap<>();
+    private final Map<String, String> headers = new TreeMap<>();
 
     private Integer connectTimeoutSeconds;
     private Integer readTimeoutSeconds;
@@ -141,7 +142,7 @@ public class Rest {
      * <p>This method may be chained together repeatedly, to pass multiple parameters with a request.  When the
      * request is ultimately sent, the parameters will be sorted by their names.</p>
      *
-     * @param name The raw parameter name (not url-encoded)
+     * @param name  The raw parameter name (not url-encoded)
      * @param value The raw parameter value (not url-encoded)
      * @return This object, with a parameter added, ready for other builder-pattern config methods or an HTTP verb method
      * @throws RestException If any error occurs, or unexpected response received from Vault
@@ -156,25 +157,37 @@ public class Rest {
     }
 
     /**
-     * <p>Adds a header to be send with the HTTP request.</p>
+     * <p>Adds a header to be sent with the HTTP request.</p>
+     * *
+     * <p>This method may be chained together repeatedly, to pass multiple headers with a request.  When the request
+     * is ultimately sent, the headers will be sorted by their names.</p>
      *
-     * <p>Both the header name and value will be automatically url-encoded by the Rest client.</p>
+     * @param name  The raw header name
+     * @param value The raw header value
+     * @return This object, with a header added, ready for other builder-pattern config methods or an HTTP verb method
+     */
+    public Rest header(final String name, final String value) {
+        this.headers.put(name, value);
+        return this;
+    }
+
+    /**
+     * <p>Adds an optional header to be sent with the HTTP request.</p>
+     * *
+     * <p> The value, if null, will skip adding this header to the request.</p>
      *
      * <p>This method may be chained together repeatedly, to pass multiple headers with a request.  When the request
      * is ultimately sent, the headers will be sorted by their names.</p>
      *
-     * @param name The raw header name (not url-encoded)
-     * @param value The raw header value (not url-encoded)
+     * @param name  The raw header name
+     * @param value The raw header value
      * @return This object, with a header added, ready for other builder-pattern config methods or an HTTP verb method
-     * @throws RestException If any error occurs, or unexpected response received from Vault
      */
-    public Rest header(final String name, final String value) throws RestException {
-        try {
-            this.headers.put(URLEncoder.encode(name, "UTF-8"), URLEncoder.encode(value, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new RestException(e);
-        }
-        return this;
+    public Rest optionalHeader(final String name, final String value) {
+        if (value != null && !value.isEmpty()) {
+            this.headers.put(name, value);
+            return this;
+        } else return this;
     }
 
     /**
@@ -311,7 +324,7 @@ public class Rest {
      * Executes an HTTP DELETE request with the settings already configured.  Parameters and headers are optional,
      * but a <code>RestException</code> will be thrown if the caller has not first set a base URL with the
      * <code>url()</code> method.
-     *
+     * <p>
      * Note that any parameters are set in the query string.  This method does not send a request body, as some
      * HTTP servers will ignore it for DELETE requests.
      *
@@ -407,7 +420,7 @@ public class Rest {
      * instance (e.g. timeout thresholds, SSL verification, SSL certificate data).</p>
      *
      * @param urlString The URL to which this connection will be made
-     * @param method The applicable request method (e.g. "GET", "POST", etc)
+     * @param method    The applicable request method (e.g. "GET", "POST", etc)
      * @return
      * @throws RestException If the URL cannot be successfully parsed, or if there are errors processing an SSL cert, etc.
      */
@@ -491,7 +504,7 @@ public class Rest {
         try {
             final InputStream inputStream;
             final int responseCode = this.connectionStatus(connection);
-            if (200 <= responseCode && responseCode  <= 299) {
+            if (200 <= responseCode && responseCode <= 299) {
                 inputStream = connection.getInputStream();
             } else {
                 if (connection instanceof HttpsURLConnection) {

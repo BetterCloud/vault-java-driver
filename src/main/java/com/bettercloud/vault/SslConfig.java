@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -538,7 +539,7 @@ public class SslConfig implements Serializable {
                 final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 // Convert the trusted servers PEM data into an X509Certificate
                 X509Certificate certificate;
-                try (final ByteArrayInputStream pem = new ByteArrayInputStream(pemUTF8.getBytes("UTF-8"))) {
+                try (final ByteArrayInputStream pem = new ByteArrayInputStream(pemUTF8.getBytes(StandardCharsets.UTF_8))) {
                     certificate = (X509Certificate) certificateFactory.generateCertificate(pem);
                 }
                 // Build a truststore
@@ -553,7 +554,7 @@ public class SslConfig implements Serializable {
                 final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
                 // Convert the client certificate PEM data into an X509Certificate
                 X509Certificate clientCertificate;
-                try (final ByteArrayInputStream pem = new ByteArrayInputStream(clientPemUTF8.getBytes("UTF-8"))) {
+                try (final ByteArrayInputStream pem = new ByteArrayInputStream(clientPemUTF8.getBytes(StandardCharsets.UTF_8))) {
                     clientCertificate = (X509Certificate) certificateFactory.generateCertificate(pem);
                 }
 
@@ -613,7 +614,7 @@ public class SslConfig implements Serializable {
      * @throws IOException
      */
     private static String inputStreamToUTF8(final InputStream input) throws IOException {
-        final BufferedReader in = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+        final BufferedReader in = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
         final StringBuilder utf8 = new StringBuilder("");
         String str;
         while ((str = in.readLine()) != null) {

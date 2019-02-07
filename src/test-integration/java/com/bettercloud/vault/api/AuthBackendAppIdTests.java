@@ -12,7 +12,9 @@ import java.io.IOException;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
-/** Integration tests for the AppId auth backend. */
+/**
+ * Integration tests for the AppId auth backend.
+ */
 public class AuthBackendAppIdTests {
 
     @ClassRule
@@ -24,13 +26,15 @@ public class AuthBackendAppIdTests {
         container.setupBackendAppId();
     }
 
-    /** Test Authentication with app-id auth backend */
+    /**
+     * Test Authentication with app-id auth backend
+     */
     @Test
     public void testLoginByAuthId() throws VaultException {
         final Vault vault = container.getVault();
         final String path = "app-id/login";
         final String token = vault.auth().loginByAppID(path, VaultContainer.APP_ID, VaultContainer.USER_ID)
-                                  .getAuthClientToken();
+                .getAuthClientToken();
 
         assertNotNull(token);
         assertNotSame("", token.trim());

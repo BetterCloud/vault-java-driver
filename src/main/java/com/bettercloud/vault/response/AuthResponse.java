@@ -7,7 +7,7 @@ import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.json.ParseException;
 import com.bettercloud.vault.rest.RestResponse;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class AuthResponse extends VaultResponse {
         super(restResponse, retries);
 
         try {
-            final String responseJson = new String(restResponse.getBody(), "UTF-8");
+            final String responseJson = new String(restResponse.getBody(), StandardCharsets.UTF_8);
             final JsonObject jsonObject = Json.parse(responseJson).asObject();
             final JsonObject authJsonObject = jsonObject.get("auth").asObject();
 
@@ -54,7 +54,7 @@ public class AuthResponse extends VaultResponse {
             for (final JsonValue authPolicy : authPoliciesJsonArray) {
                 authPolicies.add(authPolicy.asString());
             }
-        } catch (UnsupportedEncodingException | ParseException e) {
+        } catch (ParseException e) {
         }
     }
 

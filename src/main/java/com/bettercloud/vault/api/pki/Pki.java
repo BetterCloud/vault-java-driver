@@ -8,9 +8,8 @@ import com.bettercloud.vault.response.PkiResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
 
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 /**
@@ -23,6 +22,12 @@ public class Pki {
 
     private final VaultConfig config;
     private final String mountPath;
+    private String nameSpace;
+
+    public Pki withNameSpace(final String nameSpace) {
+        this.nameSpace = nameSpace;
+        return this;
+    }
 
     /**
      * Constructor for use when the PKI backend is mounted on the default path (i.e. <code>/v1/pki</code>).
@@ -32,17 +37,23 @@ public class Pki {
     public Pki(final VaultConfig config) {
         this.config = config;
         this.mountPath = "pki";
+        if (this.config.getNameSpace() != null && !this.config.getNameSpace().isEmpty()) {
+            this.nameSpace = this.config.getNameSpace();
+        }
     }
 
     /**
      * Constructor for use when the PKI backend is mounted on some non-default custom path (e.g. <code>/v1/root-ca</code>).
      *
-     * @param config A container for the configuration settings needed to initialize a <code>Vault</code> driver instance
+     * @param config    A container for the configuration settings needed to initialize a <code>Vault</code> driver instance
      * @param mountPath The path on which your Vault PKI backend is mounted, without the <code>/v1/</code> prefix (e.g. <code>"root-ca"</code>)
      */
     public Pki(final VaultConfig config, final String mountPath) {
         this.config = config;
         this.mountPath = mountPath;
+        if (this.config.getNameSpace() != null && !this.config.getNameSpace().isEmpty()) {
+            this.nameSpace = this.config.getNameSpace();
+        }
     }
 
     /**
@@ -92,7 +103,7 @@ public class Pki {
      * </blockquote>
      *
      * @param roleName A name for the role to be created or updated
-     * @param options Optional settings for the role to be created or updated (e.g. allowed domains, ttl, etc)
+     * @param options  Optional settings for the role to be created or updated (e.g. allowed domains, ttl, etc)
      * @return A container for the information returned by Vault
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
@@ -105,7 +116,8 @@ public class Pki {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
-                        .body(requestJson.getBytes("UTF-8"))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -166,6 +178,7 @@ public class Pki {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -232,9 +245,10 @@ public class Pki {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/revoke", config.getAddress(), this.mountPath))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
-                        .body(requestJson.getBytes("UTF-8"))
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
@@ -293,6 +307,7 @@ public class Pki {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -343,12 +358,12 @@ public class Pki {
      * }</pre>
      * </blockquote>
      *
-     * @param roleName The role on which the credentials will be based.
+     * @param roleName   The role on which the credentials will be based.
      * @param commonName The requested CN for the certificate. If the CN is allowed by role policy, it will be issued.
-     * @param altNames (optional) Requested Subject Alternative Names, in a comma-delimited list. These can be host names or email addresses; they will be parsed into their respective fields. If any requested names do not match role policy, the entire request will be denied.
-     * @param ipSans (optional) Requested IP Subject Alternative Names, in a comma-delimited list. Only valid if the role allows IP SANs (which is the default).
-     * @param ttl (optional) Requested Time To Live. Cannot be greater than the role's max_ttl value. If not provided, the role's ttl value will be used. Note that the role values default to system values if not explicitly set.
-     * @param format (optional) Format for returned data. Can be pem, der, or pem_bundle; defaults to pem. If der, the output is base64 encoded. If pem_bundle, the certificate field will contain the private key, certificate, and issuing CA, concatenated.
+     * @param altNames   (optional) Requested Subject Alternative Names, in a comma-delimited list. These can be host names or email addresses; they will be parsed into their respective fields. If any requested names do not match role policy, the entire request will be denied.
+     * @param ipSans     (optional) Requested IP Subject Alternative Names, in a comma-delimited list. Only valid if the role allows IP SANs (which is the default).
+     * @param ttl        (optional) Requested Time To Live. Cannot be greater than the role's max_ttl value. If not provided, the role's ttl value will be used. Note that the role values default to system values if not explicitly set.
+     * @param format     (optional) Format for returned data. Can be pem, der, or pem_bundle; defaults to pem. If der, the output is base64 encoded. If pem_bundle, the certificate field will contain the private key, certificate, and issuing CA, concatenated.
      * @return A container for the information returned by Vault
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
@@ -360,12 +375,13 @@ public class Pki {
             final String ttl,
             final CredentialFormat format) throws VaultException {
 
-        return issue(roleName,commonName,altNames,ipSans, ttl, format, "");
+        return issue(roleName, commonName, altNames, ipSans, ttl, format, "");
     }
+
     /**
      * <p>Operation to generate a new set of credentials or sign the embedded CSR, in the PKI backend. If CSR is passed the
-     *  sign function of the vault will be called if not, issue will be used.
-     *  The issuing CA certificate is returned as well, so that only the root CA need be in a
+     * sign function of the vault will be called if not, issue will be used.
+     * The issuing CA certificate is returned as well, so that only the root CA need be in a
      * client's trust store.</p>
      *
      * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will be thrown if
@@ -382,13 +398,13 @@ public class Pki {
      * }</pre>
      * </blockquote>
      *
-     * @param roleName The role on which the credentials will be based.
+     * @param roleName   The role on which the credentials will be based.
      * @param commonName The requested CN for the certificate. If the CN is allowed by role policy, it will be issued.
-     * @param altNames (optional) Requested Subject Alternative Names, in a comma-delimited list. These can be host names or email addresses; they will be parsed into their respective fields. If any requested names do not match role policy, the entire request will be denied.
-     * @param ipSans (optional) Requested IP Subject Alternative Names, in a comma-delimited list. Only valid if the role allows IP SANs (which is the default).
-     * @param ttl (optional) Requested Time To Live. Cannot be greater than the role's max_ttl value. If not provided, the role's ttl value will be used. Note that the role values default to system values if not explicitly set.
-     * @param format (optional) Format for returned data. Can be pem, der, or pem_bundle; defaults to pem. If der, the output is base64 encoded. If pem_bundle, the certificate field will contain the private key, certificate, and issuing CA, concatenated.
-     * @param csr (optional) PEM Encoded CSR
+     * @param altNames   (optional) Requested Subject Alternative Names, in a comma-delimited list. These can be host names or email addresses; they will be parsed into their respective fields. If any requested names do not match role policy, the entire request will be denied.
+     * @param ipSans     (optional) Requested IP Subject Alternative Names, in a comma-delimited list. Only valid if the role allows IP SANs (which is the default).
+     * @param ttl        (optional) Requested Time To Live. Cannot be greater than the role's max_ttl value. If not provided, the role's ttl value will be used. Note that the role values default to system values if not explicitly set.
+     * @param format     (optional) Format for returned data. Can be pem, der, or pem_bundle; defaults to pem. If der, the output is base64 encoded. If pem_bundle, the certificate field will contain the private key, certificate, and issuing CA, concatenated.
+     * @param csr        (optional) PEM Encoded CSR
      * @return A container for the information returned by Vault
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
@@ -437,17 +453,18 @@ public class Pki {
                 jsonObject.add("format", format.toString());
             }
             if (csr != null) {
-                jsonObject.add("csr", csr.toString());
+                jsonObject.add("csr", csr);
             }
             final String requestJson = jsonObject.toString();
 
             // Make an HTTP request to Vault
             try {
-                String endpoint = (csr == null || csr.isEmpty()) ?  "%s/v1/%s/issue/%s" : "%s/v1/%s/sign/%s";
+                String endpoint = (csr == null || csr.isEmpty()) ? "%s/v1/%s/issue/%s" : "%s/v1/%s/sign/%s";
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format(endpoint, config.getAddress(), this.mountPath, roleName))
                         .header("X-Vault-Token", config.getToken())
-                        .body(requestJson.getBytes("UTF-8"))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -488,7 +505,7 @@ public class Pki {
             addJsonFieldIfNotNull(jsonObject, "max_ttl", options.getMaxTtl());
             addJsonFieldIfNotNull(jsonObject, "allow_localhost", options.getAllowLocalhost());
             if (options.getAllowedDomains() != null && options.getAllowedDomains().size() > 0) {
-                addJsonFieldIfNotNull(jsonObject, "allowed_domains", options.getAllowedDomains().stream().collect(Collectors.joining(",")));
+                addJsonFieldIfNotNull(jsonObject, "allowed_domains", String.join(",", options.getAllowedDomains()));
             }
             addJsonFieldIfNotNull(jsonObject, "allow_spiffe_name", options.getAllowSpiffename());
             addJsonFieldIfNotNull(jsonObject, "allow_bare_domains", options.getAllowBareDomains());
@@ -505,7 +522,7 @@ public class Pki {
             addJsonFieldIfNotNull(jsonObject, "use_csr_common_name", options.getUseCsrCommonName());
             addJsonFieldIfNotNull(jsonObject, "use_csr_sans", options.getUseCsrSans());
             if (options.getKeyUsage() != null && options.getKeyUsage().size() > 0) {
-                addJsonFieldIfNotNull(jsonObject, "key_usage", options.getKeyUsage().stream().collect(Collectors.joining(",")));
+                addJsonFieldIfNotNull(jsonObject, "key_usage", String.join(",", options.getKeyUsage()));
             }
         }
         return jsonObject.toString();

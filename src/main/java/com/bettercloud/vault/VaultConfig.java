@@ -3,6 +3,8 @@ package com.bettercloud.vault;
 import lombok.Getter;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <p>A container for the configuration settings needed to initialize a <code>Vault</code> driver instance.</p>
@@ -30,13 +32,26 @@ public class VaultConfig implements Serializable {
     private static final String VAULT_OPEN_TIMEOUT = "VAULT_OPEN_TIMEOUT";
     private static final String VAULT_READ_TIMEOUT = "VAULT_READ_TIMEOUT";
 
-    @Getter private String address;
-    @Getter private String token;
-    @Getter private SslConfig sslConfig;
-    @Getter private Integer openTimeout;
-    @Getter private Integer readTimeout;
-    @Getter private int maxRetries;
-    @Getter private int retryIntervalMilliseconds;
+    @Getter
+    private Map<String, String> secretsEnginePathMap = new ConcurrentHashMap<>();
+    @Getter
+    private String address;
+    @Getter
+    private String token;
+    @Getter
+    private SslConfig sslConfig;
+    @Getter
+    private Integer openTimeout;
+    @Getter
+    private Integer readTimeout;
+    @Getter
+    private int maxRetries;
+    @Getter
+    private int retryIntervalMilliseconds;
+    @Getter
+    private Integer globalEngineVersion;
+    @Getter
+    private String nameSpace;
     private EnvironmentLoader environmentLoader;
 
     /**
@@ -47,16 +62,46 @@ public class VaultConfig implements Serializable {
      * constructing a <code>VaultConfig</code> instance using the builder pattern approach rather than the convenience
      * constructor.  This method's access level was therefore originally set to <code>protected</code>, but was bumped
      * up to <code>public</code> due to community request for the ability to disable environment loading altogether
-     * (see https://github.com/BetterCloud/vault-java-driver/issues/77).
+     * (see https://github.com/BetterCloud/vault-java-driver/issues/77).</p>
      *
-     * Note that if you do override this, however, then obviously all of the environment checking discussed in the
-     * documentation becomes disabled.
+     * <p>Note that if you do override this, however, then obviously all of the environment checking discussed in the
+     * documentation becomes disabled.</p>
      *
      * @param environmentLoader An environment variable loader implementation (presumably a mock)
      * @return This object, with environmentLoader populated, ready for additional builder-pattern method calls or else finalization with the build() method
      */
     public VaultConfig environmentLoader(final EnvironmentLoader environmentLoader) {
         this.environmentLoader = environmentLoader;
+        return this;
+    }
+
+    /**
+     * <p>Optional. Sets a global namespace to the Vault server instance, if desired. Otherwise, namespace can be applied individually to any read / write / auth call.
+     *
+     * <p>Namespace support requires Vault Enterprise Pro, please see https://learn.hashicorp.com/vault/operations/namespaces</p>
+     *
+     * @param nameSpace The namespace to use globally in this VaultConfig instance.
+     * @return This object, with the namespace populated, ready for additional builder-pattern method calls or else
+     * finalization with the build() method
+     */
+    public VaultConfig nameSpace(final String nameSpace) throws VaultException {
+        if (nameSpace != null && !nameSpace.isEmpty()) {
+            this.nameSpace = nameSpace;
+            return this;
+        } else throw new VaultException("A namespace cannot be empty.");
+    }
+
+    /**
+     * <p>Sets the KV Secrets Engine version of the Vault server instance.
+     *
+     * <p>If no version is explicitly set, it will be defaulted to version 2, the current version.</p>
+     *
+     * @param globalEngineVersion The Vault KV Secrets Engine version
+     * @return This object, with KV Secrets Engine version populated, ready for additional builder-pattern method calls or else
+     * finalization with the build() method
+     */
+    public VaultConfig engineVersion(final Integer globalEngineVersion) {
+        this.globalEngineVersion = globalEngineVersion;
         return this;
     }
 
@@ -92,6 +137,20 @@ public class VaultConfig implements Serializable {
      */
     public VaultConfig token(final String token) {
         this.token = token;
+        return this;
+    }
+
+    /**
+     * <p>Sets the secrets Engine paths used by Vault.</p>
+     *
+     * @param secretEngineVersions paths to use for accessing Vault secrets.
+     *                             Key: secret path, value: Engine version to use.
+     *                             Example map: "/secret/foo" , "1",
+     *                             "/secret/bar", "2"
+     * @return This object, with secrets paths populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     */
+    VaultConfig secretsEnginePathMap(final Map<String, String> secretEngineVersions) {
+        this.secretsEnginePathMap = secretEngineVersions;
         return this;
     }
 
@@ -150,7 +209,7 @@ public class VaultConfig implements Serializable {
      *
      * @param maxRetries The number of times that API operations will be retried when a failure occurs.
      */
-    protected void setMaxRetries(final int maxRetries) {
+    void setMaxRetries(final int maxRetries) {
         this.maxRetries = maxRetries;
     }
 
@@ -164,10 +223,20 @@ public class VaultConfig implements Serializable {
      *
      * @param retryIntervalMilliseconds The number of milliseconds that the driver will wait in between retries.
      */
-    protected void setRetryIntervalMilliseconds(final int retryIntervalMilliseconds) {
+    void setRetryIntervalMilliseconds(final int retryIntervalMilliseconds) {
         this.retryIntervalMilliseconds = retryIntervalMilliseconds;
     }
 
+    /**
+     * <p>Sets the global Engine version for this Vault Config instance. If no KV Engine version map is provided, use this version
+     * globally.</p>
+     * If the provided KV Engine version map does not contain a requested secret, or when writing new secrets, fall back to this version.
+     *
+     * @param engineVersion The version of the Vault KV Engine to use globally.
+     */
+    void setEngineVersion(final Integer engineVersion) {
+        this.globalEngineVersion = engineVersion;
+    }
 
     /**
      * <p>This is the terminating method in the builder pattern.  The method that validates all of the fields that

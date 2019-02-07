@@ -38,30 +38,30 @@ import com.bettercloud.vault.json.ParseException;
 @SuppressWarnings("PMD")
 public class Mocking_Test {
 
-  @Test
-  public void mockValue() {
-    JsonValue jsonValue = Mockito.mock(JsonValue.class);
+    @Test
+    public void mockValue() {
+        JsonValue jsonValue = Mockito.mock(JsonValue.class);
 
-    assertNotNull(jsonValue);
-  }
+        assertNotNull(jsonValue);
+    }
 
-  @Test
-  public void mockObject() {
-    JsonObject jsonObject = Mockito.mock(JsonObject.class);
+    @Test
+    public void mockObject() {
+        JsonObject jsonObject = Mockito.mock(JsonObject.class);
 
-    assertNotNull(jsonObject);
-  }
+        assertNotNull(jsonObject);
+    }
 
-  @Test
-  public void mockArray() {
-    JsonArray jsonArray = Mockito.mock(JsonArray.class);
+    @Test
+    public void mockArray() {
+        JsonArray jsonArray = Mockito.mock(JsonArray.class);
 
-    assertNotNull(jsonArray);
-  }
+        assertNotNull(jsonArray);
+    }
 
-  @Test
-  public void mockParseException() {
-    Mockito.mock(ParseException.class);
-  }
+    @Test
+    public void mockParseException() {
+        Mockito.mock(ParseException.class);
+    }
 
 }

@@ -7,6 +7,9 @@ import com.bettercloud.vault.response.VaultResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
 
+import java.nio.charset.StandardCharsets;
+
+
 /**
  * <p>The implementing class for operations on REST endpoints, under the "Leases" section of the Vault HTTP API
  * docs (https://www.vaultproject.io/docs/http/index.html).</p>
@@ -19,8 +22,18 @@ public class Leases {
 
     private final VaultConfig config;
 
+    private String nameSpace;
+
     public Leases(final VaultConfig config) {
         this.config = config;
+        if (this.config.getNameSpace() != null && !this.config.getNameSpace().isEmpty()) {
+            this.nameSpace = this.config.getNameSpace();
+        }
+    }
+
+    public Leases withNameSpace(final String nameSpace) {
+        this.nameSpace = nameSpace;
+        return this;
     }
 
     /**
@@ -44,6 +57,7 @@ public class Leases {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke/" + leaseId)
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -98,6 +112,7 @@ public class Leases {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-prefix/" + prefix)
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -155,6 +170,7 @@ public class Leases {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-force/" + prefix)
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -217,12 +233,14 @@ public class Leases {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
                         .header("X-Vault-Token", config.getToken())
-                        .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(increment < 0 ? null : requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
-                        .put();
+                        .post();
+
                 // Validate response
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Expecting HTTP status 200, but instead receiving " + restResponse.getStatus(), restResponse.getStatus());

@@ -13,10 +13,11 @@ import com.bettercloud.vault.rest.RestResponse;
 import lombok.Getter;
 
 import java.io.Serializable;
-import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 
 /**
  * <p>The implementing class for operations on Vault's <code>/v1/auth/*</code> REST endpoints.</p>
@@ -39,15 +40,24 @@ public class Auth {
      */
     public static class TokenRequest implements Serializable {
 
-        @Getter private UUID id;
-        @Getter private List<String> polices;
-        @Getter private Map<String, String> meta;
-        @Getter private Boolean noParent;
-        @Getter private Boolean noDefaultPolicy;
-        @Getter private String ttl;
-        @Getter private String displayName;
-        @Getter private Long numUses;
-        @Getter private String role;
+        @Getter
+        private UUID id;
+        @Getter
+        private List<String> polices;
+        @Getter
+        private Map<String, String> meta;
+        @Getter
+        private Boolean noParent;
+        @Getter
+        private Boolean noDefaultPolicy;
+        @Getter
+        private String ttl;
+        @Getter
+        private String displayName;
+        @Getter
+        private Long numUses;
+        @Getter
+        private String role;
 
         /**
          * @param id (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
@@ -104,7 +114,6 @@ public class Auth {
         }
 
         /**
-         *
          * @param displayName (optional) The display name of the token. Defaults to "token".
          * @return This object, with its displayName field populated
          */
@@ -134,8 +143,18 @@ public class Auth {
 
     private final VaultConfig config;
 
+    private String nameSpace;
+
     public Auth(final VaultConfig config) {
         this.config = config;
+        if (this.config.getNameSpace() != null && !this.config.getNameSpace().isEmpty()) {
+            this.nameSpace = this.config.getNameSpace();
+        }
+    }
+
+    public Auth withNameSpace(final String nameSpace) {
+        this.nameSpace = nameSpace;
+        return this;
     }
 
     /**
@@ -156,10 +175,10 @@ public class Auth {
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
-    public AuthResponse createToken(final TokenRequest tokenRequest) throws VaultException{
-    	return createToken(tokenRequest, "token");
+    public AuthResponse createToken(final TokenRequest tokenRequest) throws VaultException {
+        return createToken(tokenRequest, "token");
     }
-    
+
     /**
      * <p>Operation to create an authentication token.  Relies on another token already being present in
      * the <code>VaultConfig</code> instance.  Example usage:</p>
@@ -174,20 +193,20 @@ public class Auth {
      * }</pre>
      * </blockquote>
      *
-     * @param tokenRequest A container of optional configuration parameters
+     * @param tokenRequest   A container of optional configuration parameters
      * @param tokenAuthMount The mount name of the token authentication back end.  If null, defaults to "token"
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse createToken(final TokenRequest tokenRequest, final String tokenAuthMount) throws VaultException {
         int retryCount = 0;
-        
+
         final String mount = tokenAuthMount != null ? tokenAuthMount : "token";
         while (true) {
             try {
                 // Parse parameters to JSON
                 final JsonObject jsonObject = Json.object();
-              
+
                 if (tokenRequest.id != null) jsonObject.add("id", tokenRequest.id.toString());
                 if (tokenRequest.polices != null && !tokenRequest.polices.isEmpty()) {
                     jsonObject.add("policies", Json.array(tokenRequest.polices.toArray(new String[tokenRequest.polices.size()])));//NOPMD
@@ -200,12 +219,13 @@ public class Auth {
                     jsonObject.add("meta", metaMap);
                 }
                 if (tokenRequest.noParent != null) jsonObject.add("no_parent", tokenRequest.noParent);
-                if (tokenRequest.noDefaultPolicy != null) jsonObject.add("no_default_policy", tokenRequest.noDefaultPolicy);
+                if (tokenRequest.noDefaultPolicy != null)
+                    jsonObject.add("no_default_policy", tokenRequest.noDefaultPolicy);
                 if (tokenRequest.ttl != null) jsonObject.add("ttl", tokenRequest.ttl);
                 if (tokenRequest.displayName != null) jsonObject.add("display_name", tokenRequest.displayName);
                 if (tokenRequest.numUses != null) jsonObject.add("num_uses", tokenRequest.numUses);
                 final String requestJson = jsonObject.toString();
-                
+
                 final StringBuilder urlBuilder = new StringBuilder(config.getAddress()).append("/v1/auth/" + mount + "/create");//NOPMD
                 if (tokenRequest.role != null) {
                     urlBuilder.append("/").append(tokenRequest.role);
@@ -216,7 +236,8 @@ public class Auth {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(url)
                         .header("X-Vault-Token", config.getToken())
-                        .body(requestJson.getBytes("UTF-8"))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -266,8 +287,8 @@ public class Auth {
      * <strong>NOTE: </strong> As of Vault 0.6.1, Hashicorp has deprecated the App ID authentication backend in
      * favor of AppRole.  This method will be removed at some point after this backend has been eliminated from Vault.
      *
-     * @param path The path on which the authentication is performed (e.g. <code>auth/app-id/login</code>)
-     * @param appId The app-id used for authentication
+     * @param path   The path on which the authentication is performed (e.g. <code>auth/app-id/login</code>)
+     * @param appId  The app-id used for authentication
      * @param userId The user-id used for authentication
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
@@ -281,7 +302,8 @@ public class Auth {
                 final String requestJson = Json.object().add("app_id", appId).add("user_id", userId).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + path)
-                        .body(requestJson.getBytes("UTF-8"))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -329,7 +351,7 @@ public class Auth {
      * }</pre>
      * </blockquote>
      *
-     * @param roleId The role-id used for authentication
+     * @param roleId   The role-id used for authentication
      * @param secretId The secret-id used for authentication
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
@@ -350,18 +372,18 @@ public class Auth {
      * final String token = response.getAuthClientToken();
      * }</pre>
      * </blockquote>
-     *
+     * <p>
      * NOTE:  I hate that this method takes the custom mount path as its first parameter, while all of the other
-     *        methods in this class take it as the last parameter (a better practice).  I just didn't think about it
-     *        during code review.  Now it's difficult to deprecate this, since a version of the method with path as
-     *        the final parameter would have the same method signature.
+     * methods in this class take it as the last parameter (a better practice).  I just didn't think about it
+     * during code review.  Now it's difficult to deprecate this, since a version of the method with path as
+     * the final parameter would have the same method signature.
+     * <p>
+     * I may or may not change this in some future breaking-change major release, especially if we keep adding
+     * similar overloaded methods elsewhere and need the global consistency.  At any rate, going forward no new
+     * methods should take a custom path as the first parameter.
      *
-     *        I may or may not change this in some future breaking-change major release, especially if we keep adding
-     *        similar overloaded methods elsewhere and need the global consistency.  At any rate, going forward no new
-     *        methods should take a custom path as the first parameter.
-     *
-     * @param path The path on which the authentication is performed, following the "/v1/auth/" prefix (e.g. "approle")
-     * @param roleId The role-id used for authentication
+     * @param path     The path on which the authentication is performed, following the "/v1/auth/" prefix (e.g. "approle")
+     * @param roleId   The role-id used for authentication
      * @param secretId The secret-id used for authentication
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
@@ -374,7 +396,8 @@ public class Auth {
                 final String requestJson = Json.object().add("role_id", roleId).add("secret_id", secretId).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + path + "/login")
-                        .body(requestJson.getBytes("UTF-8"))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -391,7 +414,6 @@ public class Auth {
                 }
                 return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
-                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
                     retryCount++;
                     try {
@@ -427,9 +449,9 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByUserPass(final String username, final String password) throws VaultException {
-    	return loginByUserPass(username, password, "userpass");
+        return loginByUserPass(username, password, "userpass");
     }
-    
+
     /**
      * <p>Basic login operation to authenticate to a Username &amp; Password backend.  Example usage:</p>
      *
@@ -441,15 +463,15 @@ public class Auth {
      * }</pre>
      * </blockquote>
      *
-     * @param username The username used for authentication
-     * @param password The password used for authentication
+     * @param username          The username used for authentication
+     * @param password          The password used for authentication
      * @param userpassAuthMount The mount name of the userpass authentication back end.  If null, defaults to "userpass"
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByUserPass(final String username, final String password, final String userpassAuthMount) throws VaultException {
         int retryCount = 0;
-        
+
         final String mount = userpassAuthMount != null ? userpassAuthMount : "userpass";
         while (true) {
             try {
@@ -457,7 +479,8 @@ public class Auth {
                 final String requestJson = Json.object().add("password", password).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login/" + username)
-                        .body(requestJson.getBytes("UTF-8"))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -474,7 +497,6 @@ public class Auth {
                 }
                 return new AuthResponse(restResponse, retryCount);
             } catch (Exception e) {
-                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
                 if (retryCount < config.getMaxRetries()) {
                     retryCount++;
                     try {
@@ -525,8 +547,8 @@ public class Auth {
      * }</pre>
      * </blockquote>
      *
-     * @param username The username used for authentication
-     * @param password The password used for authentication
+     * @param username      The username used for authentication
+     * @param password      The password used for authentication
      * @param ldapAuthMount The mount name of the ldap authentication back end.  If null, defaults to "ldap"
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
@@ -548,17 +570,15 @@ public class Auth {
      * }</pre>
      * </blockquote>
      *
-     * @param role Name of the role against which the login is being attempted. If role is not specified, then the login endpoint
-     *             looks for a role bearing the name of the AMI ID of the EC2 instance that is trying to login if using the ec2
-     *             auth method, or the "friendly name" (i.e., role name or username) of the IAM principal authenticated.
-     *             If a matching role is not found, login fails.
-     * @param identity Base64 encoded EC2 instance identity document.
-     * @param signature Base64 encoded SHA256 RSA signature of the instance identity document.
-     * @param nonce Client nonce used for authentication. If null, a new nonce will be generated by Vault
+     * @param role         Name of the role against which the login is being attempted. If role is not specified, then the login endpoint
+     *                     looks for a role bearing the name of the AMI ID of the EC2 instance that is trying to login if using the ec2
+     *                     auth method, or the "friendly name" (i.e., role name or username) of the IAM principal authenticated.
+     *                     If a matching role is not found, login fails.
+     * @param identity     Base64 encoded EC2 instance identity document.
+     * @param signature    Base64 encoded SHA256 RSA signature of the instance identity document.
+     * @param nonce        Client nonce used for authentication. If null, a new nonce will be generated by Vault
      * @param awsAuthMount AWS auth mount
-     *
      * @return The auth token, with additional response metadata
-     *
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     // TODO: Needs integration test coverage if possible
@@ -571,16 +591,18 @@ public class Auth {
                 // HTTP request to Vault
                 final JsonObject request = Json.object().add("identity", identity)
                         .add("signature", signature);
-                if(role != null) {
+                if (role != null) {
                     request.add("role", role);
                 }
-                if(nonce != null) {
+                if (nonce != null) {
                     request.add("nonce", nonce);
                 }
                 final String requestJson = request.toString();
+
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
-                        .body(requestJson.getBytes("UTF-8"))
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -627,16 +649,14 @@ public class Auth {
      * }</pre>
      * </blockquote>
      *
-     * @param role Name of the role against which the login is being attempted. If role is not specified, then the login endpoint
-     *             looks for a role bearing the name of the AMI ID of the EC2 instance that is trying to login if using the ec2
-     *             auth method, or the "friendly name" (i.e., role name or username) of the IAM principal authenticated.
-     *             If a matching role is not found, login fails.
-     * @param pkcs7 PKCS7 signature of the identity document with all \n characters removed.
-     * @param nonce Client nonce used for authentication. If null, a new nonce will be generated by Vault
+     * @param role         Name of the role against which the login is being attempted. If role is not specified, then the login endpoint
+     *                     looks for a role bearing the name of the AMI ID of the EC2 instance that is trying to login if using the ec2
+     *                     auth method, or the "friendly name" (i.e., role name or username) of the IAM principal authenticated.
+     *                     If a matching role is not found, login fails.
+     * @param pkcs7        PKCS7 signature of the identity document with all \n characters removed.
+     * @param nonce        Client nonce used for authentication. If null, a new nonce will be generated by Vault
      * @param awsAuthMount AWS auth mount
-     *
      * @return The auth token, with additional response metadata
-     *
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     // TODO: Needs integration test coverage if possible
@@ -648,16 +668,17 @@ public class Auth {
             try {
                 // HTTP request to Vault
                 final JsonObject request = Json.object().add("pkcs7", pkcs7);
-                if(role != null) {
+                if (role != null) {
                     request.add("role", role);
                 }
-                if(nonce != null) {
+                if (nonce != null) {
                     request.add("nonce", nonce);
                 }
                 final String requestJson = request.toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
-                        .body(requestJson.getBytes("UTF-8"))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -704,20 +725,18 @@ public class Auth {
      * }</pre>
      * </blockquote>
      *
-     * @param role Name of the role against which the login is being attempted. If role is not specified, then the login endpoint
-     *             looks for a role bearing the name of the AMI ID of the EC2 instance that is trying to login if using the ec2
-     *             auth method, or the "friendly name" (i.e., role name or username) of the IAM principal authenticated.
-     *             If a matching role is not found, login fails.
-     * @param iamRequestUrl PKCS7 signature of the identity document with all \n characters removed.Base64-encoded HTTP URL used in the signed request.
-     *                      Most likely just aHR0cHM6Ly9zdHMuYW1hem9uYXdzLmNvbS8= (base64-encoding of https://sts.amazonaws.com/) as most requests will
-     *                      probably use POST with an empty URI.
-     * @param iamRequestBody Base64-encoded body of the signed request. Most likely QWN0aW9uPUdldENhbGxlcklkZW50aXR5JlZlcnNpb249MjAxMS0wNi0xNQ== which is
+     * @param role              Name of the role against which the login is being attempted. If role is not specified, then the login endpoint
+     *                          looks for a role bearing the name of the AMI ID of the EC2 instance that is trying to login if using the ec2
+     *                          auth method, or the "friendly name" (i.e., role name or username) of the IAM principal authenticated.
+     *                          If a matching role is not found, login fails.
+     * @param iamRequestUrl     PKCS7 signature of the identity document with all \n characters removed.Base64-encoded HTTP URL used in the signed request.
+     *                          Most likely just aHR0cHM6Ly9zdHMuYW1hem9uYXdzLmNvbS8= (base64-encoding of https://sts.amazonaws.com/) as most requests will
+     *                          probably use POST with an empty URI.
+     * @param iamRequestBody    Base64-encoded body of the signed request. Most likely QWN0aW9uPUdldENhbGxlcklkZW50aXR5JlZlcnNpb249MjAxMS0wNi0xNQ== which is
      *                          the base64 encoding of Action=GetCallerIdentity&amp;Version=2011-06-15.
      * @param iamRequestHeaders Request headers
-     * @param awsAuthMount AWS auth mount
-     *
+     * @param awsAuthMount      AWS auth mount
      * @return The auth token, with additional response metadata
-     *
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByAwsIam(final String role, final String iamRequestUrl, final String iamRequestBody, final String iamRequestHeaders, final String awsAuthMount) throws VaultException {
@@ -731,13 +750,14 @@ public class Auth {
                         .add("iam_request_body", iamRequestBody)
                         .add("iam_request_headers", iamRequestHeaders)
                         .add("iam_http_request_method", "POST");
-                if(role != null) {
+                if (role != null) {
                     request.add("role", role);
                 }
                 final String requestJson = request.toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
-                        .body(requestJson.getBytes("UTF-8"))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -774,25 +794,6 @@ public class Auth {
     }
 
     /**
-    * <p>Basic login operation to authenticate to an github backend.  Example usage:</p>
-    *
-    * <blockquote>
-    * <pre>{@code
-    * final AuthResponse response = vault.auth().loginByGithub("githubToken");
-    *
-    * final String token = response.getAuthClientToken();
-    * }</pre>
-    * </blockquote>
-    *
-    * @param githubToken The app-id used for authentication
-    * @return The auth token, with additional response metadata
-    * @throws VaultException If any error occurs, or unexpected response received from Vault
-    */
-   public AuthResponse loginByGithub(final String githubToken) throws VaultException {
-	   return loginByGithub(githubToken, "github");
-   }
-    
-     /**
      * <p>Basic login operation to authenticate to an github backend.  Example usage:</p>
      *
      * <blockquote>
@@ -804,6 +805,25 @@ public class Auth {
      * </blockquote>
      *
      * @param githubToken The app-id used for authentication
+     * @return The auth token, with additional response metadata
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse loginByGithub(final String githubToken) throws VaultException {
+        return loginByGithub(githubToken, "github");
+    }
+
+    /**
+     * <p>Basic login operation to authenticate to an github backend.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().loginByGithub("githubToken");
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param githubToken     The app-id used for authentication
      * @param githubAuthMount The mount name of the github authentication back end.  If null, defaults to "github"
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
@@ -813,7 +833,7 @@ public class Auth {
         // TODO:  Add (optional?) integration test coverage
 
         int retryCount = 0;
-        
+
         final String mount = githubAuthMount != null ? githubAuthMount : "github";
         while (true) {
             try {
@@ -821,7 +841,8 @@ public class Auth {
                 final String requestJson = Json.object().add("token", githubToken).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
-                        .body(requestJson.getBytes("UTF-8"))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -857,7 +878,7 @@ public class Auth {
         }
     }
 
-     /**
+    /**
      * <p>Basic login operation to authenticate to an GCP backend.  Example usage:</p>
      *
      * <blockquote>
@@ -869,11 +890,11 @@ public class Auth {
      * </blockquote>
      *
      * @param role The gcp role used for authentication
-     * @param jwt The JWT token for the role
+     * @param jwt  The JWT token for the role
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
-     // TODO: Needs integration test coverage if possible
+    // TODO: Needs integration test coverage if possible
     public AuthResponse loginByGCP(final String role, final String jwt) throws VaultException {
         int retryCount = 0;
 
@@ -883,7 +904,8 @@ public class Auth {
                 final String requestJson = Json.object().add("role", role).add("jwt", jwt).toString();
                 final RestResponse restResponse = new Rest()
                         .url(config.getAddress() + "/v1/auth/gcp/login")
-                        .body(requestJson.getBytes("UTF-8"))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -943,9 +965,9 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse loginByCert() throws VaultException {
-    	return loginByCert("cert");
+        return loginByCert("cert");
     }
-    
+
     /**
      * <p>Basic login operation to authenticate using Vault's TLS Certificate auth backend.  Example usage:</p>
      *
@@ -972,21 +994,23 @@ public class Auth {
      */
     public AuthResponse loginByCert(final String certAuthMount) throws VaultException {
         int retryCount = 0;
-        
+
         final String mount = certAuthMount != null ? certAuthMount : "cert";
         while (true) {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
+
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(),
-                                             restResponse.getStatus());
+                            restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -1034,22 +1058,22 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse renewSelf(final long increment) throws VaultException {
-    	return renewSelf(increment, "token");
+        return renewSelf(increment, "token");
     }
-    
+
     /**
      * <p>Renews the lease associated with the calling token.  This version of the method accepts a parameter to
      * explicitly declare how long the new lease period should be (in seconds).  The Vault documentation suggests
      * that this value may be ignored, however.</p>
      *
-     * @param increment The number of seconds requested for the new lease lifespan
+     * @param increment      The number of seconds requested for the new lease lifespan
      * @param tokenAuthMount The mount name of the token authentication back end.  If null, defaults to "token"
      * @return The response information returned from Vault
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public AuthResponse renewSelf(final long increment, final String tokenAuthMount) throws VaultException {
         int retryCount = 0;
-        
+
         final String mount = tokenAuthMount != null ? tokenAuthMount : "token";
         while (true) {
             try {
@@ -1058,12 +1082,14 @@ public class Auth {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/renew-self")
                         .header("X-Vault-Token", config.getToken())
-                        .body(increment < 0 ? null : requestJson.getBytes("UTF-8"))
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(increment < 0 ? null : requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
+
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
@@ -1100,7 +1126,7 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public LookupResponse lookupSelf() throws VaultException {
-    	return lookupSelf("token");
+        return lookupSelf("token");
     }
 
     /**
@@ -1119,11 +1145,13 @@ public class Auth {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/lookup-self")
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .get();
+
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
@@ -1141,9 +1169,9 @@ public class Auth {
                         final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
-                        e1.printStackTrace(); //NOPMD
+                        e1.printStackTrace();
                     }
-                } else if (e instanceof VaultException) { //NOPMD
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
                     throw (VaultException) e;
                 } else {
@@ -1179,11 +1207,13 @@ public class Auth {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/wrapping/lookup")
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .get();
+
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(),
@@ -1193,7 +1223,7 @@ public class Auth {
                 if (mimeType == null || !"application/json".equals(mimeType)) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
-                return new LogicalResponse(restResponse, retryCount);
+                return new LogicalResponse(restResponse, retryCount, Logical.logicalOperations.authentication);
             } catch (Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the loop
                 // again...
@@ -1203,9 +1233,9 @@ public class Auth {
                         final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
-                        e1.printStackTrace(); //NOPMD
+                        e1.printStackTrace();
                     }
-                } else if (e instanceof VaultException) { //NOPMD
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
                     throw (VaultException) e;
                 } else {
@@ -1239,11 +1269,13 @@ public class Auth {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/revoke-self")
                         .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
                         .post();
+
                 // Validate restResponse
                 if (restResponse.getStatus() != 204) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
@@ -1257,9 +1289,9 @@ public class Auth {
                         final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
                         Thread.sleep(retryIntervalMilliseconds);
                     } catch (InterruptedException e1) {
-                        e1.printStackTrace(); //NOPMD
+                        e1.printStackTrace();
                     }
-                } else if (e instanceof VaultException) { //NOPMD
+                } else if (e instanceof VaultException) {
                     // ... otherwise, give up.
                     throw (VaultException) e;
                 } else {
@@ -1316,7 +1348,7 @@ public class Auth {
      * </blockquote>
      *
      * @param wrappedToken Specifies the wrapping token ID, do NOT also put this in your {@link VaultConfig#token},
-     *              if token is {@code null}, this method will unwrap the auth token in {@link VaultConfig#token}
+     *                     if token is {@code null}, this method will unwrap the auth token in {@link VaultConfig#token}
      * @return The response information returned from Vault
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      * @see #unwrap()
@@ -1336,19 +1368,20 @@ public class Auth {
 
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()
-                                .url(url)
-                                .header("X-Vault-Token", config.getToken())
-                                .body(requestJson.getBytes("UTF-8"))
-                                .connectTimeoutSeconds(config.getOpenTimeout())
-                                .readTimeoutSeconds(config.getReadTimeout())
-                                .sslVerification(config.getSslConfig().isVerify())
-                                .sslContext(config.getSslConfig().getSslContext())
-                                .post();
+                        .url(url)
+                        .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(),
-                                    restResponse.getStatus());
+                            restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {

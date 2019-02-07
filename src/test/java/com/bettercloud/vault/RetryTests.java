@@ -19,18 +19,19 @@ public class RetryTests {
 
     @Test
     public void testRetries_Read() throws Exception {
-        final RetriesMockVault retriesMockVault = new RetriesMockVault(5, 200, "{\"lease_id\":\"12345\",\"renewable\":false,\"lease_duration\":10000,\"data\":{\"value\":\"mock\"}}");
+        final RetriesMockVault retriesMockVault = new RetriesMockVault(5, 200,
+                "{\"lease_id\":\"12345\",\"renewable\":false,\"lease_duration\":10000,\"data\":{\"value\":\"mock\"}}");
         final Server server = VaultTestUtils.initHttpMockVault(retriesMockVault);
         server.start();
 
-        final VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("mock_token").build();
+        final VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("mock_token").engineVersion(1).build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.withRetries(5, 100).logical().read("secret/hello");
         assertEquals(5, response.getRetries());
         assertEquals("mock", response.getData().get("value"));
         assertEquals("12345", response.getLeaseId());
         assertEquals(false, response.getRenewable());
-        assertTrue(10000L == response.getLeaseDuration());
+        assertEquals(10000L, (long) response.getLeaseDuration());
 
         VaultTestUtils.shutdownMockVault(server);
     }
@@ -44,7 +45,9 @@ public class RetryTests {
         final VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("mock_token").build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.withRetries(5, 100).logical()
-                .write("secret/hello", new HashMap() {{ put("value", "world"); }});
+                .write("secret/hello", new HashMap<String, Object>() {{
+                    put("value", "world");
+                }});
         assertEquals(5, response.getRetries());
 
         VaultTestUtils.shutdownMockVault(server);

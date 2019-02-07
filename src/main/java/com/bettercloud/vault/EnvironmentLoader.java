@@ -2,6 +2,7 @@ package com.bettercloud.vault;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -25,7 +26,7 @@ public class EnvironmentLoader implements Serializable {
                 try {
                     final byte[] bytes = Files.readAllBytes(
                             Paths.get(System.getProperty("user.home")).resolve(".vault-token"));
-                    value = new String(bytes, "UTF-8").trim();
+                    value = new String(bytes, StandardCharsets.UTF_8).trim();
                 } catch (IOException e) {
                     // No-op... there simply isn't a token value available
                 }

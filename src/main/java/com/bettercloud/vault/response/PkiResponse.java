@@ -1,5 +1,6 @@
 package com.bettercloud.vault.response;
 
+import com.bettercloud.vault.api.Logical;
 import com.bettercloud.vault.api.pki.Credential;
 import com.bettercloud.vault.api.pki.RoleOptions;
 import com.bettercloud.vault.rest.RestResponse;
@@ -23,7 +24,7 @@ public class PkiResponse extends LogicalResponse {
      * @param retries The number of retries that were performed for this operation
      */
     public PkiResponse(final RestResponse restResponse, final int retries) {
-        super(restResponse, retries);
+        super(restResponse, retries, Logical.logicalOperations.authentication);
         roleOptions = buildRoleOptionsFromData(this.getData());
         credential = buildCredentialFromData(this.getData());
     }

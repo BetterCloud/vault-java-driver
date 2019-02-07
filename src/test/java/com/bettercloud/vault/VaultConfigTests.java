@@ -1,5 +1,6 @@
 package com.bettercloud.vault;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
@@ -7,12 +8,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static junit.framework.Assert.assertSame;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
@@ -38,12 +41,12 @@ public class VaultConfigTests {
         final String mockHomeDirectory;
 
         public MockEnvironmentLoader() {
-            overrides = new HashMap<String, String>();
+            overrides = new HashMap<>();
             mockHomeDirectory = "";
         }
 
-        public MockEnvironmentLoader(final String mockHomeDirectory) {
-            overrides = new HashMap<String, String>();
+        private MockEnvironmentLoader(final String mockHomeDirectory) {
+            overrides = new HashMap<>();
             this.mockHomeDirectory = mockHomeDirectory;
         }
 
@@ -52,10 +55,10 @@ public class VaultConfigTests {
          * repeatedly, to populate multiple variables.  This method should be called prior to passing the object
          * instance to a <code>VaultConfig</code> constructor, or calling the <code>build()</code> method on that class.
          *
-         * @param name Mock environment variable name
+         * @param name  Mock environment variable name
          * @param value Mock environment variable value
          */
-        public void override(final String name, final String value) {
+        private void override(final String name, final String value) {
             this.overrides.put(name, value);
         }
 
@@ -68,7 +71,7 @@ public class VaultConfigTests {
                 } else {
                     try {
                         final byte[] bytes = Files.readAllBytes(Paths.get(mockHomeDirectory).resolve(".vault-token"));
-                        value = new String(bytes, "UTF-8").trim();
+                        value = new String(bytes, StandardCharsets.UTF_8).trim();
                     } catch (IOException e) {
                     }
                 }
@@ -112,13 +115,18 @@ public class VaultConfigTests {
      */
     @Test
     public void testConfigBuilder() throws VaultException {
+        Map<String, String> testMap = new HashMap<>();
         final VaultConfig config =
                 new VaultConfig()
                         .address("address")
                         .token("token")
+                        .engineVersion(1)
+                        .secretsEnginePathMap(testMap)
                         .build();
         assertEquals("address", config.getAddress());
         assertEquals("token", config.getToken());
+        assertEquals("1", config.getGlobalEngineVersion().toString());
+        assertSame(testMap, config.getSecretsEnginePathMap());
     }
 
     /**
@@ -159,8 +167,8 @@ public class VaultConfigTests {
                 final FileOutputStream output = new FileOutputStream(pemPath)
         ) {
             int nextChar;
-            while ( (nextChar = input.read()) != -1 ) {
-                output.write( (char) nextChar );
+            while ((nextChar = input.read()) != -1) {
+                output.write((char) nextChar);
             }
         }
 
@@ -223,11 +231,17 @@ public class VaultConfigTests {
         assertEquals("http://127.0.0.1:8200", config.getAddress());
         assertEquals("d24e2469-298a-6c64-6a71-5b47c9ba459a", config.getToken());
         assertTrue(config.getSslConfig().isVerify());
-        assertTrue(30 == config.getOpenTimeout());
-        assertTrue(30 == config.getReadTimeout());
+        assertEquals(30, (int) config.getOpenTimeout());
+        assertEquals(30, (int) config.getReadTimeout());
 
         assertTrue(mockTokenFile.delete());
         assertTrue(new File(mockHomeDirectory).delete());
+    }
+
+    @Test
+    public void testConfigBuilder_WithNamespace() throws VaultException {
+        VaultConfig vaultConfig = new VaultConfig().nameSpace("namespace").address("address").build();
+        Assert.assertEquals(vaultConfig.getNameSpace(), "namespace");
     }
 
 }
