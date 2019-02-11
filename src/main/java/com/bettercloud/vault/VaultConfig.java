@@ -83,6 +83,8 @@ public class VaultConfig implements Serializable {
      * @param nameSpace The namespace to use globally in this VaultConfig instance.
      * @return This object, with the namespace populated, ready for additional builder-pattern method calls or else
      * finalization with the build() method
+     *
+     * @throws VaultException  If any error occurs
      */
     public VaultConfig nameSpace(final String nameSpace) throws VaultException {
         if (nameSpace != null && !nameSpace.isEmpty()) {

@@ -649,7 +649,6 @@ public class Logical {
      *
      * @param path The Vault secret path to check (e.g. <code>secret/</code>).
      * @return The response information received from Vault
-     * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
     public Integer getEngineVersionForSecretPath(final String path) {
         return this.engineVersionForSecretPath(path);
