@@ -31,7 +31,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    compile('com.bettercloud:vault-java-driver:4.0.0')
+    compile('com.bettercloud:vault-java-driver:4.1.0')
 }
 ```
 
@@ -249,11 +249,15 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
+* **4.1.0**:  New health code support:
+  * Adds support for the new [Vault health codes](https://www.vaultproject.io/api/system/health.html#parameters)
+    
 * **4.0.0**:  This is a breaking-change release, with two primary updates:
   * Adds support for Version 2 of the Key/Value Secrets Engine.  The driver now assumes that your Vault instance uses Version 2 of the 
     Key/Value Secrets Engine across the board.  To configure this, see the [Key/Value Secret Engine Config](#key-value-secret-engine-config) 
     section above.
   * Adds support for the namespaces feature of Vault Enterprise.
+  
 * **3.1.0**:  Several updates.
   * Adds support for seal-related operations (i.e. `/sys/seal`, `/sys/unseal`, `/sys/seal-status`).
   * Adds support for the AWS auth backend.

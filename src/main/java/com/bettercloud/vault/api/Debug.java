@@ -43,7 +43,8 @@ public class Debug {
      * health check and provides a simple way to monitor the health of a Vault instance.</p>
      *
      * @return The response information returned from Vault
-     * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
+     * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc),
+     *                        and the maximum number of retries is exceeded.
      * @see <a href="https://www.vaultproject.io/docs/http/sys-health.html">https://www.vaultproject.io/docs/http/sys-health.html</a>
      *
      * <blockquote>
@@ -58,7 +59,21 @@ public class Debug {
      * </blockquote>
      */
     public HealthResponse health() throws VaultException {
-        return health(null, null, null, null);
+        return health(null, null, null, null, null,
+                null, null, null);
+    }
+
+    /**
+     * <p>A deprecated, overloaded version of {@link Debug#health()} that allows for passing one or more of the previous four optional parameters.</p>
+     * Please consider using the new constructor that adds support for perfStandbyOk, drSecondaryCode, etc/
+     */
+    @Deprecated
+    public HealthResponse health(
+            final Boolean standbyOk,
+            final Integer activeCode,
+            final Integer standbyCode,
+            final Integer sealedCode) throws VaultException {
+        return health(standbyOk, activeCode, standbyCode, sealedCode, null, null, null, null);
     }
 
     /**
@@ -71,10 +86,14 @@ public class Debug {
      * will need to check <code>HealthReponse.getRestResponse().getStatus()</code> to determine the result of
      * the operation.</p>
      *
-     * @param standbyOk   (optional) Indicates that being a standby should still return the active status code instead of the standby code
-     * @param activeCode  (optional) Indicates the status code that should be returned for an active node instead of the default of 200
-     * @param standbyCode (optional) Indicates the status code that should be returned for a standby node instead of the default of 429
-     * @param sealedCode  (optional) Indicates the status code that should be returned for a sealed node instead of the default of 500
+     * @param standbyOk              (optional) Indicates that being a standby should still return the active status code instead of the standby code
+     * @param activeCode             (optional) Indicates the status code that should be returned for an active node instead of the default of 200
+     * @param standbyCode            (optional) Indicates the status code that should be returned for a standby node instead of the default of 429
+     * @param sealedCode             (optional) Indicates the status code that should be returned for a sealed node instead of the default of 500
+     * @param perfStandbyOk          (optional)  Specifies if being a performance standby should still return the active status code instead of the performance standby status code
+     * @param drSecondaryCode        (optional)  Indicates the status code that should be returned for a DR secondary node instead of the default of 472
+     * @param performanceStandbyCode (optional)  Indicates the status code that should be returned for a performance standby node instead of the default of 473
+     * @param unInitCode             (optional)  Indicates the status code that should be returned for an uninitialized node instead of the default of 501
      * @return The response information returned from Vault
      * @throws VaultException If an error occurs or unexpected response received from Vault
      */
@@ -82,7 +101,11 @@ public class Debug {
             final Boolean standbyOk,
             final Integer activeCode,
             final Integer standbyCode,
-            final Integer sealedCode
+            final Integer sealedCode,
+            final Boolean perfStandbyOk,
+            final Integer drSecondaryCode,
+            final Integer performanceStandbyCode,
+            final Integer unInitCode
     ) throws VaultException {
         final String path = "sys/health";
         int retryCount = 0;
@@ -105,6 +128,11 @@ public class Debug {
                 if (activeCode != null) rest.parameter("activecode", activeCode.toString());
                 if (standbyCode != null) rest.parameter("standbycode", standbyCode.toString());
                 if (sealedCode != null) rest.parameter("sealedcode", sealedCode.toString());
+                if (perfStandbyOk != null) rest.parameter("perfstandbyok", perfStandbyOk.toString());
+                if (drSecondaryCode != null) rest.parameter("drsecondarycode", drSecondaryCode.toString());
+                if (performanceStandbyCode != null)
+                    rest.parameter("performancestandbycode", performanceStandbyCode.toString());
+                if (unInitCode != null) rest.parameter("uninitcode", unInitCode.toString());
                 // Execute request
                 final RestResponse restResponse = rest.get();
 
@@ -112,12 +140,20 @@ public class Debug {
                 final Set<Integer> validCodes = new HashSet<>();//NOPMD
                 validCodes.add(200);
                 validCodes.add(429);
+                validCodes.add(472);
+                validCodes.add(473);
                 validCodes.add(500);
+                validCodes.add(501);
+                validCodes.add(503);
                 if (activeCode != null) validCodes.add(activeCode);
                 if (standbyCode != null) validCodes.add(standbyCode);
                 if (sealedCode != null) validCodes.add(sealedCode);
+                if (drSecondaryCode != null) validCodes.add(drSecondaryCode);
+                if (performanceStandbyCode != null) validCodes.add(performanceStandbyCode);
+                if (unInitCode != null) validCodes.add(unInitCode);
                 if (!validCodes.contains(restResponse.getStatus())) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(),
+                            restResponse.getStatus());
                 }
                 return new HealthResponse(restResponse, retryCount);
             } catch (RuntimeException | VaultException | RestException e) {

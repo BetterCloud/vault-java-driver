@@ -12,7 +12,7 @@ public class RoleOptionsTests {
         RoleOptions roleOptions = new RoleOptions();
         Assert.assertNotNull(roleOptions);
 
-        Assert.assertEquals(roleOptions.getAllowedDomains(), null);
+        Assert.assertNull(roleOptions.getAllowedDomains());
 
         roleOptions.allowAnyName(true);
         roleOptions.allowBareDomains(true);

@@ -72,7 +72,7 @@ public class VaultConfigTests {
                     try {
                         final byte[] bytes = Files.readAllBytes(Paths.get(mockHomeDirectory).resolve(".vault-token"));
                         value = new String(bytes, StandardCharsets.UTF_8).trim();
-                    } catch (IOException e) {
+                    } catch (IOException ignored) {
                     }
                 }
             } else {
@@ -154,8 +154,8 @@ public class VaultConfigTests {
         assertEquals("http://127.0.0.1:8200", config.getAddress());
         assertEquals("c24e2469-298a-6c64-6a71-5b47c9ba459a", config.getToken());
         assertTrue(config.getSslConfig().isVerify());
-        assertTrue(30 == config.getOpenTimeout());
-        assertTrue(30 == config.getReadTimeout());
+        assertEquals(30, (int) config.getOpenTimeout());
+        assertEquals(30, (int) config.getReadTimeout());
     }
 
     @Test

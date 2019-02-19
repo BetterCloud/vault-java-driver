@@ -46,16 +46,16 @@ public class EchoInputMockVault extends MockVault {
             headers.add(name, value);
         }
 
-        final StringBuilder url = new StringBuilder(request.getScheme())
-                .append("://")
-                .append(request.getServerName())
-                .append(request.getServerPort() == 0 ? "" : ":" + request.getServerPort())
-                .append(request.getRequestURI())
-                .append(request.getQueryString() == null || request.getQueryString().isEmpty() ? "" : "?" +
+        String url = request.getScheme() +
+                "://" +
+                request.getServerName() +
+                (request.getServerPort() == 0 ? "" : ":" + request.getServerPort()) +
+                request.getRequestURI() +
+                (request.getQueryString() == null || request.getQueryString().isEmpty() ? "" : "?" +
                         request.getQueryString());
         final String mockResponse = Json.object()
                 .add("method", request.getMethod())
-                .add("URL", url.toString())
+                .add("URL", url)
                 .add("headers", headers)
                 .toString();
 
