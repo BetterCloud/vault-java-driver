@@ -12,6 +12,7 @@ Table of Contents
 -----------------
 * [Installing the Driver](#installing-the-driver)
 * [Initializing a Driver Instance](#initializing-a-driver-instance)
+* [Key/Value Secret Engine Config](#key-value-secret-engine-config)
 * [SSL Config](#ssl-config)
   * [General Options](#general-options)
   * [Java Keystore (JKS) based config](#java-keystore-jks-based-config)
@@ -30,7 +31,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    compile('com.bettercloud:vault-java-driver:3.1.0')
+    compile('com.bettercloud:vault-java-driver:4.1.0')
 }
 ```
 
@@ -39,7 +40,7 @@ Maven:
 <dependency>
     <groupId>com.bettercloud</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>3.1.0</version>
+    <version>4.0.0</version>
 </dependency>
 ```
 
@@ -80,6 +81,32 @@ driver class:
 ```
 final Vault vault = new Vault(config);
 ```
+
+Key Value Secret Engine Config
+------------------------------
+Shortly before its `1.0` release, Vault added a Version 2 of its [Key/Value Secrets Engine](https://www.vaultproject.io/docs/secrets/kv/index.html).  This 
+supports some addition features beyond the Version 1 that was the default in earlier Vault builds (e.g. secret rotation, soft deletes, etc).  
+
+Unfortunately, K/V V2 introduces some breaking changes, in terms of both request/response payloads as well as how URL's are constructed 
+for Vault's REST API.  Therefore, version `4.0.0` of this Vault Driver likewise had to introduce some breaking changes, to allow support 
+for both K/V versions.
+
+* **If you are using the new K/V V2 across the board**, then no action is needed.  The Vault Driver now assumes this by default.
+  
+* **If you are still using the old K/V V1 across the board**, then you can use the `Vault` class constructor: 
+  `public Vault(final VaultConfig vaultConfig, final Integer engineVersion)`, supplying a `1` as the engine version parameter.
+  constructor, then you can declare whether to use Version 1 or 2 across the board.
+  
+* **If you are using a mix, of some secret paths mounted with V1 and others mounted with V2**, then you have two options:
+
+  * You can explicitly specify your Vault secret paths, and which K/V version each one is using.  Construct your `Vault` objects 
+    with the constructor `public Vault(final VaultConfig vaultConfig, final Boolean useSecretsEnginePathMap, final Integer globalFallbackVersion)`.  
+    Within the `VaultConfig` object, supply a map of Vault secret paths to their associated K/V version (`1` or `2`).
+    
+  * You can rely on the Vault Driver to auto-detect your mounts and K/V versions upon instantiation.  Use the same constructor as above, 
+    but leave the map `null`.  Note that this option requires your authentication credentials to have access to read Vault's `/v1/sys/mounts` 
+    path.
+  
 
 SSL Config
 ----------
@@ -222,6 +249,15 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
+* **4.1.0**:  New health code support:
+  * Adds support for the new [Vault health codes](https://www.vaultproject.io/api/system/health.html#parameters)
+    
+* **4.0.0**:  This is a breaking-change release, with two primary updates:
+  * Adds support for Version 2 of the Key/Value Secrets Engine.  The driver now assumes that your Vault instance uses Version 2 of the 
+    Key/Value Secrets Engine across the board.  To configure this, see the [Key/Value Secret Engine Config](#key-value-secret-engine-config) 
+    section above.
+  * Adds support for the namespaces feature of Vault Enterprise.
+  
 * **3.1.0**:  Several updates.
   * Adds support for seal-related operations (i.e. `/sys/seal`, `/sys/unseal`, `/sys/seal-status`).
   * Adds support for the AWS auth backend.
@@ -330,7 +366,7 @@ License
 -------
 The MIT License (MIT)
 
-Copyright (c) 2016-2018 BetterCloud
+Copyright (c) 2016-2019 BetterCloud
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation the

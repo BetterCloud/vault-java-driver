@@ -76,6 +76,9 @@ public class Vault {
 
     /**
      * Construct a Vault driver instance with the provided config settings, and use the provided global KV Engine version for all secrets.
+     *
+     * @param vaultConfig             Configuration settings for Vault interaction (e.g. server address, token, etc)
+     * @param engineVersion           Which version of the Key/Value Secret Engine to use globally (i.e. 1 or 2)
      */
     public Vault(final VaultConfig vaultConfig, final Integer engineVersion) {
         if (engineVersion < 1 || engineVersion > 2) {
@@ -99,6 +102,8 @@ public class Vault {
      *                                If a secrets KV Engine version map is not supplied, use Vault APIs to determine the
      *                                KV Engine version for each secret. This call requires admin rights.
      * @param globalFallbackVersion   The Integer version of the KV Engine to use as a global fallback.
+     *
+     * @throws VaultException         If any error occurs
      */
     public Vault(final VaultConfig vaultConfig, final Boolean useSecretsEnginePathMap, final Integer globalFallbackVersion)
             throws VaultException {

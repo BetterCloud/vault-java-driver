@@ -1,6 +1,5 @@
 package com.bettercloud.vault.api.pki;
 
-import com.bettercloud.vault.api.pki.Credential;
 import org.junit.Assert;
 import org.junit.Test;
 

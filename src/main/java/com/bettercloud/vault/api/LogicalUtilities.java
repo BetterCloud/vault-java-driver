@@ -100,6 +100,8 @@ public class LogicalUtilities {
      *
      * @param path      The Vault path to check or mutate, based on the operation.
      * @param operation The operation being performed, e.g. readV2 or writeV1.
+     *
+     * @return The modified path
      */
     public static String adjustPathForDelete(final String path, final Logical.logicalOperations operation) {
         final List<String> pathSegments = getPathSegments(path);
@@ -118,6 +120,8 @@ public class LogicalUtilities {
      * When deleting secret versions, you must inject the path segment "delete" right after the lowest-level path segment.
      *
      * @param path The Vault path to check or mutate, based on the operation.
+     *
+     * @return The modified path
      */
     public static String adjustPathForVersionDelete(final String path) {
         final List<String> pathSegments = getPathSegments(path);

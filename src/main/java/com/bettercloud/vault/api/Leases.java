@@ -239,7 +239,7 @@ public class Leases {
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .put();
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {
