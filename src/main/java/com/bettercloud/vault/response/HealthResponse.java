@@ -3,6 +3,7 @@ package com.bettercloud.vault.response;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
+import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.rest.RestResponse;
 
 import java.io.Serializable;
@@ -21,6 +22,9 @@ public class HealthResponse implements Serializable {
     private Boolean sealed;
     private Boolean standby;
     private Long serverTimeUTC;
+    private Boolean performanceStandby;
+    private String replicationPerformanceMode;
+    private String replicationDrMode;
 
     /**
      * <p>Constructs a <code>HealthResponse</code> object from the data received in a health
@@ -34,7 +38,7 @@ public class HealthResponse implements Serializable {
      * {@link com.bettercloud.vault.api.Debug#health(Boolean, Integer, Integer, Integer)}.</p>
      *
      * @param restResponse The raw HTTP response from Vault
-     * @param retries The number of retry attempts that occurred during the API call (can be zero)
+     * @param retries      The number of retry attempts that occurred during the API call (can be zero)
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public HealthResponse(final RestResponse restResponse, final int retries) throws VaultException {
@@ -59,7 +63,14 @@ public class HealthResponse implements Serializable {
                 this.sealed = jsonObject.get("sealed") == null ? null : jsonObject.get("sealed").asBoolean();
                 this.standby = jsonObject.get("standby") == null ? null : jsonObject.get("standby").asBoolean();
                 this.serverTimeUTC = jsonObject.get("server_time_utc") == null ? null : jsonObject.get("server_time_utc").asLong();
-            } catch(final Exception e) {
+                this.performanceStandby = jsonObject.get("performance_standby") == null ? null :
+                        jsonObject.get("performance_standby").asBoolean();
+                this.replicationPerformanceMode = jsonObject.get("replication_performance_mode") == null ? null :
+                        jsonObject.get("replication_performance_mode").asString();
+                this.replicationDrMode = jsonObject.get("replication_dr_mode") == null ? null :
+                        jsonObject.get("replication_dr_mode").asString();
+
+            } catch (final Exception e) {
                 throw new VaultException("Unable to parse JSON payload: " + e, restResponse.getStatus());
             }
         }
@@ -93,4 +104,15 @@ public class HealthResponse implements Serializable {
         return serverTimeUTC;
     }
 
+    public Boolean getPerformanceStandby() {
+        return performanceStandby;
+    }
+
+    public String getReplicationPerformanceMode() {
+        return replicationPerformanceMode;
+    }
+
+    public String getReplicationDrMode() {
+        return replicationDrMode;
+    }
 }

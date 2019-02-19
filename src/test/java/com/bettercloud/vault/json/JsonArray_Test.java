@@ -21,13 +21,11 @@
  ******************************************************************************/
 package com.bettercloud.vault.json;
 
-import static com.bettercloud.vault.json.TestUtil.assertException;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;

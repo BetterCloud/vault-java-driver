@@ -54,7 +54,7 @@ public class AuthResponse extends VaultResponse {
             for (final JsonValue authPolicy : authPoliciesJsonArray) {
                 authPolicies.add(authPolicy.asString());
             }
-        } catch (ParseException e) {
+        } catch (ParseException ignored) {
         }
     }
 

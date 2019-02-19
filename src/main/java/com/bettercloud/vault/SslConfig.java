@@ -452,7 +452,7 @@ public class SslConfig implements Serializable {
         } else {
             this.verify = true;
         }
-        if (this.verify == true && this.pemUTF8 == null && environmentLoader.loadVariable(VAULT_SSL_CERT) != null) {
+        if (this.verify && this.pemUTF8 == null && environmentLoader.loadVariable(VAULT_SSL_CERT) != null) {
             final File pemFile = new File(environmentLoader.loadVariable(VAULT_SSL_CERT));
             try (final InputStream input = new FileInputStream(pemFile)) {
                 this.pemUTF8 = inputStreamToUTF8(input);
@@ -477,7 +477,7 @@ public class SslConfig implements Serializable {
      * @throws VaultException
      */
     private void buildSsl() throws VaultException {
-        if (verify == true) {
+        if (verify) {
             if (keyStore != null || trustStore != null) {
                 this.sslContext = buildSslContextFromJks();
             } else if (pemUTF8 != null || clientPemUTF8 != null || clientKeyPemUTF8 != null) {
