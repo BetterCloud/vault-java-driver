@@ -54,8 +54,14 @@ public class Leases {
         int retryCount = 0;
         while (true) {
             try {
+                /**
+                * 2019-03-21
+                * Changed the Lease revoke url due to invalid path.  Vault deprecated the original
+                * path (/v1/sys/revoke) in favor of a new leases mount point (/v1/sys/leases/revoke)
+                * https://github.com/hashicorp/vault/blob/master/CHANGELOG.md#080-august-9th-2017
+                */
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/sys/revoke/" + leaseId)
+                        .url(config.getAddress() + "/v1/sys/leases/revoke/" + leaseId)
                         .header("X-Vault-Token", config.getToken())
                         .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
