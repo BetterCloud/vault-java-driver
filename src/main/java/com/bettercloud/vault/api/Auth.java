@@ -10,7 +10,6 @@ import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.response.LookupResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
-import lombok.Getter;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -40,23 +39,14 @@ public class Auth {
      */
     public static class TokenRequest implements Serializable {
 
-        @Getter
         private UUID id;
-        @Getter
         private List<String> polices;
-        @Getter
         private Map<String, String> meta;
-        @Getter
         private Boolean noParent;
-        @Getter
         private Boolean noDefaultPolicy;
-        @Getter
         private String ttl;
-        @Getter
         private String displayName;
-        @Getter
         private Long numUses;
-        @Getter
         private String role;
 
         /**
@@ -138,6 +128,42 @@ public class Auth {
         public TokenRequest role(final String role) {
             this.role = role;
             return this;
+        }
+
+        public UUID getId() {
+            return id;
+        }
+
+        public List<String> getPolices() {
+            return polices;
+        }
+
+        public Map<String, String> getMeta() {
+            return meta;
+        }
+
+        public Boolean getNoParent() {
+            return noParent;
+        }
+
+        public Boolean getNoDefaultPolicy() {
+            return noDefaultPolicy;
+        }
+
+        public String getTtl() {
+            return ttl;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public Long getNumUses() {
+            return numUses;
+        }
+
+        public String getRole() {
+            return role;
         }
     }
 
