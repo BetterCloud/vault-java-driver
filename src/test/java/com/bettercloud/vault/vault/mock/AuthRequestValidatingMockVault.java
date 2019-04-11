@@ -19,7 +19,8 @@ public class AuthRequestValidatingMockVault extends MockVault {
             "      \"instance_id\": \"i-de0f1344\",\n" +
             "      \"ami_id\": \"ami-fce36983\",\n" +
             "      \"role\": \"dev-role\",\n" +
-            "      \"auth_type\": \"ec2\"\n" +
+            "      \"auth_type\": \"ec2\",\n" +
+            "      \"nonce\": \"5defbf9e-a8f9-3063-bdfc-54b7a42a1f95\"\n" +
             "    },\n" +
             "    \"policies\": [\n" +
             "      \"default\",\n" +
