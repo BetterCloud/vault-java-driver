@@ -982,7 +982,7 @@ public class Auth {
      * @return The auth token, with additional response metadata
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
-    private AuthResponse loginByKubernetes(final String role, final String jwt) throws VaultException {
+    public AuthResponse loginByKubernetes(final String role, final String jwt) throws VaultException {
         return loginByJwt("kubernetes", role, jwt);
     }
 
