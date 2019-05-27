@@ -229,9 +229,12 @@ public class Leases {
         int retryCount = 0;
         while (true) {
             try {
-                final String requestJson = Json.object().add("increment", increment).toString();
+                final String requestJson = Json.object()
+                        .add("lease_id", leaseId)
+                        .add("increment", increment)
+                        .toString();
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
+                        .url(config.getAddress() + "/v1/sys/renew/")
                         .header("X-Vault-Token", config.getToken())
                         .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .body(increment < 0 ? null : requestJson.getBytes(StandardCharsets.UTF_8))
@@ -239,7 +242,7 @@ public class Leases {
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+                        .put();
 
                 // Validate response
                 if (restResponse.getStatus() != 200) {
