@@ -4,7 +4,7 @@ apply plugin: 'signing'
 
 group 'com.bettercloud'
 archivesBaseName = 'vault-java-driver'
-version '4.0.0'
+version '4.0.0-S'
 ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 
 compileJava {
