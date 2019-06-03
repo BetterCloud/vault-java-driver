@@ -10,11 +10,6 @@ import java.io.Serializable;
  * responses (e.g. the raw HTTP response, the number of retry attempts if any).  API methods
  * which return additional information will use more specialized subclasses inheriting
  * from <code>VaultResponse</code>.</p>
- *
- * <p>NOTE: It turns out that not all API methods will populate <code>leaseId</code>,
- * <code>renewable</code>, and <code>leaseDuration</code>.  In fact, many response types won't.
- * So the next major release will implement those fields directly in the subclasses where they're
- * used.
  */
 public class VaultResponse implements Serializable {
 
