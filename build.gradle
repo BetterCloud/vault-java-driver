@@ -12,6 +12,24 @@ compileJava {
     targetCompatibility = 1.8
 }
 
+sourceSets {
+    main {
+        java {
+            exclude 'module-info.java'
+        }
+    }
+    mainModuleInfo {
+        java {
+            srcDirs = ['src/main/java']
+            outputDir = file("$buildDir/classes/java/main")
+            include 'module-info.java'
+        }
+    }
+}
+
+classes.dependsOn mainModuleInfoClasses
+compileMainModuleInfoJava.options.compilerArgs.addAll(['--release', '9'])
+
 compileTestJava {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
@@ -22,8 +40,6 @@ repositories {
 }
 
 dependencies {
-    compileOnly('org.projectlombok:lombok:1.18.4')
-
     testCompile('junit:junit:4.12')
     testCompile('org.mockito:mockito-core:2.23.4')
     testCompile('org.testcontainers:testcontainers:1.6.0')

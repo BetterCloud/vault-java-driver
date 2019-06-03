@@ -1,15 +1,12 @@
 package com.bettercloud.vault;
 
 import com.bettercloud.vault.api.Auth;
-import lombok.AccessLevel;
-import lombok.Getter;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
-import javax.xml.bind.DatatypeConverter;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -33,6 +30,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
 
 /**
  * <p>A container for SSL-related configuration options, meant to be stored within a {@link VaultConfig} instance.</p>
@@ -47,12 +45,12 @@ public class SslConfig implements Serializable {
     private static final String VAULT_SSL_VERIFY = "VAULT_SSL_VERIFY";
     private static final String VAULT_SSL_CERT = "VAULT_SSL_CERT";
 
-    @Getter private boolean verify;
-    @Getter private transient SSLContext sslContext;
+    private boolean verify;
+    private transient SSLContext sslContext;
     private transient KeyStore trustStore;
     private transient KeyStore keyStore;
     private String keyStorePassword;
-    @Getter(AccessLevel.PROTECTED) private String pemUTF8;  // exposed to unit tests
+    private String pemUTF8;  // exposed to unit tests
     private String clientPemUTF8;
     private String clientKeyPemUTF8;
     private Boolean verifyObject;
@@ -464,6 +462,18 @@ public class SslConfig implements Serializable {
         return this;
     }
 
+    public boolean isVerify() {
+        return verify;
+    }
+
+    public SSLContext getSslContext() {
+        return sslContext;
+    }
+
+    protected String getPemUTF8() {
+        return pemUTF8;
+    }
+
     /**
      * <p>Constructs the {@link this#sslContext} member field, if SSL verification is enabled and any JKS or PEM-based
      * data was populated.  This method is broken off from {@link this#build()}, because the same process must
@@ -561,7 +571,7 @@ public class SslConfig implements Serializable {
                 // Convert the client private key into a PrivateKey
                 final String strippedKey = clientKeyPemUTF8.replace("-----BEGIN PRIVATE KEY-----", "")
                                                      .replace("-----END PRIVATE KEY-----", "");
-                final byte[] keyBytes = DatatypeConverter.parseBase64Binary(strippedKey);
+                final byte[] keyBytes = Base64.getDecoder().decode(strippedKey);
                 final PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(keyBytes);
                 final KeyFactory factory = KeyFactory.getInstance("RSA");
                 final PrivateKey privateKey = factory.generatePrivate(pkcs8EncodedKeySpec);
