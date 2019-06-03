@@ -31,7 +31,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    compile('com.bettercloud:vault-java-driver:4.0.0')
+    implementation 'com.bettercloud:vault-java-driver:4.0.0'
 }
 ```
 
