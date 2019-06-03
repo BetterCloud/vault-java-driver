@@ -24,6 +24,7 @@ public class AuthResponse extends VaultResponse {
     private String appId;
     private String userId;
     private String username;
+    private String nonce;
 
     /**
      * This constructor simply exposes the common base class constructor.
@@ -47,6 +48,7 @@ public class AuthResponse extends VaultResponse {
                 appId = metadata.getString("app-id", "");
                 userId = metadata.getString("user-id", "");
                 username = metadata.getString("username", "");
+                nonce = metadata.getString("nonce", "");
             }
             authClientToken = authJsonObject.getString("client_token", "");
             final JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();
@@ -89,4 +91,6 @@ public class AuthResponse extends VaultResponse {
     public String getUserId() {
         return userId;
     }
+
+    public String getNonce() { return nonce; }
 }
