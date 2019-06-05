@@ -198,6 +198,20 @@ public class VaultContainer implements TestRule, TestConstants {
         runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=kv-v1", "-version=1", "kv");
         runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=kv-v1-Upgrade-Test", "-version=1", "kv");
     }
+    
+    /**
+     * Prepares the Vault server for testing of the Mounts backend (i.e. mounts the backend and enable test secret engines).
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void setupBackendMounts() throws IOException, InterruptedException {
+        runCommand("vault", "auth", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
+
+        runCommand("vault", "mount", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=pki/custom-path-1", "pki");
+        runCommand("vault", "mount", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=pki/custom-path-2", "pki");
+        runCommand("vault", "mount", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=pki/custom-path-3", "pki");
+    }
 
     /**
      * <p>Constructs an instance of the Vault driver, providing maximum flexibility to control all options

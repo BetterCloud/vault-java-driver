@@ -9,3 +9,7 @@ build/
 node_modules/
 ssl/
 
+bin
+.settings
+.classpath
+.project
