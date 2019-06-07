@@ -2,10 +2,6 @@ package com.bettercloud.vault.api.mounts;
 
 import java.util.concurrent.TimeUnit;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 /**
  * <p>A container for Time To Live information sent to mounts endpoints on the Secret Engine backend as REST payload.
  * This class is meant for use with a static <code>TimeToLive.of(int, TimeUnit)</code> method pattern style.  Example
@@ -25,10 +21,19 @@ import lombok.RequiredArgsConstructor;
  * <li><code>TimeUnit.HOURS</code></li>
  * </ul>
  */
-@RequiredArgsConstructor(staticName = "of")
 public class TimeToLive {
-    @Getter private final int ttl;
-    @Getter @NonNull private final TimeUnit unit;
+    private final int ttl;
+    private final TimeUnit unit;
+
+    public static TimeToLive of(final int ttl, final TimeUnit unit) {
+        return new TimeToLive(ttl, unit);
+    }
+
+    private TimeToLive(final int ttl, final TimeUnit unit) {
+        if (unit == null) throw new NullPointerException("unit is null");
+        this.ttl = ttl;
+        this.unit = unit;
+    }
 
     public String toString() {
         return new StringBuilder()

@@ -151,7 +151,8 @@ public class VaultConfig implements Serializable {
      * <p>Sets the secrets Engine version be used by Vault for the provided path.</p>
      *
      * @param path the path to use for accessing Vault secrets.
-     *             Example "/secret/foo" 
+     *             Example "/secret/foo"
+     * @param version The key-value engine version used for this path.
      * @return This object, with a new entry in the secrets paths map, ready for additional builder-pattern method calls or else finalization with 
      *         the build() method
      */

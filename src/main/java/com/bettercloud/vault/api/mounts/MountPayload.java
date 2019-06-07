@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 
-import lombok.Getter;
-
 /**
  * <p>A container for options sent to mounts endpoints on the Secret Engine backend as REST payload. This class is
  * meant for use with a builder pattern style.  Example usage:</p>
@@ -26,13 +24,13 @@ import lombok.Getter;
 public class MountPayload implements Serializable {
     private static final long serialVersionUID = 839595627039704093L;
 
-    @Getter private TimeToLive defaultLeaseTtl;
-    @Getter private TimeToLive maxLeaseTtl;
-    @Getter private String description;
-    @Getter private Boolean forceNoCache;
-    @Getter private String pluginName;
-    @Getter private Boolean local;
-    @Getter private Boolean sealWrap;
+    private TimeToLive defaultLeaseTtl;
+    private TimeToLive maxLeaseTtl;
+    private String description;
+    private Boolean forceNoCache;
+    private String pluginName;
+    private Boolean local;
+    private Boolean sealWrap;
     private List<String> auditNonHmacRequestKeys;
     private List<String> auditNonHmacResponseKeys;
 
@@ -156,4 +154,33 @@ public class MountPayload implements Serializable {
 
         return jsonObject;
     }
+
+    public TimeToLive getDefaultLeaseTtl() {
+        return defaultLeaseTtl;
+    }
+
+    public TimeToLive getMaxLeaseTtl() {
+        return maxLeaseTtl;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Boolean getForceNoCache() {
+        return forceNoCache;
+    }
+
+    public String getPluginName() {
+        return pluginName;
+    }
+
+    public Boolean getLocal() {
+        return local;
+    }
+
+    public Boolean getSealWrap() {
+        return sealWrap;
+    }
+
 }

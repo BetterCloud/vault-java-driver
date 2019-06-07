@@ -31,7 +31,7 @@ public class Logical {
 
     private String nameSpace;
 
-    public enum logicalOperations {authentication, deleteV1, deleteV2, destroy, listV1, listV2, readV1, readV2, writeV1, writeV2, unDelete}
+    public enum logicalOperations {authentication, deleteV1, deleteV2, destroy, listV1, listV2, readV1, readV2, writeV1, writeV2, unDelete, mount}
 
     public Logical(final VaultConfig config) {
         this.config = config;

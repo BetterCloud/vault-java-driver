@@ -2,8 +2,6 @@ package com.bettercloud.vault.api.mounts;
 
 import java.io.Serializable;
 
-import lombok.Getter;
-
 /**
  * <p>A container for options returned by mounts endpoints on the Secret Engine backend. This class is
  * meant for use with a builder pattern style.  Example usage:</p>
@@ -17,13 +15,14 @@ import lombok.Getter;
  * </blockquote>
  */
 public class Mount implements Serializable {
+    
     private static final long serialVersionUID = 45748211702309181L;
 
-    @Getter private MountType type;
-    @Getter private String description;
-    @Getter private MountConfig config;
-    @Getter private Boolean local;
-    @Getter private Boolean sealWrap;
+    private MountType type;
+    private String description;
+    private MountConfig config;
+    private Boolean local;
+    private Boolean sealWrap;
 
     public Mount type(final MountType type) {
         this.type = type;
@@ -49,4 +48,25 @@ public class Mount implements Serializable {
         this.sealWrap = sealWrap;
         return this;
     }
+
+    public MountType getType() {
+        return type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public MountConfig getConfig() {
+        return config;
+    }
+
+    public Boolean getLocal() {
+        return local;
+    }
+
+    public Boolean getSealWrap() {
+        return sealWrap;
+    }
+
 }

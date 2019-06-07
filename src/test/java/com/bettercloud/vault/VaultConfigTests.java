@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static junit.framework.Assert.assertSame;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
@@ -128,6 +127,7 @@ public class VaultConfigTests {
     @Test
     public void testConfigBuilder() throws VaultException {
         Map<String, String> testMap = new HashMap<>();
+        testMap.put("foo", "bar");
         final VaultConfig config =
                 new VaultConfig()
                         .address("address")
@@ -138,7 +138,7 @@ public class VaultConfigTests {
         assertEquals("address", config.getAddress());
         assertEquals("token", config.getToken());
         assertEquals("1", config.getGlobalEngineVersion().toString());
-        assertSame(testMap, config.getSecretsEnginePathMap());
+        assertEquals("bar", config.getSecretsEnginePathMap().get("foo"));
     }
 
     /**

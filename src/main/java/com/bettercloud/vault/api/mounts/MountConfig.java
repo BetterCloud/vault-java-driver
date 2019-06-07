@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
-
 /**
  * <p>A container for options returned by mounts endpoints on the Secret Engine backend. This class is
  * meant for use with a builder pattern style.  Example usage:</p>
@@ -25,11 +23,11 @@ import lombok.Getter;
 public class MountConfig implements Serializable {
     private static final long serialVersionUID = 839595627039704093L;
 
-    @Getter private Integer defaultLeaseTtl;
-    @Getter private Integer maxLeaseTtl;
-    @Getter private String description;
-    @Getter private Boolean forceNoCache;
-    @Getter private String pluginName;
+    private Integer defaultLeaseTtl;
+    private Integer maxLeaseTtl;
+    private String description;
+    private Boolean forceNoCache;
+    private String pluginName;
     private List<String> auditNonHmacRequestKeys;
     private List<String> auditNonHmacResponseKeys;
 
@@ -93,4 +91,25 @@ public class MountConfig implements Serializable {
             return clone;
         }
     }
+
+    public Integer getDefaultLeaseTtl() {
+        return defaultLeaseTtl;
+    }
+
+    public Integer getMaxLeaseTtl() {
+        return maxLeaseTtl;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Boolean getForceNoCache() {
+        return forceNoCache;
+    }
+
+    public String getPluginName() {
+        return pluginName;
+    }
+
 }

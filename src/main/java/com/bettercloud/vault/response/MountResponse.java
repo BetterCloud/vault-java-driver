@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import com.bettercloud.vault.api.Logical;
 import com.bettercloud.vault.api.mounts.Mount;
 import com.bettercloud.vault.api.mounts.MountConfig;
 import com.bettercloud.vault.api.mounts.MountType;
@@ -30,7 +31,7 @@ public class MountResponse extends LogicalResponse {
      * @param isList the flag to indicate if we're expecting a list of Mounts from Vault or not
      */
     public MountResponse(final RestResponse restResponse, final int retries, final boolean isList) {
-        super(restResponse, retries);
+        super(restResponse, retries, Logical.logicalOperations.mount);
 
         mount = isList ? null : buildMount(this.getDataObject());
         mounts = isList ? buildMountsMap() : null;
