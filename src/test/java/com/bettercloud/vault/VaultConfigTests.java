@@ -256,4 +256,12 @@ public class VaultConfigTests {
         Assert.assertEquals(vaultConfig.getNameSpace(), "namespace");
     }
 
+    @Test
+    public void testConfigBuiler_WithInvalidRequestAsNonError() throws VaultException {
+        VaultConfig vaultConfig = new VaultConfig().address("address").token("token").treatInvalidRequestsAsErrors(false).build();
+        assertEquals("address", vaultConfig.getAddress());
+        assertEquals("token", vaultConfig.getToken());
+        assertEquals(Boolean.FALSE, vaultConfig.isTreatInvalidRequestsAsErrors());
+
+    }
 }
