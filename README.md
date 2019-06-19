@@ -5,8 +5,11 @@ HashiCorp.
 
 This driver strives to implement Vault's full HTTP API, along with supporting functionality such as automatic
 retry handling.  It does so without relying on any other external libraries beyond the Java standard library,
-and is compatible with Java 7 and up.  So it will play nice with all of your projects, greenfield and legacy
+and is compatible with Java 8 and up.  So it will play nice with all of your projects, greenfield and legacy
 alike, without causing conflicts with any other dependency.
+
+NOTE:  Although the binary artifact produced by the project is backwards-compatible with Java 8, you do need 
+       JDK 9 or higher to modify or build the source code of this library itself.
 
 Table of Contents
 -----------------
@@ -31,7 +34,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    implementation 'com.bettercloud:vault-java-driver:4.0.0'
+    implementation 'com.bettercloud:vault-java-driver:4.1.0'
 }
 ```
 
@@ -40,7 +43,7 @@ Maven:
 <dependency>
     <groupId>com.bettercloud</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>4.0.0</version>
+    <version>4.1.0</version>
 </dependency>
 ```
 
@@ -249,11 +252,22 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
+* **4.1.0**:  This release contains the following update:
+  * Support for JWT authentication, for use by Kubernetes and other JWT-based authentication providers.  [(PR #164)](https://github.com/BetterCloud/vault-java-driver/pull/164)
+  * Updates the lease revoke method, to support changes in the underlying Vault API.  [(PR #163)](https://github.com/BetterCloud/vault-java-driver/pull/163)
+  * Changes the `VaultConfig.secretsEnginePathMap(...)` method from default access level to `public`, to allow for manual
+    setting [(PR #164)](https://github.com/BetterCloud/vault-java-driver/pull/156)
+  * Adds the nonce value to `AuthResponse`, to facilitate re-authentication with Vault via AWS.  [(PR #168)](https://github.com/BetterCloud/vault-java-driver/pull/168)
+  * Establishes a `module-info` file, updates the JDK requirement for building this library to Java 9 (although the built 
+    library artifact remains compatible as a dependency in Java 8 projects).  [(PR #165)](https://github.com/BetterCloud/vault-java-driver/pull/165)
+  * Updates Gradle, and various test dependencies to their latest versions.  Integration tests now target Vault 1.1.3.
+  
 * **4.0.0**:  This is a breaking-change release, with two primary updates:
   * Adds support for Version 2 of the Key/Value Secrets Engine.  The driver now assumes that your Vault instance uses Version 2 of the 
     Key/Value Secrets Engine across the board.  To configure this, see the [Key/Value Secret Engine Config](#key-value-secret-engine-config) 
     section above.
   * Adds support for the namespaces feature of Vault Enterprise.
+  
 * **3.1.0**:  Several updates.
   * Adds support for seal-related operations (i.e. `/sys/seal`, `/sys/unseal`, `/sys/seal-status`).
   * Adds support for the AWS auth backend.
@@ -357,6 +371,10 @@ Unit tests are located under the `src/test` directory, and can be run with the G
 
 Integration tests are located under the `src/test-integration` directory, and can be run with the Gradle
 `integrationTest` task.  See the additional `README.md` file in this directory for more detailed information.
+
+Although this library now includes a `module-info` class for use by Java 9+, the library currently targets 
+Java 8 compatibility.  Please do not attempt to introduce any features or syntax not compatible with Java 8 (the 
+Gradle build script should prevent you from doing so without modification).
 
 License
 -------
