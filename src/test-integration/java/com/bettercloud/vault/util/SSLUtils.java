@@ -179,7 +179,7 @@ public class SSLUtils implements TestConstants {
      */
     private static void writeCertToPem(final X509Certificate certificate, final String filename)
             throws CertificateEncodingException, FileNotFoundException {
-        final Base64.Encoder encoder = Base64.getEncoder();
+        final Base64.Encoder encoder = Base64.getMimeEncoder();
 
         final String certHeader = "-----BEGIN CERTIFICATE-----\n";
         final String certFooter = "\n-----END CERTIFICATE-----";
@@ -199,7 +199,7 @@ public class SSLUtils implements TestConstants {
      * @throws FileNotFoundException
      */
     private static void writePrivateKeyToPem(final PrivateKey key, final String filename) throws FileNotFoundException {
-        final Base64.Encoder encoder = Base64.getEncoder();
+        final Base64.Encoder encoder = Base64.getMimeEncoder();
 
         final String keyHeader = "-----BEGIN PRIVATE KEY-----\n";
         final String keyFooter = "\n-----END PRIVATE KEY-----";

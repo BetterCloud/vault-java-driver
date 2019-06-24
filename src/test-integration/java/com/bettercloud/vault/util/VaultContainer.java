@@ -105,11 +105,12 @@ public class VaultContainer implements TestRule, TestConstants {
         // Initialize the Vault server
         final Container.ExecResult initResult = runCommand("vault", "operator", "init", "-ca-cert=" +
                 CONTAINER_CERT_PEMFILE, "-key-shares=1", "-key-threshold=1");
-        final String[] initLines = initResult.getStdout().split(System.lineSeparator());
-        this.unsealKey = initLines[0].replace("Unseal Key 1: ", "");
-        this.rootToken = initLines[2].replace("Initial Root Token: ", "");
+        final String stdout = initResult.getStdout().replaceAll(System.lineSeparator(), "").split("Vault initialized")[0];
+        final String[] tokens = stdout.split("Initial Root Token: ");
+        this.unsealKey = tokens[0].replace("Unseal Key 1: ", "");
+        this.rootToken = tokens[1];
 
-        System.out.println("Root token: " + rootToken.toString());
+        System.out.println("Root token: " + rootToken);
 
         // Unseal the Vault server
         runCommand("vault", "operator", "unseal", "-ca-cert=" + CONTAINER_CERT_PEMFILE, unsealKey);
@@ -173,6 +174,11 @@ public class VaultContainer implements TestRule, TestConstants {
 
         runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=pki", "pki");
         runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=other-pki", "pki");
+
+        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=pki-custom-path-1", "pki");
+        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=pki-custom-path-2", "pki");
+        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=pki-custom-path-3", "pki");
+
         runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "pki/root/generate/internal",
                 "common_name=myvault.com", "ttl=99h");
     }
@@ -193,26 +199,13 @@ public class VaultContainer implements TestRule, TestConstants {
     }
 
     public void setEngineVersions() throws IOException, InterruptedException {
-        //Upgrade default secrets/ Engine to V2, set a new V1 secrets path at "kv-v1/"
+        // Upgrade default secrets/ Engine to V2, set a new V1 secrets path at "kv-v1/"
         runCommand("vault", "kv", "enable-versioning", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "secret/");
+        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=secret", "-version=2", "kv");
         runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=kv-v1", "-version=1", "kv");
         runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=kv-v1-Upgrade-Test", "-version=1", "kv");
     }
     
-    /**
-     * Prepares the Vault server for testing of the Mounts backend (i.e. mounts the backend and enable test secret engines).
-     *
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    public void setupBackendMounts() throws IOException, InterruptedException {
-        runCommand("vault", "auth", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
-
-        runCommand("vault", "mount", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=pki/custom-path-1", "pki");
-        runCommand("vault", "mount", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=pki/custom-path-2", "pki");
-        runCommand("vault", "mount", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=pki/custom-path-3", "pki");
-    }
-
     /**
      * <p>Constructs an instance of the Vault driver, providing maximum flexibility to control all options
      * explicitly.</p>

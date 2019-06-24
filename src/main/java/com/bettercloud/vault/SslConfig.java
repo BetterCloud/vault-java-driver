@@ -571,7 +571,7 @@ public class SslConfig implements Serializable {
                 // Convert the client private key into a PrivateKey
                 final String strippedKey = clientKeyPemUTF8.replace("-----BEGIN PRIVATE KEY-----", "")
                                                      .replace("-----END PRIVATE KEY-----", "");
-                final byte[] keyBytes = Base64.getDecoder().decode(strippedKey);
+                final byte[] keyBytes = Base64.getMimeDecoder().decode(strippedKey);
                 final PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(keyBytes);
                 final KeyFactory factory = KeyFactory.getInstance("RSA");
                 final PrivateKey privateKey = factory.generatePrivate(pkcs8EncodedKeySpec);
