@@ -252,7 +252,9 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **4.1.0**:  This release contains the following update:
+* **4.2.0 (IN PROGRESS)**:  This release contains the following updates:
+  * Removes stray uses of `System.out.println` in favor of `java.util.logging`. [(PR #178)](https://github.com/BetterCloud/vault-java-driver/pull/178)
+* **4.1.0**:  This release contains the following updates:
   * Support for JWT authentication, for use by Kubernetes and other JWT-based authentication providers.  [(PR #164)](https://github.com/BetterCloud/vault-java-driver/pull/164)
   * Updates the lease revoke method, to support changes in the underlying Vault API.  [(PR #163)](https://github.com/BetterCloud/vault-java-driver/pull/163)
   * Changes the `VaultConfig.secretsEnginePathMap(...)` method from default access level to `public`, to allow for manual
