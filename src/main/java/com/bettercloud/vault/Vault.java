@@ -17,6 +17,7 @@ import com.bettercloud.vault.rest.RestResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * <p>The Vault driver class, the primary interface through which dependent applications will access Vault.</p>
@@ -56,6 +57,7 @@ import java.util.Map;
 public class Vault {
 
     private final VaultConfig vaultConfig;
+    private Logger logger =  Logger.getLogger(Vault.class.getCanonicalName());
 
     /**
      * Construct a Vault driver instance with the provided config settings.
@@ -67,10 +69,10 @@ public class Vault {
     public Vault(final VaultConfig vaultConfig) {
         this.vaultConfig = vaultConfig;
         if (this.vaultConfig.getNameSpace() != null && !this.vaultConfig.getNameSpace().isEmpty()) {
-            System.out.println(String.format("The NameSpace %s has been bound to this Vault instance. Please keep this in mind when running operations.", this.vaultConfig.getNameSpace()));
+            logger.info(String.format("The NameSpace %s has been bound to this Vault instance. Please keep this in mind when running operations.", this.vaultConfig.getNameSpace()));
         }
         if (this.vaultConfig.getSecretsEnginePathMap().isEmpty() && this.vaultConfig.getGlobalEngineVersion() == null) {
-            System.out.println("Constructing a Vault instance with no provided Engine version, defaulting to version 2.");
+            logger.info("Constructing a Vault instance with no provided Engine version, defaulting to version 2.");
             this.vaultConfig.setEngineVersion(2);
         }
     }
@@ -89,7 +91,7 @@ public class Vault {
         vaultConfig.setEngineVersion(engineVersion);
         this.vaultConfig = vaultConfig;
         if (this.vaultConfig.getNameSpace() != null && !this.vaultConfig.getNameSpace().isEmpty()) {
-            System.out.println(String.format("The Namespace %s has been bound to this Vault instance. Please keep this in mind when running operations.", this.vaultConfig.getNameSpace()));
+            logger.info(String.format("The Namespace %s has been bound to this Vault instance. Please keep this in mind when running operations.", this.vaultConfig.getNameSpace()));
         }
     }
 
@@ -110,12 +112,12 @@ public class Vault {
             throws VaultException {
         this.vaultConfig = vaultConfig;
         if (this.vaultConfig.getNameSpace() != null && !this.vaultConfig.getNameSpace().isEmpty()) {
-            System.out.println(String.format("The Namespace %s has been bound to this Vault instance. Please keep this in mind when running operations.", this.vaultConfig.getNameSpace()));
+            logger.info(String.format("The Namespace %s has been bound to this Vault instance. Please keep this in mind when running operations.", this.vaultConfig.getNameSpace()));
         }
         this.vaultConfig.setEngineVersion(globalFallbackVersion);
         if (useSecretsEnginePathMap && this.vaultConfig.getSecretsEnginePathMap().isEmpty()) {
             try {
-                System.out.println("No secrets Engine version map was supplied, attempting to generate one.");
+                logger.info("No secrets Engine version map was supplied, attempting to generate one.");
                 final Map<String, String> secretsEnginePathMap = collectSecretEngineVersions();
                 assert secretsEnginePathMap != null;
                 this.vaultConfig.getSecretsEnginePathMap().putAll(secretsEnginePathMap);
