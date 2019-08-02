@@ -17,6 +17,8 @@ public enum MountType {
 
     KEY_VALUE("kv"),
 
+    KEY_VALUE_V2("kv-v2"),
+
     IDENTITY("identity"),
 
     NOMAD("nomad"),
