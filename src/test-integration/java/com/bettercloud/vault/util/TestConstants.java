@@ -1,5 +1,7 @@
 package com.bettercloud.vault.util;
 
+import org.testcontainers.containers.Network;
+
 import java.io.File;
 
 /**
@@ -31,4 +33,8 @@ interface TestConstants {
     String CONTAINER_CERT_PEMFILE = CONTAINER_SSL_DIRECTORY + "/vault-cert.pem";
     String CONTAINER_CLIENT_CERT_PEMFILE = CONTAINER_SSL_DIRECTORY + "/client-cert.pem";
 
+    String AGENT_CONFIG_FILE = "/home/vault/agent.hcl";
+    String APPROLE_POLICY_FILE = "/home/vault/approlePolicy.hcl";
+
+    Network CONTAINER_NETWORK = Network.newNetwork();
 }

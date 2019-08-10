@@ -96,9 +96,7 @@ public class Debug {
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext());
                 // Add token if present
-                if (config.getToken() != null) {
-                    rest.header("X-Vault-Token", config.getToken());
-                }
+                rest.optionalHeader("X-Vault-Token", config.getToken());
                 rest.optionalHeader("X-Vault-Namespace", this.nameSpace);
                 // Add params if present
                 if (standbyOk != null) rest.parameter("standbyok", standbyOk.toString());
