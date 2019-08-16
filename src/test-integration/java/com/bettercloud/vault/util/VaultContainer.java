@@ -198,6 +198,24 @@ public class VaultContainer implements TestRule, TestConstants {
                 "policies=web,prod", "certificate=@" + CONTAINER_CLIENT_CERT_PEMFILE, "ttl=3600");
     }
 
+    /**
+     * Prepares the Vault server for testing of the Database Backend using Postgres
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void setupBackendDatabase(String databaseIp) throws IOException, InterruptedException {
+        runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
+
+        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "database");
+        runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "database/config/postgres",
+                "plugin_name=postgresql-database-plugin",
+                "allowed_roles=*",
+                "connection_url=postgresql://{{username}}:{{password}}@" + databaseIp + ":5432/postgres?sslmode=disable",
+                "password=" + POSTGRES_PASSWORD,
+                "username=" + POSTGRES_USER);
+    }
+
     public void setEngineVersions() throws IOException, InterruptedException {
         // Upgrade default secrets/ Engine to V2, set a new V1 secrets path at "kv-v1/"
         runCommand("vault", "kv", "enable-versioning", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "secret/");

@@ -9,6 +9,9 @@ import java.io.File;
  */
 interface TestConstants {
 
+    String POSTGRES_PASSWORD = "superpassword1";
+    String POSTGRES_USER = "superuser1";
+
     String APP_ID = "fake_app";
     String USER_ID = "fake_user";
     String PASSWORD = "fake_password";
