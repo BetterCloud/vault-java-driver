@@ -39,9 +39,12 @@ public class VaultContainer implements TestRule, TestConstants {
      */
     public VaultContainer() {
         container = new GenericContainer("vault:1.1.3")
+                .withNetwork(CONTAINER_NETWORK)
+                .withNetworkAliases("vault")
                 .withClasspathResourceMapping("/startup.sh", CONTAINER_STARTUP_SCRIPT, BindMode.READ_ONLY)
                 .withClasspathResourceMapping("/config.json", CONTAINER_CONFIG_FILE, BindMode.READ_ONLY)
                 .withClasspathResourceMapping("/libressl.conf", CONTAINER_OPENSSL_CONFIG_FILE, BindMode.READ_ONLY)
+                .withClasspathResourceMapping("/approlePolicy.hcl", APPROLE_POLICY_FILE, BindMode.READ_ONLY)
                 .withFileSystemBind(SSL_DIRECTORY, CONTAINER_SSL_DIRECTORY, BindMode.READ_WRITE)
                 .withCreateContainerCmdModifier(new Consumer<CreateContainerCmd>() {
                     // TODO: Why does the compiler freak out when this anonymous class is converted to a lambda?
@@ -158,9 +161,10 @@ public class VaultContainer implements TestRule, TestConstants {
     public void setupBackendAppRole() throws IOException, InterruptedException {
         runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
 
+        runCommand("vault", "policy", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "testerrole", APPROLE_POLICY_FILE);
         runCommand("vault", "auth", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "approle");
         runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "auth/approle/role/testrole",
-                "secret_id_ttl=10m", "token_ttl=20m", "token_max_ttl=30m", "secret_id_num_uses=40");
+                "secret_id_ttl=10m", "token_ttl=20m", "token_max_ttl=30m", "secret_id_num_uses=40", "policies=testerrole");
     }
 
     /**
@@ -223,7 +227,7 @@ public class VaultContainer implements TestRule, TestConstants {
         runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=kv-v1", "-version=1", "kv");
         runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=kv-v1-Upgrade-Test", "-version=1", "kv");
     }
-    
+
     /**
      * <p>Constructs an instance of the Vault driver, providing maximum flexibility to control all options
      * explicitly.</p>

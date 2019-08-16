@@ -47,7 +47,7 @@ public class Seal {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/seal")
-                        .header("X-Vault-Token", config.getToken())
+                        .optionalHeader("X-Vault-Token", config.getToken())
                         .optionalHeader("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())

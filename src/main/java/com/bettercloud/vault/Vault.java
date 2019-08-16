@@ -254,7 +254,7 @@ public class Vault {
         try {
             final RestResponse restResponse = new Rest()//NOPMD
                     .url(vaultConfig.getAddress() + "/v1/sys/mounts")
-                    .header("X-Vault-Token", vaultConfig.getToken())
+                    .optionalHeader("X-Vault-Token", vaultConfig.getToken())
                     .optionalHeader("X-Vault-Namespace", this.vaultConfig.getNameSpace())
                     .connectTimeoutSeconds(vaultConfig.getOpenTimeout())
                     .readTimeoutSeconds(vaultConfig.getReadTimeout())
