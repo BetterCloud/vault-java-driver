@@ -6,6 +6,7 @@ vault-java-driver.iml
 gradle.properties
 
 build/
+out/
 node_modules/
 ssl/
 

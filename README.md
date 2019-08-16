@@ -253,6 +253,7 @@ may require modifications in your code to migrate.  Changes to the minor version
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
 * **4.2.0 (IN PROGRESS)**:  This release contains the following updates:
+  * Implements support for the Database secret engine. [(PR #175)](https://github.com/BetterCloud/vault-java-driver/pull/175)
   * Removes stray uses of `System.out.println` in favor of `java.util.logging`. [(PR #178)](https://github.com/BetterCloud/vault-java-driver/pull/178)
 * **4.1.0**:  This release contains the following updates:
   * Support for JWT authentication, for use by Kubernetes and other JWT-based authentication providers.  [(PR #164)](https://github.com/BetterCloud/vault-java-driver/pull/164)
