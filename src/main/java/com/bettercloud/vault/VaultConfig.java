@@ -40,7 +40,6 @@ public class VaultConfig implements Serializable {
     private int retryIntervalMilliseconds;
     private Integer globalEngineVersion;
     private String nameSpace;
-    private Boolean treatInvalidRequestsAsErrors = true;
     private EnvironmentLoader environmentLoader;
 
     /**
@@ -209,26 +208,6 @@ public class VaultConfig implements Serializable {
     }
 
     /**
-     * <p>Specifies whether 4xx class status codes should be treated as errors or invalid calls.</p>
-     *
-     * <p>If 4xx status codes are treated as errors, any call that returns them will retry (if specified)
-     * and will result in an exception being thrown.  If disabled, a 4xx return code does not retry, does
-     * not generate an exception, and instead returns the error in the response body</p>
-     *
-     * <p>If you set this to <code>false</code> you need to check the response code before using the data
-     * in a response</p>
-     *
-     * <p>The default behavior is to treat 4xx status codes as errors.</p>
-     *
-     * @param treatInvalidRequestsAsErrors Should 4xx class status codes be treated as errors.
-     * @return This object, with treatInvalidRequestsAsErrors populated, ready for additional builder-pattern method calls or else finalization with the build() method
-     */
-    public VaultConfig treatInvalidRequestsAsErrors(final Boolean treatInvalidRequestsAsErrors) {
-        this.treatInvalidRequestsAsErrors = treatInvalidRequestsAsErrors;
-        return this;
-    }
-
-    /**
      * <p>Sets the maximum number of times that an API operation will retry upon failure.</p>
      *
      * <p>This method is not meant to be called from application-level code outside of this package (hence
@@ -333,10 +312,6 @@ public class VaultConfig implements Serializable {
 
     public Integer getReadTimeout() {
         return readTimeout;
-    }
-
-    public Boolean isTreatInvalidRequestsAsErrors() {
-        return treatInvalidRequestsAsErrors;
     }
 
     public int getMaxRetries() {
