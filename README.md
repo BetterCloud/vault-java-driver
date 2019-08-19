@@ -34,7 +34,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    implementation 'com.bettercloud:vault-java-driver:4.1.0'
+    implementation 'com.bettercloud:vault-java-driver:5.0.0'
 }
 ```
 
@@ -43,7 +43,7 @@ Maven:
 <dependency>
     <groupId>com.bettercloud</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>4.1.0</version>
+    <version>5.0.0</version>
 </dependency>
 ```
 
@@ -252,9 +252,14 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **4.2.0 (IN PROGRESS)**:  This release contains the following updates:
+* **5.0.0 (IN PROGRESS)**:  This release contains the following updates:
+  * Changes the retry behavior, to no longer attempt retries on 4xx response codes (for which retries generally won't succeed anyway).  This 
+    is the only (mildly) breaking change in this release, necessitating a major version bump. [(PR #176)](https://github.com/BetterCloud/vault-java-driver/pull/176)
   * Implements support for the Database secret engine. [(PR #175)](https://github.com/BetterCloud/vault-java-driver/pull/175)
+  * Makes the "x-vault-token" header optional, to allow use of Vault Agent.  [(PR #184)](https://github.com/BetterCloud/vault-java-driver/pull/184)
   * Removes stray uses of `System.out.println` in favor of `java.util.logging`. [(PR #178)](https://github.com/BetterCloud/vault-java-driver/pull/178)
+  * Adds the enum constant `MountType.KEY_VALUE_V2`.  [(PR #182)](https://github.com/BetterCloud/vault-java-driver/pull/182)
+  
 * **4.1.0**:  This release contains the following updates:
   * Support for JWT authentication, for use by Kubernetes and other JWT-based authentication providers.  [(PR #164)](https://github.com/BetterCloud/vault-java-driver/pull/164)
   * Updates the lease revoke method, to support changes in the underlying Vault API.  [(PR #163)](https://github.com/BetterCloud/vault-java-driver/pull/163)

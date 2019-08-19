@@ -4,7 +4,7 @@ apply plugin: 'signing'
 
 group 'com.bettercloud'
 archivesBaseName = 'vault-java-driver'
-version '4.2.0-SNAPSHOT'
+version '5.0.0-SNAPSHOT'
 ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 
 // This project is actually limited to Java 8 compatibility.  See below.
