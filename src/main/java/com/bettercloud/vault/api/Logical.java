@@ -91,8 +91,8 @@ public class Logical {
                         .sslContext(config.getSslConfig().getSslContext())
                         .get();
 
-                // Validate response
-                if (restResponse.getStatus() != 200) {
+                // Validate response - don't treat 4xx class errors as exceptions, we want to return an error as the response
+                if (restResponse.getStatus() != 200 && !(restResponse.getStatus() >= 400 && restResponse.getStatus() < 500)) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
                             + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
                             restResponse.getStatus());
@@ -160,8 +160,8 @@ public class Logical {
                         .sslContext(config.getSslConfig().getSslContext())
                         .get();
 
-                // Validate response
-                if (restResponse.getStatus() != 200) {
+                // Validate response - don't treat 4xx class errors as exceptions, we want to return an error as the response
+                if (restResponse.getStatus() != 200 && !(restResponse.getStatus() >= 400 && restResponse.getStatus() < 500)) {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
                             + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
                             restResponse.getStatus());
@@ -261,7 +261,7 @@ public class Logical {
 
                 // HTTP Status should be either 200 (with content - e.g. PKI write) or 204 (no content)
                 final int restStatus = restResponse.getStatus();
-                if (restStatus == 200 || restStatus == 204) {
+                if (restStatus == 200 || restStatus == 204 || (restResponse.getStatus() >= 400 && restResponse.getStatus() < 500)) {
                     return new LogicalResponse(restResponse, retryCount, operation);
                 } else {
                     throw new VaultException("Expecting HTTP status 204 or 200, but instead receiving " + restStatus

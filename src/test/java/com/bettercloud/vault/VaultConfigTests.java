@@ -255,5 +255,4 @@ public class VaultConfigTests {
         VaultConfig vaultConfig = new VaultConfig().nameSpace("namespace").address("address").build();
         Assert.assertEquals(vaultConfig.getNameSpace(), "namespace");
     }
-
 }

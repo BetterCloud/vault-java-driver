@@ -1,10 +1,16 @@
 package com.bettercloud.vault;
 
+import com.bettercloud.vault.response.LogicalResponse;
+import com.bettercloud.vault.vault.VaultTestUtils;
+import com.bettercloud.vault.vault.mock.MockVault;
+import org.eclipse.jetty.server.Server;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static junit.framework.TestCase.assertEquals;
 
 
 /**
@@ -87,5 +93,23 @@ public class VaultTests {
         Assert.assertNotNull(vault);
         Assert.assertEquals(String.valueOf(1), vault.logical().getEngineVersionForSecretPath("kv-v1").toString());
         Assert.assertEquals(String.valueOf(2), vault.logical().getEngineVersionForSecretPath("notInMap").toString());
+    }
+
+    @Test
+    public void testConfigBuiler_WithInvalidRequestAsNonError() throws Exception {
+        final MockVault mockVault = new MockVault(403, "{\"errors\":[\"preflight capability check returned 403, please ensure client's policies grant access to path \"path/that/does/not/exist/\"]}");
+        final Server server = VaultTestUtils.initHttpMockVault(mockVault);
+        server.start();
+
+        final VaultConfig vaultConfig = new VaultConfig()
+                .address("http://127.0.0.1:8999")
+                .token("mock_token")
+                .build();
+        final Vault vault = new Vault(vaultConfig);
+
+        LogicalResponse response = vault.logical().read("path/that/does/not/exist/");
+        VaultTestUtils.shutdownMockVault(server);
+        Assert.assertEquals(403, response.getRestResponse().getStatus());
+        Assert.assertEquals(0, response.getRetries());
     }
 }
