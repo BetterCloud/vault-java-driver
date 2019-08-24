@@ -481,7 +481,7 @@ public class Rest {
      */
     private String parametersToQueryString() {
         final StringBuilder queryString = new StringBuilder();
-        final List<Map.Entry<String, String>> params = new ArrayList<Map.Entry<String, String>>(parameters.entrySet());
+        final List<Map.Entry<String, String>> params = new ArrayList<>(parameters.entrySet());
         for (int index = 0; index < params.size(); index++) {
             if (index > 0) {
                 queryString.append('&');
