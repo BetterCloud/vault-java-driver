@@ -19,16 +19,16 @@ import static junit.framework.TestCase.assertTrue;
 
 public class AuthBackendDatabaseTests {
     @ClassRule
-    public static final VaultContainer container = new VaultContainer();
+    public static final DbContainer dbContainer = new DbContainer();
 
     @ClassRule
-    public static final DbContainer dbContainer = new DbContainer();
+    public static final VaultContainer container = new VaultContainer().dependsOn(dbContainer);
 
 
     @BeforeClass
     public static void setupClass() throws IOException, InterruptedException {
         container.initAndUnsealVault();
-        container.setupBackendDatabase(dbContainer.getDbContainerIp());
+        container.setupBackendDatabase(DbContainer.hostname);
     }
 
     @Test

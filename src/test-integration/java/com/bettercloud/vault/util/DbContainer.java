@@ -1,35 +1,25 @@
 package com.bettercloud.vault.util;
 
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-import org.testcontainers.containers.Container;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.HostPortWaitStrategy;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy;
 
-import java.io.IOException;
+public class DbContainer extends GenericContainer<DbContainer> implements TestConstants {
 
-public class DbContainer implements TestRule, TestConstants {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DbContainer.class);
 
-    private final GenericContainer container;
+    public static final String hostname = "postgres";
 
     public DbContainer() {
-        container = new GenericContainer("postgres:11.3-alpine")
+        super("postgres:11.3-alpine");
+        this.withNetwork(CONTAINER_NETWORK)
+                .withNetworkAliases(hostname)
                 .withEnv("POSTGRES_PASSWORD", POSTGRES_PASSWORD)
                 .withEnv("POSTGRES_USER", POSTGRES_USER)
                 .withExposedPorts(5432)
+                .withLogConsumer(new Slf4jLogConsumer(LOGGER))
                 .waitingFor(new HostPortWaitStrategy());
-    }
-
-    public String getDbContainerIp() throws IOException, InterruptedException {
-        Container.ExecResult ip = container.execInContainer("hostname", "-i");
-        return ip.getStdout().replace("\n", "");
-
-        //return container.getContainerIpAddress();
-    }
-
-    @Override
-    public Statement apply(Statement base, Description description) {
-        return container.apply(base, description);
     }
 }
