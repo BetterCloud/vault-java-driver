@@ -33,6 +33,7 @@ public class AuthBackendAppIdTests {
     public void testLoginByAuthId() throws VaultException {
         final Vault vault = container.getVault();
         final String path = "app-id/login";
+        @SuppressWarnings("deprecation") // used for testing
         final String token = vault.auth().loginByAppID(path, VaultContainer.APP_ID, VaultContainer.USER_ID)
                 .getAuthClientToken();
 
