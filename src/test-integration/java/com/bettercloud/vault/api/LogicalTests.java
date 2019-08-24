@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.response.AuthResponse;
+import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.util.VaultContainer;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -19,6 +20,7 @@ import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultException;
 import org.junit.rules.ExpectedException;
 
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
@@ -253,12 +255,10 @@ public class LogicalTests {
      * @throws VaultException
      */
     @Test
-    public void testReadExceptionMessageIncludesErrorsReturnedByVault() throws VaultException {
-        expectedEx.expect(VaultException.class);
-        expectedEx.expectMessage("permission denied");
-
+    public void testReadPermissionDeniedReturnedByVault() throws VaultException {
         final Vault vault = container.getVault(NONROOT_TOKEN);
-        vault.logical().read("secret/null");
+        LogicalResponse read = vault.logical().read("secret/null");
+        assertEquals(403, read.getRestResponse().getStatus());
     }
 
     /**
@@ -267,14 +267,12 @@ public class LogicalTests {
      * @throws VaultException
      */
     @Test
-    public void testWriteExceptionMessageIncludesErrorsReturnedByVault() throws VaultException {
-        expectedEx.expect(VaultException.class);
-        expectedEx.expectMessage("permission denied");
-
+    public void testWritePermissionDeniedReturnedByVault() throws VaultException {
         final Vault vault = container.getVault(NONROOT_TOKEN);
         final Map<String, Object> testMap = new HashMap<>();
         testMap.put("value", null);
-        vault.logical().write("secret/null", testMap);
+        LogicalResponse write = vault.logical().write("secret/null", testMap);
+        assertEquals(403, write.getRestResponse().getStatus());
     }
 
     /**
@@ -288,7 +286,8 @@ public class LogicalTests {
         expectedEx.expectMessage("permission denied");
 
         final Vault vault = container.getVault(NONROOT_TOKEN);
-        vault.logical().delete("secret/null");
+        LogicalResponse delete = vault.logical().delete("secret/null");
+        assertEquals(403, delete.getRestResponse().getStatus());
     }
 
     /**
@@ -297,12 +296,10 @@ public class LogicalTests {
      * @throws VaultException
      */
     @Test
-    public void testListExceptionMessageIncludesErrorsReturnedByVault() throws VaultException {
-        expectedEx.expect(VaultException.class);
-        expectedEx.expectMessage("permission denied");
-
+    public void testListPermissionDeniedReturnedByVault() throws VaultException {
         final Vault vault = container.getVault(NONROOT_TOKEN);
-        vault.logical().list("secret/null");
+        List<String> list = vault.logical().list("secret/null");
+        assertEquals(list.size(), 0);
     }
 
     /**
@@ -311,13 +308,11 @@ public class LogicalTests {
      * @throws VaultException
      */
     @Test
-    public void testReadExceptionMessageIncludesErrorsReturnedByVaultOn404() throws VaultException {
-        expectedEx.expect(VaultException.class);
-        expectedEx.expectMessage("{\"errors\":[]}");
-
+    public void testReadReturnedByVaultOn404() throws VaultException {
         final Vault vault = container.getRootVault();
         final String path = "secret/" + UUID.randomUUID().toString();
-        vault.logical().read(path);
+        LogicalResponse read = vault.logical().read(path);
+        assertEquals(404, read.getRestResponse().getStatus());
     }
 
     /**
