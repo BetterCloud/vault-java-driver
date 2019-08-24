@@ -106,9 +106,9 @@ public class DeleteTests {
 
         final RestResponse restResponse = new Rest()//NOPMD
                 .url("http://127.0.0.1:8999")
-                .optionalHeader("header1", "value1")
-                .optionalHeader("header2", "value2")
-                .optionalHeader("I am null", null)
+                .header("header1", "value1")
+                .header("header2", "value2")
+                .header("I am null", null)
                 .delete();
 
         assertEquals(204, restResponse.getStatus());

@@ -47,7 +47,7 @@ public class Mounts {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/sys/mounts", config.getAddress()))
-                        .optionalHeader("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -132,7 +132,7 @@ public class Mounts {
 
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/sys/mounts/%s", config.getAddress(), path))
-                        .optionalHeader("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -199,7 +199,7 @@ public class Mounts {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/sys/mounts/%s", config.getAddress(), path))
-                        .optionalHeader("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -265,7 +265,7 @@ public class Mounts {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/sys/mounts/%s/tune", config.getAddress(), path))
-                        .optionalHeader("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -346,7 +346,7 @@ public class Mounts {
 
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/sys/mounts/%s/tune", config.getAddress(), path))
-                        .optionalHeader("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes("UTF-8"))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
