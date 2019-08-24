@@ -106,12 +106,7 @@ public class MountResponse extends LogicalResponse {
         }
 
         return StreamSupport.stream(data.spliterator(), false)
-                .collect(Collectors.toMap(new Function<Member, String>() {
-                    @Override
-                    public String apply(Member member) {
-                        return member.getName();
-                    }
-                }, new Function<Member, Mount>() {
+                .collect(Collectors.toMap(Member::getName, new Function<Member, Mount>() {
                     @Override
                     public Mount apply(Member member) {
                         return buildMount(member.getValue().asObject());
