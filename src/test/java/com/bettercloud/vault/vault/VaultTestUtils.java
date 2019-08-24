@@ -39,7 +39,7 @@ public class VaultTestUtils {
 
     public static Server initHttpsMockVault(final MockVault mock) {
         final Server server = new Server();
-        final SslContextFactory sslContextFactory = new SslContextFactory();
+        final SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
         sslContextFactory.setKeyStorePath(VaultTestUtils.class.getResource("/keystore.jks").toExternalForm());
         sslContextFactory.setKeyStorePassword("password");
         sslContextFactory.setKeyManagerPassword("password");
