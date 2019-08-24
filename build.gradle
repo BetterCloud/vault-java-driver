@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'checkstyle'
 
 group 'com.bettercloud'
 archivesBaseName = 'vault-java-driver'
@@ -211,4 +212,3 @@ uploadArchives {
         }
     }
 }
-
