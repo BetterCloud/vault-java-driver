@@ -46,9 +46,9 @@ public enum MountType {
 
     /**
      * <p>Get the <code>MountType</code> instance from the provided <code>value</code> string.
-     * 
+     *
      * @param value The mount type value to use to lookup.
-     * 
+     *
      * @return an instance of <code>MountType</code> or <code>null</code>
      */
     public static MountType of(final String value) {

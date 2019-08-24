@@ -35,9 +35,9 @@ public class Mounts {
      * final Map<String, Mount> mounts = response.getMounts();
      * }</pre>
      * </blockquote>
-     * 
+     *
      * @return A container for the information returned by Vault
-     * 
+     *
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public MountResponse list() throws VaultException {
@@ -87,7 +87,7 @@ public class Mounts {
      *
      * <p>This method accepts a <code>MountConfig</code> parameter,   containing optional settings for the mount
      * creation operation. Example usage:</p>
-     * 
+     *
      * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will be thrown if
      * mount point already exists, or if any other problem occurs.  Example usage:</p>
      *
@@ -95,14 +95,14 @@ public class Mounts {
      * <pre>{@code
      * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
-     * 
+     *
      * final MountPayload payload = new MountPayload()
      *                                       .defaultLeaseTtl(TimeToLive.of(86400, TimeUnit.SECONDS))
      *                                       .maxLeaseTtl(TimeToLive.of(86400, TimeUnit.SECONDS))
      *                                       .description("description for pki engine");
-     * 
+     *
      * final MountResponse response = vault.mounts().enable("pki/mount/point/path", MountType.PKI, payload);
-     * 
+     *
      * assertEquals(204, response.getRestResponse().getStatus();
      * }</pre>
      * </blockquote>
@@ -110,9 +110,9 @@ public class Mounts {
      * @param path The path to enable secret engine on.
      * @param type The type of secret engine to enable.
      * @param payload The <code>MountPayload</code> instance to use to create secret engine.
-     * 
+     *
      * @return A container for the information returned by Vault
-     * 
+     *
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public MountResponse enable(final String path, final MountType type, final MountPayload payload) throws VaultException {
@@ -179,17 +179,17 @@ public class Mounts {
      * <pre>{@code
      * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
-     * 
+     *
      * final MountResponse response = vault.mounts().disable("pki/mount/point/path");
-     * 
+     *
      * assertEquals(204, response.getRestResponse().getStatus();
      * }</pre>
      * </blockquote>
      *
      * @param path The path to disable secret engine on.
-     * 
+     *
      * @return A container for the information returned by Vault
-     * 
+     *
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public MountResponse disable(final String path) throws VaultException {
@@ -245,7 +245,7 @@ public class Mounts {
      * <pre>{@code
      * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
-     * 
+     *
      * final MountResponse response = vault.mounts().read("pki/mount/point/path");
      * final Mount mount = response.getMount();
      * final MountConfig mountConfig = mount.getConfig();
@@ -253,9 +253,9 @@ public class Mounts {
      * </blockquote>
      *
      * @param path The path to read secret engine's configuration from.
-     * 
+     *
      * @return A container for the information returned by Vault
-     * 
+     *
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public MountResponse read(final String path) throws VaultException {
@@ -306,7 +306,7 @@ public class Mounts {
      *
      * <p>This the method accepts a <code>MountConfig</code> parameter, containing optional settings for the  mount
      * tune operation.  Example usage:</p>
-     * 
+     *
      * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will be thrown if
      * the mount point not exist, or if any other problem occurs.  Example usage:</p>
      *
@@ -314,23 +314,23 @@ public class Mounts {
      * <pre>{@code
      * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
-     * 
+     *
      * final MountPayload payload = new MountPayload()
      *                                   .defaultLeaseTtl(TimeToLive.of(12, TimeUnit.HOURS))
      *                                   .maxLeaseTtl(TimeToLive.of(12, TimeUnit.HOURS))
      *                                   .description("description of pki");
-     * 
+     *
      * final MountResponse response = vault.mounts().tune("pki/mount/point/path", configs);
-     * 
+     *
      * assertEquals(204, response.getRestResponse().getStatus();
      * }</pre>
      * </blockquote>
      *
      * @param path The path to tune secret engine's configuration on.
      * @param payload The <code>MountPayload</code> instance to use to tune secret engine.
-     * 
+     *
      * @return A container for the information returned by Vault
-     * 
+     *
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public MountResponse tune(final String path, final MountPayload payload) throws VaultException {

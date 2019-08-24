@@ -7,10 +7,10 @@ import java.util.List;
 /**
  * <p>A container for options returned by mounts endpoints on the Secret Engine backend. This class is
  * meant for use with a builder pattern style.  Example usage:</p>
- * 
+ *
  * <p>Most of the time this will be wrapped inside <code>Mount</code> object rather than directly sent to Vault backend
  * or back to the user.</p>
- * 
+ *
  * <blockquote>
  * <pre>{@code
  * final MountConfig config = new MountConfig()

@@ -600,7 +600,7 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
     JsonValue value = get(name);
     return value != null ? value.asInt() : null;
   }
-  
+
   /**
    * Returns the <code>int</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
@@ -636,7 +636,7 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
     JsonValue value = get(name);
     return value != null ? value.asLong() : null;
   }
-  
+
   /**
    * Returns the <code>long</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
@@ -672,7 +672,7 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
     JsonValue value = get(name);
     return value != null ? value.asFloat() : null;
   }
-  
+
   /**
    * Returns the <code>float</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
@@ -708,7 +708,7 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
     JsonValue value = get(name);
     return value != null ? value.asDouble() : null;
   }
-  
+
   /**
    * Returns the <code>double</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
@@ -744,7 +744,7 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
     JsonValue value = get(name);
     return value != null ? value.asBoolean() : null;
   }
-  
+
   /**
    * Returns the <code>boolean</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
@@ -779,7 +779,7 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
     JsonValue value = get(name);
     return value != null ? value.asString() : null;
   }
-  
+
   /**
    * Returns the <code>String</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
