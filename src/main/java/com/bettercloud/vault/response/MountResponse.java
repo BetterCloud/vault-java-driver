@@ -2,7 +2,6 @@ package com.bettercloud.vault.response;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -106,11 +105,6 @@ public class MountResponse extends LogicalResponse {
         }
 
         return StreamSupport.stream(data.spliterator(), false)
-                .collect(Collectors.toMap(Member::getName, new Function<Member, Mount>() {
-                    @Override
-                    public Mount apply(Member member) {
-                        return buildMount(member.getValue().asObject());
-                    }
-                }));
+                .collect(Collectors.toMap(Member::getName, member -> buildMount(member.getValue().asObject())));
     }
 }

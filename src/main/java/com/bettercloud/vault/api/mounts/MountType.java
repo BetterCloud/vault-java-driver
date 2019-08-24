@@ -1,7 +1,6 @@
 package com.bettercloud.vault.api.mounts;
 
 import java.util.Arrays;
-import java.util.function.Predicate;
 
 /**
  * <p>A representation of different available secret engine mount points</p>
@@ -59,11 +58,7 @@ public enum MountType {
 
         return Arrays.asList(MountType.values())
                 .stream()
-                .filter(new Predicate<MountType>() {
-                    public boolean test(MountType type) {
-                        return type.value.equals(value);
-                    }
-                })
+                .filter(type -> type.value.equals(value))
                 .findFirst()
                 .orElse(null);
     }

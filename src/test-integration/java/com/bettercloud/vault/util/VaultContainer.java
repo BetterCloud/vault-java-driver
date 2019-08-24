@@ -18,7 +18,6 @@ import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.function.Consumer;
 
 /**
  * Sets up and exposes utilities for dealing with a Docker-hosted instance of Vault, for integration tests.

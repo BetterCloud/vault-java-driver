@@ -1,9 +1,7 @@
 package com.bettercloud.vault.rest;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.ByteArrayOutputStream;
@@ -444,12 +442,7 @@ public class Rest {
                 if (sslVerification != null && !sslVerification) {
                     // SSL verification disabled
                     httpsURLConnection.setSSLSocketFactory(DISABLED_SSL_CONTEXT.getSocketFactory());
-                    httpsURLConnection.setHostnameVerifier(new HostnameVerifier() {
-                        @Override
-                        public boolean verify(final String s, final SSLSession sslSession) {
-                            return true;
-                        }
-                    });
+                    httpsURLConnection.setHostnameVerifier((s, sslSession) -> true);
                 } else if (sslContext != null) {
                     // Cert file supplied
                     httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());

@@ -6,7 +6,6 @@ import com.bettercloud.vault.VaultException;
 import com.github.dockerjava.api.model.Capability;
 
 import java.nio.file.Path;
-import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
