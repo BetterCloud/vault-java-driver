@@ -444,7 +444,7 @@ public class SslConfig implements Serializable {
             this.environmentLoader = new EnvironmentLoader();
         }
         if (this.verifyObject == null && environmentLoader.loadVariable(VAULT_SSL_VERIFY) != null) {
-            this.verify = Boolean.valueOf(environmentLoader.loadVariable(VAULT_SSL_VERIFY));
+            this.verify = Boolean.parseBoolean(environmentLoader.loadVariable(VAULT_SSL_VERIFY));
         } else if (this.verifyObject != null) {
             this.verify = verifyObject;
         } else {
