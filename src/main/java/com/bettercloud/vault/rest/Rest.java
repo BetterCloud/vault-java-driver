@@ -441,7 +441,7 @@ public class Rest {
             // SSL settings, if applicable
             if (connection instanceof HttpsURLConnection) {
                 final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
-                if (sslVerification != null && !sslVerification.booleanValue()) {
+                if (sslVerification != null && !sslVerification) {
                     // SSL verification disabled
                     httpsURLConnection.setSSLSocketFactory(DISABLED_SSL_CONTEXT.getSocketFactory());
                     httpsURLConnection.setHostnameVerifier(new HostnameVerifier() {
