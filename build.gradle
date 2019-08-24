@@ -46,10 +46,14 @@ compileJava {
     options.compilerArgs = ['--release', '8']
 }
 
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
 task compileModuleInfoJava(type: JavaCompile) {
     classpath = files()
     source = 'src/main/java/module-info.java'
     destinationDir = compileJava.destinationDir
+    options.encoding = compileJava.options.encoding
 
     doFirst {
         options.compilerArgs = [
