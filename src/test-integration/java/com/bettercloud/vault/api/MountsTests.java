@@ -144,8 +144,8 @@ public class MountsTests {
 
         assertEquals(200, response.getRestResponse().getStatus());
 
-        assertEquals(new Integer(21600), config.getDefaultLeaseTtl());
-        assertEquals(new Integer(21600), config.getMaxLeaseTtl());
+        assertEquals(Integer.valueOf(21600), config.getDefaultLeaseTtl());
+        assertEquals(Integer.valueOf(21600), config.getMaxLeaseTtl());
     }
 
     @Test
@@ -180,8 +180,8 @@ public class MountsTests {
         final Mount mount = response.getMount();
         final MountConfig config = mount.getConfig();
 
-        assertEquals(new Integer(43200), config.getDefaultLeaseTtl());
-        assertEquals(new Integer(43200), config.getMaxLeaseTtl());
+        assertEquals(Integer.valueOf(43200), config.getDefaultLeaseTtl());
+        assertEquals(Integer.valueOf(43200), config.getMaxLeaseTtl());
     }
 
     @Test
