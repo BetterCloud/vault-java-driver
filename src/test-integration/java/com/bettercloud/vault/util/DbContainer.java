@@ -5,8 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy;
+import org.testcontainers.lifecycle.TestDescription;
+import org.testcontainers.lifecycle.TestLifecycleAware;
 
-public class DbContainer extends GenericContainer<DbContainer> implements TestConstants {
+import static org.junit.Assume.assumeTrue;
+
+public class DbContainer extends GenericContainer<DbContainer> implements TestConstants, TestLifecycleAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DbContainer.class);
 
@@ -21,5 +25,10 @@ public class DbContainer extends GenericContainer<DbContainer> implements TestCo
                 .withExposedPorts(5432)
                 .withLogConsumer(new Slf4jLogConsumer(LOGGER))
                 .waitingFor(new HostPortWaitStrategy());
+    }
+
+    @Override
+    public void beforeTest(TestDescription description) {
+        assumeTrue(DOCKER_AVAILABLE);
     }
 }

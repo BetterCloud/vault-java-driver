@@ -1,6 +1,7 @@
 package com.bettercloud.vault.util;
 
 import org.testcontainers.containers.Network;
+import org.testcontainers.utility.TestEnvironment;
 
 import java.io.File;
 
@@ -40,4 +41,5 @@ interface TestConstants {
     String APPROLE_POLICY_FILE = "/home/vault/approlePolicy.hcl";
 
     Network CONTAINER_NETWORK = Network.newNetwork();
+    boolean DOCKER_AVAILABLE = TestEnvironment.dockerApiAtLeast("1.10");
 }

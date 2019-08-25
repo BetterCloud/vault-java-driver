@@ -14,15 +14,20 @@ import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
+import org.testcontainers.lifecycle.TestDescription;
+import org.testcontainers.lifecycle.TestLifecycleAware;
+import org.testcontainers.utility.TestEnvironment;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
+import static org.junit.Assume.assumeTrue;
+
 /**
  * Sets up and exposes utilities for dealing with a Docker-hosted instance of Vault, for integration tests.
  */
-public class VaultContainer extends GenericContainer<VaultContainer> implements TestConstants {
+public class VaultContainer extends GenericContainer<VaultContainer> implements TestConstants, TestLifecycleAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultContainer.class);
 
@@ -359,5 +364,10 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
             LOGGER.info("Command stderr: {}", result.getStderr());
         }
         return result;
+    }
+
+    @Override
+    public void beforeTest(TestDescription description) {
+        assumeTrue(DOCKER_AVAILABLE);
     }
 }

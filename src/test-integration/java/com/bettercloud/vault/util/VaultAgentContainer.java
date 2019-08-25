@@ -13,10 +13,13 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.lifecycle.TestDescription;
+import org.testcontainers.lifecycle.TestLifecycleAware;
 
+import static org.junit.Assume.assumeTrue;
 import static org.testcontainers.utility.MountableFile.forHostPath;
 
-public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> implements TestConstants {
+public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> implements TestConstants, TestLifecycleAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultAgentContainer.class);
 
@@ -68,5 +71,10 @@ public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> i
      */
     public String getAddress() {
         return String.format("http://%s:%d", getContainerIpAddress(), getMappedPort(8100));
+    }
+
+    @Override
+    public void beforeTest(TestDescription description) {
+        assumeTrue(DOCKER_AVAILABLE);
     }
 }
