@@ -300,13 +300,13 @@ public class Logical {
      * @return A list of keys corresponding to key/value pairs at a given Vault path, or an empty list if there are none
      * @throws VaultException If any errors occur, or unexpected response received from Vault
      */
-    public List<String> list(final String path) throws VaultException {
+    public LogicalResponse list(final String path) throws VaultException {
         if (engineVersionForSecretPath(path).equals(2)) {
             return list(path, logicalOperations.listV2);
         } else return list(path, logicalOperations.listV1);
     }
 
-    private List<String> list(final String path, final logicalOperations operation) throws VaultException {
+    private LogicalResponse list(final String path, final logicalOperations operation) throws VaultException {
         LogicalResponse response = null;
         try {
             response = read(adjustPathForList(path, operation), true, operation);
@@ -316,20 +316,7 @@ public class Logical {
             }
         }
 
-        final List<String> returnValues = new ArrayList<>();
-        if (
-                response != null
-                        && response.getRestResponse().getStatus() != 404
-                        && response.getData() != null
-                        && response.getData().get("keys") != null
-        ) {
-
-            final JsonArray keys = Json.parse(response.getData().get("keys")).asArray();
-            for (int index = 0; index < keys.size(); index++) {
-                returnValues.add(keys.get(index).asString());
-            }
-        }
-        return returnValues;
+        return response;
     }
 
     /**

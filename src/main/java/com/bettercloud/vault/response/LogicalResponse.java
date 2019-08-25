@@ -2,12 +2,15 @@ package com.bettercloud.vault.response;
 
 import com.bettercloud.vault.api.Logical;
 import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.rest.RestResponse;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,6 +20,7 @@ import java.util.Map;
 public class LogicalResponse extends VaultResponse {
 
     private Map<String, String> data = new HashMap<>();
+    private List<String> listData = new ArrayList<>();
     private JsonObject dataObject = null;
     private String leaseId;
     private Boolean renewable;
@@ -35,6 +39,10 @@ public class LogicalResponse extends VaultResponse {
 
     public Map<String, String> getData() {
         return data;
+    }
+
+    public List<String> getListData() {
+        return listData;
     }
 
     public JsonObject getDataObject() {
@@ -83,6 +91,20 @@ public class LogicalResponse extends VaultResponse {
                 } else {
                     data.put(member.getName(), jsonValue.toString());
                 }
+            }
+            // For list operations convert the array of keys to a list of values
+            if (operation.equals(Logical.logicalOperations.listV1) || operation.equals(Logical.logicalOperations.listV2)) {
+                if (
+                        getRestResponse().getStatus() != 404
+                                && data.get("keys") != null
+                ) {
+
+                    final JsonArray keys = Json.parse(data.get("keys")).asArray();
+                    for (int index = 0; index < keys.size(); index++) {
+                        listData.add(keys.get(index).asString());
+                    }
+                }
+
             }
         } catch (Exception ignored) {
         }
