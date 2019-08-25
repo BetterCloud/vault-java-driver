@@ -217,6 +217,7 @@ public class VaultConfigTests {
         new VaultConfig().build();
     }
 
+    @SuppressWarnings("CharsetObjectCanBeUsed") // Requires Java 10 and above
     @Test
     public void testConfigBuilder_LoadTokenFromHomedir() throws IOException, VaultException {
         final String mockHomeDirectory = System.getProperty("java.io.tmpdir") + File.separatorChar + UUID.randomUUID().toString();

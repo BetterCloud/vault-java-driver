@@ -13,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -145,6 +146,7 @@ public class Rest {
      * @return This object, with a parameter added, ready for other builder-pattern config methods or an HTTP verb method
      * @throws RestException If any error occurs, or unexpected response received from Vault
      */
+    @SuppressWarnings("CharsetObjectCanBeUsed") // Using Charset constant requires Java and above
     public Rest parameter(final String name, final String value) throws RestException {
         try {
             this.parameters.put(URLEncoder.encode(name, "UTF-8"), URLEncoder.encode(value, "UTF-8"));
@@ -397,7 +399,7 @@ public class Rest {
             } else if (!parameters.isEmpty()) {
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
                 final OutputStream outputStream = connection.getOutputStream();
-                outputStream.write(parametersToQueryString().getBytes("UTF-8"));
+                outputStream.write(parametersToQueryString().getBytes(StandardCharsets.UTF_8));
                 outputStream.close();
             }
 

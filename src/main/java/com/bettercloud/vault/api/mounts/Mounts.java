@@ -6,6 +6,8 @@ import com.bettercloud.vault.response.MountResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * <p>The implementing class for operations on Vault's <code>/v1/sys/mounts/*</code> REST endpoints.</p>
  *
@@ -133,7 +135,7 @@ public class Mounts {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/sys/mounts/%s", config.getAddress(), path))
                         .optionalHeader("X-Vault-Token", config.getToken())
-                        .body(requestJson.getBytes("UTF-8"))
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -347,7 +349,7 @@ public class Mounts {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/sys/mounts/%s/tune", config.getAddress(), path))
                         .optionalHeader("X-Vault-Token", config.getToken())
-                        .body(requestJson.getBytes("UTF-8"))
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
