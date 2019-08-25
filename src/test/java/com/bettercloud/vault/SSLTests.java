@@ -173,13 +173,13 @@ public class SSLTests {
 
         final BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/cert.pem")));
         final StringBuilder builder = new StringBuilder();
-        String utf8 = "";
+        StringBuilder utf8 = new StringBuilder();
         String str;
         while ((str = in.readLine()) != null) {
-            utf8 += str + System.lineSeparator();//NOPMD
+            utf8.append(str).append(System.lineSeparator());//NOPMD
         }
         in.close();
-        final String pemUTF8 = utf8;
+        final String pemUTF8 = utf8.toString();
 
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")
