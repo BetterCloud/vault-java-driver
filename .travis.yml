@@ -21,7 +21,7 @@ matrix:
     - jdk: openjdk9
 
 script:
-  - ./gradlew build integrationTest -s
+  - ./gradlew build integrationTest -s --info
 
 notifications:
   email: false
