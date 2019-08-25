@@ -1228,7 +1228,7 @@ public class Auth {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType();
-                if (mimeType == null || !"application/json".equals(mimeType)) {
+                if (!"application/json".equals(mimeType)) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
                 return new LookupResponse(restResponse, retryCount);
@@ -1291,7 +1291,7 @@ public class Auth {
                             restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType();
-                if (mimeType == null || !"application/json".equals(mimeType)) {
+                if (!"application/json".equals(mimeType)) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
                 return new LogicalResponse(restResponse, retryCount, Logical.logicalOperations.authentication);
