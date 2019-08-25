@@ -89,9 +89,7 @@ public class MountPayload implements Serializable {
         if (auditNonHmacRequestKeys == null) {
             return null;
         } else {
-            final List<String> clone = new ArrayList<>();
-            clone.addAll(auditNonHmacRequestKeys);
-            return clone;
+            return new ArrayList<>(auditNonHmacRequestKeys);
         }
     }
 
@@ -99,9 +97,7 @@ public class MountPayload implements Serializable {
         if (auditNonHmacResponseKeys == null) {
             return null;
         } else {
-            final List<String> clone = new ArrayList<>();
-            clone.addAll(auditNonHmacResponseKeys);
-            return clone;
+            return new ArrayList<>(auditNonHmacResponseKeys);
         }
     }
 
