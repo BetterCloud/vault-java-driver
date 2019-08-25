@@ -10,7 +10,7 @@ import java.io.File;
  * and {@link SSLUtils}.  Mostly username/password credentials and other Vault configuration values, and
  * path locations for SSL artifacts.
  */
-interface TestConstants {
+public interface TestConstants {
 
     String POSTGRES_PASSWORD = "superpassword1";
     String POSTGRES_USER = "superuser1";
@@ -26,9 +26,6 @@ interface TestConstants {
     String CERT_PEMFILE = SSL_DIRECTORY + File.separator + "root-cert.pem";
 
     String CLIENT_CERT_PEMFILE = SSL_DIRECTORY + File.separator + "client-cert.pem";
-    String CLIENT_PRIVATE_KEY_PEMFILE = SSL_DIRECTORY + File.separator + "client-privatekey.pem";
-    String CLIENT_KEYSTORE = SSL_DIRECTORY + File.separator + "keystore.jks";
-    String CLIENT_TRUSTSTORE = SSL_DIRECTORY + File.separator + "truststore.jks";
 
     String CONTAINER_STARTUP_SCRIPT = "/vault/config/startup.sh";
     String CONTAINER_CONFIG_FILE = "/vault/config/config.json";

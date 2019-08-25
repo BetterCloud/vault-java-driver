@@ -176,10 +176,11 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
      *
      * @throws IOException
      * @throws InterruptedException
+     * @param cert
      */
-    public void setupBackendCert() throws IOException, InterruptedException {
+    public void setupBackendCert(String cert) throws IOException, InterruptedException {
         runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
-
+        runCommand("sh", "-c", "cat <<EOL >> " + CONTAINER_CLIENT_CERT_PEMFILE + "\n" + cert + "\nEOL");
         runCommand("vault", "auth", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "cert");
         runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "auth/cert/certs/web", "display_name=web",
                 "policies=web,prod", "certificate=@" + CONTAINER_CLIENT_CERT_PEMFILE, "ttl=3600");
