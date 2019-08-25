@@ -252,7 +252,10 @@ public class Auth {
                 if (tokenRequest.numUses != null) jsonObject.add("num_uses", tokenRequest.numUses);
                 final String requestJson = jsonObject.toString();
 
-                final StringBuilder urlBuilder = new StringBuilder(config.getAddress()).append("/v1/auth/" + mount + "/create");//NOPMD
+                final StringBuilder urlBuilder = new StringBuilder(config.getAddress())//NOPMD
+                        .append("/v1/auth/")
+                        .append(mount)
+                        .append("/create");
                 if (tokenRequest.role != null) {
                     urlBuilder.append("/").append(tokenRequest.role);
                 }
