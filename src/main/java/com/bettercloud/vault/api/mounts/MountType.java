@@ -36,7 +36,7 @@ public enum MountType {
 
     private final String value;
 
-    private MountType(final String value) {
+    MountType(final String value) {
         this.value = value;
     }
 
