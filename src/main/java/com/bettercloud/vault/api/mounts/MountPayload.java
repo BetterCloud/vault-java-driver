@@ -132,11 +132,11 @@ public class MountPayload implements Serializable {
         jsonObject.addIfNotNull("description", this.description);
 
         if (this.auditNonHmacRequestKeys != null && this.auditNonHmacRequestKeys.size() > 0) {
-            jsonObject.addIfNotNull("audit_non_hmac_request_keys", this.auditNonHmacRequestKeys.stream().collect(Collectors.joining(",")));
+            jsonObject.addIfNotNull("audit_non_hmac_request_keys", String.join(",", this.auditNonHmacRequestKeys));
         }
 
         if (this.auditNonHmacResponseKeys != null && this.auditNonHmacResponseKeys.size() > 0) {
-            jsonObject.addIfNotNull("audit_non_hmac_response_keys", this.auditNonHmacResponseKeys.stream().collect(Collectors.joining(",")));
+            jsonObject.addIfNotNull("audit_non_hmac_response_keys", String.join(",", this.auditNonHmacResponseKeys));
         }
 
         return jsonObject;

@@ -56,8 +56,7 @@ public enum MountType {
             return null;
         }
 
-        return Arrays.asList(MountType.values())
-                .stream()
+        return Arrays.stream(MountType.values())
                 .filter(type -> type.value.equals(value))
                 .findFirst()
                 .orElse(null);
