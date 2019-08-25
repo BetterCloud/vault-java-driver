@@ -21,14 +21,15 @@
  ******************************************************************************/
 package com.bettercloud.vault.json;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.io.StringWriter;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 
 @SuppressWarnings("PMD")

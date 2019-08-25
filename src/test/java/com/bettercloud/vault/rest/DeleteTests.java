@@ -4,10 +4,9 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.vault.VaultTestUtils;
 import com.bettercloud.vault.vault.mock.EchoInputMockVault;
+import java.io.UnsupportedEncodingException;
 import org.eclipse.jetty.server.Server;
 import org.junit.Test;
-
-import java.io.UnsupportedEncodingException;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNull;

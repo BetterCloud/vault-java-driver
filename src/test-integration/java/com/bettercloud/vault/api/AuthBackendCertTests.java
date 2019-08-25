@@ -6,14 +6,13 @@ import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.util.SSLUtils;
 import com.bettercloud.vault.util.VaultContainer;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.util.HashMap;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
 
 import static com.bettercloud.vault.util.TestConstants.PASSWORD;
 import static org.junit.Assert.assertNotNull;

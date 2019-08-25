@@ -7,11 +7,10 @@ import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.vault.VaultTestUtils;
 import com.bettercloud.vault.vault.mock.AuthRequestValidatingMockVault;
+import java.util.function.Predicate;
+import javax.servlet.http.HttpServletRequest;
 import org.eclipse.jetty.server.Server;
 import org.junit.Test;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.function.Predicate;
 
 import static com.bettercloud.vault.vault.VaultTestUtils.readRequestBody;
 import static org.junit.Assert.assertEquals;

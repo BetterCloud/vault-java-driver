@@ -4,7 +4,6 @@ import com.bettercloud.vault.api.Logical;
 import com.bettercloud.vault.api.pki.Credential;
 import com.bettercloud.vault.api.pki.RoleOptions;
 import com.bettercloud.vault.rest.RestResponse;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

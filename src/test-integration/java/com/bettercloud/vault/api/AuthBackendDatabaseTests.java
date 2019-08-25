@@ -6,13 +6,12 @@ import com.bettercloud.vault.api.database.DatabaseRoleOptions;
 import com.bettercloud.vault.response.DatabaseResponse;
 import com.bettercloud.vault.util.DbContainer;
 import com.bettercloud.vault.util.VaultContainer;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;

@@ -6,7 +6,6 @@ import com.bettercloud.vault.response.HealthResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestException;
 import com.bettercloud.vault.rest.RestResponse;
-
 import java.util.HashSet;
 import java.util.Set;
 

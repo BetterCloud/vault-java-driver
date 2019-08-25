@@ -1,9 +1,8 @@
 package com.bettercloud.vault.util;
 
+import java.io.File;
 import org.testcontainers.containers.Network;
 import org.testcontainers.utility.TestEnvironment;
-
-import java.io.File;
 
 /**
  * Various constants used throughout the integration test suite, but primarily by {@link VaultContainer}

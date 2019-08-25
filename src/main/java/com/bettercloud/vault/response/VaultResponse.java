@@ -1,7 +1,6 @@
 package com.bettercloud.vault.response;
 
 import com.bettercloud.vault.rest.RestResponse;
-
 import java.io.Serializable;
 
 /**

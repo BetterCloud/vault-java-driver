@@ -6,13 +6,14 @@ import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.util.VaultAgentContainer;
 import com.bettercloud.vault.util.VaultContainer;
-import org.junit.*;
-import org.junit.rules.TemporaryFolder;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.apache.commons.io.FileUtils.writeStringToFile;

@@ -10,7 +10,6 @@ import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.response.LookupResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
-
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.List;

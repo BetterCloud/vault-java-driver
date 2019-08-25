@@ -1,11 +1,5 @@
 package com.bettercloud.vault.api;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
@@ -15,8 +9,19 @@ import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestException;
 import com.bettercloud.vault.rest.RestResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-import static com.bettercloud.vault.api.LogicalUtilities.*;
+import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForDelete;
+import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForList;
+import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForReadOrWrite;
+import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForVersionDelete;
+import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForVersionDestroy;
+import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForVersionUnDelete;
+import static com.bettercloud.vault.api.LogicalUtilities.jsonObjectToWriteFromEngineVersion;
 
 
 /**

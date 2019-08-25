@@ -3,9 +3,6 @@ package com.bettercloud.vault;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.vault.VaultTestUtils;
 import com.bettercloud.vault.vault.mock.MockVault;
-import org.eclipse.jetty.server.Server;
-import org.junit.Test;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,6 +10,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.KeyStore;
 import java.util.HashMap;
+import org.eclipse.jetty.server.Server;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 

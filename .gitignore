@@ -1,5 +1,6 @@
 .gradle
-.idea
+.idea/*
+!.idea/codeStyles/
 .testcontainers-tmp*
 
 vault-java-driver.iml

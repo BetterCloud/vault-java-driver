@@ -21,15 +21,14 @@
  ******************************************************************************/
 package com.bettercloud.vault.json.test.mocking;
 
-import static org.junit.Assert.assertNotNull;
-
 import com.bettercloud.vault.json.JsonArray;
-import org.junit.Test;
-import org.mockito.Mockito;
-
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.json.ParseException;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import static org.junit.Assert.assertNotNull;
 
 
 /**

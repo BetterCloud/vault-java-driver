@@ -5,7 +5,6 @@ import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.MountResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
-
 import java.nio.charset.StandardCharsets;
 
 /**

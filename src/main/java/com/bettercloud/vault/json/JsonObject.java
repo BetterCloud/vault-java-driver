@@ -21,15 +21,13 @@
  ******************************************************************************/
 package com.bettercloud.vault.json;
 
+import com.bettercloud.vault.json.JsonObject.Member;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import com.bettercloud.vault.json.JsonObject.Member;
 
 
 /**

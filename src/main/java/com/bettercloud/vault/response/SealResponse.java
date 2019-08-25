@@ -4,7 +4,6 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.ParseException;
 import com.bettercloud.vault.rest.RestResponse;
-
 import java.nio.charset.StandardCharsets;
 
 /**

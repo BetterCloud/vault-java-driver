@@ -3,14 +3,11 @@ package com.bettercloud.vault;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.vault.VaultTestUtils;
 import com.bettercloud.vault.vault.mock.MockVault;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.jetty.server.Server;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static junit.framework.TestCase.assertEquals;
 
 
 /**

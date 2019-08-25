@@ -21,16 +21,16 @@
  ******************************************************************************/
 package com.bettercloud.vault.json;
 
-import static com.bettercloud.vault.json.TestUtil.assertException;
-import static org.junit.Assert.*;
-
+import com.bettercloud.vault.json.TestUtil.RunnableEx;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-
 import org.junit.Test;
 
-import com.bettercloud.vault.json.TestUtil.RunnableEx;
+import static com.bettercloud.vault.json.TestUtil.assertException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 
 @SuppressWarnings("PMD")

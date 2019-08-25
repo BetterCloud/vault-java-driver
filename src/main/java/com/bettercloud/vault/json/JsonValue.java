@@ -22,7 +22,6 @@
 package com.bettercloud.vault.json;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;

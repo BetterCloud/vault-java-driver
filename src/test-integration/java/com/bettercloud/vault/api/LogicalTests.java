@@ -1,26 +1,23 @@
 package com.bettercloud.vault.api;
 
+import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultConfig;
+import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.response.AuthResponse;
+import com.bettercloud.vault.response.LogicalResponse;
+import com.bettercloud.vault.util.VaultContainer;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import com.bettercloud.vault.VaultConfig;
-import com.bettercloud.vault.response.AuthResponse;
-import com.bettercloud.vault.response.LogicalResponse;
-import com.bettercloud.vault.util.VaultContainer;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-
-import com.bettercloud.vault.Vault;
-import com.bettercloud.vault.VaultException;
 import org.junit.rules.ExpectedException;
 
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;

@@ -3,13 +3,11 @@ package com.bettercloud.vault;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.vault.VaultTestUtils;
 import com.bettercloud.vault.vault.mock.RetriesMockVault;
+import java.util.HashMap;
 import org.eclipse.jetty.server.Server;
 import org.junit.Test;
 
-import java.util.HashMap;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * <p>Unit tests for the Vault driver, having no dependency on an actual Vault server instance being available.  The

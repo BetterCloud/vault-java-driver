@@ -6,7 +6,6 @@ import com.bettercloud.vault.api.database.DatabaseRoleOptions;
 import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.rest.RestResponse;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

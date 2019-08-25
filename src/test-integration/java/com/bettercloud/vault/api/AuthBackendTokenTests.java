@@ -6,12 +6,11 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.response.LookupResponse;
 import com.bettercloud.vault.util.VaultContainer;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

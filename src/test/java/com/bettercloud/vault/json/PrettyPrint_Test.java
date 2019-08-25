@@ -21,17 +21,21 @@
  ******************************************************************************/
 package com.bettercloud.vault.json;
 
-import static com.bettercloud.vault.json.PrettyPrint.*;
-import static java.util.Locale.US;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import static com.bettercloud.vault.json.PrettyPrint.indentWithSpaces;
+import static com.bettercloud.vault.json.PrettyPrint.indentWithTabs;
+import static com.bettercloud.vault.json.PrettyPrint.singleLine;
+import static java.util.Locale.US;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 
 @SuppressWarnings("PMD")

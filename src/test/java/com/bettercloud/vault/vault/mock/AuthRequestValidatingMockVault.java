@@ -1,11 +1,10 @@
 package com.bettercloud.vault.vault.mock;
 
-import org.eclipse.jetty.server.Request;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.function.Predicate;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.eclipse.jetty.server.Request;
 
 public class AuthRequestValidatingMockVault extends MockVault {
     private Predicate<HttpServletRequest> validator;

@@ -7,17 +7,23 @@ import com.bettercloud.vault.api.pki.RoleOptions;
 import com.bettercloud.vault.response.PkiResponse;
 import com.bettercloud.vault.rest.RestResponse;
 import com.bettercloud.vault.util.VaultContainer;
+import java.io.IOException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.security.*;
-import java.util.ArrayList;
-
 import static com.bettercloud.vault.util.SSLUtils.generatePKCS10;
-import static junit.framework.TestCase.*;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertNull;
+import static junit.framework.TestCase.assertTrue;
 
 /**
  * Integration tests for for operations on Vault's <code>/v1/pki/*</code> REST endpoints.
