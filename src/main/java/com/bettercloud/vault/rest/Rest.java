@@ -462,7 +462,7 @@ public class Rest {
         } catch (Exception e) {
             throw new RestException(e);
         } finally {
-            if (connection != null && connection instanceof HttpURLConnection) {
+            if (connection instanceof HttpURLConnection) {
                 ((HttpURLConnection) connection).disconnect();
             }
         }
