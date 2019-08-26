@@ -90,13 +90,12 @@ public class Debug {
                 // Build an HTTP request for Vault
                 final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext());
-                // Add token if present
-                rest.optionalHeader("X-Vault-Token", config.getToken());
-                rest.optionalHeader("X-Vault-Namespace", this.nameSpace);
                 // Add params if present
                 if (standbyOk != null) rest.parameter("standbyok", standbyOk.toString());
                 if (activeCode != null) rest.parameter("activecode", activeCode.toString());

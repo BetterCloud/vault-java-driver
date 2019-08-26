@@ -46,8 +46,8 @@ public class Seal {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/seal")
-                        .optionalHeader("X-Vault-Token", config.getToken())
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -107,7 +107,7 @@ public class Seal {
                 final String requestJson = Json.object().add("key", key).add("reset", reset).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/unseal")
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -150,7 +150,7 @@ public class Seal {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/seal-status")
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())

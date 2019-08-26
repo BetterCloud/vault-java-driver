@@ -263,8 +263,8 @@ public class Auth {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(url)
-                        .optionalHeader("X-Vault-Token", config.getToken())
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -424,7 +424,7 @@ public class Auth {
                 final String requestJson = Json.object().add("role_id", roleId).add("secret_id", secretId).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + path + "/login")
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -507,7 +507,7 @@ public class Auth {
                 final String requestJson = Json.object().add("password", password).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login/" + username)
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -630,7 +630,7 @@ public class Auth {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -705,7 +705,7 @@ public class Auth {
                 final String requestJson = request.toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -784,7 +784,7 @@ public class Auth {
                 final String requestJson = request.toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -869,7 +869,7 @@ public class Auth {
                 final String requestJson = Json.object().add("token", githubToken).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -933,7 +933,7 @@ public class Auth {
                 final String requestJson = Json.object().add("role", role).add("jwt", jwt).toString();
                 final RestResponse restResponse = new Rest()
                         .url(config.getAddress() + "/v1/auth/" + provider + "/login")
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -1073,7 +1073,7 @@ public class Auth {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/login")
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -1154,8 +1154,8 @@ public class Auth {
                 final String requestJson = Json.object().add("increment", increment).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/renew-self")
-                        .optionalHeader("X-Vault-Token", config.getToken())
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .body(increment < 0 ? null : requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -1217,8 +1217,8 @@ public class Auth {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/lookup-self")
-                        .optionalHeader("X-Vault-Token", config.getToken())
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -1279,8 +1279,8 @@ public class Auth {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/wrapping/lookup")
-                        .optionalHeader("X-Vault-Token", config.getToken())
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -1341,8 +1341,8 @@ public class Auth {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/auth/" + mount + "/revoke-self")
-                        .optionalHeader("X-Vault-Token", config.getToken())
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -1442,8 +1442,8 @@ public class Auth {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()
                         .url(url)
-                        .optionalHeader("X-Vault-Token", config.getToken())
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())

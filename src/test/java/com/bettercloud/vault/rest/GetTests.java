@@ -140,10 +140,10 @@ public class GetTests {
     public void testGet_WithOptionalHeaders() throws RestException {
         final RestResponse restResponse = new Rest()
                 .url("https://httpbin.org/get")
-                .optionalHeader("black", "white")
-                .optionalHeader("day", "night")
-                .optionalHeader("two-part", "Header value")
-                .optionalHeader("I am null", null)
+                .header("black", "white")
+                .header("day", "night")
+                .header("two-part", "Header value")
+                .header("I am null", null)
                 .get();
         assertEquals(200, restResponse.getStatus());
         assertEquals("application/json", restResponse.getMimeType());

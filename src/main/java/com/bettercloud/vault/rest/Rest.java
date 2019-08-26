@@ -167,7 +167,9 @@ public class Rest {
      * @return This object, with a header added, ready for other builder-pattern config methods or an HTTP verb method
      */
     public Rest header(final String name, final String value) {
-        this.headers.put(name, value);
+        if (value != null && !value.isEmpty()) {
+            this.headers.put(name, value);
+        }
         return this;
     }
 
@@ -182,12 +184,13 @@ public class Rest {
      * @param name  The raw header name
      * @param value The raw header value
      * @return This object, with a header added, ready for other builder-pattern config methods or an HTTP verb method
+     *
+     * @deprecated use {@link #header(String, String)} instead.
      */
+    @Deprecated
     public Rest optionalHeader(final String name, final String value) {
-        if (value != null && !value.isEmpty()) {
-            this.headers.put(name, value);
-            return this;
-        } else return this;
+        header(name, value);
+        return this;
     }
 
     /**

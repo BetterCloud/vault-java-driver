@@ -61,8 +61,8 @@ public class Leases {
                 */
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/leases/revoke/" + leaseId)
-                        .optionalHeader("X-Vault-Token", config.getToken())
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -116,8 +116,8 @@ public class Leases {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-prefix/" + prefix)
-                        .optionalHeader("X-Vault-Token", config.getToken())
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -174,8 +174,8 @@ public class Leases {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-force/" + prefix)
-                        .optionalHeader("X-Vault-Token", config.getToken())
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -237,8 +237,8 @@ public class Leases {
                 final String requestJson = Json.object().add("increment", increment).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
-                        .optionalHeader("X-Vault-Token", config.getToken())
-                        .optionalHeader("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .body(increment < 0 ? null : requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
