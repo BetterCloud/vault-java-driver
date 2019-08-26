@@ -1,11 +1,5 @@
 package com.bettercloud.vault.response;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 import com.bettercloud.vault.api.Logical;
 import com.bettercloud.vault.api.mounts.Mount;
 import com.bettercloud.vault.api.mounts.MountConfig;
@@ -14,6 +8,10 @@ import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.JsonObject.Member;
 import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.rest.RestResponse;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * This class is a container for the information returned by Vault in /sys/mounts/ API
@@ -106,16 +104,6 @@ public class MountResponse extends LogicalResponse {
         }
 
         return StreamSupport.stream(data.spliterator(), false)
-                .collect(Collectors.toMap(new Function<Member, String>() {
-                    @Override
-                    public String apply(Member member) {
-                        return member.getName();
-                    }
-                }, new Function<Member, Mount>() {
-                    @Override
-                    public Mount apply(Member member) {
-                        return buildMount(member.getValue().asObject());
-                    }
-                }));
+                .collect(Collectors.toMap(Member::getName, member -> buildMount(member.getValue().asObject())));
     }
 }

@@ -1,7 +1,6 @@
 package com.bettercloud.vault.api;
 
 import com.bettercloud.vault.json.JsonObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;

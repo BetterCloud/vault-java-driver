@@ -2,12 +2,11 @@ package com.bettercloud.vault.vault.mock;
 
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
-import org.eclipse.jetty.server.Request;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Enumeration;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.eclipse.jetty.server.Request;
 
 /**
  * <p>This class is used for inspecting the request inputs to ensure they were properly

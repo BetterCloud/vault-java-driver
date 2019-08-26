@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'checkstyle'
 
 group 'com.bettercloud'
 archivesBaseName = 'vault-java-driver'
@@ -18,7 +19,7 @@ repositories {
 dependencies {
     testCompile('junit:junit:4.12')
     testCompile('org.mockito:mockito-core:2.28.2')
-    testCompile('org.testcontainers:testcontainers:1.11.3')
+    testCompile('org.testcontainers:testcontainers:1.12.0')
     testCompile('org.eclipse.jetty:jetty-server:9.4.19.v20190610')
     testCompile('org.slf4j:slf4j-api:1.7.26')
     testCompile('org.bouncycastle:bcprov-jdk15on:1.62')
@@ -46,10 +47,14 @@ compileJava {
     options.compilerArgs = ['--release', '8']
 }
 
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
 task compileModuleInfoJava(type: JavaCompile) {
     classpath = files()
     source = 'src/main/java/module-info.java'
     destinationDir = compileJava.destinationDir
+    options.encoding = compileJava.options.encoding
 
     doFirst {
         options.compilerArgs = [
@@ -207,4 +212,3 @@ uploadArchives {
         }
     }
 }
-

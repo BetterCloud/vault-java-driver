@@ -4,32 +4,32 @@ import com.bettercloud.vault.SslConfig;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
-import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.json.JsonObject;
 import com.github.dockerjava.api.model.Capability;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
+import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.containers.wait.HttpWaitStrategy;
+import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
+import org.testcontainers.lifecycle.TestDescription;
+import org.testcontainers.lifecycle.TestLifecycleAware;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.util.function.Consumer;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Sets up and exposes utilities for dealing with a Docker-hosted instance of Vault, for integration tests.
  */
-public class VaultContainer implements TestRule, TestConstants {
+public class VaultContainer extends GenericContainer<VaultContainer> implements TestConstants, TestLifecycleAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultContainer.class);
 
-    private final GenericContainer container;
+    public static final String DEFAULT_IMAGE_AND_TAG = "vault:1.1.3";
 
     private String rootToken;
     private String unsealKey;
@@ -37,24 +37,19 @@ public class VaultContainer implements TestRule, TestConstants {
     /**
      * Establishes a running Docker container, hosting a Vault server instance.
      */
-    public VaultContainer() {
-        container = new GenericContainer("vault:1.1.3")
-                .withNetwork(CONTAINER_NETWORK)
+    public VaultContainer(String image) {
+        super(image);
+        this.withNetwork(CONTAINER_NETWORK)
                 .withNetworkAliases("vault")
                 .withClasspathResourceMapping("/startup.sh", CONTAINER_STARTUP_SCRIPT, BindMode.READ_ONLY)
                 .withClasspathResourceMapping("/config.json", CONTAINER_CONFIG_FILE, BindMode.READ_ONLY)
                 .withClasspathResourceMapping("/libressl.conf", CONTAINER_OPENSSL_CONFIG_FILE, BindMode.READ_ONLY)
                 .withClasspathResourceMapping("/approlePolicy.hcl", APPROLE_POLICY_FILE, BindMode.READ_ONLY)
                 .withFileSystemBind(SSL_DIRECTORY, CONTAINER_SSL_DIRECTORY, BindMode.READ_WRITE)
-                .withCreateContainerCmdModifier(new Consumer<CreateContainerCmd>() {
-                    // TODO: Why does the compiler freak out when this anonymous class is converted to a lambda?
-                    @Override
-                    public void accept(final CreateContainerCmd createContainerCmd) {
-                        createContainerCmd.withCapAdd(Capability.IPC_LOCK);
-                    }
-                })
+                .withCreateContainerCmdModifier(command -> command.withCapAdd(Capability.IPC_LOCK))
                 .withExposedPorts(8200, 8280)
                 .withCommand("/bin/sh " + CONTAINER_STARTUP_SCRIPT)
+                .withLogConsumer(new Slf4jLogConsumer(LOGGER))
                 .waitingFor(
                         // All of the tests in this integration test suite use HTTPS connections.  However, Vault
                         // is configured to run a plain HTTP listener on port 8280, purely for purposes of detecting
@@ -64,34 +59,21 @@ public class VaultContainer implements TestRule, TestConstants {
                         // configuring SSL to trust the self-signed cert that's generated inside of the Docker
                         // container.  A chicken-and-egg problem, as we need to wait for the container to be fully
                         // ready before we access that cert.
-                        new HttpWaitStrategy() {
-                            @Override
-                            protected Integer getLivenessCheckPort() {
-                                return container.getMappedPort(8280);
-                            }
-                        }
+                        new HttpWaitStrategy()
+                                .forPort(8280)
                                 .forPath("/v1/sys/seal-status")
                                 .forStatusCode(HttpURLConnection.HTTP_OK) // The expected response when "vault init" has not yet run
                 );
     }
 
-    /**
-     * Called by JUnit automatically after the constructor method.  Launches the Docker container that was configured
-     * in the constructor.
-     *
-     * @param base
-     * @param description
-     * @return
-     */
-    @Override
-    public Statement apply(final Statement base, final Description description) {
-        return container.apply(base, description);
+    public VaultContainer() {
+        this(DEFAULT_IMAGE_AND_TAG);
     }
 
     /**
-     * To be called by a test class method annotated with {@link org.junit.BeforeClass}.  This logic doesn't work
-     * when placed inside of the constructor or {@link this#apply(Statement, Description)} methods here, presumably
-     * because the Docker container spawned by TestContainers is not ready to accept commonds until after those
+     * To be called by a test class method annotated with {@link org.junit.BeforeClass}.
+     * This logic doesn't work when placed inside of the constructor, presumably
+     * because the Docker container spawned by TestContainers is not ready to accept commands until after those
      * methods complete.
      *
      * <p>This method initializes the Vault server, capturing the unseal key and root token that are displayed on the
@@ -102,16 +84,15 @@ public class VaultContainer implements TestRule, TestConstants {
      * @throws InterruptedException
      */
     public void initAndUnsealVault() throws IOException, InterruptedException {
-        final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOGGER);
-        container.followOutput(logConsumer);
+
 
         // Initialize the Vault server
         final Container.ExecResult initResult = runCommand("vault", "operator", "init", "-ca-cert=" +
-                CONTAINER_CERT_PEMFILE, "-key-shares=1", "-key-threshold=1");
-        final String stdout = initResult.getStdout().replaceAll(System.lineSeparator(), "").split("Vault initialized")[0];
-        final String[] tokens = stdout.split("Initial Root Token: ");
-        this.unsealKey = tokens[0].replace("Unseal Key 1: ", "");
-        this.rootToken = tokens[1];
+                CONTAINER_CERT_PEMFILE, "-key-shares=1", "-key-threshold=1", "-format=json");
+        final String stdout = initResult.getStdout().replaceAll("\\r?\\n", "");
+        JsonObject initJson = Json.parse(stdout).asObject();
+        this.unsealKey = initJson.get("unseal_keys_b64").asArray().get(0).asString();
+        this.rootToken = initJson.get("root_token").asString();
 
         System.out.println("Root token: " + rootToken);
 
@@ -193,10 +174,11 @@ public class VaultContainer implements TestRule, TestConstants {
      *
      * @throws IOException
      * @throws InterruptedException
+     * @param cert
      */
-    public void setupBackendCert() throws IOException, InterruptedException {
+    public void setupBackendCert(String cert) throws IOException, InterruptedException {
         runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
-
+        runCommand("sh", "-c", "cat <<EOL >> " + CONTAINER_CLIENT_CERT_PEMFILE + "\n" + cert + "\nEOL");
         runCommand("vault", "auth", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "cert");
         runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "auth/cert/certs/web", "display_name=web",
                 "policies=web,prod", "certificate=@" + CONTAINER_CLIENT_CERT_PEMFILE, "ttl=3600");
@@ -345,7 +327,7 @@ public class VaultContainer implements TestRule, TestConstants {
      * @return The URL of the Vault instance
      */
     public String getAddress() {
-        return String.format("https://%s:%d", container.getContainerIpAddress(), container.getMappedPort(8200));
+        return String.format("https://%s:%d", getContainerIpAddress(), getMappedPort(8200));
     }
 
     /**
@@ -371,7 +353,7 @@ public class VaultContainer implements TestRule, TestConstants {
      */
     private Container.ExecResult runCommand(final String... command) throws IOException, InterruptedException {
         LOGGER.info("Command: {}", String.join(" ", command));
-        final Container.ExecResult result = this.container.execInContainer(command);
+        final Container.ExecResult result = execInContainer(command);
         final String out = result.getStdout();
         final String err = result.getStderr();
         if (out != null && !out.isEmpty()) {
@@ -381,5 +363,10 @@ public class VaultContainer implements TestRule, TestConstants {
             LOGGER.info("Command stderr: {}", result.getStderr());
         }
         return result;
+    }
+
+    @Override
+    public void beforeTest(TestDescription description) {
+        assumeTrue(DOCKER_AVAILABLE);
     }
 }

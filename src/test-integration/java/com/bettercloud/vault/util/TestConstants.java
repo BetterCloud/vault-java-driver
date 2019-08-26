@@ -1,15 +1,15 @@
 package com.bettercloud.vault.util;
 
-import org.testcontainers.containers.Network;
-
 import java.io.File;
+import org.testcontainers.containers.Network;
+import org.testcontainers.utility.TestEnvironment;
 
 /**
  * Various constants used throughout the integration test suite, but primarily by {@link VaultContainer}
  * and {@link SSLUtils}.  Mostly username/password credentials and other Vault configuration values, and
  * path locations for SSL artifacts.
  */
-interface TestConstants {
+public interface TestConstants {
 
     String POSTGRES_PASSWORD = "superpassword1";
     String POSTGRES_USER = "superuser1";
@@ -25,9 +25,6 @@ interface TestConstants {
     String CERT_PEMFILE = SSL_DIRECTORY + File.separator + "root-cert.pem";
 
     String CLIENT_CERT_PEMFILE = SSL_DIRECTORY + File.separator + "client-cert.pem";
-    String CLIENT_PRIVATE_KEY_PEMFILE = SSL_DIRECTORY + File.separator + "client-privatekey.pem";
-    String CLIENT_KEYSTORE = SSL_DIRECTORY + File.separator + "keystore.jks";
-    String CLIENT_TRUSTSTORE = SSL_DIRECTORY + File.separator + "truststore.jks";
 
     String CONTAINER_STARTUP_SCRIPT = "/vault/config/startup.sh";
     String CONTAINER_CONFIG_FILE = "/vault/config/config.json";
@@ -40,4 +37,5 @@ interface TestConstants {
     String APPROLE_POLICY_FILE = "/home/vault/approlePolicy.hcl";
 
     Network CONTAINER_NETWORK = Network.newNetwork();
+    boolean DOCKER_AVAILABLE = TestEnvironment.dockerApiAtLeast("1.10");
 }

@@ -6,15 +6,14 @@ import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.util.VaultAgentContainer;
 import com.bettercloud.vault.util.VaultContainer;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
@@ -25,6 +24,7 @@ public class VaultAgentTests {
     public static final VaultContainer container = new VaultContainer();
     @ClassRule
     public static final TemporaryFolder temp = new TemporaryFolder();
+    @ClassRule
     public static VaultAgentContainer vaultAgentContainer;
 
     @BeforeClass
@@ -49,6 +49,7 @@ public class VaultAgentTests {
         writeStringToFile(role_id, appRoleId);
         writeStringToFile(secret_id, secretId);
         vaultAgentContainer = new VaultAgentContainer(role_id.toPath(), secret_id.toPath());
+        vaultAgentContainer.start();
     }
 
     @Test
@@ -67,5 +68,4 @@ public class VaultAgentTests {
         final String valueRead = vault.logical().read(pathToRead).getData().get("value");
         assertEquals(value, valueRead);
     }
-
 }

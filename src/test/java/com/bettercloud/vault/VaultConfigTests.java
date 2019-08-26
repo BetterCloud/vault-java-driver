@@ -1,8 +1,5 @@
 package com.bettercloud.vault;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,6 +11,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.junit.Assert;
+import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -217,6 +216,7 @@ public class VaultConfigTests {
         new VaultConfig().build();
     }
 
+    @SuppressWarnings("CharsetObjectCanBeUsed") // Requires Java 10 and above
     @Test
     public void testConfigBuilder_LoadTokenFromHomedir() throws IOException, VaultException {
         final String mockHomeDirectory = System.getProperty("java.io.tmpdir") + File.separatorChar + UUID.randomUUID().toString();

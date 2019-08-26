@@ -21,13 +21,22 @@
  ******************************************************************************/
 package com.bettercloud.vault.json;
 
-import static com.bettercloud.vault.json.Json.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import java.io.IOException;
-
 import org.junit.Test;
+
+import static com.bettercloud.vault.json.Json.FALSE;
+import static com.bettercloud.vault.json.Json.NULL;
+import static com.bettercloud.vault.json.Json.TRUE;
+import static com.bettercloud.vault.json.Json.value;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 
 @SuppressWarnings("PMD")

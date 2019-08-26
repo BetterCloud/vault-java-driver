@@ -1,12 +1,6 @@
 package com.bettercloud.vault;
 
 import com.bettercloud.vault.api.Auth;
-
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -31,6 +25,11 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * <p>A container for SSL-related configuration options, meant to be stored within a {@link VaultConfig} instance.</p>
@@ -444,13 +443,13 @@ public class SslConfig implements Serializable {
             this.environmentLoader = new EnvironmentLoader();
         }
         if (this.verifyObject == null && environmentLoader.loadVariable(VAULT_SSL_VERIFY) != null) {
-            this.verify = Boolean.valueOf(environmentLoader.loadVariable(VAULT_SSL_VERIFY));
+            this.verify = Boolean.parseBoolean(environmentLoader.loadVariable(VAULT_SSL_VERIFY));
         } else if (this.verifyObject != null) {
             this.verify = verifyObject;
         } else {
             this.verify = true;
         }
-        if (this.verify == true && this.pemUTF8 == null && environmentLoader.loadVariable(VAULT_SSL_CERT) != null) {
+        if (this.verify && this.pemUTF8 == null && environmentLoader.loadVariable(VAULT_SSL_CERT) != null) {
             final File pemFile = new File(environmentLoader.loadVariable(VAULT_SSL_CERT));
             try (final InputStream input = new FileInputStream(pemFile)) {
                 this.pemUTF8 = inputStreamToUTF8(input);
@@ -487,7 +486,7 @@ public class SslConfig implements Serializable {
      * @throws VaultException
      */
     private void buildSsl() throws VaultException {
-        if (verify == true) {
+        if (verify) {
             if (keyStore != null || trustStore != null) {
                 this.sslContext = buildSslContextFromJks();
             } else if (pemUTF8 != null || clientPemUTF8 != null || clientKeyPemUTF8 != null) {
@@ -625,7 +624,7 @@ public class SslConfig implements Serializable {
      */
     private static String inputStreamToUTF8(final InputStream input) throws IOException {
         final BufferedReader in = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
-        final StringBuilder utf8 = new StringBuilder("");
+        final StringBuilder utf8 = new StringBuilder();
         String str;
         while ((str = in.readLine()) != null) {
             // String concatenation is less efficient, but for some reason the line-breaks (which are necessary

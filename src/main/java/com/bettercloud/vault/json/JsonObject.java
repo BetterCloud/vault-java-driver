@@ -21,15 +21,13 @@
  ******************************************************************************/
 package com.bettercloud.vault.json;
 
+import com.bettercloud.vault.json.JsonObject.Member;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import com.bettercloud.vault.json.JsonObject.Member;
 
 
 /**
@@ -80,8 +78,8 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
    * Creates a new empty JsonObject.
    */
   public JsonObject() {
-    names = new ArrayList<String>();
-    values = new ArrayList<JsonValue>();
+    names = new ArrayList<>();
+    values = new ArrayList<>();
     table = new HashIndexTable();
   }
 
@@ -103,8 +101,8 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
       names = Collections.unmodifiableList(object.names);
       values = Collections.unmodifiableList(object.values);
     } else {
-      names = new ArrayList<String>(object.names);
-      values = new ArrayList<JsonValue>(object.values);
+      names = new ArrayList<>(object.names);
+      values = new ArrayList<>(object.values);
     }
     table = new HashIndexTable();
     updateHashIndex();
@@ -600,7 +598,7 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
     JsonValue value = get(name);
     return value != null ? value.asInt() : null;
   }
-  
+
   /**
    * Returns the <code>int</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
@@ -636,7 +634,7 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
     JsonValue value = get(name);
     return value != null ? value.asLong() : null;
   }
-  
+
   /**
    * Returns the <code>long</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
@@ -672,7 +670,7 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
     JsonValue value = get(name);
     return value != null ? value.asFloat() : null;
   }
-  
+
   /**
    * Returns the <code>float</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
@@ -708,7 +706,7 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
     JsonValue value = get(name);
     return value != null ? value.asDouble() : null;
   }
-  
+
   /**
    * Returns the <code>double</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
@@ -744,7 +742,7 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
     JsonValue value = get(name);
     return value != null ? value.asBoolean() : null;
   }
-  
+
   /**
    * Returns the <code>boolean</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
@@ -779,7 +777,7 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
     JsonValue value = get(name);
     return value != null ? value.asString() : null;
   }
-  
+
   /**
    * Returns the <code>String</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If

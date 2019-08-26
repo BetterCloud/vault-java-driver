@@ -1,11 +1,10 @@
 package com.bettercloud.vault.vault.mock;
 
-import org.eclipse.jetty.server.Request;
-
+import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.eclipse.jetty.server.Request;
 
 /**
  * <p>This class is used to mock out a Vault server in unit tests involving open timeouts (i.e. delays before an

@@ -10,7 +10,6 @@ import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.response.LookupResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
-
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -252,7 +251,10 @@ public class Auth {
                 if (tokenRequest.numUses != null) jsonObject.add("num_uses", tokenRequest.numUses);
                 final String requestJson = jsonObject.toString();
 
-                final StringBuilder urlBuilder = new StringBuilder(config.getAddress()).append("/v1/auth/" + mount + "/create");//NOPMD
+                final StringBuilder urlBuilder = new StringBuilder(config.getAddress())//NOPMD
+                        .append("/v1/auth/")
+                        .append(mount)
+                        .append("/create");
                 if (tokenRequest.role != null) {
                     urlBuilder.append("/").append(tokenRequest.role);
                 }
@@ -1228,7 +1230,7 @@ public class Auth {
                     throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType();
-                if (mimeType == null || !"application/json".equals(mimeType)) {
+                if (!"application/json".equals(mimeType)) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
                 return new LookupResponse(restResponse, retryCount);
@@ -1291,7 +1293,7 @@ public class Auth {
                             restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType();
-                if (mimeType == null || !"application/json".equals(mimeType)) {
+                if (!"application/json".equals(mimeType)) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
                 return new LogicalResponse(restResponse, retryCount, Logical.logicalOperations.authentication);

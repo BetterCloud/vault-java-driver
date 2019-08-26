@@ -1,11 +1,5 @@
 package com.bettercloud.vault.rest;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -24,6 +19,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * <p>A simple client for issuing HTTP requests.  Supports the HTTP verbs:</p>
@@ -147,6 +146,7 @@ public class Rest {
      * @return This object, with a parameter added, ready for other builder-pattern config methods or an HTTP verb method
      * @throws RestException If any error occurs, or unexpected response received from Vault
      */
+    @SuppressWarnings("CharsetObjectCanBeUsed") // Using Charset constant requires Java and above
     public Rest parameter(final String name, final String value) throws RestException {
         try {
             this.parameters.put(URLEncoder.encode(name, "UTF-8"), URLEncoder.encode(value, "UTF-8"));
@@ -402,7 +402,7 @@ public class Rest {
             } else if (!parameters.isEmpty()) {
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
                 final OutputStream outputStream = connection.getOutputStream();
-                outputStream.write(parametersToQueryString().getBytes("UTF-8"));
+                outputStream.write(parametersToQueryString().getBytes(StandardCharsets.UTF_8));
                 outputStream.close();
             }
 
@@ -444,15 +444,10 @@ public class Rest {
             // SSL settings, if applicable
             if (connection instanceof HttpsURLConnection) {
                 final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
-                if (sslVerification != null && !sslVerification.booleanValue()) {
+                if (sslVerification != null && !sslVerification) {
                     // SSL verification disabled
                     httpsURLConnection.setSSLSocketFactory(DISABLED_SSL_CONTEXT.getSocketFactory());
-                    httpsURLConnection.setHostnameVerifier(new HostnameVerifier() {
-                        @Override
-                        public boolean verify(final String s, final SSLSession sslSession) {
-                            return true;
-                        }
-                    });
+                    httpsURLConnection.setHostnameVerifier((s, sslSession) -> true);
                 } else if (sslContext != null) {
                     // Cert file supplied
                     httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
@@ -470,7 +465,7 @@ public class Rest {
         } catch (Exception e) {
             throw new RestException(e);
         } finally {
-            if (connection != null && connection instanceof HttpURLConnection) {
+            if (connection instanceof HttpURLConnection) {
                 ((HttpURLConnection) connection).disconnect();
             }
         }
@@ -484,7 +479,7 @@ public class Rest {
      */
     private String parametersToQueryString() {
         final StringBuilder queryString = new StringBuilder();
-        final List<Map.Entry<String, String>> params = new ArrayList<Map.Entry<String, String>>(parameters.entrySet());
+        final List<Map.Entry<String, String>> params = new ArrayList<>(parameters.entrySet());
         for (int index = 0; index < params.size(); index++) {
             if (index > 0) {
                 queryString.append('&');

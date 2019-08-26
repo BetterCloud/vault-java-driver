@@ -46,7 +46,7 @@ public class DatabaseRoleOptions {
     }
 
     /**
-     * @param name (string: <required>) – Specifies the name of the role to create. This is specified as part of the URL.
+     * @param name {@code String} – Specifies the name of the role to create. This is specified as part of the URL.
      * @return This object, with name populated, ready for other builder methods or immediate use.
      */
     public DatabaseRoleOptions name(final String name) {
@@ -55,7 +55,7 @@ public class DatabaseRoleOptions {
     }
 
     /**
-     * @param dbName (string: <required>) - The name of the database connection to use for this role.
+     * @param dbName {@code String} - The name of the database connection to use for this role.
      * @return This object, with dbName populated, ready for other builder methods or immediate use.
      */
     public DatabaseRoleOptions dbName(final String dbName) {
@@ -82,7 +82,7 @@ public class DatabaseRoleOptions {
     }
 
     /**
-     * @param creationStatements (list: <required>) – Specifies the database statements executed to create and configure a user. See the plugin's API page for more information on support and formatting for this parameter.
+     * @param creationStatements {@code List<String>} – Specifies the database statements executed to create and configure a user. See the plugin's API page for more information on support and formatting for this parameter.
      * @return This object, with creationStatements populated, ready for other builder methods or immediate use.
      */
     public DatabaseRoleOptions creationStatements(final List<String> creationStatements) {

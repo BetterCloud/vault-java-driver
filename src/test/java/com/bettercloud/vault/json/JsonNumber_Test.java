@@ -21,14 +21,15 @@
  ******************************************************************************/
 package com.bettercloud.vault.json;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.io.StringWriter;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 
 @SuppressWarnings("PMD")
@@ -45,11 +46,7 @@ public class JsonNumber_Test {
 
     @Test
     public void constructor_failsWithNull() {
-        TestUtil.assertException(NullPointerException.class, "string is null", new Runnable() {
-            public void run() {
-                new JsonNumber(null);
-            }
-        });
+        TestUtil.assertException(NullPointerException.class, "string is null", (Runnable) () -> new JsonNumber(null));
     }
 
     @Test

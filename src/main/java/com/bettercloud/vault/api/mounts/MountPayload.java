@@ -1,17 +1,15 @@
 package com.bettercloud.vault.api.mounts;
 
+import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.json.JsonObject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import com.bettercloud.vault.json.Json;
-import com.bettercloud.vault.json.JsonObject;
 
 /**
  * <p>A container for options sent to mounts endpoints on the Secret Engine backend as REST payload. This class is
  * meant for use with a builder pattern style.  Example usage:</p>
- * 
+ *
  * <blockquote>
  * <pre>{@code
  * final MountPayload payload = new MountPayload()
@@ -89,9 +87,7 @@ public class MountPayload implements Serializable {
         if (auditNonHmacRequestKeys == null) {
             return null;
         } else {
-            final List<String> clone = new ArrayList<>();
-            clone.addAll(auditNonHmacRequestKeys);
-            return clone;
+            return new ArrayList<>(auditNonHmacRequestKeys);
         }
     }
 
@@ -99,9 +95,7 @@ public class MountPayload implements Serializable {
         if (auditNonHmacResponseKeys == null) {
             return null;
         } else {
-            final List<String> clone = new ArrayList<>();
-            clone.addAll(auditNonHmacResponseKeys);
-            return clone;
+            return new ArrayList<>(auditNonHmacResponseKeys);
         }
     }
 
@@ -132,11 +126,11 @@ public class MountPayload implements Serializable {
         jsonObject.addIfNotNull("description", this.description);
 
         if (this.auditNonHmacRequestKeys != null && this.auditNonHmacRequestKeys.size() > 0) {
-            jsonObject.addIfNotNull("audit_non_hmac_request_keys", this.auditNonHmacRequestKeys.stream().collect(Collectors.joining(",")));
+            jsonObject.addIfNotNull("audit_non_hmac_request_keys", String.join(",", this.auditNonHmacRequestKeys));
         }
 
         if (this.auditNonHmacResponseKeys != null && this.auditNonHmacResponseKeys.size() > 0) {
-            jsonObject.addIfNotNull("audit_non_hmac_response_keys", this.auditNonHmacResponseKeys.stream().collect(Collectors.joining(",")));
+            jsonObject.addIfNotNull("audit_non_hmac_response_keys", String.join(",", this.auditNonHmacResponseKeys));
         }
 
         return jsonObject;

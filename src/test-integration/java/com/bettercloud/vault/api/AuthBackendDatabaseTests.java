@@ -6,29 +6,28 @@ import com.bettercloud.vault.api.database.DatabaseRoleOptions;
 import com.bettercloud.vault.response.DatabaseResponse;
 import com.bettercloud.vault.util.DbContainer;
 import com.bettercloud.vault.util.VaultContainer;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 public class AuthBackendDatabaseTests {
     @ClassRule
-    public static final VaultContainer container = new VaultContainer();
+    public static final DbContainer dbContainer = new DbContainer();
 
     @ClassRule
-    public static final DbContainer dbContainer = new DbContainer();
+    public static final VaultContainer container = new VaultContainer().dependsOn(dbContainer);
 
 
     @BeforeClass
     public static void setupClass() throws IOException, InterruptedException {
         container.initAndUnsealVault();
-        container.setupBackendDatabase(dbContainer.getDbContainerIp());
+        container.setupBackendDatabase(DbContainer.hostname);
     }
 
     @Test

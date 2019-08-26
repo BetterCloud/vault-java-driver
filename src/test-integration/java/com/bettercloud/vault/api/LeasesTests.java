@@ -1,18 +1,16 @@
 package com.bettercloud.vault.api;
 
-import static junit.framework.TestCase.assertEquals;
-
+import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.VaultResponse;
 import com.bettercloud.vault.util.VaultContainer;
+import java.io.IOException;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import com.bettercloud.vault.Vault;
-import com.bettercloud.vault.VaultException;
-
-import java.io.IOException;
+import static junit.framework.TestCase.assertEquals;
 
 /**
  * <p>Integration tests for the basic (i.e. "sys") Vault API operations.</p>

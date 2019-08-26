@@ -21,14 +21,15 @@
  ******************************************************************************/
 package com.bettercloud.vault.json;
 
-import static com.bettercloud.vault.json.TestUtil.assertException;
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.io.StringReader;
-
 import org.hamcrest.core.StringStartsWith;
 import org.junit.Test;
+
+import static com.bettercloud.vault.json.TestUtil.assertException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 
 
 @SuppressWarnings("PMD")

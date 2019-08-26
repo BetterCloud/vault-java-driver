@@ -1,22 +1,21 @@
 package com.bettercloud.vault.api;
 
+import com.bettercloud.vault.Vault;
+import com.bettercloud.vault.VaultConfig;
+import com.bettercloud.vault.VaultException;
+import com.bettercloud.vault.response.AuthResponse;
+import com.bettercloud.vault.response.LogicalResponse;
+import com.bettercloud.vault.util.VaultContainer;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import com.bettercloud.vault.VaultConfig;
-import com.bettercloud.vault.response.AuthResponse;
-import com.bettercloud.vault.util.VaultContainer;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-
-import com.bettercloud.vault.Vault;
-import com.bettercloud.vault.VaultException;
 import org.junit.rules.ExpectedException;
 
 import static junit.framework.TestCase.assertEquals;
@@ -165,7 +164,7 @@ public class LogicalTests {
         testMap.put("value", "world");
 
         vault.logical().write("secret/hello", testMap);
-        final List<String> keys = vault.logical().list("secret");
+        final List<String> keys = vault.logical().list("secret").getListData();
         assertTrue(keys.contains("hello"));
     }
 
@@ -181,7 +180,7 @@ public class LogicalTests {
         testMap.put("value", "world");
 
         vault.logical().write("kv-v1/hello", testMap);
-        final List<String> keys = vault.logical().list("kv-v1");
+        final List<String> keys = vault.logical().list("kv-v1").getListData();
         assertTrue(keys.contains("hello"));
     }
 
@@ -197,9 +196,9 @@ public class LogicalTests {
         testMap.put("value", "world");
 
         vault.logical().write("secret/hello", testMap);
-        assertTrue(vault.logical().list("secret").contains("hello"));
+        assertTrue(vault.logical().list("secret").getListData().contains("hello"));
         vault.logical().delete("secret/hello");
-        assertFalse(vault.logical().list("secret").contains("hello"));
+        assertFalse(vault.logical().list("secret").getListData().contains("hello"));
     }
 
     /**
@@ -214,9 +213,9 @@ public class LogicalTests {
         testMap.put("value", "world");
 
         vault.logical().write("kv-v1/hello", testMap);
-        assertTrue(vault.logical().list("kv-v1").contains("hello"));
+        assertTrue(vault.logical().list("kv-v1").getListData().contains("hello"));
         vault.logical().delete("kv-v1/hello");
-        assertFalse(vault.logical().list("kv-v1").contains("hello"));
+        assertFalse(vault.logical().list("kv-v1").getListData().contains("hello"));
     }
 
     /**
@@ -253,12 +252,10 @@ public class LogicalTests {
      * @throws VaultException
      */
     @Test
-    public void testReadExceptionMessageIncludesErrorsReturnedByVault() throws VaultException {
-        expectedEx.expect(VaultException.class);
-        expectedEx.expectMessage("permission denied");
-
+    public void testReadPermissionDeniedReturnedByVault() throws VaultException {
         final Vault vault = container.getVault(NONROOT_TOKEN);
-        vault.logical().read("secret/null");
+        LogicalResponse read = vault.logical().read("secret/null");
+        assertEquals(403, read.getRestResponse().getStatus());
     }
 
     /**
@@ -267,14 +264,12 @@ public class LogicalTests {
      * @throws VaultException
      */
     @Test
-    public void testWriteExceptionMessageIncludesErrorsReturnedByVault() throws VaultException {
-        expectedEx.expect(VaultException.class);
-        expectedEx.expectMessage("permission denied");
-
+    public void testWritePermissionDeniedReturnedByVault() throws VaultException {
         final Vault vault = container.getVault(NONROOT_TOKEN);
         final Map<String, Object> testMap = new HashMap<>();
         testMap.put("value", null);
-        vault.logical().write("secret/null", testMap);
+        LogicalResponse write = vault.logical().write("secret/null", testMap);
+        assertEquals(403, write.getRestResponse().getStatus());
     }
 
     /**
@@ -288,7 +283,8 @@ public class LogicalTests {
         expectedEx.expectMessage("permission denied");
 
         final Vault vault = container.getVault(NONROOT_TOKEN);
-        vault.logical().delete("secret/null");
+        LogicalResponse delete = vault.logical().delete("secret/null");
+        assertEquals(403, delete.getRestResponse().getStatus());
     }
 
     /**
@@ -297,12 +293,10 @@ public class LogicalTests {
      * @throws VaultException
      */
     @Test
-    public void testListExceptionMessageIncludesErrorsReturnedByVault() throws VaultException {
-        expectedEx.expect(VaultException.class);
-        expectedEx.expectMessage("permission denied");
-
+    public void testListPermissionDeniedReturnedByVault() throws VaultException {
         final Vault vault = container.getVault(NONROOT_TOKEN);
-        vault.logical().list("secret/null");
+        LogicalResponse response = vault.logical().list("secret/null");
+        assertEquals(404, response.getRestResponse().getStatus());
     }
 
     /**
@@ -311,13 +305,11 @@ public class LogicalTests {
      * @throws VaultException
      */
     @Test
-    public void testReadExceptionMessageIncludesErrorsReturnedByVaultOn404() throws VaultException {
-        expectedEx.expect(VaultException.class);
-        expectedEx.expectMessage("{\"errors\":[]}");
-
+    public void testReadReturnedByVaultOn404() throws VaultException {
         final Vault vault = container.getRootVault();
         final String path = "secret/" + UUID.randomUUID().toString();
-        vault.logical().read(path);
+        LogicalResponse read = vault.logical().read(path);
+        assertEquals(404, read.getRestResponse().getStatus());
     }
 
     /**

@@ -6,7 +6,6 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.response.VaultResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
-
 import java.nio.charset.StandardCharsets;
 
 

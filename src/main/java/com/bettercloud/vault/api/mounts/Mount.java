@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * <p>A container for options returned by mounts endpoints on the Secret Engine backend. This class is
  * meant for use with a builder pattern style.  Example usage:</p>
- * 
+ *
  * <blockquote>
  * <pre>{@code
  * final Mount options = new Mount()
@@ -15,7 +15,7 @@ import java.io.Serializable;
  * </blockquote>
  */
 public class Mount implements Serializable {
-    
+
     private static final long serialVersionUID = 45748211702309181L;
 
     private MountType type;

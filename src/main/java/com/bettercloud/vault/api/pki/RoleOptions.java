@@ -221,9 +221,7 @@ public class RoleOptions implements Serializable {
         if (allowedDomains == null) {
             return null;
         } else {
-            final List<String> clone = new ArrayList<>();
-            clone.addAll(allowedDomains);
-            return clone;
+            return new ArrayList<>(allowedDomains);
         }
     }
 

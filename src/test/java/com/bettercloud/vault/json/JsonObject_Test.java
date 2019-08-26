@@ -21,22 +21,25 @@
  ******************************************************************************/
 package com.bettercloud.vault.json;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-
+import com.bettercloud.vault.json.JsonObject.HashIndexTable;
+import com.bettercloud.vault.json.JsonObject.Member;
 import java.io.IOException;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 
-import com.bettercloud.vault.json.JsonObject.HashIndexTable;
-import com.bettercloud.vault.json.JsonObject.Member;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 
 
 @SuppressWarnings("PMD")

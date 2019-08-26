@@ -3,10 +3,9 @@ package com.bettercloud.vault;
 import com.bettercloud.vault.api.Logical;
 import com.bettercloud.vault.api.LogicalUtilities;
 import com.bettercloud.vault.json.JsonObject;
+import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.ArrayList;
 
 
 public class LogicalUtilitiesTests {

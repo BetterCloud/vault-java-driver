@@ -4,11 +4,10 @@ import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.util.VaultContainer;
+import java.io.IOException;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-
-import java.io.IOException;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;

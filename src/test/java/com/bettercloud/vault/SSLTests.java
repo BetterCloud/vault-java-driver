@@ -3,9 +3,6 @@ package com.bettercloud.vault;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.vault.VaultTestUtils;
 import com.bettercloud.vault.vault.mock.MockVault;
-import org.eclipse.jetty.server.Server;
-import org.junit.Test;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,6 +10,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.KeyStore;
 import java.util.HashMap;
+import org.eclipse.jetty.server.Server;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -173,13 +172,13 @@ public class SSLTests {
 
         final BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/cert.pem")));
         final StringBuilder builder = new StringBuilder();
-        String utf8 = "";
+        StringBuilder utf8 = new StringBuilder();
         String str;
         while ((str = in.readLine()) != null) {
-            utf8 += str + System.lineSeparator();//NOPMD
+            utf8.append(str).append(System.lineSeparator());//NOPMD
         }
         in.close();
-        final String pemUTF8 = utf8;
+        final String pemUTF8 = utf8.toString();
 
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")

@@ -3,11 +3,10 @@ package com.bettercloud.vault.api;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.SealResponse;
 import com.bettercloud.vault.util.VaultContainer;
+import java.io.IOException;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-
-import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

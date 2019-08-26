@@ -6,15 +6,15 @@ import java.util.concurrent.TimeUnit;
  * <p>A container for Time To Live information sent to mounts endpoints on the Secret Engine backend as REST payload.
  * This class is meant for use with a static <code>TimeToLive.of(int, TimeUnit)</code> method pattern style.  Example
  * usage:</p>
- * 
+ *
  * <blockquote>
  * <pre>{@code
  * TimeToLive.of(1, TimeUnit.HOURS);
  * }</pre>
  * </blockquote>
- * 
+ *
  * <p>Note that the only accepted <code>TimeUnit</code> which Vault backend understands are:</p>
- * 
+ *
  * <ul>
  * <li><code>TimeUnit.SECONDS</code></li>
  * <li><code>TimeUnit.MINUTES</code></li>

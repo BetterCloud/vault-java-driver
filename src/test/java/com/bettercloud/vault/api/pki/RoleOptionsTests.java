@@ -1,9 +1,8 @@
 package com.bettercloud.vault.api.pki;
 
+import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.ArrayList;
 
 public class RoleOptionsTests {
 
@@ -12,7 +11,7 @@ public class RoleOptionsTests {
         RoleOptions roleOptions = new RoleOptions();
         Assert.assertNotNull(roleOptions);
 
-        Assert.assertEquals(roleOptions.getAllowedDomains(), null);
+        Assert.assertNull(roleOptions.getAllowedDomains());
 
         roleOptions.allowAnyName(true);
         roleOptions.allowBareDomains(true);
