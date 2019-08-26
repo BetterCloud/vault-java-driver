@@ -296,7 +296,7 @@ public class LogicalTests {
     public void testListPermissionDeniedReturnedByVault() throws VaultException {
         final Vault vault = container.getVault(NONROOT_TOKEN);
         LogicalResponse response = vault.logical().list("secret/null");
-        assertEquals(404, response.getRestResponse().getStatus());
+        assertEquals(403, response.getRestResponse().getStatus());
     }
 
     /**
