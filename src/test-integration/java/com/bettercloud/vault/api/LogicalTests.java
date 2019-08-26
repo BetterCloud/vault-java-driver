@@ -164,7 +164,7 @@ public class LogicalTests {
         testMap.put("value", "world");
 
         vault.logical().write("secret/hello", testMap);
-        final List<String> keys = vault.logical().list("secret");
+        final List<String> keys = vault.logical().list("secret").getListData();
         assertTrue(keys.contains("hello"));
     }
 
@@ -180,7 +180,7 @@ public class LogicalTests {
         testMap.put("value", "world");
 
         vault.logical().write("kv-v1/hello", testMap);
-        final List<String> keys = vault.logical().list("kv-v1");
+        final List<String> keys = vault.logical().list("kv-v1").getListData();
         assertTrue(keys.contains("hello"));
     }
 
@@ -196,9 +196,9 @@ public class LogicalTests {
         testMap.put("value", "world");
 
         vault.logical().write("secret/hello", testMap);
-        assertTrue(vault.logical().list("secret").contains("hello"));
+        assertTrue(vault.logical().list("secret").getListData().contains("hello"));
         vault.logical().delete("secret/hello");
-        assertFalse(vault.logical().list("secret").contains("hello"));
+        assertFalse(vault.logical().list("secret").getListData().contains("hello"));
     }
 
     /**
@@ -213,9 +213,9 @@ public class LogicalTests {
         testMap.put("value", "world");
 
         vault.logical().write("kv-v1/hello", testMap);
-        assertTrue(vault.logical().list("kv-v1").contains("hello"));
+        assertTrue(vault.logical().list("kv-v1").getListData().contains("hello"));
         vault.logical().delete("kv-v1/hello");
-        assertFalse(vault.logical().list("kv-v1").contains("hello"));
+        assertFalse(vault.logical().list("kv-v1").getListData().contains("hello"));
     }
 
     /**
@@ -295,8 +295,8 @@ public class LogicalTests {
     @Test
     public void testListPermissionDeniedReturnedByVault() throws VaultException {
         final Vault vault = container.getVault(NONROOT_TOKEN);
-        List<String> list = vault.logical().list("secret/null");
-        assertEquals(list.size(), 0);
+        LogicalResponse response = vault.logical().list("secret/null");
+        assertEquals(404, response.getRestResponse().getStatus());
     }
 
     /**
