@@ -1,7 +1,7 @@
 Vault Java Driver
 =================
 A zero-dependency Java client for the [Vault](https://www.vaultproject.io/) secrets management solution from
-HashiCorp.
+HashiCorp. 
 
 This driver strives to implement Vault's full HTTP API, along with supporting functionality such as automatic
 retry handling.  It does so without relying on any other external libraries beyond the Java standard library,
