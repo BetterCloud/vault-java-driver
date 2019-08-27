@@ -15,15 +15,15 @@ This Change
 -----------
 This change generalizes the vault Java driver to allow prefix paths to 
 contain multiple path elements.  That is, instead of restricting v2 paths
-to be v1/*something*/data/*anything*/*else* (e.g., for a read or write),
-paths can be v1/*my*/*long*/*prefix*/*path*/data/*anything*/*else*.
+to be **v1**/*something*/**data**/*anything*/*else* (e.g., for a read or write),
+paths can be **v1**/*my*/*long*/*prefix*/*path*/**data**/*anything*/*else*.
 The length of the prefix path in path elements, or the prefix path itself
 (from which the length in path elements can be derived) is passed in the 
 VaultConfig build sequence.  This allows Vault administrators greater
 flexibility in configuring the system.
 
-The default behavior is to use a prefix path length of one, which makes
-the library's behavior backwards-compatible with v5.0.0.
+The default is a prefix path length of one, which makes the library's
+behavior backwards-compatible with v5.0.0.
 
 Table of Contents
 -----------------
