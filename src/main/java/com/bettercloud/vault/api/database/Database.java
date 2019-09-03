@@ -84,7 +84,7 @@ public class Database {
 
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
-                        .proxy(config.getProxy())
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
@@ -147,7 +147,7 @@ public class Database {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
-                        .proxy(config.getProxy())
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -215,7 +215,7 @@ public class Database {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/revoke", config.getAddress(), this.mountPath))
-                        .proxy(config.getProxy())
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -278,7 +278,7 @@ public class Database {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
-                        .proxy(config.getProxy())
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -339,7 +339,7 @@ public class Database {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/creds/%s", config.getAddress(), this.mountPath, roleName))
-                        .proxy(config.getProxy())
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())

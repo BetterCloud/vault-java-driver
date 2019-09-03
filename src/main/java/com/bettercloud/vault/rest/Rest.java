@@ -101,6 +101,7 @@ public class Rest {
     private Boolean sslVerification;
     private SSLContext sslContext;
     private Proxy proxy;
+    private String proxyAuth;
 
     /**
      * <p>Sets the base URL to which the HTTP request will be sent.  The URL may or may not include query parameters
@@ -125,10 +126,12 @@ public class Rest {
      *
      * @param proxy the proxy to use or {@code null} to let the JRE select the proxy (which normally defaults to
      * {@link ProxySelector#getDefault()}
+     * @param proxyAuth the {@code Proxy-Authenticate} header value to apply or {@code null} to let the JRE attempt authentication.
      * @return This object, with proxy populated, ready for other builder-pattern config methods or an HTTP verb method
      */
-    public Rest proxy(final Proxy proxy) {
+    public Rest proxy(final Proxy proxy, final String proxyAuth) {
         this.proxy = proxy;
+        this.proxyAuth = proxyAuth;
         return this;
     }
 
@@ -447,7 +450,15 @@ public class Rest {
         URLConnection connection = null;
         try {
             final URL url = new URL(urlString);
-            connection = proxy == null ? url.openConnection() : url.openConnection(proxy);
+            if (proxy == null) {
+                connection = url.openConnection();
+            } else {
+                connection = url.openConnection(proxy);
+                if (proxyAuth != null) {
+                    connection.setRequestProperty("Proxy-Authenticate", proxyAuth);
+                }
+            }
+
 
             // Timeout settings, if applicable
             if (connectTimeoutSeconds != null) {

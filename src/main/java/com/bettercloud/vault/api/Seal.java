@@ -46,7 +46,7 @@ public class Seal {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/seal")
-                        .proxy(config.getProxy())
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -108,7 +108,7 @@ public class Seal {
                 final String requestJson = Json.object().add("key", key).add("reset", reset).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/unseal")
-                        .proxy(config.getProxy())
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -152,7 +152,7 @@ public class Seal {
                 // HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/seal-status")
-                        .proxy(config.getProxy())
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())

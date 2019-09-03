@@ -37,6 +37,7 @@ public class VaultConfig implements Serializable {
     private String token;
     private SslConfig sslConfig;
     private Proxy proxy;
+    private String proxyAuth;
     private Integer openTimeout;
     private Integer readTimeout;
     private int maxRetries;
@@ -128,6 +129,22 @@ public class VaultConfig implements Serializable {
      */
     public VaultConfig proxy(final Proxy proxy) {
         this.proxy = proxy;
+        this.proxyAuth = null;
+        return this;
+    }
+
+    /**
+     * <p>Sets the proxy to use to connect to the Vault server.</p>
+     *
+     * <p>If a {@code null} proxy is specified then the JRE default proxy selection algorithm will be used, e.g. {@link ProxySelector#getDefault()}</p>
+     *
+     * @param proxy  proxy the proxy to use or {@code null} to let the JRE select the proxy (which normally defaults to {@link ProxySelector#getDefault()}
+     * @param proxyAuth the {@code Proxy-Authenticate} header to supply for authenticated proxies.
+     * @return This object, with proxy populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     */
+    public VaultConfig proxy(final Proxy proxy, String proxyAuth) {
+        this.proxy = proxy;
+        this.proxyAuth = proxyAuth;
         return this;
     }
 
@@ -316,6 +333,10 @@ public class VaultConfig implements Serializable {
 
     public Proxy getProxy() {
         return proxy;
+    }
+
+    public String getProxyAuth() {
+        return proxyAuth;
     }
 
     public String getToken() {

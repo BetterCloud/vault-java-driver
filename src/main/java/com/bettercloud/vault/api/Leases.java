@@ -61,7 +61,7 @@ public class Leases {
                 */
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/leases/revoke/" + leaseId)
-                        .proxy(config.getProxy())
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -117,7 +117,7 @@ public class Leases {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-prefix/" + prefix)
-                        .proxy(config.getProxy())
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -176,7 +176,7 @@ public class Leases {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/revoke-force/" + prefix)
-                        .proxy(config.getProxy())
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -240,7 +240,7 @@ public class Leases {
                 final String requestJson = Json.object().add("increment", increment).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
-                        .proxy(config.getProxy())
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .body(increment < 0 ? null : requestJson.getBytes(StandardCharsets.UTF_8))
