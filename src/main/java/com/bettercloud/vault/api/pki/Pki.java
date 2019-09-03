@@ -114,6 +114,7 @@ public class Pki {
 
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
+                        .proxy(config.getProxy())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
@@ -176,6 +177,7 @@ public class Pki {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
+                        .proxy(config.getProxy())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -243,6 +245,7 @@ public class Pki {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/revoke", config.getAddress(), this.mountPath))
+                        .proxy(config.getProxy())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -305,6 +308,7 @@ public class Pki {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
+                        .proxy(config.getProxy())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -461,6 +465,7 @@ public class Pki {
                 String endpoint = (csr == null || csr.isEmpty()) ? "%s/v1/%s/issue/%s" : "%s/v1/%s/sign/%s";
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format(endpoint, config.getAddress(), this.mountPath, roleName))
+                        .proxy(config.getProxy())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))

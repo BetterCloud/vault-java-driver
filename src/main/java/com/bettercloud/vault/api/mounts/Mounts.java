@@ -48,6 +48,7 @@ public class Mounts {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/sys/mounts", config.getAddress()))
+                        .proxy(config.getProxy())
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -133,6 +134,7 @@ public class Mounts {
 
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/sys/mounts/%s", config.getAddress(), path))
+                        .proxy(config.getProxy())
                         .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -200,6 +202,7 @@ public class Mounts {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/sys/mounts/%s", config.getAddress(), path))
+                        .proxy(config.getProxy())
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -266,6 +269,7 @@ public class Mounts {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/sys/mounts/%s/tune", config.getAddress(), path))
+                        .proxy(config.getProxy())
                         .header("X-Vault-Token", config.getToken())
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -347,6 +351,7 @@ public class Mounts {
 
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(String.format("%s/v1/sys/mounts/%s/tune", config.getAddress(), path))
+                        .proxy(config.getProxy())
                         .header("X-Vault-Token", config.getToken())
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())

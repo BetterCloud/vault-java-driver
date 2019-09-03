@@ -90,6 +90,7 @@ public class Debug {
                 // Build an HTTP request for Vault
                 final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
+                        .proxy(config.getProxy())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
