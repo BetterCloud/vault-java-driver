@@ -496,6 +496,124 @@ public class Pki {
         }
     }
 
+    // TODO add method doc
+    public PkiResponse issue(
+            final String roleName,
+            final String commonName,
+            final IssueOptions issueOptions
+    ) throws VaultException {
+         int retryCount = 0;
+        while (true) {
+            // Construct a JSON body from inputs
+            final JsonObject jsonObject = Json.object();
+            if (commonName != null) {
+                jsonObject.add("common_name", commonName);
+            }
+            List<String> altNames = issueOptions.getAltNames();
+            if (altNames != null && !altNames.isEmpty()) {
+                final StringBuilder altNamesCsv = new StringBuilder();//NOPMD
+                for (int index = 0; index < altNames.size(); index++) {
+                    altNamesCsv.append(altNames.get(index));
+                    if (index + 1 < altNames.size()) {
+                        altNamesCsv.append(',');
+                    }
+                }
+                jsonObject.add("alt_names", altNamesCsv.toString());
+            }
+            List<String> ipSans = issueOptions.getIpSans();
+            if (ipSans != null && !ipSans.isEmpty()) {
+                final StringBuilder ipSansCsv = new StringBuilder();//NOPMD
+                for (int index = 0; index < ipSans.size(); index++) {
+                    ipSansCsv.append(ipSans.get(index));
+                    if (index + 1 < ipSans.size()) {
+                        ipSansCsv.append(',');
+                    }
+                }
+                jsonObject.add("ip_sans", ipSansCsv.toString());
+            }
+            List<String> uriSans = issueOptions.getUriSans();
+            if (uriSans != null && !uriSans.isEmpty()) {
+                final StringBuilder uriSansCsv = new StringBuilder();//NOPMD
+                for (int index = 0; index < ipSans.size(); index++) {
+                    uriSansCsv.append(uriSans.get(index));
+                    if (index + 1 < uriSans.size()) {
+                        uriSansCsv.append(',');
+                    }
+                }
+                jsonObject.add("uri_sans", uriSansCsv.toString());
+            }
+            List<String> otherSans = issueOptions.getOtherSans();
+            if (otherSans != null && !otherSans.isEmpty()) {
+                final StringBuilder otherSansCsv = new StringBuilder();//NOPMD
+                for (int index = 0; index < otherSans.size(); index++) {
+                    otherSansCsv.append(otherSans.get(index));
+                    if (index + 1 < otherSans.size()) {
+                        otherSansCsv.append(',');
+                    }
+                }
+                jsonObject.add("other_sans", otherSansCsv.toString());
+            }
+            String ttl = issueOptions.getTtl();
+            if (ttl != null) {
+                jsonObject.add("ttl", ttl);
+            }
+            CredentialFormat credentialFormat = issueOptions.getCredentialFormat();
+            if (credentialFormat != null) {
+                jsonObject.add("format", credentialFormat.toString());
+            }
+            PrivateKeyFormat privateKeyFormat = issueOptions.getPrivateKeyFormat();
+            if (privateKeyFormat != null) {
+                jsonObject.add("private_key_format", privateKeyFormat.toString());
+            }
+            Boolean excludeCnFromSans = issueOptions.isExcludeCnFromSans();
+            if(excludeCnFromSans != null) {
+                jsonObject.add("exclude_cn_from_sans ", excludeCnFromSans);
+            }
+            String csr = issueOptions.getCsr();
+            if (csr != null) {
+                jsonObject.add("csr", csr);
+            }
+            final String requestJson = jsonObject.toString();
+
+            // Make an HTTP request to Vault
+            try {
+                String endpoint = (csr == null || csr.isEmpty()) ? "%s/v1/%s/issue/%s" : "%s/v1/%s/sign/%s";
+                final RestResponse restResponse = new Rest()//NOPMD
+                        .url(String.format(endpoint, config.getAddress(), this.mountPath, roleName))
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
+
+                // Validate response
+                if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
+                    String body = restResponse.getBody() != null ? new String(restResponse.getBody()) : "(no body)";
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus() + " " + body, restResponse.getStatus());
+                }
+                return new PkiResponse(restResponse, retryCount);
+            } catch (Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
 
     private String roleOptionsToJson(final RoleOptions options) {
         final JsonObject jsonObject = Json.object();
