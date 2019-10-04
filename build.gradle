@@ -5,7 +5,7 @@ apply plugin: 'checkstyle'
 
 group 'com.bettercloud'
 archivesBaseName = 'vault-java-driver'
-version '5.0.0'
+version '5.0.1'
 ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 
 // This project is actually limited to Java 8 compatibility.  See below.
