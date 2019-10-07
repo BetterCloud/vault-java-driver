@@ -5,6 +5,7 @@ import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
+import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestException;
@@ -247,6 +248,8 @@ public class Logical {
                             requestJson = requestJson.add(pair.getKey(), (Float) pair.getValue());
                         } else if (value instanceof Double) {
                             requestJson = requestJson.add(pair.getKey(), (Double) pair.getValue());
+                        } else if (value instanceof JsonValue) {
+                            requestJson = requestJson.add(pair.getKey(), (JsonValue) pair.getValue());
                         } else {
                             requestJson = requestJson.add(pair.getKey(), pair.getValue().toString());
                         }
