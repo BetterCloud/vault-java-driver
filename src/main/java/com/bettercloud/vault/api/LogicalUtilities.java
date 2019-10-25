@@ -28,16 +28,25 @@ public class LogicalUtilities {
      * path to be converted for use with a Version 2 secret engine.
      *
      * @param segments The Vault path split into segments.
+     * @param prefixPathDepth number of path elements in the prefix part of
+     *                        the path (the part before the qualifier)
      * @param qualifier The String to add to the path, based on the operation.
      * @return The final path with the needed qualifier.
      */
-    public static String addQualifierToPath(final List<String> segments, final String qualifier) {
-        final StringBuilder adjustedPath = new StringBuilder(segments.get(0)).append('/').append(qualifier).append('/');
-        for (int index = 1; index < segments.size(); index++) {
-            adjustedPath.append(segments.get(index));
-            if (index + 1 < segments.size()) {
-                adjustedPath.append('/');
-            }
+    public static String addQualifierToPath(final List<String> segments, final int prefixPathDepth, final String qualifier) {
+        final StringBuilder adjustedPath = new StringBuilder();
+        int index;
+
+        for (index=0;index < prefixPathDepth;index++) {
+           adjustedPath.append(segments.get(index))
+                       .append('/');
+        }
+
+        adjustedPath.append(qualifier);
+
+        for (;index < segments.size(); index++) {
+            adjustedPath.append('/')
+                        .append(segments.get(index));
         }
         return adjustedPath.toString();
     }
@@ -51,11 +60,11 @@ public class LogicalUtilities {
      * @param operation The operation being performed, e.g. readV2 or writeV1.
      * @return The Vault path mutated based on the operation.
      */
-    public static String adjustPathForReadOrWrite(final String path, final Logical.logicalOperations operation) {
+    public static String adjustPathForReadOrWrite(final String path, final int prefixPathLength,final Logical.logicalOperations operation) {
         final List<String> pathSegments = getPathSegments(path);
         if (operation.equals(Logical.logicalOperations.readV2) || operation.equals(Logical.logicalOperations.writeV2)) {
             // Version 2
-            final StringBuilder adjustedPath = new StringBuilder(addQualifierToPath(pathSegments, "data"));
+            final StringBuilder adjustedPath = new StringBuilder(addQualifierToPath(pathSegments, prefixPathLength, "data"));
             if (path.endsWith("/")) {
                 adjustedPath.append("/");
             }
@@ -75,12 +84,12 @@ public class LogicalUtilities {
      * @param operation The operation being performed, e.g. readV2 or writeV1.
      * @return The Vault path mutated based on the operation.
      */
-    public static String adjustPathForList(final String path, final Logical.logicalOperations operation) {
+    public static String adjustPathForList(final String path, int prefixPathDepth, final Logical.logicalOperations operation) {
         final List<String> pathSegments = getPathSegments(path);
         final StringBuilder adjustedPath = new StringBuilder();
         if (operation.equals(Logical.logicalOperations.listV2)) {
             // Version 2
-            adjustedPath.append(addQualifierToPath(pathSegments, "metadata"));
+            adjustedPath.append(addQualifierToPath(pathSegments, prefixPathDepth, "metadata"));
             if (path.endsWith("/")) {
                 adjustedPath.append("/");
             }
@@ -102,10 +111,10 @@ public class LogicalUtilities {
      *
      * @return The modified path
      */
-    public static String adjustPathForDelete(final String path, final Logical.logicalOperations operation) {
+    public static String adjustPathForDelete(final String path, final int prefixPathDepth, final Logical.logicalOperations operation) {
         final List<String> pathSegments = getPathSegments(path);
         if (operation.equals(Logical.logicalOperations.deleteV2)) {
-            final StringBuilder adjustedPath = new StringBuilder(addQualifierToPath(pathSegments, "metadata"));
+            final StringBuilder adjustedPath = new StringBuilder(addQualifierToPath(pathSegments, prefixPathDepth, "metadata"));
             if (path.endsWith("/")) {
                 adjustedPath.append("/");
             }
@@ -122,9 +131,9 @@ public class LogicalUtilities {
      *
      * @return The modified path
      */
-    public static String adjustPathForVersionDelete(final String path) {
+    public static String adjustPathForVersionDelete(final String path,final int prefixPathDepth) {
         final List<String> pathSegments = getPathSegments(path);
-        final StringBuilder adjustedPath = new StringBuilder(addQualifierToPath(pathSegments, "delete"));
+        final StringBuilder adjustedPath = new StringBuilder(addQualifierToPath(pathSegments, prefixPathDepth, "delete"));
         if (path.endsWith("/")) {
             adjustedPath.append("/");
         }
@@ -137,9 +146,9 @@ public class LogicalUtilities {
      * @param path The Vault path to check or mutate, based on the operation.
      * @return The path mutated depending on the operation.
      */
-    public static String adjustPathForVersionUnDelete(final String path) {
+    public static String adjustPathForVersionUnDelete(final String path, final int prefixPathDepth) {
         final List<String> pathSegments = getPathSegments(path);
-        final StringBuilder adjustedPath = new StringBuilder(addQualifierToPath(pathSegments, "undelete"));
+        final StringBuilder adjustedPath = new StringBuilder(addQualifierToPath(pathSegments, prefixPathDepth, "undelete"));
         if (path.endsWith("/")) {
             adjustedPath.append("/");
         }
@@ -152,9 +161,9 @@ public class LogicalUtilities {
      * @param path The Vault path to check or mutate, based on the operation.
      * @return The path mutated depending on the operation.
      */
-    public static String adjustPathForVersionDestroy(final String path) {
+    public static String adjustPathForVersionDestroy(final String path,final int prefixPathDepth) {
         final List<String> pathSegments = getPathSegments(path);
-        final StringBuilder adjustedPath = new StringBuilder(addQualifierToPath(pathSegments, "destroy"));
+        final StringBuilder adjustedPath = new StringBuilder(addQualifierToPath(pathSegments, prefixPathDepth, "destroy"));
         if (path.endsWith("/")) {
             adjustedPath.append("/");
         }
