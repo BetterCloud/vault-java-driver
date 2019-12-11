@@ -213,7 +213,7 @@ public class VaultConfig implements Serializable {
      * 1, to correspond to one path element in the prefix path.  To use
      * a longer prefix path, set this value.</p>
      *
-     * @param pathLength integer number of path elements in the prefix path
+     * @param prefixPathDepth integer number of path elements in the prefix path
      */
     public VaultConfig prefixPathDepth(int prefixPathDepth) {
        if (prefixPathDepth < 1) {
