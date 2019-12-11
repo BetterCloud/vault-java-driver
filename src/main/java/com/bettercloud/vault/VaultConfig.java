@@ -209,17 +209,18 @@ public class VaultConfig implements Serializable {
     }
 
     /**
-     * Sets the "path depth" of the prefix path.  This defaults to 1, corresponding to one
-     * path element in the prefix path.  To use a longer prefix path, set this value.
+     * <p>Set the "path depth" of the prefix path.  Normally this is just
+     * 1, to correspond to one path element in the prefix path.  To use
+     * a longer prefix path, set this value.</p>
      *
      * @param pathLength integer number of path elements in the prefix path
      */
-    public VaultConfig prefixPathDepth(int pathLength) {
-       if (pathLength < 1) {
+    public VaultConfig prefixPathDepth(int prefixPathDepth) {
+       if (prefixPathDepth < 1) {
           throw new IllegalArgumentException("pathLength must be > 1");
        }
 
-       this.prefixPathDepth = pathLength;
+       this.prefixPathDepth = prefixPathDepth;
        return this;
     }
 
