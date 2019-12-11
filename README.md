@@ -13,17 +13,6 @@ NOTE:  Although the binary artifact produced by the project is backwards-compati
 
 This Change
 -----------
-This change generalizes the vault Java driver to allow prefix paths to 
-contain multiple path elements.  That is, instead of restricting v2 paths
-to be **v1**/*something*/**data**/*anything*/*else* (e.g., for a read or write),
-paths can be **v1**/*my*/*long*/*prefix*/*path*/**data**/*anything*/*else*.
-The length of the prefix path in path elements, or the prefix path itself
-(from which the length in path elements can be derived) is passed in the 
-VaultConfig build sequence.  This allows Vault administrators greater
-flexibility in configuring the system.
-
-The default is a prefix path length of one, which makes the library's
-behavior backwards-compatible with v5.0.0.
 
 Table of Contents
 -----------------
@@ -48,7 +37,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    implementation 'com.bettercloud:vault-java-driver:5.0.0'
+    implementation 'com.bettercloud:vault-java-driver:5.1.0'
 }
 ```
 
@@ -57,7 +46,7 @@ Maven:
 <dependency>
     <groupId>com.bettercloud</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>5.0.0</version>
+    <version>5.1.0</version>
 </dependency>
 ```
 
@@ -124,6 +113,22 @@ for both K/V versions.
     but leave the map `null`.  Note that this option requires your authentication credentials to have access to read Vault's `/v1/sys/mounts` 
     path.
   
+Version 2 of the K/V engine dynamically injects a qualifier element into your secret paths, which varies depending on the type of for read and write operations, in between the root version 
+operation.  For example, for read and write operations, the secret path:
+
+```v1/mysecret```
+
+... has a "data" qualifier injected:
+
+```v1/data/mysecret```
+
+The default behavior of this driver is to insert the appropriate qualifier one level deep (i.e. in between the root version number 
+and the rest of the path).  However, if your secret path is prefixed, such that the qualifier should be injected further down:
+
+```v1/my/long/prefix/data/anything/else```
+
+... then you should accordingly set the `VaultConfig.prefixPathDepth` property when constructing your `Vault` instance.
+
 
 SSL Config
 ----------
@@ -266,7 +271,11 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **5.0.0 (IN PROGRESS)**:  This release contains the following updates:
+* **5.1.0 (IN PROGRESS)**:  This release contains the following updates:
+  * Supports path prefixes when using K/V engine V2.  [(PR #189)](https://github.com/BetterCloud/vault-java-driver/pull/189)
+  * Support all options for the createToken operation.  [(PR # 199)](https://github.com/BetterCloud/vault-java-driver/pull/199)
+  
+* **5.0.0**:  This release contains the following updates:
   * Changes the retry behavior, to no longer attempt retries on 4xx response codes (for which retries generally won't succeed anyway).  This 
     is the only (mildly) breaking change in this release, necessitating a major version bump. [(PR #176)](https://github.com/BetterCloud/vault-java-driver/pull/176)
   * Implements support for the Database secret engine. [(PR #175)](https://github.com/BetterCloud/vault-java-driver/pull/175)

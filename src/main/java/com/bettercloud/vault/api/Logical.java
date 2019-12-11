@@ -20,7 +20,6 @@ import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForVersionDes
 import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForVersionUnDelete;
 import static com.bettercloud.vault.api.LogicalUtilities.jsonObjectToWriteFromEngineVersion;
 
-
 /**
  * <p>The implementing class for Vault's core/logical operations (e.g. read, write).</p>
  *

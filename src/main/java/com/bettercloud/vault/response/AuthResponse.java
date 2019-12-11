@@ -17,6 +17,7 @@ public class AuthResponse extends VaultResponse {
 
     private Boolean renewable;
     private String authClientToken;
+    private String tokenAccessor;
     private List<String> authPolicies;
     private long authLeaseDuration;
     private boolean authRenewable;
@@ -50,6 +51,7 @@ public class AuthResponse extends VaultResponse {
                 nonce = metadata.getString("nonce", "");
             }
             authClientToken = authJsonObject.getString("client_token", "");
+            tokenAccessor = authJsonObject.getString("accessor", "");
             final JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();
             authPolicies = new ArrayList<>();
             for (final JsonValue authPolicy : authPoliciesJsonArray) {
@@ -92,4 +94,6 @@ public class AuthResponse extends VaultResponse {
     }
 
     public String getNonce() { return nonce; }
+
+    public String getTokenAccessor() { return tokenAccessor; }
 }
