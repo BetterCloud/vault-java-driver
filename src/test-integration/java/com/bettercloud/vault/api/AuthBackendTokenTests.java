@@ -8,6 +8,9 @@ import com.bettercloud.vault.response.LookupResponse;
 import com.bettercloud.vault.util.VaultContainer;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -37,10 +40,30 @@ public class AuthBackendTokenTests {
     public void testCreateTokenWithRequest() throws VaultException {
         final Vault vault = container.getRootVault();
 
-        final AuthResponse response = vault.auth().createToken(new Auth.TokenRequest().ttl("1h"));
+        final AuthResponse response = vault.auth().createToken(
+            new Auth.TokenRequest()
+            .id(UUID.randomUUID())
+            .polices(Arrays.asList("policy"))
+            .noParent(true)
+            .noDefaultPolicy(false)
+            .ttl("1h")
+            .displayName("display name")
+            .numUses(1L)
+            .renewable(true)
+            .type("service")
+            .explicitMaxTtl("2h")
+            .period("2h")
+            .entityAlias("entityId")
+        );
         final String token = response.getAuthClientToken();
+        final String accessor = response.getTokenAccessor();
 
+        assertNotNull(accessor);
         assertNotNull(token);
+        assertEquals(2, response.getAuthPolicies().size());
+        assertEquals("default", response.getAuthPolicies().get(0));
+        assertEquals("policy", response.getAuthPolicies().get(1));
+        assertEquals(7200, response.getAuthLeaseDuration());
     }
 
     /**

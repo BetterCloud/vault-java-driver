@@ -47,6 +47,11 @@ public class Auth {
         private String displayName;
         private Long numUses;
         private String role;
+        private Boolean renewable;
+        private String type;
+        private String explicitMaxTtl;
+        private String period;
+        private String entityAlias;
 
         /**
          * @param id (optional) The ID of the client token. Can only be specified by a root token. Otherwise, the token ID is a randomly generated UUID.
@@ -129,6 +134,57 @@ public class Auth {
             return this;
         }
 
+        /**
+         * @param renewable Set to false to disable the ability of the token to be renewed past its
+         * initial TTL. Setting the value to true will allow the token to be renewable up to
+         * the system/mount maximum TTL.
+         * @return This object, with its renewable field populated
+         */
+        public TokenRequest renewable(final Boolean renewable) {
+            this.renewable = renewable;
+            return this;
+        }
+
+        /**
+         *
+         * @param type The token type. Can be "batch" or "service".
+         * @return This object, with its type field populated
+         */
+        public TokenRequest type(final String type) {
+            this.type = type;
+            return this;
+        }
+
+        /**
+         *
+         * @param explicitMaxTtl If set, the token will have an explicit max TTL set upon it.
+         * @return This object, with its explicitMaxTtl field populated
+         */
+        public TokenRequest explicitMaxTtl(final String explicitMaxTtl) {
+            this.explicitMaxTtl = explicitMaxTtl;
+            return this;
+        }
+
+        /**
+         *
+         * @param period If specified, the token will be periodic
+         * @return This object, with its period field populated
+         */
+        public TokenRequest period(final String period) {
+            this.period = period;
+            return this;
+        }
+
+        /**
+         *
+         * @param entityAlias Name of the entity alias to associate with during token creation.
+         * @return This object, with its period field populated
+         */
+        public TokenRequest entityAlias(final String entityAlias) {
+            this.entityAlias = entityAlias;
+            return this;
+        }
+
         public UUID getId() {
             return id;
         }
@@ -163,6 +219,26 @@ public class Auth {
 
         public String getRole() {
             return role;
+        }
+
+        public Boolean getRenewable() {
+            return renewable;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getExplicitMaxTtl() {
+            return explicitMaxTtl;
+        }
+
+        public String getPeriod() {
+            return period;
+        }
+
+        public String getEntityAlias() {
+            return entityAlias;
         }
     }
 
@@ -249,6 +325,11 @@ public class Auth {
                 if (tokenRequest.ttl != null) jsonObject.add("ttl", tokenRequest.ttl);
                 if (tokenRequest.displayName != null) jsonObject.add("display_name", tokenRequest.displayName);
                 if (tokenRequest.numUses != null) jsonObject.add("num_uses", tokenRequest.numUses);
+                if (tokenRequest.renewable != null) jsonObject.add("renewable", tokenRequest.renewable);
+                if (tokenRequest.type != null) jsonObject.add("type", tokenRequest.type);
+                if (tokenRequest.explicitMaxTtl != null) jsonObject.add("explicit_max_ttl", tokenRequest.explicitMaxTtl);
+                if (tokenRequest.period != null) jsonObject.add("period", tokenRequest.period);
+                if (tokenRequest.entityAlias != null) jsonObject.add("entity_alias", tokenRequest.entityAlias);
                 final String requestJson = jsonObject.toString();
 
                 final StringBuilder urlBuilder = new StringBuilder(config.getAddress())//NOPMD
@@ -274,7 +355,9 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -340,7 +423,9 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -434,7 +519,9 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -517,7 +604,9 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -639,7 +728,9 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -715,7 +806,9 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -794,7 +887,9 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -879,7 +974,9 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -943,7 +1040,9 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -1082,7 +1181,8 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(),
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
                             restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
@@ -1165,7 +1265,9 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
                 if (!mimeType.equals("application/json")) {
@@ -1227,7 +1329,9 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType();
                 if (!"application/json".equals(mimeType)) {
@@ -1351,7 +1455,9 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 204) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
                 }
                 return;
             } catch (Exception e) {
@@ -1453,7 +1559,8 @@ public class Auth {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(),
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
                             restResponse.getStatus());
                 }
                 final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
