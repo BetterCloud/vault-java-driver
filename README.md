@@ -37,7 +37,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    implementation 'com.bettercloud:vault-java-driver:5.0.0'
+    implementation 'com.bettercloud:vault-java-driver:5.1.0'
 }
 ```
 
@@ -46,7 +46,7 @@ Maven:
 <dependency>
     <groupId>com.bettercloud</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>5.0.0</version>
+    <version>5.1.0</version>
 </dependency>
 ```
 
@@ -271,8 +271,10 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **5.1.1 (IN PROGRESS)**:  This release contains the following updates:
+* **5.1.0 (IN PROGRESS)**:  This release contains the following updates:
   * Supports path prefixes when using K/V engine V2.  [(PR #189)](https://github.com/BetterCloud/vault-java-driver/pull/189)
+  * Support all options for the createToken operation.  [(PR # 199)](https://github.com/BetterCloud/vault-java-driver/pull/199)
+  
 * **5.0.0**:  This release contains the following updates:
   * Changes the retry behavior, to no longer attempt retries on 4xx response codes (for which retries generally won't succeed anyway).  This 
     is the only (mildly) breaking change in this release, necessitating a major version bump. [(PR #176)](https://github.com/BetterCloud/vault-java-driver/pull/176)
