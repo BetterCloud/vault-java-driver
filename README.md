@@ -271,7 +271,7 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **5.1.0 (IN PROGRESS)**:  This release contains the following updates:
+* **5.1.0**:  This release contains the following updates:
   * Supports path prefixes when using K/V engine V2.  [(PR #189)](https://github.com/BetterCloud/vault-java-driver/pull/189)
   * Fixes issues with bulk requests in the transit API.  [(PR #195)](https://github.com/BetterCloud/vault-java-driver/pull/195)
   * Adds response body to exception for Auth failures.  [(PR #198)](https://github.com/BetterCloud/vault-java-driver/pull/198)
