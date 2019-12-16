@@ -273,7 +273,6 @@ should represent non-breaking changes.  The third number represents any very min
 
 * **5.1.0 (IN PROGRESS)**:  This release contains the following updates:
   * Supports path prefixes when using K/V engine V2.  [(PR #189)](https://github.com/BetterCloud/vault-java-driver/pull/189)
-  * Changes the logic for mapping paths to engine versions, to support generating AWS credentials using roles.  [(PR #194)](https://github.com/BetterCloud/vault-java-driver/pull/194/)
   * Fixes issues with bulk requests in the transit API.  [(PR #195)](https://github.com/BetterCloud/vault-java-driver/pull/195)
   * Adds response body to exception for Auth failures.  [(PR #198)](https://github.com/BetterCloud/vault-java-driver/pull/198)
   * Support all options for the createToken operation.  [(PR #199)](https://github.com/BetterCloud/vault-java-driver/pull/199)

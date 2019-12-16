@@ -12,7 +12,6 @@ import com.bettercloud.vault.rest.RestResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForDelete;
 import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForList;
@@ -626,11 +625,9 @@ public class Logical {
 
     private Integer engineVersionForSecretPath(final String secretPath) {
         if (!this.config.getSecretsEnginePathMap().isEmpty()) {
-            for (Entry<String, String> entry : this.config.getSecretsEnginePathMap().entrySet()) {
-                if (secretPath.startsWith(entry.getKey())) {
-                    return Integer.valueOf(entry.getValue());
-                }
-            }
+            return this.config.getSecretsEnginePathMap().containsKey(secretPath + "/") ?
+                    Integer.valueOf(this.config.getSecretsEnginePathMap().get(secretPath + "/"))
+                    : this.config.getGlobalEngineVersion();
         }
         return this.config.getGlobalEngineVersion();
     }
