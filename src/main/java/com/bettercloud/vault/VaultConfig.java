@@ -214,6 +214,7 @@ public class VaultConfig implements Serializable {
      * a longer prefix path, set this value.</p>
      *
      * @param prefixPathDepth integer number of path elements in the prefix path
+     * @return VaultConfig
      */
     public VaultConfig prefixPathDepth(int prefixPathDepth) {
        if (prefixPathDepth < 1) {
@@ -230,8 +231,8 @@ public class VaultConfig implements Serializable {
      * the prefix path, e.g., "foo/bar/blah" would set the prefix path depth
      * to 3.
      *
-     * @param prefixPath string prefix path, with or without initial or
-     * final forward slashes
+     * @param prefixPath string prefix path, with or without initial or final forward slashes
+     * @return VaultConfig
      */
     public VaultConfig prefixPath(String prefixPath) {
        int orig = 0;

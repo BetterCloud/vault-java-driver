@@ -58,6 +58,7 @@ public class LogicalUtilities {
      * lowest-level path segment.
      *
      * @param path The Vault path to check or mutate, based on the operation.
+     * @param prefixPathLength prefixPathLength
      * @param operation The operation being performed, e.g. readV2 or writeV1.
      * @return The Vault path mutated based on the operation.
      */
@@ -86,6 +87,7 @@ public class LogicalUtilities {
      * after the lowest-level path segment.
      *
      * @param path The Vault path to check or mutate, based on the operation.
+     * @param prefixPathDepth prefixPathDepth
      * @param operation The operation being performed, e.g. readV2 or writeV1.
      * @return The Vault path mutated based on the operation.
      */
@@ -114,6 +116,7 @@ public class LogicalUtilities {
      * path segment.
      *
      * @param path The Vault path to check or mutate, based on the operation.
+     * @param prefixPathDepth prefixPathDepth
      * @param operation The operation being performed, e.g. readV2 or writeV1.
      * @return The modified path
      */
@@ -137,6 +140,7 @@ public class LogicalUtilities {
      * lowest-level path segment.
      *
      * @param path The Vault path to check or mutate, based on the operation.
+     * @param prefixPathDepth prefixPathDepth
      * @return The modified path
      */
     public static String adjustPathForVersionDelete(final String path, final int prefixPathDepth) {
@@ -154,6 +158,7 @@ public class LogicalUtilities {
      * lowest-level path segment.
      *
      * @param path The Vault path to check or mutate, based on the operation.
+     * @param prefixPathDepth prefixPathDepth
      * @return The path mutated depending on the operation.
      */
     public static String adjustPathForVersionUnDelete(final String path,
@@ -172,6 +177,7 @@ public class LogicalUtilities {
      * lowest-level path segment.
      *
      * @param path The Vault path to check or mutate, based on the operation.
+     * @param prefixPathDepth prefixPathDepth
      * @return The path mutated depending on the operation.
      */
     public static String adjustPathForVersionDestroy(final String path, final int prefixPathDepth) {
