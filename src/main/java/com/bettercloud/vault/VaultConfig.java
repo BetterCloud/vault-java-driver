@@ -315,7 +315,7 @@ public class VaultConfig implements Serializable {
         if (this.address == null) {
             final String addressFromEnv = environmentLoader.loadVariable(VAULT_ADDR);
             if (addressFromEnv != null) {
-                this.address = addressFromEnv;
+                address(addressFromEnv);
             } else {
                 throw new VaultException("No address is set");
             }

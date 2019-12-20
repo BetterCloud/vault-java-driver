@@ -107,6 +107,23 @@ public class VaultConfigTests {
     }
 
     /**
+     * Test creating a new <code>VaultConfig</code> via its constructor, take address from environment and ensuring
+     * that addresses are normalized to not have a trailing slash.
+     *
+     * @throws VaultException
+     */
+    @Test
+    public void testConfigConstructor_NormalizesAddressFromEnv() throws VaultException {
+        final MockEnvironmentLoader mock = new MockEnvironmentLoader();
+        mock.override("VAULT_ADDR", "https://localhost:8200/");
+
+        final VaultConfig config = new VaultConfig()
+                .environmentLoader(mock)
+                .build();
+        assertEquals("https://localhost:8200", config.getAddress());
+    }
+
+    /**
      * Test creating a new <code>VaultConfig</code> via its constructor, passing null address and token values AND
      * having them unavailable in the environment variables too.  This should cause initialization failure.
      *
