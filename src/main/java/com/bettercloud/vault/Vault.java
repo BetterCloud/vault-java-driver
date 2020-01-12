@@ -57,7 +57,7 @@ import java.util.logging.Logger;
 public class Vault {
 
     private final VaultConfig vaultConfig;
-    private Logger logger =  Logger.getLogger(Vault.class.getCanonicalName());
+    private static final Logger logger =  Logger.getLogger(Vault.class.getCanonicalName());
 
     /**
      * Construct a Vault driver instance with the provided config settings.
@@ -282,7 +282,7 @@ public class Vault {
             }
             return data;
         } catch (RestException e) {
-            System.err.print(String.format("Unable to retrieve the KV Engine secrets, due to exception: %s", e.getMessage()));
+            logger.severe(String.format("Unable to retrieve the KV Engine secrets, due to exception: %s", e.getMessage()));
             return null;
         }
     }

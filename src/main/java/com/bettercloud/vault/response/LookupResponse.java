@@ -9,11 +9,14 @@ import com.bettercloud.vault.rest.RestResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * This class is a container for the information returned by Vault in lookup operations on auth backends.
  */
 public class LookupResponse extends VaultResponse {
+
+    private static final Logger logger =  Logger.getLogger(LookupResponse.class.getCanonicalName());
 
     private String accessor;
     private long creationTime;
@@ -69,7 +72,8 @@ public class LookupResponse extends VaultResponse {
             renewable = dataJsonObject.getBoolean("renewable", false);
             ttl = dataJsonObject.getLong("ttl", 0);
 
-        } catch (ParseException ignored) {
+        } catch (ParseException e) {
+            logger.warning("RestResponse parse exception:" + e.getMessage());
         }
     }
 

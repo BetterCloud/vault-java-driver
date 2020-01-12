@@ -3,6 +3,7 @@ package com.bettercloud.vault;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 /**
  * <p>A container for the configuration settings needed to initialize a <code>Vault</code> driver instance.</p>
@@ -24,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @see SslConfig
  */
 public class VaultConfig implements Serializable {
+
+    private static final Logger logger =  Logger.getLogger(VaultConfig.class.getCanonicalName());
 
     protected static final String VAULT_TOKEN = "VAULT_TOKEN";
     private static final String VAULT_ADDR = "VAULT_ADDR";
@@ -327,16 +330,16 @@ public class VaultConfig implements Serializable {
             try {
                 this.openTimeout = Integer.valueOf(environmentLoader.loadVariable(VAULT_OPEN_TIMEOUT));
             } catch (NumberFormatException e) {
-                System.err.printf("The " + VAULT_OPEN_TIMEOUT + " environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
-                        environmentLoader.loadVariable(VAULT_OPEN_TIMEOUT));
+                logger.severe(String.format("The " + VAULT_OPEN_TIMEOUT + " environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
+                        environmentLoader.loadVariable(VAULT_OPEN_TIMEOUT)));
             }
         }
         if (this.readTimeout == null && environmentLoader.loadVariable(VAULT_READ_TIMEOUT) != null) {
             try {
                 this.readTimeout = Integer.valueOf(environmentLoader.loadVariable(VAULT_READ_TIMEOUT));
             } catch (NumberFormatException e) {
-                System.err.printf("The " + VAULT_READ_TIMEOUT + " environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
-                        environmentLoader.loadVariable(VAULT_READ_TIMEOUT));
+                logger.severe(String.format("The " + VAULT_READ_TIMEOUT + " environment variable contains value \"%s\", which cannot be parsed as an integer timeout period.%n",
+                        environmentLoader.loadVariable(VAULT_READ_TIMEOUT)));
             }
         }
         if (this.sslConfig == null) {
