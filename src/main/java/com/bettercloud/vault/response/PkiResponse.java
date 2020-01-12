@@ -4,10 +4,9 @@ import com.bettercloud.vault.api.Logical;
 import com.bettercloud.vault.api.pki.Credential;
 import com.bettercloud.vault.api.pki.RoleOptions;
 import com.bettercloud.vault.rest.RestResponse;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 /**
  * This class is a container for the information returned by Vault in PKI backend API
@@ -152,12 +151,7 @@ public class PkiResponse extends LogicalResponse {
         if (input == null) {
             return null;
         }
-        final List<String> returnValue = new ArrayList<>();
-        final StringTokenizer tokenizer = new StringTokenizer(input, ",");
-        while (tokenizer.hasMoreTokens()) {
-            returnValue.add(tokenizer.nextToken());
-        }
-        return returnValue;
+        return Arrays.asList(input.split(","));
     }
 
     /**

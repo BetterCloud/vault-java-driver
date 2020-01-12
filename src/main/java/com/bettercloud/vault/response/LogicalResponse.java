@@ -20,7 +20,7 @@ public class LogicalResponse extends VaultResponse {
 
     private Map<String, String> data = new HashMap<>();
     private List<String> listData = new ArrayList<>();
-    private JsonObject dataObject = null;
+    private JsonObject dataObject;
     private String leaseId;
     private Boolean renewable;
     private Long leaseDuration;
@@ -79,7 +79,6 @@ public class LogicalResponse extends VaultResponse {
             if (operation.equals(Logical.logicalOperations.readV2)) {
                 jsonObject = jsonObject.get("data").asObject();
             }
-            data = new HashMap<>();
             dataObject = jsonObject.get("data").asObject();
             for (final JsonObject.Member member : dataObject) {
                 final JsonValue jsonValue = member.getValue();
