@@ -11,12 +11,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * This class is a container for the information returned by Vault in logical API
  * operations (e.g. read, write).
  */
 public class LogicalResponse extends VaultResponse {
+
+    private static final Logger logger =  Logger.getLogger(LogicalResponse.class.getCanonicalName());
 
     private Map<String, String> data = new HashMap<>();
     private List<String> listData = new ArrayList<>();
@@ -68,7 +71,8 @@ public class LogicalResponse extends VaultResponse {
             this.leaseId = jsonObject.get("lease_id").asString();
             this.renewable = jsonObject.get("renewable").asBoolean();
             this.leaseDuration = jsonObject.get("lease_duration").asLong();
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            logger.warning("RestResponse parse exception:" + e.getMessage());
         }
     }
 
@@ -105,7 +109,8 @@ public class LogicalResponse extends VaultResponse {
                 }
 
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            logger.warning("RestResponse parse exception:" + e.getMessage());
         }
     }
 }

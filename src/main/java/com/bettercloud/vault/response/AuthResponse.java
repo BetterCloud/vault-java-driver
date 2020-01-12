@@ -9,11 +9,14 @@ import com.bettercloud.vault.rest.RestResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * This class is a container for the information returned by Vault in auth backend operations.
  */
 public class AuthResponse extends VaultResponse {
+
+    private static final Logger logger =  Logger.getLogger(AuthResponse.class.getCanonicalName());
 
     private Boolean renewable;
     private String authClientToken;
@@ -58,6 +61,7 @@ public class AuthResponse extends VaultResponse {
                 authPolicies.add(authPolicy.asString());
             }
         } catch (ParseException e) {
+            logger.warning("RestResponse parse exception:" + e.getMessage());
         }
     }
 

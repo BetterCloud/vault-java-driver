@@ -5,12 +5,16 @@ import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.ParseException;
 import com.bettercloud.vault.rest.RestResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Logger;
 
 /**
  * This class is a container for the information returned by Vault in <code>v1/sys/*seal*</code>
  * operations.
  */
 public class SealResponse extends VaultResponse {
+
+    private static final Logger logger =  Logger.getLogger(SealResponse.class.getCanonicalName());
+
     private Boolean sealed;
     private Long threshold;
     private Long numberOfShares;
@@ -34,7 +38,8 @@ public class SealResponse extends VaultResponse {
             numberOfShares = jsonObject.getLong("n", 0);
             progress = jsonObject.getLong("progress", 0);
 
-        } catch (ParseException ignored) {
+        } catch (ParseException e) {
+            logger.warning("RestResponse parse exception:" + e.getMessage());
         }
     }
 
