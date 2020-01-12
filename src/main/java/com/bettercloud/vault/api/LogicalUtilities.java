@@ -1,9 +1,8 @@
 package com.bettercloud.vault.api;
 
 import com.bettercloud.vault.json.JsonObject;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.StringTokenizer;
 
 
 public class LogicalUtilities {
@@ -15,12 +14,7 @@ public class LogicalUtilities {
      * @return The path potentially mutated, based on the operation
      */
     private static List<String> getPathSegments(final String path) {
-        final List<String> segments = new ArrayList<>();
-        final StringTokenizer tokenizer = new StringTokenizer(path, "/");
-        while (tokenizer.hasMoreTokens()) {
-            segments.add(tokenizer.nextToken());
-        }
-        return segments;
+        return Arrays.asList(path.split("/"));
     }
 
     /**
@@ -64,10 +58,10 @@ public class LogicalUtilities {
      */
     public static String adjustPathForReadOrWrite(final String path, final int prefixPathLength,
             final Logical.logicalOperations operation) {
-        final List<String> pathSegments = getPathSegments(path);
         if (operation.equals(Logical.logicalOperations.readV2) || operation
                 .equals(Logical.logicalOperations.writeV2)) {
             // Version 2
+            final List<String> pathSegments = getPathSegments(path);
             final StringBuilder adjustedPath = new StringBuilder(
                     addQualifierToPath(pathSegments, prefixPathLength, "data"));
             if (path.endsWith("/")) {
@@ -93,10 +87,10 @@ public class LogicalUtilities {
      */
     public static String adjustPathForList(final String path, int prefixPathDepth,
             final Logical.logicalOperations operation) {
-        final List<String> pathSegments = getPathSegments(path);
         final StringBuilder adjustedPath = new StringBuilder();
         if (operation.equals(Logical.logicalOperations.listV2)) {
             // Version 2
+            final List<String> pathSegments = getPathSegments(path);
             adjustedPath.append(addQualifierToPath(pathSegments, prefixPathDepth, "metadata"));
             if (path.endsWith("/")) {
                 adjustedPath.append("/");
@@ -122,8 +116,8 @@ public class LogicalUtilities {
      */
     public static String adjustPathForDelete(final String path, final int prefixPathDepth,
             final Logical.logicalOperations operation) {
-        final List<String> pathSegments = getPathSegments(path);
         if (operation.equals(Logical.logicalOperations.deleteV2)) {
+            final List<String> pathSegments = getPathSegments(path);
             final StringBuilder adjustedPath = new StringBuilder(
                     addQualifierToPath(pathSegments, prefixPathDepth, "metadata"));
             if (path.endsWith("/")) {
