@@ -85,6 +85,7 @@ public class Logical {
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, config.getPrefixPathDepth(), operation))
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -153,6 +154,7 @@ public class Logical {
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, config.getPrefixPathDepth(), logicalOperations.readV2))
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .parameter("version", version.toString())
@@ -254,6 +256,7 @@ public class Logical {
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, config.getPrefixPathDepth(), operation))
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .body(jsonObjectToWriteFromEngineVersion(operation, requestJson).toString().getBytes(StandardCharsets.UTF_8))
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
@@ -346,6 +349,7 @@ public class Logical {
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForDelete(path, config.getPrefixPathDepth(), operation))
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -406,6 +410,7 @@ public class Logical {
                 JsonObject versionsToDelete = new JsonObject().add("versions", versions);
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForVersionDelete(path,config.getPrefixPathDepth()))
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -477,6 +482,7 @@ public class Logical {
                 JsonObject versionsToUnDelete = new JsonObject().add("versions", versions);
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForVersionUnDelete(path,config.getPrefixPathDepth()))
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -536,6 +542,7 @@ public class Logical {
                 JsonObject versionsToDestroy = new JsonObject().add("versions", versions);
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForVersionDestroy(path,config.getPrefixPathDepth()))
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -587,6 +594,7 @@ public class Logical {
                 JsonObject kvToUpgrade = new JsonObject().add("options", new JsonObject().add("version", 2));
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/mounts/" + (kvPath.replaceAll("/", "") + "/tune"))
+                        .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())

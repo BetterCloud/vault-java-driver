@@ -1,6 +1,8 @@
 package com.bettercloud.vault;
 
 import java.io.Serializable;
+import java.net.Proxy;
+import java.net.ProxySelector;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,6 +36,8 @@ public class VaultConfig implements Serializable {
     private String address;
     private String token;
     private SslConfig sslConfig;
+    private Proxy proxy;
+    private String proxyAuth;
     private Integer openTimeout;
     private Integer readTimeout;
     private int prefixPathDepth = 1;
@@ -113,6 +117,35 @@ public class VaultConfig implements Serializable {
         if (this.address.endsWith("/")) {
             this.address = this.address.substring(0, this.address.length() - 1);
         }
+        return this;
+    }
+
+    /**
+     * <p>Sets the proxy to use to connect to the Vault server.</p>
+     *
+     * <p>If a {@code null} proxy is specified then the JRE default proxy selection algorithm will be used, e.g. {@link ProxySelector#getDefault()}</p>
+     *
+     * @param proxy  proxy the proxy to use or {@code null} to let the JRE select the proxy (which normally defaults to {@link ProxySelector#getDefault()}
+     * @return This object, with proxy populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     */
+    public VaultConfig proxy(final Proxy proxy) {
+        this.proxy = proxy;
+        this.proxyAuth = null;
+        return this;
+    }
+
+    /**
+     * <p>Sets the proxy to use to connect to the Vault server.</p>
+     *
+     * <p>If a {@code null} proxy is specified then the JRE default proxy selection algorithm will be used, e.g. {@link ProxySelector#getDefault()}</p>
+     *
+     * @param proxy  proxy the proxy to use or {@code null} to let the JRE select the proxy (which normally defaults to {@link ProxySelector#getDefault()}
+     * @param proxyAuth the {@code Proxy-Authenticate} header to supply for authenticated proxies.
+     * @return This object, with proxy populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     */
+    public VaultConfig proxy(final Proxy proxy, String proxyAuth) {
+        this.proxy = proxy;
+        this.proxyAuth = proxyAuth;
         return this;
     }
 
@@ -351,6 +384,14 @@ public class VaultConfig implements Serializable {
 
     public String getAddress() {
         return address;
+    }
+
+    public Proxy getProxy() {
+        return proxy;
+    }
+
+    public String getProxyAuth() {
+        return proxyAuth;
     }
 
     public String getToken() {
