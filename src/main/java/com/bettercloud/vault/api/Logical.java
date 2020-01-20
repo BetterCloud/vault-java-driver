@@ -3,16 +3,14 @@ package com.bettercloud.vault.api;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
-import com.bettercloud.vault.json.JsonArray;
 import com.bettercloud.vault.json.JsonObject;
+import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestException;
 import com.bettercloud.vault.rest.RestResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForDelete;
@@ -22,7 +20,6 @@ import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForVersionDel
 import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForVersionDestroy;
 import static com.bettercloud.vault.api.LogicalUtilities.adjustPathForVersionUnDelete;
 import static com.bettercloud.vault.api.LogicalUtilities.jsonObjectToWriteFromEngineVersion;
-
 
 /**
  * <p>The implementing class for Vault's core/logical operations (e.g. read, write).</p>
@@ -87,7 +84,7 @@ public class Logical {
             try {
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, operation))
+                        .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, config.getPrefixPathDepth(), operation))
                         .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
@@ -156,7 +153,7 @@ public class Logical {
             try {
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, logicalOperations.readV2))
+                        .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, config.getPrefixPathDepth(), logicalOperations.readV2))
                         .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
@@ -249,6 +246,8 @@ public class Logical {
                             requestJson = requestJson.add(pair.getKey(), (Float) pair.getValue());
                         } else if (value instanceof Double) {
                             requestJson = requestJson.add(pair.getKey(), (Double) pair.getValue());
+                        } else if (value instanceof JsonValue) {
+                            requestJson = requestJson.add(pair.getKey(), (JsonValue) pair.getValue());
                         } else {
                             requestJson = requestJson.add(pair.getKey(), pair.getValue().toString());
                         }
@@ -256,7 +255,7 @@ public class Logical {
                 }
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, operation))
+                        .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, config.getPrefixPathDepth(), operation))
                         .proxy(config.getProxy(), config.getProxyAuth())
                         .body(jsonObjectToWriteFromEngineVersion(operation, requestJson).toString().getBytes(StandardCharsets.UTF_8))
                         .header("X-Vault-Token", config.getToken())
@@ -317,7 +316,7 @@ public class Logical {
     private LogicalResponse list(final String path, final logicalOperations operation) throws VaultException {
         LogicalResponse response = null;
         try {
-            response = read(adjustPathForList(path, operation), true, operation);
+            response = read(adjustPathForList(path, config.getPrefixPathDepth(), operation), true, operation);
         } catch (final VaultException e) {
             if (e.getHttpStatusCode() != 404) {
                 throw e;
@@ -349,7 +348,7 @@ public class Logical {
             try {
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + adjustPathForDelete(path, operation))
+                        .url(config.getAddress() + "/v1/" + adjustPathForDelete(path, config.getPrefixPathDepth(), operation))
                         .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
@@ -410,7 +409,7 @@ public class Logical {
                 // Make an HTTP request to Vault
                 JsonObject versionsToDelete = new JsonObject().add("versions", versions);
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + adjustPathForVersionDelete(path))
+                        .url(config.getAddress() + "/v1/" + adjustPathForVersionDelete(path,config.getPrefixPathDepth()))
                         .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
@@ -482,7 +481,7 @@ public class Logical {
                 // Make an HTTP request to Vault
                 JsonObject versionsToUnDelete = new JsonObject().add("versions", versions);
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + adjustPathForVersionUnDelete(path))
+                        .url(config.getAddress() + "/v1/" + adjustPathForVersionUnDelete(path,config.getPrefixPathDepth()))
                         .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
@@ -542,7 +541,7 @@ public class Logical {
                 // Make an HTTP request to Vault
                 JsonObject versionsToDestroy = new JsonObject().add("versions", versions);
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/" + adjustPathForVersionDestroy(path))
+                        .url(config.getAddress() + "/v1/" + adjustPathForVersionDestroy(path,config.getPrefixPathDepth()))
                         .proxy(config.getProxy(), config.getProxyAuth())
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)

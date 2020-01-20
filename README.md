@@ -11,6 +11,9 @@ alike, without causing conflicts with any other dependency.
 NOTE:  Although the binary artifact produced by the project is backwards-compatible with Java 8, you do need 
        JDK 9 or higher to modify or build the source code of this library itself.
 
+This Change
+-----------
+
 Table of Contents
 -----------------
 * [Installing the Driver](#installing-the-driver)
@@ -34,7 +37,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    implementation 'com.bettercloud:vault-java-driver:5.0.0'
+    implementation 'com.bettercloud:vault-java-driver:5.1.0'
 }
 ```
 
@@ -43,7 +46,7 @@ Maven:
 <dependency>
     <groupId>com.bettercloud</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>5.0.0</version>
+    <version>5.1.0</version>
 </dependency>
 ```
 
@@ -110,6 +113,22 @@ for both K/V versions.
     but leave the map `null`.  Note that this option requires your authentication credentials to have access to read Vault's `/v1/sys/mounts` 
     path.
   
+Version 2 of the K/V engine dynamically injects a qualifier element into your secret paths, which varies depending on the type of for read and write operations, in between the root version 
+operation.  For example, for read and write operations, the secret path:
+
+```v1/mysecret```
+
+... has a "data" qualifier injected:
+
+```v1/data/mysecret```
+
+The default behavior of this driver is to insert the appropriate qualifier one level deep (i.e. in between the root version number 
+and the rest of the path).  However, if your secret path is prefixed, such that the qualifier should be injected further down:
+
+```v1/my/long/prefix/data/anything/else```
+
+... then you should accordingly set the `VaultConfig.prefixPathDepth` property when constructing your `Vault` instance.
+
 
 SSL Config
 ----------
@@ -252,7 +271,13 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
-* **5.0.0 (IN PROGRESS)**:  This release contains the following updates:
+* **5.1.0**:  This release contains the following updates:
+  * Supports path prefixes when using K/V engine V2.  [(PR #189)](https://github.com/BetterCloud/vault-java-driver/pull/189)
+  * Fixes issues with bulk requests in the transit API.  [(PR #195)](https://github.com/BetterCloud/vault-java-driver/pull/195)
+  * Adds response body to exception for Auth failures.  [(PR #198)](https://github.com/BetterCloud/vault-java-driver/pull/198)
+  * Support all options for the createToken operation.  [(PR #199)](https://github.com/BetterCloud/vault-java-driver/pull/199)
+  
+* **5.0.0**:  This release contains the following updates:
   * Changes the retry behavior, to no longer attempt retries on 4xx response codes (for which retries generally won't succeed anyway).  This 
     is the only (mildly) breaking change in this release, necessitating a major version bump. [(PR #176)](https://github.com/BetterCloud/vault-java-driver/pull/176)
   * Implements support for the Database secret engine. [(PR #175)](https://github.com/BetterCloud/vault-java-driver/pull/175)
