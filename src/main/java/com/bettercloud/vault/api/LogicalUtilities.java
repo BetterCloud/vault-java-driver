@@ -125,7 +125,7 @@ public class LogicalUtilities {
         final List<String> pathSegments = getPathSegments(path);
         if (operation.equals(Logical.logicalOperations.deleteV2)) {
             final StringBuilder adjustedPath = new StringBuilder(
-                    addQualifierToPath(pathSegments, prefixPathDepth, "metadata"));
+                    addQualifierToPath(pathSegments, prefixPathDepth, "data"));
             if (path.endsWith("/")) {
                 adjustedPath.append("/");
             }
