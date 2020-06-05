@@ -3,6 +3,7 @@ package com.bettercloud.vault.api;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.json.Json;
+import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.response.VaultResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestResponse;
@@ -53,6 +54,7 @@ public class Leases {
         int retryCount = 0;
         while (true) {
             try {
+                JsonObject body = Json.object() .add("lease_id", leaseId);
                 /**
                 * 2019-03-21
                 * Changed the Lease revoke url due to invalid path.  Vault deprecated the original
@@ -60,10 +62,11 @@ public class Leases {
                 * https://github.com/hashicorp/vault/blob/master/CHANGELOG.md#080-august-9th-2017
                 */
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/sys/leases/revoke/" + leaseId)
+                        .url(config.getAddress() + "/v1/sys/leases/revoke")
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
+                        .body(body.toString().getBytes(StandardCharsets.UTF_8))
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
@@ -234,12 +237,17 @@ public class Leases {
         int retryCount = 0;
         while (true) {
             try {
-                final String requestJson = Json.object().add("increment", increment).toString();
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
+                JsonObject body = Json.object().add("lease_id", leaseId);
+
+                if (increment > 0) {
+                    body.add("increment", increment);
+                }
+
+                final RestResponse restResponse = new Rest()
+                        .url(config.getAddress() + "/v1/sys/leases/renew")
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
-                        .body(increment < 0 ? null : requestJson.getBytes(StandardCharsets.UTF_8))
+                        .body(body.toString().getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
