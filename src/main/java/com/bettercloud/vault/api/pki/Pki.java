@@ -374,7 +374,7 @@ public class Pki {
             final String ttl,
             final CredentialFormat format) throws VaultException {
 
-        return issue(roleName,commonName,altNames,ipSans, ttl, format, "", null);
+        return issue(roleName, commonName, altNames, ipSans, ttl, format, "", null);
     }
 
     /**
