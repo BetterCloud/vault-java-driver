@@ -6,8 +6,7 @@ import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.JsonValue;
 import com.bettercloud.vault.json.ParseException;
 import com.bettercloud.vault.rest.RestResponse;
-
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,12 +17,14 @@ public class AuthResponse extends VaultResponse {
 
     private Boolean renewable;
     private String authClientToken;
+    private String tokenAccessor;
     private List<String> authPolicies;
     private long authLeaseDuration;
     private boolean authRenewable;
     private String appId;
     private String userId;
     private String username;
+    private String nonce;
 
     /**
      * This constructor simply exposes the common base class constructor.
@@ -35,7 +36,7 @@ public class AuthResponse extends VaultResponse {
         super(restResponse, retries);
 
         try {
-            final String responseJson = new String(restResponse.getBody(), "UTF-8");
+            final String responseJson = new String(restResponse.getBody(), StandardCharsets.UTF_8);
             final JsonObject jsonObject = Json.parse(responseJson).asObject();
             final JsonObject authJsonObject = jsonObject.get("auth").asObject();
 
@@ -47,14 +48,16 @@ public class AuthResponse extends VaultResponse {
                 appId = metadata.getString("app-id", "");
                 userId = metadata.getString("user-id", "");
                 username = metadata.getString("username", "");
+                nonce = metadata.getString("nonce", "");
             }
             authClientToken = authJsonObject.getString("client_token", "");
+            tokenAccessor = authJsonObject.getString("accessor", "");
             final JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();
             authPolicies = new ArrayList<>();
             for (final JsonValue authPolicy : authPoliciesJsonArray) {
                 authPolicies.add(authPolicy.asString());
             }
-        } catch (UnsupportedEncodingException | ParseException e) {
+        } catch (ParseException e) {
         }
     }
 
@@ -89,4 +92,8 @@ public class AuthResponse extends VaultResponse {
     public String getUserId() {
         return userId;
     }
+
+    public String getNonce() { return nonce; }
+
+    public String getTokenAccessor() { return tokenAccessor; }
 }

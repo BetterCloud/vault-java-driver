@@ -1,11 +1,10 @@
 package com.bettercloud.vault.vault.mock;
 
-import org.eclipse.jetty.server.Request;
-
+import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.eclipse.jetty.server.Request;
 
 /**
  * <p>This class is used to mock out a Vault server in unit tests involving open timeouts (i.e. delays before an
@@ -15,14 +14,14 @@ import java.io.IOException;
  * <p>The basic usage pattern is as follows:</p>
  *
  * <ol>
- *     <li>
- *         <code>OpenTimeoutsMockVault</code> pauses for the designated number of seconds before allowing the
- *         incoming HTTP(S) request to connect.
- *     </li>
- *     <li>
- *         After the delay, <code>OpenTimeoutsMockVault</code> responds with a designated HTTP status code, and
- *         a designated response body.
- *     </li>
+ * <li>
+ * <code>OpenTimeoutsMockVault</code> pauses for the designated number of seconds before allowing the
+ * incoming HTTP(S) request to connect.
+ * </li>
+ * <li>
+ * After the delay, <code>OpenTimeoutsMockVault</code> responds with a designated HTTP status code, and
+ * a designated response body.
+ * </li>
  * </ol>
  *
  * <p>Example usage:</p>
@@ -74,7 +73,8 @@ public class OpenTimeoutsMockVault extends MockVault {
             Thread.sleep(delaySeconds * 1000);
             response.setContentType("application/json");
             baseRequest.setHandled(true);
-            System.out.println("OpenTimeoutsMockVault is sending an HTTP " + mockStatus + " code, with expected success payload...");
+            System.out.println("OpenTimeoutsMockVault is sending an HTTP " + mockStatus + " code, with expected" +
+                    " success payload...");
             response.setStatus(mockStatus);
             if (mockResponse != null) {
                 response.getWriter().println(mockResponse);

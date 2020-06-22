@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class AuthUnwrapTest {
 
@@ -46,7 +47,7 @@ public class AuthUnwrapTest {
         assertEquals(200, response.getRestResponse().getStatus());
 
         // Assert request body should NOT have token body (wrapped is in header)
-        assertEquals(null, vaultServer.getRequestBody().get().get("token"));
+        assertNull(vaultServer.getRequestBody().get().get("token"));
         assertEquals("wrappedToken", vaultServer.getRequestHeaders().get("X-Vault-Token"));
 
         // Assert response should have the unwrapped token in the client_token key
@@ -62,7 +63,8 @@ public class AuthUnwrapTest {
         assertEquals(200, response.getRestResponse().getStatus());
 
         // Assert request body SHOULD have token body
-        assertEquals("wrappedToken", vaultServer.getRequestBody().get().getString("token", null));
+        assertEquals("wrappedToken", vaultServer.getRequestBody().get().getString("token",
+                null));
         assertEquals("authToken", vaultServer.getRequestHeaders().get("X-Vault-Token"));
 
         // Assert response should have the unwrapped token in the client_token key

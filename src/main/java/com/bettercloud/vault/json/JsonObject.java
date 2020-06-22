@@ -21,15 +21,13 @@
  ******************************************************************************/
 package com.bettercloud.vault.json;
 
+import com.bettercloud.vault.json.JsonObject.Member;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import com.bettercloud.vault.json.JsonObject.Member;
 
 
 /**
@@ -80,8 +78,8 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
    * Creates a new empty JsonObject.
    */
   public JsonObject() {
-    names = new ArrayList<String>();
-    values = new ArrayList<JsonValue>();
+    names = new ArrayList<>();
+    values = new ArrayList<>();
     table = new HashIndexTable();
   }
 
@@ -103,8 +101,8 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
       names = Collections.unmodifiableList(object.names);
       values = Collections.unmodifiableList(object.values);
     } else {
-      names = new ArrayList<String>(object.names);
-      values = new ArrayList<JsonValue>(object.values);
+      names = new ArrayList<>(object.names);
+      values = new ArrayList<>(object.values);
     }
     table = new HashIndexTable();
     updateHashIndex();
@@ -149,6 +147,30 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
     add(name, Json.value(value));
     return this;
   }
+
+  /**
+   * Appends a new member to the end of this object, with the specified name and the JSON
+   * representation of the specified <code>int[]</code> value.
+   * <p>
+   * This method <strong>does not prevent duplicate names</strong>. Calling this method with a name
+   * that already exists in the object will append another member with the same name. In order to
+   * replace existing members, use the method <code>set(name, value)</code> instead. However,
+   * <strong> <em>add</em> is much faster than <em>set</em></strong> (because it does not need to
+   * search for existing members). Therefore <em>add</em> should be preferred when constructing new
+   * objects.
+   * </p>
+   *
+   * @param name
+   *          the name of the member to add
+   * @param value
+   *          the value of the member to add
+   * @return the object itself, to enable method chaining
+   */
+  public JsonObject add(String name, int[] value) {
+    add(name, Json.value(value));
+    return this;
+  }
+
 
   /**
    * Appends a new member to the end of this object, with the specified name and the JSON
@@ -263,6 +285,46 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
   public JsonObject add(String name, String value) {
     add(name, Json.value(value));
     return this;
+  }
+
+  /**
+   * Appends a new member to the end of this object, with the specified name and the JSON
+   * representation of the specified casted Object <strong>only if the value is not null</strong>.
+   * <p>
+   * This method <strong>does not prevent duplicate names</strong>. Calling this method with a name
+   * that already exists in the object will append another member with the same name. In order to
+   * replace existing members, use the method <code>set(name, value)</code> instead. However,
+   * <strong> <em>add</em> is much faster than <em>set</em></strong> (because it does not need to
+   * search for existing members). Therefore <em>add</em> should be preferred when constructing new
+   * objects.
+   * </p>
+   *
+   * @param name
+   *          the name of the member to add
+   * @param value
+   *          the value of the member to add
+   * @return the object itself, to enable method chaining
+   */
+  public JsonObject addIfNotNull(final String name, final Object value) {
+      if (value == null) {
+          return this;
+      }
+      if (value instanceof JsonValue) {
+          this.add(name, (JsonValue)value);
+      } else if (value instanceof Integer) {
+          this.add(name, (Integer)value);
+      } else if (value instanceof Long) {
+          this.add(name, (Long)value);
+      } else if (value instanceof Float) {
+          this.add(name, (Float)value);
+      } else if (value instanceof Double) {
+          this.add(name, (Double)value);
+      } else if (value instanceof Boolean) {
+          this.add(name, (Boolean)value);
+      } else if (value instanceof String) {
+          this.add(name, (String)value);
+      }
+      return this;
   }
 
   /**
@@ -521,6 +583,23 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
   }
 
   /**
+   * Returns the <code>Integer</code> value of the member with the specified name in this object. If
+   * this object does not contain a member with this name, <strong><code>null</code></strong> is returned. If
+   * this object contains multiple members with the given name, the last one will be picked. If this
+   * member's value does not represent a JSON number or if it cannot be interpreted as Java
+   * <code>int</code>, an exception is thrown.
+   *
+   * @param name
+   *          the name of the member whose value is to be returned
+   * @return the value of the last member with the specified name, or null if
+   *         this object does not contain a member with that name
+   */
+  public Integer getInt(String name) {
+    JsonValue value = get(name);
+    return value != null ? value.asInt() : null;
+  }
+
+  /**
    * Returns the <code>int</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
    * this object contains multiple members with the given name, the last one will be picked. If this
@@ -537,6 +616,23 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
   public int getInt(String name, int defaultValue) {
     JsonValue value = get(name);
     return value != null ? value.asInt() : defaultValue;
+  }
+
+  /**
+   * Returns the <code>Long</code> value of the member with the specified name in this object. If
+   * this object does not contain a member with this name, <strong><code>null</code></strong> is returned. If
+   * this object contains multiple members with the given name, the last one will be picked. If this
+   * member's value does not represent a JSON number or if it cannot be interpreted as Java
+   * <code>long</code>, an exception is thrown.
+   *
+   * @param name
+   *          the name of the member whose value is to be returned
+   * @return the value of the last member with the specified name, or null if
+   *         this object does not contain a member with that name
+   */
+  public Long getLong(String name) {
+    JsonValue value = get(name);
+    return value != null ? value.asLong() : null;
   }
 
   /**
@@ -559,6 +655,23 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
   }
 
   /**
+   * Returns the <code>Float</code> value of the member with the specified name in this object. If
+   * this object does not contain a member with this name, <strong><code>null</code></strong> is returned. If
+   * this object contains multiple members with the given name, the last one will be picked. If this
+   * member's value does not represent a JSON number or if it cannot be interpreted as Java
+   * <code>float</code>, an exception is thrown.
+   *
+   * @param name
+   *          the name of the member whose value is to be returned
+   * @return the value of the last member with the specified name, or null if
+   *         this object does not contain a member with that name
+   */
+  public Float getFloat(String name) {
+    JsonValue value = get(name);
+    return value != null ? value.asFloat() : null;
+  }
+
+  /**
    * Returns the <code>float</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
    * this object contains multiple members with the given name, the last one will be picked. If this
@@ -575,6 +688,23 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
   public float getFloat(String name, float defaultValue) {
     JsonValue value = get(name);
     return value != null ? value.asFloat() : defaultValue;
+  }
+
+  /**
+   * Returns the <code>Double</code> value of the member with the specified name in this object. If
+   * this object does not contain a member with this name, <strong><code>null</code></strong> is returned. If
+   * this object contains multiple members with the given name, the last one will be picked. If this
+   * member's value does not represent a JSON number or if it cannot be interpreted as Java
+   * <code>double</code>, an exception is thrown.
+   *
+   * @param name
+   *          the name of the member whose value is to be returned
+   * @return the value of the last member with the specified name, or null if
+   *         this object does not contain a member with that name
+   */
+  public Double getDouble(String name) {
+    JsonValue value = get(name);
+    return value != null ? value.asDouble() : null;
   }
 
   /**
@@ -597,6 +727,23 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
   }
 
   /**
+   * Returns the <code>Boolean</code> value of the member with the specified name in this object. If
+   * this object does not contain a member with this name, <strong><code>null</code></strong> is returned. If
+   * this object contains multiple members with the given name, the last one will be picked. If this
+   * member's value does not represent a JSON <code>true</code> or <code>false</code> value, an
+   * exception is thrown.
+   *
+   * @param name
+   *          the name of the member whose value is to be returned
+   * @return the value of the last member with the specified name, or null if
+   *         this object does not contain a member with that name
+   */
+  public Boolean getBoolean(String name) {
+    JsonValue value = get(name);
+    return value != null ? value.asBoolean() : null;
+  }
+
+  /**
    * Returns the <code>boolean</code> value of the member with the specified name in this object. If
    * this object does not contain a member with this name, the given default value is returned. If
    * this object contains multiple members with the given name, the last one will be picked. If this
@@ -613,6 +760,22 @@ public class JsonObject extends JsonValue implements Iterable<Member> {
   public boolean getBoolean(String name, boolean defaultValue) {
     JsonValue value = get(name);
     return value != null ? value.asBoolean() : defaultValue;
+  }
+
+  /**
+   * Returns the <code>String</code> value of the member with the specified name in this object. If
+   * this object does not contain a member with this name, <strong><code>null</code></strong> is returned. If
+   * this object contains multiple members with the given name, the last one is picked. If this
+   * member's value does not represent a JSON string, an exception is thrown.
+   *
+   * @param name
+   *          the name of the member whose value is to be returned
+   * @return the value of the last member with the specified name, or null if
+   *         this object does not contain a member with that name
+   */
+  public String getString(String name) {
+    JsonValue value = get(name);
+    return value != null ? value.asString() : null;
   }
 
   /**

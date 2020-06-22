@@ -3,9 +3,6 @@ package com.bettercloud.vault;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.vault.VaultTestUtils;
 import com.bettercloud.vault.vault.mock.MockVault;
-import org.eclipse.jetty.server.Server;
-import org.junit.Test;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,6 +10,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.KeyStore;
 import java.util.HashMap;
+import org.eclipse.jetty.server.Server;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -32,6 +31,7 @@ public class SSLTests {
                 .address("https://127.0.0.1:9998")
                 .token("mock_token")
                 .sslConfig(new SslConfig().verify(false))
+                .engineVersion(1)
                 .build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().read("secret/hello");
@@ -74,7 +74,9 @@ public class SSLTests {
                 .token("mock_token")
                 .build();
         final Vault vault = new Vault(vaultConfig);
-        final LogicalResponse response = vault.logical().write("secret/hello", new HashMap() {{ put("value", "world"); }});
+        HashMap<String, Object> testMap = new HashMap<>();
+        testMap.put("value", "world");
+        final LogicalResponse response = vault.logical().write("secret/hello", testMap);
         assertEquals(204, response.getRestResponse().getStatus());
 
         VaultTestUtils.shutdownMockVault(server);
@@ -108,8 +110,8 @@ public class SSLTests {
         final InputStream input = this.getClass().getResourceAsStream("/cert.pem");
         final FileOutputStream output = new FileOutputStream(pem);
         int nextChar;
-        while ( (nextChar = input.read()) != -1 ) {
-            output.write( (char) nextChar );
+        while ((nextChar = input.read()) != -1) {
+            output.write((char) nextChar);
         }
         input.close();
         output.close();
@@ -154,8 +156,10 @@ public class SSLTests {
                 .sslConfig(new SslConfig().pemResource("/cert.pem").build())
                 .build();
         final Vault vault = new Vault(vaultConfig);
+        HashMap<String, Object> testMap = new HashMap<>();
+        testMap.put("value", "world");
         final LogicalResponse response = vault.logical()
-                .write("secret/hello", new HashMap() {{ put("value", "world"); }});
+                .write("secret/hello", testMap);
 
         VaultTestUtils.shutdownMockVault(server);
     }
@@ -168,13 +172,13 @@ public class SSLTests {
 
         final BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/cert.pem")));
         final StringBuilder builder = new StringBuilder();
-        String utf8 = "";
+        StringBuilder utf8 = new StringBuilder();
         String str;
         while ((str = in.readLine()) != null) {
-            utf8 += str + System.lineSeparator();//NOPMD
+            utf8.append(str).append(System.lineSeparator());//NOPMD
         }
         in.close();
-        final String pemUTF8 = utf8;
+        final String pemUTF8 = utf8.toString();
 
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")
@@ -264,7 +268,8 @@ public class SSLTests {
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")
                 .token("mock_token")
-                .sslConfig(new SslConfig().trustStoreResource("/keystore.jks").keyStoreResource("/keystore.jks", "password").build())
+                .sslConfig(new SslConfig().trustStoreResource("/keystore.jks").keyStoreResource(
+                        "/keystore.jks", "password").build())
                 .build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.logical().read("secret/hello");

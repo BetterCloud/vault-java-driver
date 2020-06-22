@@ -23,6 +23,7 @@ package com.bettercloud.vault.json;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Arrays;
 
 
 /**
@@ -82,6 +83,16 @@ public final class Json {
    */
   public static JsonValue value(int value) {
     return new JsonNumber(Integer.toString(value, 10));
+  }
+  /**
+   * Returns a JsonValue instance that represents the given <code>int[]</code> value.
+   *
+   * @param value
+   *          the value to get a JSON representation for
+   * @return a JSON value that represents the given value
+   */
+  public static JsonValue value(int[] value) {
+    return new JsonNumber(Arrays.toString(value));
   }
 
   /**

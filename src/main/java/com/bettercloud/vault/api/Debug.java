@@ -6,9 +6,9 @@ import com.bettercloud.vault.response.HealthResponse;
 import com.bettercloud.vault.rest.Rest;
 import com.bettercloud.vault.rest.RestException;
 import com.bettercloud.vault.rest.RestResponse;
-
 import java.util.HashSet;
 import java.util.Set;
+
 
 /**
  * <p>The implementing class for operations on REST endpoints, under the "Debug" section of the Vault HTTP API
@@ -22,14 +22,27 @@ public class Debug {
 
     private final VaultConfig config;
 
+    private String nameSpace;
+
     public Debug(final VaultConfig config) {
         this.config = config;
+        if (this.config.getNameSpace() != null && !this.config.getNameSpace().isEmpty()) {
+            this.nameSpace = this.config.getNameSpace();
+        }
     }
+
+    public Debug withNameSpace(final String nameSpace) {
+        this.nameSpace = nameSpace;
+        return this;
+    }
+
 
     /**
      * <p>Returns the health status of Vault. This matches the semantics of a Consul HTTP
      * health check and provides a simple way to monitor the health of a Vault instance.</p>
      *
+     * @return The response information returned from Vault
+     * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
      * @see <a href="https://www.vaultproject.io/docs/http/sys-health.html">https://www.vaultproject.io/docs/http/sys-health.html</a>
      *
      * <blockquote>
@@ -42,9 +55,6 @@ public class Debug {
      * final Boolean sealed = response.getSealed();  // Warning: CAN be null!
      * }</pre>
      * </blockquote>
-     *
-     * @return The response information returned from Vault
-     * @throws VaultException If any errors occurs with the REST request (e.g. non-200 status code, invalid JSON payload, etc), and the maximum number of retries is exceeded.
      */
     public HealthResponse health() throws VaultException {
         return health(null, null, null, null);
@@ -60,10 +70,10 @@ public class Debug {
      * will need to check <code>HealthReponse.getRestResponse().getStatus()</code> to determine the result of
      * the operation.</p>
      *
-     * @param standbyOk (optional) Indicates that being a standby should still return the active status code instead of the standby code
-     * @param activeCode (optional) Indicates the status code that should be returned for an active node instead of the default of 200
+     * @param standbyOk   (optional) Indicates that being a standby should still return the active status code instead of the standby code
+     * @param activeCode  (optional) Indicates the status code that should be returned for an active node instead of the default of 200
      * @param standbyCode (optional) Indicates the status code that should be returned for a standby node instead of the default of 429
-     * @param sealedCode (optional) Indicates the status code that should be returned for a sealed node instead of the default of 500
+     * @param sealedCode  (optional) Indicates the status code that should be returned for a sealed node instead of the default of 500
      * @return The response information returned from Vault
      * @throws VaultException If an error occurs or unexpected response received from Vault
      */
@@ -80,14 +90,12 @@ public class Debug {
                 // Build an HTTP request for Vault
                 final Rest rest = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + path)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext());
-                // Add token if present
-                if (config.getToken() != null) {
-                    rest.header("X-Vault-Token", config.getToken());
-                }
                 // Add params if present
                 if (standbyOk != null) rest.parameter("standbyok", standbyOk.toString());
                 if (activeCode != null) rest.parameter("activecode", activeCode.toString());

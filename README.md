@@ -1,17 +1,24 @@
 Vault Java Driver
 =================
 A zero-dependency Java client for the [Vault](https://www.vaultproject.io/) secrets management solution from
-HashiCorp.
+HashiCorp. 
 
 This driver strives to implement Vault's full HTTP API, along with supporting functionality such as automatic
 retry handling.  It does so without relying on any other external libraries beyond the Java standard library,
-and is compatible with Java 7 and up.  So it will play nice with all of your projects, greenfield and legacy
+and is compatible with Java 8 and up.  So it will play nice with all of your projects, greenfield and legacy
 alike, without causing conflicts with any other dependency.
+
+NOTE:  Although the binary artifact produced by the project is backwards-compatible with Java 8, you do need 
+       JDK 9 or higher to modify or build the source code of this library itself.
+
+This Change
+-----------
 
 Table of Contents
 -----------------
 * [Installing the Driver](#installing-the-driver)
 * [Initializing a Driver Instance](#initializing-a-driver-instance)
+* [Key/Value Secret Engine Config](#key-value-secret-engine-config)
 * [SSL Config](#ssl-config)
   * [General Options](#general-options)
   * [Java Keystore (JKS) based config](#java-keystore-jks-based-config)
@@ -30,7 +37,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    compile('com.bettercloud:vault-java-driver:3.1.0')
+    implementation 'com.bettercloud:vault-java-driver:5.1.0'
 }
 ```
 
@@ -39,7 +46,7 @@ Maven:
 <dependency>
     <groupId>com.bettercloud</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>3.1.0</version>
+    <version>5.1.0</version>
 </dependency>
 ```
 
@@ -65,7 +72,7 @@ environment variables.
 
 ```
 final VaultConfig config =
-    new VaultConfig().
+    new VaultConfig()
         .address("http://127.0.0.1:8200")               // Defaults to "VAULT_ADDR" environment variable
         .token("3c9fd6be-7bc2-9d1f-6fb3-cd746c0fc4e8")  // Defaults to "VAULT_TOKEN" environment variable
         .openTimeout(5)                                 // Defaults to "VAULT_OPEN_TIMEOUT" environment variable
@@ -80,6 +87,48 @@ driver class:
 ```
 final Vault vault = new Vault(config);
 ```
+
+Key Value Secret Engine Config
+------------------------------
+Shortly before its `1.0` release, Vault added a Version 2 of its [Key/Value Secrets Engine](https://www.vaultproject.io/docs/secrets/kv/index.html).  This 
+supports some addition features beyond the Version 1 that was the default in earlier Vault builds (e.g. secret rotation, soft deletes, etc).  
+
+Unfortunately, K/V V2 introduces some breaking changes, in terms of both request/response payloads as well as how URL's are constructed 
+for Vault's REST API.  Therefore, version `4.0.0` of this Vault Driver likewise had to introduce some breaking changes, to allow support 
+for both K/V versions.
+
+* **If you are using the new K/V V2 across the board**, then no action is needed.  The Vault Driver now assumes this by default.
+  
+* **If you are still using the old K/V V1 across the board**, then you can use the `Vault` class constructor: 
+  `public Vault(final VaultConfig vaultConfig, final Integer engineVersion)`, supplying a `1` as the engine version parameter.
+  constructor, then you can declare whether to use Version 1 or 2 across the board.
+  
+* **If you are using a mix, of some secret paths mounted with V1 and others mounted with V2**, then you have two options:
+
+  * You can explicitly specify your Vault secret paths, and which K/V version each one is using.  Construct your `Vault` objects 
+    with the constructor `public Vault(final VaultConfig vaultConfig, final Boolean useSecretsEnginePathMap, final Integer globalFallbackVersion)`.  
+    Within the `VaultConfig` object, supply a map of Vault secret paths to their associated K/V version (`1` or `2`).
+    
+  * You can rely on the Vault Driver to auto-detect your mounts and K/V versions upon instantiation.  Use the same constructor as above, 
+    but leave the map `null`.  Note that this option requires your authentication credentials to have access to read Vault's `/v1/sys/mounts` 
+    path.
+  
+Version 2 of the K/V engine dynamically injects a qualifier element into your secret paths, which varies depending on the type of for read and write operations, in between the root version 
+operation.  For example, for read and write operations, the secret path:
+
+```v1/mysecret```
+
+... has a "data" qualifier injected:
+
+```v1/data/mysecret```
+
+The default behavior of this driver is to insert the appropriate qualifier one level deep (i.e. in between the root version number 
+and the rest of the path).  However, if your secret path is prefixed, such that the qualifier should be injected further down:
+
+```v1/my/long/prefix/data/anything/else```
+
+... then you should accordingly set the `VaultConfig.prefixPathDepth` property when constructing your `Vault` instance.
+
 
 SSL Config
 ----------
@@ -222,6 +271,36 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
+* **5.1.0**:  This release contains the following updates:
+  * Supports path prefixes when using K/V engine V2.  [(PR #189)](https://github.com/BetterCloud/vault-java-driver/pull/189)
+  * Fixes issues with bulk requests in the transit API.  [(PR #195)](https://github.com/BetterCloud/vault-java-driver/pull/195)
+  * Adds response body to exception for Auth failures.  [(PR #198)](https://github.com/BetterCloud/vault-java-driver/pull/198)
+  * Support all options for the createToken operation.  [(PR #199)](https://github.com/BetterCloud/vault-java-driver/pull/199)
+  
+* **5.0.0**:  This release contains the following updates:
+  * Changes the retry behavior, to no longer attempt retries on 4xx response codes (for which retries generally won't succeed anyway).  This 
+    is the only (mildly) breaking change in this release, necessitating a major version bump. [(PR #176)](https://github.com/BetterCloud/vault-java-driver/pull/176)
+  * Implements support for the Database secret engine. [(PR #175)](https://github.com/BetterCloud/vault-java-driver/pull/175)
+  * Makes the "x-vault-token" header optional, to allow use of Vault Agent.  [(PR #184)](https://github.com/BetterCloud/vault-java-driver/pull/184)
+  * Removes stray uses of `System.out.println` in favor of `java.util.logging`. [(PR #178)](https://github.com/BetterCloud/vault-java-driver/pull/178)
+  * Adds the enum constant `MountType.KEY_VALUE_V2`.  [(PR #182)](https://github.com/BetterCloud/vault-java-driver/pull/182)
+  
+* **4.1.0**:  This release contains the following updates:
+  * Support for JWT authentication, for use by Kubernetes and other JWT-based authentication providers.  [(PR #164)](https://github.com/BetterCloud/vault-java-driver/pull/164)
+  * Updates the lease revoke method, to support changes in the underlying Vault API.  [(PR #163)](https://github.com/BetterCloud/vault-java-driver/pull/163)
+  * Changes the `VaultConfig.secretsEnginePathMap(...)` method from default access level to `public`, to allow for manual
+    setting [(PR #164)](https://github.com/BetterCloud/vault-java-driver/pull/156)
+  * Adds the nonce value to `AuthResponse`, to facilitate re-authentication with Vault via AWS.  [(PR #168)](https://github.com/BetterCloud/vault-java-driver/pull/168)
+  * Establishes a `module-info` file, updates the JDK requirement for building this library to Java 9 (although the built 
+    library artifact remains compatible as a dependency in Java 8 projects).  [(PR #165)](https://github.com/BetterCloud/vault-java-driver/pull/165)
+  * Updates Gradle, and various test dependencies to their latest versions.  Integration tests now target Vault 1.1.3.
+  
+* **4.0.0**:  This is a breaking-change release, with two primary updates:
+  * Adds support for Version 2 of the Key/Value Secrets Engine.  The driver now assumes that your Vault instance uses Version 2 of the 
+    Key/Value Secrets Engine across the board.  To configure this, see the [Key/Value Secret Engine Config](#key-value-secret-engine-config) 
+    section above.
+  * Adds support for the namespaces feature of Vault Enterprise.
+  
 * **3.1.0**:  Several updates.
   * Adds support for seal-related operations (i.e. `/sys/seal`, `/sys/unseal`, `/sys/seal-status`).
   * Adds support for the AWS auth backend.
@@ -326,11 +405,15 @@ Unit tests are located under the `src/test` directory, and can be run with the G
 Integration tests are located under the `src/test-integration` directory, and can be run with the Gradle
 `integrationTest` task.  See the additional `README.md` file in this directory for more detailed information.
 
+Although this library now includes a `module-info` class for use by Java 9+, the library currently targets 
+Java 8 compatibility.  Please do not attempt to introduce any features or syntax not compatible with Java 8 (the 
+Gradle build script should prevent you from doing so without modification).
+
 License
 -------
 The MIT License (MIT)
 
-Copyright (c) 2016-2018 BetterCloud
+Copyright (c) 2016-2019 BetterCloud
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation the

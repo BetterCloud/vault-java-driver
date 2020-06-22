@@ -4,14 +4,17 @@ import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.HealthResponse;
 import com.bettercloud.vault.util.VaultContainer;
+import java.io.IOException;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import java.io.IOException;
-
-import static junit.framework.TestCase.*;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertNull;
+import static junit.framework.TestCase.assertTrue;
 
 /**
  * <p>Integration tests for the debug-related operations on the Vault HTTP API's.</p>
@@ -60,11 +63,13 @@ public class DebugTests {
      *
      * <p>For example... Vault still returns a valid JSON payload when you change activeCode to 212 (see test above),
      * but returns an empty payload when you set it to use 204.</p>
+     *
      * @throws VaultException
      */
     @Test
     public void testHealth_WonkyActiveCode() throws VaultException {
-        final HealthResponse response = vault.debug().health(null, 204, null, null);
+        final HealthResponse response = vault.debug().health(null, 204, null,
+                null);
         assertNull(response.getInitialized());
         assertNull(response.getSealed());
         assertNull(response.getStandby());

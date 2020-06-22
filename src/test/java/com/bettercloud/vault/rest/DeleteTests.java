@@ -4,12 +4,12 @@ import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.vault.VaultTestUtils;
 import com.bettercloud.vault.vault.mock.EchoInputMockVault;
+import java.io.UnsupportedEncodingException;
 import org.eclipse.jetty.server.Server;
 import org.junit.Test;
 
-import java.io.UnsupportedEncodingException;
-
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class DeleteTests {
 
@@ -88,6 +88,33 @@ public class DeleteTests {
         final JsonObject headers = Json.parse(echoInputMockVault.getLastRequestDetails()).asObject().get("headers").asObject();
         assertEquals("value1", headers.getString("header1", ""));
         assertEquals("value2", headers.getString("header2", ""));
+
+        VaultTestUtils.shutdownMockVault(server);
+    }
+
+    /**
+     * <p>Verify a DELETE request that sends header values.</p>
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testDelete_WithOptionalHeaders() throws Exception {
+        final EchoInputMockVault echoInputMockVault = new EchoInputMockVault(204);
+        final Server server = VaultTestUtils.initHttpMockVault(echoInputMockVault);
+        server.start();
+
+        final RestResponse restResponse = new Rest()//NOPMD
+                .url("http://127.0.0.1:8999")
+                .header("header1", "value1")
+                .header("header2", "value2")
+                .header("I am null", null)
+                .delete();
+
+        assertEquals(204, restResponse.getStatus());
+        final JsonObject headers = Json.parse(echoInputMockVault.getLastRequestDetails()).asObject().get("headers").asObject();
+        assertEquals("value1", headers.getString("header1", ""));
+        assertEquals("value2", headers.getString("header2", ""));
+        assertNull(headers.getString( "I am null", null));
 
         VaultTestUtils.shutdownMockVault(server);
     }

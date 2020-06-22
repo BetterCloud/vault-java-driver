@@ -1,0 +1,27 @@
+language: java
+
+dist: xenial
+
+services:
+  - docker
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+matrix:
+  include:
+    - jdk: openjdk12
+    - jdk: openjdk11
+    - jdk: openjdk9
+
+script:
+  - ./gradlew build integrationTest -s --info
+
+notifications:
+  email: false

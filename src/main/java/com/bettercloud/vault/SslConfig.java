@@ -1,15 +1,6 @@
 package com.bettercloud.vault;
 
 import com.bettercloud.vault.api.Auth;
-import lombok.AccessLevel;
-import lombok.Getter;
-
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.xml.bind.DatatypeConverter;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -19,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -32,6 +24,12 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * <p>A container for SSL-related configuration options, meant to be stored within a {@link VaultConfig} instance.</p>
@@ -46,12 +44,12 @@ public class SslConfig implements Serializable {
     private static final String VAULT_SSL_VERIFY = "VAULT_SSL_VERIFY";
     private static final String VAULT_SSL_CERT = "VAULT_SSL_CERT";
 
-    @Getter private boolean verify;
-    @Getter private transient SSLContext sslContext;
+    private boolean verify;
+    private transient SSLContext sslContext;
     private transient KeyStore trustStore;
     private transient KeyStore keyStore;
     private String keyStorePassword;
-    @Getter(AccessLevel.PROTECTED) private String pemUTF8;  // exposed to unit tests
+    private String pemUTF8;  // exposed to unit tests
     private String clientPemUTF8;
     private String clientKeyPemUTF8;
     private Boolean verifyObject;
@@ -445,13 +443,13 @@ public class SslConfig implements Serializable {
             this.environmentLoader = new EnvironmentLoader();
         }
         if (this.verifyObject == null && environmentLoader.loadVariable(VAULT_SSL_VERIFY) != null) {
-            this.verify = Boolean.valueOf(environmentLoader.loadVariable(VAULT_SSL_VERIFY));
+            this.verify = Boolean.parseBoolean(environmentLoader.loadVariable(VAULT_SSL_VERIFY));
         } else if (this.verifyObject != null) {
             this.verify = verifyObject;
         } else {
             this.verify = true;
         }
-        if (this.verify == true && this.pemUTF8 == null && environmentLoader.loadVariable(VAULT_SSL_CERT) != null) {
+        if (this.verify && this.pemUTF8 == null && environmentLoader.loadVariable(VAULT_SSL_CERT) != null) {
             final File pemFile = new File(environmentLoader.loadVariable(VAULT_SSL_CERT));
             try (final InputStream input = new FileInputStream(pemFile)) {
                 this.pemUTF8 = inputStreamToUTF8(input);
@@ -461,6 +459,18 @@ public class SslConfig implements Serializable {
         }
         buildSsl();
         return this;
+    }
+
+    public boolean isVerify() {
+        return verify;
+    }
+
+    public SSLContext getSslContext() {
+        return sslContext;
+    }
+
+    protected String getPemUTF8() {
+        return pemUTF8;
     }
 
     /**
@@ -476,7 +486,7 @@ public class SslConfig implements Serializable {
      * @throws VaultException
      */
     private void buildSsl() throws VaultException {
-        if (verify == true) {
+        if (verify) {
             if (keyStore != null || trustStore != null) {
                 this.sslContext = buildSslContextFromJks();
             } else if (pemUTF8 != null || clientPemUTF8 != null || clientKeyPemUTF8 != null) {
@@ -538,7 +548,7 @@ public class SslConfig implements Serializable {
                 final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 // Convert the trusted servers PEM data into an X509Certificate
                 X509Certificate certificate;
-                try (final ByteArrayInputStream pem = new ByteArrayInputStream(pemUTF8.getBytes("UTF-8"))) {
+                try (final ByteArrayInputStream pem = new ByteArrayInputStream(pemUTF8.getBytes(StandardCharsets.UTF_8))) {
                     certificate = (X509Certificate) certificateFactory.generateCertificate(pem);
                 }
                 // Build a truststore
@@ -553,14 +563,14 @@ public class SslConfig implements Serializable {
                 final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
                 // Convert the client certificate PEM data into an X509Certificate
                 X509Certificate clientCertificate;
-                try (final ByteArrayInputStream pem = new ByteArrayInputStream(clientPemUTF8.getBytes("UTF-8"))) {
+                try (final ByteArrayInputStream pem = new ByteArrayInputStream(clientPemUTF8.getBytes(StandardCharsets.UTF_8))) {
                     clientCertificate = (X509Certificate) certificateFactory.generateCertificate(pem);
                 }
 
                 // Convert the client private key into a PrivateKey
                 final String strippedKey = clientKeyPemUTF8.replace("-----BEGIN PRIVATE KEY-----", "")
                                                      .replace("-----END PRIVATE KEY-----", "");
-                final byte[] keyBytes = DatatypeConverter.parseBase64Binary(strippedKey);
+                final byte[] keyBytes = Base64.getMimeDecoder().decode(strippedKey);
                 final PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(keyBytes);
                 final KeyFactory factory = KeyFactory.getInstance("RSA");
                 final PrivateKey privateKey = factory.generatePrivate(pkcs8EncodedKeySpec);
@@ -613,8 +623,8 @@ public class SslConfig implements Serializable {
      * @throws IOException
      */
     private static String inputStreamToUTF8(final InputStream input) throws IOException {
-        final BufferedReader in = new BufferedReader(new InputStreamReader(input, "UTF-8"));
-        final StringBuilder utf8 = new StringBuilder("");
+        final BufferedReader in = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+        final StringBuilder utf8 = new StringBuilder();
         String str;
         while ((str = in.readLine()) != null) {
             // String concatenation is less efficient, but for some reason the line-breaks (which are necessary

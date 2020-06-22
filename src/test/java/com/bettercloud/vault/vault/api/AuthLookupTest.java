@@ -7,12 +7,11 @@ import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.response.LookupResponse;
 import com.bettercloud.vault.vault.VaultTestUtils;
 import com.bettercloud.vault.vault.mock.MockVault;
+import java.util.Optional;
 import org.eclipse.jetty.server.Server;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 

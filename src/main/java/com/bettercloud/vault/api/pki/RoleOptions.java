@@ -42,7 +42,6 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param ttl (optional) The Time To Live value provided as a string duration with time suffix. Hour is the largest suffix.  If not set, uses the system default value or the value of max_ttl, whichever is shorter.
-     *
      * @return This object, with ttl populated, ready for other builder methods or immediate use.
      */
     public RoleOptions ttl(final String ttl) {
@@ -52,7 +51,6 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param maxTtl (optional) The maximum Time To Live provided as a string duration with time suffix. Hour is the largest suffix.  If not set, defaults to the system maximum lease TTL.
-     *
      * @return This object, with maxTtl populated, ready for other builder methods or immediate use.
      */
     public RoleOptions maxTtl(final String maxTtl) {
@@ -62,7 +60,6 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param allowLocalhost (optional) If set, clients can request certificates for localhost as one of the requested common names. This is useful for testing and to allow clients on a single host to talk securely. Defaults to true.
-     *
      * @return This object, with allowLocalhost populated, ready for other builder methods or immediate use.
      */
     public RoleOptions allowLocalhost(final Boolean allowLocalhost) {
@@ -72,7 +69,6 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param allowedDomains (optional) Designates the domains of the role, provided as a comma-separated list. This is used with the allow_bare_domains and allow_subdomains options. There is no default.
-     *
      * @return This object, with allowedDomains populated, ready for other builder methods or immediate use.
      */
     public RoleOptions allowedDomains(final List<String> allowedDomains) {
@@ -85,7 +81,6 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param allowBareDomains (optional) If set, clients can request certificates matching the value of the actual domains themselves; e.g. if a configured domain set with allowed_domains is example.com, this allows clients to actually request a certificate containing the name example.com as one of the DNS values on the final certificate. In some scenarios, this can be considered a security risk. Defaults to false.
-     *
      * @return This object, with allowBareDomains populated, ready for other builder methods or immediate use.
      */
     public RoleOptions allowBareDomains(final Boolean allowBareDomains) {
@@ -95,25 +90,24 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param allowSubdomains (optional) If set, clients can request certificates with CNs that are subdomains of the CNs allowed by the other role options. This includes wildcard subdomains. For example, an allowed_domains value of example.com with this option set to true will allow foo.example.com and bar.example.com as well as *.example.com. This is redundant when using the allow_any_name option. Defaults to false. *
-     *
      * @return This object, with allowSubdomains populated, ready for other builder methods or immediate use.
      */
     public RoleOptions allowSubdomains(final Boolean allowSubdomains) {
         this.allowSubdomains = allowSubdomains;
         return this;
     }
+
     /**
-     * @param  allowSpiffename (optional)
-     *
+     * @param allowSpiffename (optional)
      * @return This object, with AllowSpiffename populated, ready for other builder methods or immediate use.
      */
     public RoleOptions allowSpiffeName(final Boolean allowSpiffename) {
-        this.allowSpiffename  = allowSpiffename ;
+        this.allowSpiffename = allowSpiffename;
         return this;
     }
+
     /**
      * @param allowAnyName (optional) If set, clients can request any CN. Useful in some circumstances, but make sure you understand whether it is appropriate for your installation before enabling it. Defaults to false.
-     *
      * @return This object, with allowSubdomains populated, ready for other builder methods or immediate use.
      */
     public RoleOptions allowAnyName(final Boolean allowAnyName) {
@@ -123,7 +117,6 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param enforceHostnames (optional) If set, only valid host names are allowed for CNs, DNS SANs, and the host part of email addresses.  Defaults to true.
-     *
      * @return This object, with enforceHostnames populated, ready for other builder methods or immediate use.
      */
     public RoleOptions enforceHostnames(final Boolean enforceHostnames) {
@@ -133,7 +126,6 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param allowIpSans (optional) If set, clients can request IP Subject Alternative Names. No authorization checking is performed except to verify that the given values are valid IP addresses. Defaults to true.
-     *
      * @return This object, with allowIpSans populated, ready for other builder methods or immediate use.
      */
     public RoleOptions allowIpSans(final Boolean allowIpSans) {
@@ -143,7 +135,6 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param serverFlag (optional) If set, certificates are flagged for server use. Defaults to true.
-     *
      * @return This object, with serverFlag populated, ready for other builder methods or immediate use.
      */
     public RoleOptions serverFlag(final Boolean serverFlag) {
@@ -153,7 +144,6 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param clientFlag (optional) If set, certificates are flagged for client use. Defaults to true.
-     *
      * @return This object, with clientFlag populated, ready for other builder methods or immediate use.
      */
     public RoleOptions clientFlag(final Boolean clientFlag) {
@@ -163,7 +153,6 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param codeSigningFlag (optional) If set, certificates are flagged for code signing use. Defaults to false.
-     *
      * @return This object, with codeSigningFlag populated, ready for other builder methods or immediate use.
      */
     public RoleOptions codeSigningFlag(final Boolean codeSigningFlag) {
@@ -173,7 +162,6 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param emailProtectionFlag (optional) If set, certificates are flagged for email protection use. Defaults to false.
-     *
      * @return This object, with emailProtectionFlag populated, ready for other builder methods or immediate use.
      */
     public RoleOptions emailProtectionFlag(final Boolean emailProtectionFlag) {
@@ -183,7 +171,6 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param keyType (optional) The type of key to generate for generated private keys. Currently, rsa and ec are supported.  Defaults to rsa.
-     *
      * @return This object, with keyType populated, ready for other builder methods or immediate use.
      */
     public RoleOptions keyType(final String keyType) {
@@ -193,7 +180,6 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param keyBits (optional) The number of bits to use for the generated keys. Defaults to 2048; this will need to be changed for ec keys. See https://golang.org/pkg/crypto/elliptic/#Curve for an overview of allowed bit lengths for ec.
-     *
      * @return This object, with keyBits populated, ready for other builder methods or immediate use.
      */
     public RoleOptions keyBits(final Long keyBits) {
@@ -203,16 +189,15 @@ public class RoleOptions implements Serializable {
 
     /**
      * @param useCsrCommonName (optional) If set, when used with the CSR signing endpoint, the common name in the CSR will be used instead of taken from the JSON data. This does not include any requested SANs in the CSR. Defaults to false.
-     *
      * @return This object, with useCsrCommonName populated, ready for other builder methods or immediate use.
      */
     public RoleOptions useCsrCommonName(final Boolean useCsrCommonName) {
         this.useCsrCommonName = useCsrCommonName;
         return this;
     }
+
     /**
      * @param useCsrSans (optional) If set, when used with the CSR signing endpoint, the common name in the CSR will be used instead of taken from the JSON data. This does not include any requested SANs in the CSR. Defaults to false.
-     *
      * @return This object, with useCsrCommonName populated, ready for other builder methods or immediate use.
      */
     public RoleOptions useCsrSans(final Boolean useCsrSans) {
@@ -236,9 +221,7 @@ public class RoleOptions implements Serializable {
         if (allowedDomains == null) {
             return null;
         } else {
-            final List<String> clone = new ArrayList<>();
-            clone.addAll(allowedDomains);
-            return clone;
+            return new ArrayList<>(allowedDomains);
         }
     }
 
@@ -289,8 +272,14 @@ public class RoleOptions implements Serializable {
     public Boolean getUseCsrCommonName() {
         return useCsrCommonName;
     }
-    public Boolean getUseCsrSans() {        return useCsrSans;    }
-    public Boolean getAllowSpiffename() {        return allowSpiffename;    }
+
+    public Boolean getUseCsrSans() {
+        return useCsrSans;
+    }
+
+    public Boolean getAllowSpiffename() {
+        return allowSpiffename;
+    }
 
 
     public RoleOptions keyUsage(List<String> keyUsage) {

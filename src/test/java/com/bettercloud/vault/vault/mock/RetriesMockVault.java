@@ -1,11 +1,9 @@
 package com.bettercloud.vault.vault.mock;
 
-import org.eclipse.jetty.server.Request;
-
-import javax.servlet.ServletException;
+import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.eclipse.jetty.server.Request;
 
 /**
  * <p>This class is used to mock out a Vault server in unit tests involving retry logic.  As it extends Jetty's
@@ -61,7 +59,7 @@ public class RetriesMockVault extends MockVault {
             final Request baseRequest,
             final HttpServletRequest request,
             final HttpServletResponse response
-    ) throws IOException, ServletException {
+    ) throws IOException {
         response.setContentType("application/json");
         baseRequest.setHandled(true);
         if (failureCount > 0) {

@@ -6,20 +6,15 @@ import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.util.SSLUtils;
 import com.bettercloud.vault.util.VaultContainer;
-import org.bouncycastle.operator.OperatorCreationException;
+import java.io.File;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.util.HashMap;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.cert.CertificateException;
-
+import static com.bettercloud.vault.util.TestConstants.PASSWORD;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
@@ -34,14 +29,15 @@ public class AuthBackendCertTests {
 
     @ClassRule
     public static final VaultContainer container = new VaultContainer();
+    private static HashMap<String, Object> clientCertAndKey;
+    private static String cert;
 
     @BeforeClass
-    public static void setupClass() throws IOException, InterruptedException, CertificateException, SignatureException,
-            NoSuchAlgorithmException, KeyStoreException, OperatorCreationException, NoSuchProviderException,
-            InvalidKeyException {
+    public static void setupClass() throws IOException, InterruptedException {
+        clientCertAndKey = SSLUtils.createClientCertAndKey();
+        cert = (String) clientCertAndKey.get("cert");
         container.initAndUnsealVault();
-        SSLUtils.createClientCertAndKey();
-        container.setupBackendCert();
+        container.setupBackendCert(cert);
     }
 
     @Test
@@ -53,8 +49,8 @@ public class AuthBackendCertTests {
                         .readTimeout(30)
                         .sslConfig(
                                 new SslConfig()
-                                        .keyStoreFile(new File(VaultContainer.CLIENT_KEYSTORE), "password")
-                                        .trustStoreFile(new File(VaultContainer.CLIENT_TRUSTSTORE))
+                                        .keyStore((KeyStore) clientCertAndKey.get("clientKeystore"), PASSWORD)
+                                        .trustStore((KeyStore) clientCertAndKey.get("clientTrustStore"))
                                         .build()
                         )
                         .build();
@@ -76,8 +72,8 @@ public class AuthBackendCertTests {
                         .sslConfig(
                                 new SslConfig()
                                         .pemFile(new File(VaultContainer.CERT_PEMFILE))
-                                        .clientPemFile(new File(VaultContainer.CLIENT_CERT_PEMFILE))
-                                        .clientKeyPemFile(new File(VaultContainer.CLIENT_PRIVATE_KEY_PEMFILE))
+                                        .clientPemUTF8(cert)
+                                        .clientKeyPemUTF8((String) clientCertAndKey.get("privateKey"))
                                         .build()
                         )
                         .build();

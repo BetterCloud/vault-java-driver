@@ -1,19 +1,17 @@
 package com.bettercloud.vault.vault.mock;
 
-import static com.bettercloud.vault.vault.VaultTestUtils.readRequestBody;
-import static com.bettercloud.vault.vault.VaultTestUtils.readRequestHeaders;
-
+import com.bettercloud.vault.json.JsonObject;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import com.bettercloud.vault.json.JsonObject;
+import static com.bettercloud.vault.vault.VaultTestUtils.readRequestBody;
+import static com.bettercloud.vault.vault.VaultTestUtils.readRequestHeaders;
 
 /**
  * <p>This class is used to mock out a Vault server in unit tests involving retry logic. As it extends Jetty's
