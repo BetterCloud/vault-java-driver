@@ -69,13 +69,21 @@ public class DatabaseResponse extends LogicalResponse {
         final String username = data.get("username");
         final String password = data.get("password");
 
+        // Retrieve lease info to be able to renew or revoke certain creds
+        final String leaseId = data.get("lease_id");
+        final String leaseDuration = data.get("lease_id");
+        final Boolean leaseRenewable = Boolean.valueOf(data.getOrDefault("lease_id", Boolean.FALSE.toString()));
+
         if (username == null && password == null) {
             return null;
         }
 
         return new DatabaseCredential()
                 .username(username)
-                .password(password);
+                .password(password)
+                .leaseId(leaseId)
+                .leaseDuration(leaseDuration)
+                .leaseRenewable(leaseRenewable);
     }
 
     private JsonArray safeGetJsonArray(JsonObject source, String key) {
