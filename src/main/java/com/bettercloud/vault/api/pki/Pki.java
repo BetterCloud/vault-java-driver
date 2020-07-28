@@ -374,7 +374,7 @@ public class Pki {
             final String ttl,
             final CredentialFormat format) throws VaultException {
 
-        return issue(roleName, commonName, altNames, ipSans, ttl, format, "");
+        return issue(roleName, commonName, altNames, ipSans, ttl, format, "", null);
     }
 
     /**
@@ -407,8 +407,6 @@ public class Pki {
      * @return A container for the information returned by Vault
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
-
-
     public PkiResponse issue(
             final String roleName,
             final String commonName,
@@ -417,6 +415,50 @@ public class Pki {
             final String ttl,
             final CredentialFormat format,
             final String csr
+    ) throws VaultException {
+        return issue(roleName,commonName,altNames,ipSans, ttl, format, csr, null);
+    }
+
+    /**
+     * <p>Operation to allow a format to be set for the private key.</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final VaultConfig config = new VaultConfig.address(...).token(...).build();
+     * final Vault vault = new Vault(config);
+     *
+     * final PkiResponse response = vault.pki().issue(
+     *         "roleName",
+     *         "commonName",
+     *         null,
+     *         null,
+     *         null,
+     *         CredentialFormat.PEM, null, PrivateKeyFormat.PKCS8
+     *     ));
+     * assertEquals(200, response.getRestResponse().getStatus();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param roleName The role on which the credentials will be based.
+     * @param commonName The requested CN for the certificate. If the CN is allowed by role policy, it will be issued.
+     * @param altNames (optional) Requested Subject Alternative Names, in a comma-delimited list. These can be host names or email addresses; they will be parsed into their respective fields. If any requested names do not match role policy, the entire request will be denied.
+     * @param ipSans (optional) Requested IP Subject Alternative Names, in a comma-delimited list. Only valid if the role allows IP SANs (which is the default).
+     * @param ttl (optional) Requested Time To Live. Cannot be greater than the role's max_ttl value. If not provided, the role's ttl value will be used. Note that the role values default to system values if not explicitly set.
+     * @param format (optional) Format for returned data. Can be pem, der, or pem_bundle; defaults to pem. If der, the output is base64 encoded. If pem_bundle, the certificate field will contain the private key, certificate, and issuing CA, concatenated.
+     * @param csr (optional) PEM Encoded CSR
+     * @param privateKeyFormat (optional) der, pem, or pkcs8
+     * @return A container for the information returned by Vault
+     * @throws VaultException If any error occurs or unexpected response is received from Vault
+     */
+    public PkiResponse issue(
+            final String roleName,
+            final String commonName,
+            final List<String> altNames,
+            final List<String> ipSans,
+            final String ttl,
+            final CredentialFormat format,
+            final String csr,
+            final PrivateKeyFormat privateKeyFormat
     ) throws VaultException {
         int retryCount = 0;
         while (true) {
@@ -453,6 +495,9 @@ public class Pki {
             }
             if (csr != null) {
                 jsonObject.add("csr", csr);
+            }
+            if (privateKeyFormat != null) {
+                jsonObject.add("private_key_format", privateKeyFormat.toString());
             }
             final String requestJson = jsonObject.toString();
 
