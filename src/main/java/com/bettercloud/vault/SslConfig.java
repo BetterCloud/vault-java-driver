@@ -44,16 +44,16 @@ public class SslConfig implements Serializable {
     private static final String VAULT_SSL_VERIFY = "VAULT_SSL_VERIFY";
     private static final String VAULT_SSL_CERT = "VAULT_SSL_CERT";
 
-    private boolean verify;
-    private transient SSLContext sslContext;
-    private transient KeyStore trustStore;
-    private transient KeyStore keyStore;
-    private String keyStorePassword;
-    private String pemUTF8;  // exposed to unit tests
-    private String clientPemUTF8;
-    private String clientKeyPemUTF8;
-    private Boolean verifyObject;
-    private EnvironmentLoader environmentLoader;
+    private volatile boolean verify;
+    private volatile transient SSLContext sslContext;
+    private volatile transient KeyStore trustStore;
+    private volatile transient KeyStore keyStore;
+    private volatile String keyStorePassword;
+    private volatile String pemUTF8;  // exposed to unit tests
+    private volatile String clientPemUTF8;
+    private volatile String clientKeyPemUTF8;
+    private volatile Boolean verifyObject;
+    private volatile EnvironmentLoader environmentLoader;
 
     /**
      * <p>The code used to load environment variables is encapsulated here, so that a mock version of that environment

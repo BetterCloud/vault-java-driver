@@ -30,18 +30,18 @@ public class VaultConfig implements Serializable {
     private static final String VAULT_OPEN_TIMEOUT = "VAULT_OPEN_TIMEOUT";
     private static final String VAULT_READ_TIMEOUT = "VAULT_READ_TIMEOUT";
 
-    private Map<String, String> secretsEnginePathMap = new ConcurrentHashMap<>();
-    private String address;
-    private String token;
-    private SslConfig sslConfig;
-    private Integer openTimeout;
-    private Integer readTimeout;
-    private int prefixPathDepth = 1;
-    private int maxRetries;
-    private int retryIntervalMilliseconds;
-    private Integer globalEngineVersion;
-    private String nameSpace;
-    private EnvironmentLoader environmentLoader;
+    private volatile Map<String, String> secretsEnginePathMap = new ConcurrentHashMap<>();
+    private volatile String address;
+    private volatile String token;
+    private volatile SslConfig sslConfig;
+    private volatile Integer openTimeout;
+    private volatile Integer readTimeout;
+    private volatile int prefixPathDepth = 1;
+    private volatile int maxRetries;
+    private volatile int retryIntervalMilliseconds;
+    private volatile Integer globalEngineVersion;
+    private volatile String nameSpace;
+    private volatile EnvironmentLoader environmentLoader;
 
     /**
      * <p>The code used to load environment variables is encapsulated here, so that a mock version of that environment
