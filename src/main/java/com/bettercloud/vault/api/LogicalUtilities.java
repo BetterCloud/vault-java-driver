@@ -198,13 +198,18 @@ public class LogicalUtilities {
      * @return This jsonObject mutated for the operation.
      */
     public static JsonObject jsonObjectToWriteFromEngineVersion(
-            final Logical.logicalOperations operation, final JsonObject jsonObject) {
+            final Logical.logicalOperations operation, final JsonObject jsonObject,
+            final JsonObject optionsJsonObject) {
         if (operation.equals(Logical.logicalOperations.writeV2)) {
             final JsonObject wrappedJson = new JsonObject();
             wrappedJson.add("data", jsonObject);
+            if (null != optionsJsonObject) {
+                wrappedJson.add("options", optionsJsonObject);
+            }
             return wrappedJson;
         } else {
             return jsonObject;
         }
     }
+
 }
