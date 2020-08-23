@@ -24,7 +24,7 @@ public class LogicalResponse extends VaultResponse {
     private String leaseId;
     private Boolean renewable;
     private Long leaseDuration;
-    private final Map<String, String> metadata = new HashMap<>();
+    private final Map<String, String> dataMetadata = new HashMap<>();
 
     /**
      * @param restResponse The raw HTTP response from Vault.
@@ -61,8 +61,8 @@ public class LogicalResponse extends VaultResponse {
         return leaseDuration;
     }
 
-    public Map<String, String> getMetadata() {
-        return metadata;
+    public DataMetadata getDataMetadata() {
+        return new DataMetadata(dataMetadata);
     }
 
     private void parseMetadataFields() {
@@ -91,7 +91,7 @@ public class LogicalResponse extends VaultResponse {
             JsonValue metadataValue = jsonObject.get("metadata");
             if (null != metadataValue) {
                 JsonObject metadataObject = metadataValue.asObject();
-                parseJsonIntoMap(metadataObject, metadata);
+                parseJsonIntoMap(metadataObject, dataMetadata);
             }
 
             // For list operations convert the array of keys to a list of values

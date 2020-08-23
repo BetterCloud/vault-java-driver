@@ -105,6 +105,12 @@ public class LogicalUtilitiesTests {
         JsonObject jsonObjectV2 = new JsonObject().add("test", "test");
         JsonObject jsonObjectFromEngineVersionV2 = LogicalUtilities.jsonObjectToWriteFromEngineVersion(Logical.logicalOperations.writeV2, jsonObjectV2, null);
         Assert.assertEquals(jsonObjectFromEngineVersionV2.get("data"), jsonObjectV2);
+        Assert.assertNull(jsonObjectFromEngineVersionV2.get("options"));
+
+        JsonObject optionsJsonObject = new JsonObject().add("cas", "0");
+        JsonObject jsonObjectFromEngineVersion2WithOptions = LogicalUtilities.jsonObjectToWriteFromEngineVersion(Logical.logicalOperations.writeV2, jsonObjectV2, optionsJsonObject);
+        Assert.assertEquals(jsonObjectFromEngineVersion2WithOptions.get("data"), jsonObjectV2);
+        Assert.assertEquals(jsonObjectFromEngineVersion2WithOptions.get("options"), optionsJsonObject);
 
         JsonObject jsonObjectV1 = new JsonObject().add("test", "test");
         JsonObject jsonObjectFromEngineVersionV1 = LogicalUtilities.jsonObjectToWriteFromEngineVersion(Logical.logicalOperations.writeV1, jsonObjectV1, null);

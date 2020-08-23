@@ -29,6 +29,8 @@ import static com.bettercloud.vault.api.LogicalUtilities.jsonObjectToWriteFromEn
  */
 public class Logical {
 
+    private static final WriteOptions EMPTY_WRITE_OPTIONS = WriteOptions.emptyOptions();
+
     private final VaultConfig config;
 
     private String nameSpace;
@@ -219,12 +221,12 @@ public class Logical {
      */
     public LogicalResponse write(final String path, final Map<String, Object> nameValuePairs) throws VaultException {
         if (engineVersionForSecretPath(path).equals(2)) {
-            return write(path, nameValuePairs, logicalOperations.writeV2, null);
-        } else return write(path, nameValuePairs, logicalOperations.writeV1, null);
+            return write(path, nameValuePairs, logicalOperations.writeV2, EMPTY_WRITE_OPTIONS);
+        } else return write(path, nameValuePairs, logicalOperations.writeV1, EMPTY_WRITE_OPTIONS);
     }
 
     public LogicalResponse write(final String path, final Map<String, Object> nameValuePairs,
-                                 final Map<String, Object> writeOptions) throws VaultException {
+                                 final WriteOptions writeOptions) throws VaultException {
         if (this.engineVersionForSecretPath(path) != 2) {
             throw new VaultException("Write options are only supported in KV Engine version 2.");
         }
@@ -233,12 +235,12 @@ public class Logical {
 
     private LogicalResponse write(final String path, final Map<String, Object> nameValuePairs,
                                   final logicalOperations operation,
-                                  final Map<String, Object> writeOptions) throws VaultException {
+                                  final WriteOptions writeOptions) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
                 JsonObject dataJson = buildJsonFromMap(nameValuePairs);
-                JsonObject optionsJson = ((writeOptions != null) && (writeOptions.size() > 0)) ? buildJsonFromMap(writeOptions) : null;
+                JsonObject optionsJson = writeOptions.isEmpty() ? null : buildJsonFromMap(writeOptions.getOptionsMap());
 
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
