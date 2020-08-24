@@ -31,7 +31,4 @@ public class WriteOptions {
         return options.isEmpty();
     }
 
-    public static WriteOptions emptyOptions() {
-        return new WriteOptions().build();
-    }
 }

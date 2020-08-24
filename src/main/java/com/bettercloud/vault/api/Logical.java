@@ -29,7 +29,7 @@ import static com.bettercloud.vault.api.LogicalUtilities.jsonObjectToWriteFromEn
  */
 public class Logical {
 
-    private static final WriteOptions EMPTY_WRITE_OPTIONS = WriteOptions.emptyOptions();
+    private static final WriteOptions EMPTY_WRITE_OPTIONS = new WriteOptions().build();
 
     private final VaultConfig config;
 
