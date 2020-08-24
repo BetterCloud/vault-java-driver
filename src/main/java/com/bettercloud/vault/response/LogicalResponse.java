@@ -83,16 +83,15 @@ public class LogicalResponse extends VaultResponse {
             JsonObject jsonObject = Json.parse(jsonString).asObject();
             if (operation.equals(Logical.logicalOperations.readV2)) {
                 jsonObject = jsonObject.get("data").asObject();
+
+                JsonValue metadataValue = jsonObject.get("metadata");
+                if (null != metadataValue) {
+                    parseJsonIntoMap(metadataValue.asObject(), dataMetadata);
+                }
             }
             data = new HashMap<>();
             dataObject = jsonObject.get("data").asObject();
             parseJsonIntoMap(dataObject, data);
-
-            JsonValue metadataValue = jsonObject.get("metadata");
-            if (null != metadataValue) {
-                JsonObject metadataObject = metadataValue.asObject();
-                parseJsonIntoMap(metadataObject, dataMetadata);
-            }
 
             // For list operations convert the array of keys to a list of values
             if (operation.equals(Logical.logicalOperations.listV1) || operation.equals(Logical.logicalOperations.listV2)) {
