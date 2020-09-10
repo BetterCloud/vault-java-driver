@@ -48,6 +48,7 @@ public class Seal {
                         .url(config.getAddress() + "/v1/sys/seal")
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Request", "true")
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
@@ -108,6 +109,7 @@ public class Seal {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/unseal")
                         .header("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Request", "true")
                         .body(requestJson.getBytes(StandardCharsets.UTF_8))
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
@@ -151,6 +153,7 @@ public class Seal {
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/seal-status")
                         .header("X-Vault-Namespace", this.nameSpace)
+                        .header("X-Vault-Request", "true")
                         .connectTimeoutSeconds(config.getOpenTimeout())
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
