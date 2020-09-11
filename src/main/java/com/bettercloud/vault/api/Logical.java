@@ -29,6 +29,8 @@ import static com.bettercloud.vault.api.LogicalUtilities.jsonObjectToWriteFromEn
  */
 public class Logical {
 
+    private static final WriteOptions EMPTY_WRITE_OPTIONS = new WriteOptions().build();
+
     private final VaultConfig config;
 
     private String nameSpace;
@@ -219,42 +221,31 @@ public class Logical {
      */
     public LogicalResponse write(final String path, final Map<String, Object> nameValuePairs) throws VaultException {
         if (engineVersionForSecretPath(path).equals(2)) {
-            return write(path, nameValuePairs, logicalOperations.writeV2);
-        } else return write(path, nameValuePairs, logicalOperations.writeV1);
+            return write(path, nameValuePairs, logicalOperations.writeV2, EMPTY_WRITE_OPTIONS);
+        } else return write(path, nameValuePairs, logicalOperations.writeV1, EMPTY_WRITE_OPTIONS);
+    }
+
+    public LogicalResponse write(final String path, final Map<String, Object> nameValuePairs,
+                                 final WriteOptions writeOptions) throws VaultException {
+        if (this.engineVersionForSecretPath(path) != 2) {
+            throw new VaultException("Write options are only supported in KV Engine version 2.");
+        }
+        return write(path, nameValuePairs, logicalOperations.writeV2, writeOptions);
     }
 
     private LogicalResponse write(final String path, final Map<String, Object> nameValuePairs,
-                                  final logicalOperations operation) throws VaultException {
+                                  final logicalOperations operation,
+                                  final WriteOptions writeOptions) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
-                JsonObject requestJson = Json.object();
-                if (nameValuePairs != null) {
-                    for (final Map.Entry<String, Object> pair : nameValuePairs.entrySet()) {
-                        final Object value = pair.getValue();
-                        if (value == null) {
-                            requestJson = requestJson.add(pair.getKey(), (String) null);
-                        } else if (value instanceof Boolean) {
-                            requestJson = requestJson.add(pair.getKey(), (Boolean) pair.getValue());
-                        } else if (value instanceof Integer) {
-                            requestJson = requestJson.add(pair.getKey(), (Integer) pair.getValue());
-                        } else if (value instanceof Long) {
-                            requestJson = requestJson.add(pair.getKey(), (Long) pair.getValue());
-                        } else if (value instanceof Float) {
-                            requestJson = requestJson.add(pair.getKey(), (Float) pair.getValue());
-                        } else if (value instanceof Double) {
-                            requestJson = requestJson.add(pair.getKey(), (Double) pair.getValue());
-                        } else if (value instanceof JsonValue) {
-                            requestJson = requestJson.add(pair.getKey(), (JsonValue) pair.getValue());
-                        } else {
-                            requestJson = requestJson.add(pair.getKey(), pair.getValue().toString());
-                        }
-                    }
-                }
+                JsonObject dataJson = buildJsonFromMap(nameValuePairs);
+                JsonObject optionsJson = writeOptions.isEmpty() ? null : buildJsonFromMap(writeOptions.getOptionsMap());
+
                 // Make an HTTP request to Vault
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/" + adjustPathForReadOrWrite(path, config.getPrefixPathDepth(), operation))
-                        .body(jsonObjectToWriteFromEngineVersion(operation, requestJson).toString().getBytes(StandardCharsets.UTF_8))
+                        .body(jsonObjectToWriteFromEngineVersion(operation, dataJson, optionsJson).toString().getBytes(StandardCharsets.UTF_8))
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -644,4 +635,32 @@ public class Logical {
     public Integer getEngineVersionForSecretPath(final String path) {
         return this.engineVersionForSecretPath(path);
     }
+
+    private JsonObject buildJsonFromMap(Map<String, Object> nameValuePairs) {
+        JsonObject jsonObject = Json.object();
+        if (nameValuePairs != null) {
+            for (final Map.Entry<String, Object> pair : nameValuePairs.entrySet()) {
+                final Object value = pair.getValue();
+                if (value == null) {
+                    jsonObject = jsonObject.add(pair.getKey(), (String) null);
+                } else if (value instanceof Boolean) {
+                    jsonObject = jsonObject.add(pair.getKey(), (Boolean) pair.getValue());
+                } else if (value instanceof Integer) {
+                    jsonObject = jsonObject.add(pair.getKey(), (Integer) pair.getValue());
+                } else if (value instanceof Long) {
+                    jsonObject = jsonObject.add(pair.getKey(), (Long) pair.getValue());
+                } else if (value instanceof Float) {
+                    jsonObject = jsonObject.add(pair.getKey(), (Float) pair.getValue());
+                } else if (value instanceof Double) {
+                    jsonObject = jsonObject.add(pair.getKey(), (Double) pair.getValue());
+                } else if (value instanceof JsonValue) {
+                    jsonObject = jsonObject.add(pair.getKey(), (JsonValue) pair.getValue());
+                } else {
+                    jsonObject = jsonObject.add(pair.getKey(), pair.getValue().toString());
+                }
+            }
+        }
+        return jsonObject;
+    }
+
 }

@@ -4,6 +4,7 @@ import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.response.AuthResponse;
+import com.bettercloud.vault.response.DataMetadata;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.util.VaultContainer;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
@@ -62,6 +64,99 @@ public class LogicalTests {
 
         final String valueRead = vault.logical().read(pathToRead).getData().get("value");
         assertEquals(value, valueRead);
+    }
+
+    @Test
+    public void testWriteWithCheckAndSetAndReadWithDataMetadata() throws VaultException {
+        final String secretPath = "secret/checkAndSet";
+
+        final Vault vault = container.getRootVault();
+
+        final String value = "firstWorld";
+        final Map<String, Object> testData = new HashMap<>();
+        testData.put("value", value);
+
+        WriteOptions writeOptions = new WriteOptions().checkAndSet(0L).build();
+        vault.logical().write(secretPath, testData, writeOptions);
+
+        final LogicalResponse readResponse = vault.logical().read(secretPath);
+        final String valueRead = readResponse.getData().get("value");
+        assertEquals(value, valueRead);
+        final DataMetadata dataMetadata = readResponse.getDataMetadata();
+        assertNotNull(dataMetadata);
+        assertFalse(dataMetadata.isEmpty());
+        final Long secretVersion = dataMetadata.getVersion();
+        assertNotNull(secretVersion);
+        assertEquals(1L, secretVersion.longValue());
+    }
+
+    @Test
+    public void testWriteWithCheckAndSetWrongCreateVersion() throws VaultException {
+        final String secretPath = "secret/checkAndSetWrongVersion";
+
+        final Vault vault = container.getRootVault();
+
+        final String value = "firstWorld";
+        final Map<String, Object> testData = new HashMap<>();
+        testData.put("value", value);
+
+        WriteOptions writeOptions = new WriteOptions().checkAndSet(1L).build();
+        LogicalResponse writeResponse = vault.logical().write(secretPath, testData, writeOptions);
+        assertEquals(400, writeResponse.getRestResponse().getStatus());
+    }
+
+    @Test
+    public void tesUpdateWithCheckAndSetAndReadWithDataMetadata() throws VaultException {
+        final String secretPath = "secret/checkAndSetUpdate";
+
+        final Vault vault = container.getRootVault();
+
+        final String createValue = "firstWorld";
+        final Map<String, Object> testDataCreate = new HashMap<>();
+        testDataCreate.put("value", createValue);
+
+        LogicalResponse createResponse = vault.logical().write(secretPath, testDataCreate);
+        assertEquals(200, createResponse.getRestResponse().getStatus());
+
+        final String updateValue = "secondWorld";
+        final Map<String, Object> testDataUpdate = new HashMap<>();
+        testDataUpdate.put("value", updateValue);
+
+        WriteOptions updateOptions = new WriteOptions().checkAndSet(1L).build();
+        LogicalResponse updateResponse = vault.logical().write(secretPath, testDataUpdate, updateOptions);
+        assertEquals(200, updateResponse.getRestResponse().getStatus());
+
+        final LogicalResponse readResponse = vault.logical().read(secretPath);
+        final String valueRead = readResponse.getData().get("value");
+        assertEquals(updateValue, valueRead);
+        final DataMetadata dataMetadata = readResponse.getDataMetadata();
+        assertNotNull(dataMetadata);
+        assertFalse(dataMetadata.isEmpty());
+        final Long secretVersion = dataMetadata.getVersion();
+        assertNotNull(secretVersion);
+        assertEquals(2L, secretVersion.longValue());
+    }
+
+    @Test
+    public void testWriteWithCheckAndSetWrongUpdateVersion() throws VaultException {
+        final String secretPath = "secret/checkAndSetUpdateWrongVersion";
+
+        final Vault vault = container.getRootVault();
+
+        final String createValue = "firstWorld";
+        final Map<String, Object> testDataCreate = new HashMap<>();
+        testDataCreate.put("value", createValue);
+
+        LogicalResponse createResponse = vault.logical().write(secretPath, testDataCreate);
+        assertEquals(200, createResponse.getRestResponse().getStatus());
+
+        final String updateValue = "secondWorld";
+        final Map<String, Object> testDataUpdate = new HashMap<>();
+        testDataUpdate.put("value", updateValue);
+
+        WriteOptions updateOptions = new WriteOptions().checkAndSet(2L).build();
+        LogicalResponse updateResponse = vault.logical().write(secretPath, testDataUpdate, updateOptions);
+        assertEquals(400, updateResponse.getRestResponse().getStatus());
     }
 
     /**

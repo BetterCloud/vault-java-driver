@@ -191,20 +191,27 @@ public class LogicalUtilities {
     }
 
     /**
-     * In version two, when writing a secret, the JSONObject must be nested with "data" as the key.
+     * In version two, when writing a secret, the JSONObject must be nested with "data" as the key
+     * and an "options" key may be optionally provided
      *
      * @param operation The operation being performed, e.g. writeV1, or writeV2.
      * @param jsonObject The jsonObject that is going to be written.
+     * @param optionsJsonObject The options jsonObject that is going to be written or null if none
      * @return This jsonObject mutated for the operation.
      */
     public static JsonObject jsonObjectToWriteFromEngineVersion(
-            final Logical.logicalOperations operation, final JsonObject jsonObject) {
+            final Logical.logicalOperations operation, final JsonObject jsonObject,
+            final JsonObject optionsJsonObject) {
         if (operation.equals(Logical.logicalOperations.writeV2)) {
             final JsonObject wrappedJson = new JsonObject();
             wrappedJson.add("data", jsonObject);
+            if (null != optionsJsonObject) {
+                wrappedJson.add("options", optionsJsonObject);
+            }
             return wrappedJson;
         } else {
             return jsonObject;
         }
     }
+
 }
