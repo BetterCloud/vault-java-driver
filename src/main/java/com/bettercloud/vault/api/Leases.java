@@ -115,7 +115,7 @@ public class Leases {
         while (true) {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/sys/revoke-prefix/" + prefix)
+                        .url(config.getAddress() + "/v1/sys/leases/revoke-prefix/" + prefix)
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -173,7 +173,7 @@ public class Leases {
         while (true) {
             try {
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/sys/revoke-force/" + prefix)
+                        .url(config.getAddress() + "/v1/sys/leases/revoke-force/" + prefix)
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .connectTimeoutSeconds(config.getOpenTimeout())
@@ -236,7 +236,7 @@ public class Leases {
             try {
                 final String requestJson = Json.object().add("increment", increment).toString();
                 final RestResponse restResponse = new Rest()//NOPMD
-                        .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
+                        .url(config.getAddress() + "/v1/sys/leases/renew/" + leaseId)
                         .header("X-Vault-Token", config.getToken())
                         .header("X-Vault-Namespace", this.nameSpace)
                         .body(increment < 0 ? null : requestJson.getBytes(StandardCharsets.UTF_8))
