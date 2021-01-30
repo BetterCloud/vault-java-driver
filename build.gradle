@@ -3,9 +3,9 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'checkstyle'
 
-group 'com.bettercloud'
+group 'io.ianferguson'
 archivesBaseName = 'vault-java-driver'
-version '5.1.0'
+version '6.0.0'
 ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 
 // This project is actually limited to Java 8 compatibility.  See below.
@@ -176,22 +176,27 @@ uploadArchives {
                 packaging 'jar'
                 // optionally artifactId can be defined here
                 description 'Zero-dependency Java client for HashiCorp\'s Vault'
-                url 'https://github.com/BetterCloud/vault-java-driver'
+                url 'https://github.com/ianferguson/vault-java-driver'
 
                 scm {
-                    connection 'https://github.com/BetterCloud/vault-java-driver.git'
-                    developerConnection 'https://github.com/BetterCloud/vault-java-driver.git'
-                    url 'https://github.com/BetterCloud/vault-java-driver'
+                    connection 'https://github.com/ianferguson/vault-java-driver.git'
+                    developerConnection 'https://github.com/ianferguson/vault-java-driver.git'
+                    url 'https://github.com/ianferguson/vault-java-driver'
                 }
 
                 licenses {
                     license {
                         name 'MIT'
-                        url 'https://github.com/BetterCloud/vault-java-driver/blob/master/README.md'
+                        url 'https://github.com/ianferguson/vault-java-driver/blob/master/README.md'
                     }
                 }
 
                 developers {[
+                    developer {
+                        id 'ian-ferguson'
+                        name 'Ian Ferguson'
+                        email 'ian@ianferguson.io'
+                    },
                     developer {
                         id 'steve-perkins'
                         name 'Steve Perkins'
