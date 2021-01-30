@@ -16,6 +16,7 @@ cache:
 
 matrix:
   include:
+    - jdk: openjdk15
     - jdk: openjdk12
     - jdk: openjdk11
     - jdk: openjdk9
