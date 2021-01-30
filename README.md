@@ -37,22 +37,22 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    implementation 'com.bettercloud:vault-java-driver:5.1.0'
+    implementation 'io.ianferguson:vault-java-driver:6.0.0'
 }
 ```
 
 Maven:
 ```
 <dependency>
-    <groupId>com.bettercloud</groupId>
+    <groupId>io.ianferguson</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>5.1.0</version>
+    <version>6.0.0</version>
 </dependency>
 ```
 
 Initializing a Driver Instance
 ------------------------------
-The `com.bettercloud.vault.VaultConfig` class is used to initialize a driver instance with desired settings.
+The `io.ianferguson.vault.VaultConfig` class is used to initialize a driver instance with desired settings.
 In the most basic use cases, where you are only supplying a Vault server address and perhaps a root token, there
 are convenience constructor methods available:
 ```
@@ -262,7 +262,7 @@ final LogicalResponse response = vault.withRetries(5, 1000)
 
 API Reference (Javadocs)
 ------------------------
-Full [Javadoc documentation](http://bettercloud.github.io/vault-java-driver/javadoc/).
+Full [Javadoc documentation](http://ianferguson.github.io/vault-java-driver/javadoc/).
 
 Version History
 ---------------
@@ -414,6 +414,7 @@ License
 The MIT License (MIT)
 
 Copyright (c) 2016-2019 BetterCloud
+Copyright (c) 2021 Ian Ferguson
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
