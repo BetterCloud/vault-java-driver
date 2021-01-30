@@ -437,3 +437,11 @@ This client driver adapts JSON parsing code from Ralf Sternberg's excellent
 names have all been changed, to prevent any conflicts should you happen to be using a different version of that
 library elsewhere in your project dependencies.
 
+### Why did you fork BetterCloud/vault-java-driver
+
+BetterCloud's [vault-java-driver](https://github.com/BetterCloud/vault-java-driver) is one of the
+most commonly used Java clients for Hashicorp, but has had no activity or releases since December 2019.
+
+The lack of [X-Vault-Request header support](https://github.com/BetterCloud/vault-java-driver/pull/229) prevents it from
+being used with Vault Agent instances configured with the [`require_request_header` anti-SSRF setting enabled](https://www.vaultproject.io/api#the-x-vault-request-header).
+
