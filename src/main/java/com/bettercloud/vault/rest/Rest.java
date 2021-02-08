@@ -23,6 +23,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * <p>A simple client for issuing HTTP requests.  Supports the HTTP verbs:</p>
@@ -66,6 +67,7 @@ public class Rest {
      * verification process, to always trust any certificates.
      */
     private static SSLContext DISABLED_SSL_CONTEXT;
+    private static SSLSocketFactory DISABLED_SSL_SOCKET_FACTORY;
 
     static {
         try {
@@ -84,6 +86,7 @@ public class Rest {
                     return new X509Certificate[0];
                 }
             }}, new java.security.SecureRandom());
+            DISABLED_SSL_SOCKET_FACTORY = DISABLED_SSL_CONTEXT.getSocketFactory();
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             e.printStackTrace();
         }
@@ -98,6 +101,7 @@ public class Rest {
     private Integer readTimeoutSeconds;
     private Boolean sslVerification;
     private SSLContext sslContext;
+    private SSLSocketFactory sslSocketFactory;
 
     /**
      * <p>Sets the base URL to which the HTTP request will be sent.  The URL may or may not include query parameters
@@ -245,6 +249,11 @@ public class Rest {
      */
     public Rest sslContext(final SSLContext sslContext) {
         this.sslContext = sslContext;
+        return this;
+    }
+
+    public Rest sslSocketFactory(final SSLSocketFactory sslSocketFactory) {
+        this.sslSocketFactory = sslSocketFactory;
         return this;
     }
 
@@ -446,8 +455,11 @@ public class Rest {
                 final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) connection;
                 if (sslVerification != null && !sslVerification) {
                     // SSL verification disabled
-                    httpsURLConnection.setSSLSocketFactory(DISABLED_SSL_CONTEXT.getSocketFactory());
+                    httpsURLConnection.setSSLSocketFactory(DISABLED_SSL_SOCKET_FACTORY);
                     httpsURLConnection.setHostnameVerifier((s, sslSession) -> true);
+                } else if (sslSocketFactory != null) {
+                    // Socket factory supplied for keep-alive connections
+                    httpsURLConnection.setSSLSocketFactory(sslSocketFactory);
                 } else if (sslContext != null) {
                     // Cert file supplied
                     httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
@@ -463,11 +475,10 @@ public class Rest {
 
             return connection;
         } catch (Exception e) {
-            throw new RestException(e);
-        } finally {
-            if (connection instanceof HttpURLConnection) {
+            if (connection != null && connection instanceof HttpURLConnection) {
                 ((HttpURLConnection) connection).disconnect();
             }
+            throw new RestException(e);
         }
     }
 
@@ -499,8 +510,8 @@ public class Rest {
      * @throws RestException
      */
     private byte[] responseBodyBytes(final URLConnection connection) throws RestException {
+        InputStream inputStream = null;
         try {
-            final InputStream inputStream;
             final int responseCode = this.connectionStatus(connection);
             if (200 <= responseCode && responseCode <= 299) {
                 inputStream = connection.getInputStream();
@@ -519,9 +530,20 @@ public class Rest {
             while ((bytesRead = inputStream.read(bytes, 0, bytes.length)) != -1) {
                 byteArrayOutputStream.write(bytes, 0, bytesRead);
             }
+            inputStream.close();
             byteArrayOutputStream.flush();
             return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
+            try {
+                if (inputStream == null) {
+                    inputStream = ((HttpURLConnection) connection).getErrorStream();
+                }
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException ee) {
+                //do nothing
+            }
             return new byte[0];
         }
     }

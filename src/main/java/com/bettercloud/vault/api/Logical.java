@@ -91,6 +91,7 @@ public class Logical {
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
+                        .sslSocketFactory(config.getSslConfig().getSslSocketFactory())
                         .get();
 
                 // Validate response - don't treat 4xx class errors as exceptions, we want to return an error as the response
@@ -160,6 +161,7 @@ public class Logical {
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
+                        .sslSocketFactory(config.getSslConfig().getSslSocketFactory())
                         .get();
 
                 // Validate response - don't treat 4xx class errors as exceptions, we want to return an error as the response
@@ -261,6 +263,7 @@ public class Logical {
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
+                        .sslSocketFactory(config.getSslConfig().getSslSocketFactory())
                         .post();
 
                 // HTTP Status should be either 200 (with content - e.g. PKI write) or 204 (no content)
@@ -352,6 +355,7 @@ public class Logical {
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
+                        .sslSocketFactory(config.getSslConfig().getSslSocketFactory())
                         .delete();
 
                 // Validate response
@@ -412,6 +416,7 @@ public class Logical {
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
+                        .sslSocketFactory(config.getSslConfig().getSslSocketFactory())
                         .body(versionsToDelete.toString().getBytes(StandardCharsets.UTF_8))
                         .post();
 
@@ -483,6 +488,7 @@ public class Logical {
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
+                        .sslSocketFactory(config.getSslConfig().getSslSocketFactory())
                         .body(versionsToUnDelete.toString().getBytes(StandardCharsets.UTF_8))
                         .post();
 
@@ -542,6 +548,7 @@ public class Logical {
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
+                        .sslSocketFactory(config.getSslConfig().getSslSocketFactory())
                         .body(versionsToDestroy.toString().getBytes(StandardCharsets.UTF_8))
                         .post();
 
@@ -593,6 +600,7 @@ public class Logical {
                         .readTimeoutSeconds(config.getReadTimeout())
                         .sslVerification(config.getSslConfig().isVerify())
                         .sslContext(config.getSslConfig().getSslContext())
+                        .sslSocketFactory(config.getSslConfig().getSslSocketFactory())
                         .body(kvToUpgrade.toString().getBytes(StandardCharsets.UTF_8))
                         .post();
 
