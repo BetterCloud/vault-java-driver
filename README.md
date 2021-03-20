@@ -3,6 +3,8 @@ Vault Java Driver
 A zero-dependency Java client for the [Vault](https://www.vaultproject.io/) secrets management solution from
 HashiCorp. 
 
+ [![javadoc](https://javadoc.io/badge2/com.bettercloud/vault-java-driver/javadoc.svg)](https://javadoc.io/doc/com.bettercloud/vault-java-driver) 
+
 This driver strives to implement Vault's full HTTP API, along with supporting functionality such as automatic
 retry handling.  It does so without relying on any other external libraries beyond the Java standard library,
 and is compatible with Java 8 and up.  So it will play nice with all of your projects, greenfield and legacy
@@ -262,7 +264,7 @@ final LogicalResponse response = vault.withRetries(5, 1000)
 
 API Reference (Javadocs)
 ------------------------
-Full [Javadoc documentation](http://bettercloud.github.io/vault-java-driver/javadoc/).
+Full [Javadoc documentation](https://javadoc.io/doc/com.bettercloud/vault-java-driver).
 
 Version History
 ---------------
