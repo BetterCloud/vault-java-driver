@@ -16,6 +16,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
@@ -52,6 +53,7 @@ public class SslConfig implements Serializable {
     private String pemUTF8;  // exposed to unit tests
     private String clientPemUTF8;
     private String clientKeyPemUTF8;
+    private String provider;
     private Boolean verifyObject;
     private EnvironmentLoader environmentLoader;
 
@@ -431,6 +433,26 @@ public class SslConfig implements Serializable {
     }
 
     /**
+     * <p>It is possible to override the default Java security provider used to obtain instances of the various security constructs (SSLContext, etc) by supplying its name.
+     * @param provider The name of a {@link java.security.Provider}</p> used to obtain the SSLContext instance.
+     * @return This object, with provider populated, ready for additional builder-pattern method calls or else finalization with the build() method
+     */
+    public SslConfig provider(String provider) {
+        this.provider = provider;
+        return this;
+    }
+
+    /**
+     * <p>Supply a pre-built {@link SSLContext}</p>
+     * @param sslContext an instance of SSLContext
+     * @return This object, with sslContext populated, ready for finalization with the {@link #build()} method
+     */
+    public SslConfig sslContext(SSLContext sslContext) {
+        this.sslContext = sslContext;
+        return this;
+    }
+
+    /**
      * <p>This is the terminating method in the builder pattern.  The method that validates all of the fields that
      * has been set already, uses environment variables when available to populate any unset fields, and returns
      * a <code>SslConfig</code> object that is ready for use.</p>
@@ -505,10 +527,11 @@ public class SslConfig implements Serializable {
         TrustManager[] trustManagers = null;
         if (trustStore != null) {
             try {
-                final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                String algorithm = TrustManagerFactory.getDefaultAlgorithm();
+                final TrustManagerFactory trustManagerFactory = provider != null ? TrustManagerFactory.getInstance(algorithm, provider) : TrustManagerFactory.getInstance(algorithm);
                 trustManagerFactory.init(trustStore);
                 trustManagers = trustManagerFactory.getTrustManagers();
-            } catch (NoSuchAlgorithmException | KeyStoreException e) {
+            } catch (NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException e) {
                 throw new VaultException(e);
             }
         }
@@ -516,19 +539,20 @@ public class SslConfig implements Serializable {
         KeyManager[] keyManagers = null;
         if (keyStore != null) {
             try {
-                final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                String algorithm = KeyManagerFactory.getDefaultAlgorithm();
+                final KeyManagerFactory keyManagerFactory = provider != null ? KeyManagerFactory.getInstance(algorithm, provider) : KeyManagerFactory.getInstance(algorithm);
                 keyManagerFactory.init(keyStore, keyStorePassword == null ? null : keyStorePassword.toCharArray());
                 keyManagers = keyManagerFactory.getKeyManagers();
-            } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException e) {
+            } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException | NoSuchProviderException e) {
                 throw new VaultException(e);
             }
         }
 
         try {
-            final SSLContext sslContext = SSLContext.getInstance("TLS");
+            final SSLContext sslContext = provider != null ? SSLContext.getInstance("TLS", provider) : SSLContext.getInstance("TLS");
             sslContext.init(keyManagers, trustManagers, null);
             return sslContext;
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+        } catch (NoSuchAlgorithmException | KeyManagementException | NoSuchProviderException e) {
             throw new VaultException(e);
         }
     }
@@ -541,18 +565,20 @@ public class SslConfig implements Serializable {
      */
     private SSLContext buildSslContextFromPem() throws VaultException {
         try {
-            final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+            final CertificateFactory certificateFactory = provider != null ? CertificateFactory.getInstance("X.509", provider) : CertificateFactory.getInstance("X.509");
 
             TrustManager[] trustManagers = null;
             if (pemUTF8 != null) {
-                final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                String algorithm = TrustManagerFactory.getDefaultAlgorithm();
+                final TrustManagerFactory trustManagerFactory = provider != null ? TrustManagerFactory.getInstance(algorithm, provider) : TrustManagerFactory.getInstance(algorithm);
                 // Convert the trusted servers PEM data into an X509Certificate
                 X509Certificate certificate;
                 try (final ByteArrayInputStream pem = new ByteArrayInputStream(pemUTF8.getBytes(StandardCharsets.UTF_8))) {
                     certificate = (X509Certificate) certificateFactory.generateCertificate(pem);
                 }
                 // Build a truststore
-                final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                String type = KeyStore.getDefaultType();
+                final KeyStore keyStore = provider != null ? KeyStore.getInstance(type, provider) : KeyStore.getInstance(type);
                 keyStore.load(null);
                 keyStore.setCertificateEntry("caCert", certificate);
                 trustManagerFactory.init(keyStore);
@@ -560,7 +586,8 @@ public class SslConfig implements Serializable {
             }
             KeyManager[] keyManagers = null;
             if (clientPemUTF8 != null && clientKeyPemUTF8 != null) {
-                final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                String algorithm = KeyManagerFactory.getDefaultAlgorithm();
+                final KeyManagerFactory keyManagerFactory = provider != null ? KeyManagerFactory.getInstance(algorithm, provider) : KeyManagerFactory.getInstance(algorithm);
                 // Convert the client certificate PEM data into an X509Certificate
                 X509Certificate clientCertificate;
                 try (final ByteArrayInputStream pem = new ByteArrayInputStream(clientPemUTF8.getBytes(StandardCharsets.UTF_8))) {
@@ -572,11 +599,12 @@ public class SslConfig implements Serializable {
                                                      .replace("-----END PRIVATE KEY-----", "");
                 final byte[] keyBytes = Base64.getMimeDecoder().decode(strippedKey);
                 final PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(keyBytes);
-                final KeyFactory factory = KeyFactory.getInstance("RSA");
+                final KeyFactory factory = provider != null ? KeyFactory.getInstance("RSA", provider) : KeyFactory.getInstance("RSA");
                 final PrivateKey privateKey = factory.generatePrivate(pkcs8EncodedKeySpec);
 
                 // Build a keystore
-                final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                String type = KeyStore.getDefaultType();
+                final KeyStore keyStore = provider != null ? KeyStore.getInstance(type, provider) : KeyStore.getInstance(type);
                 keyStore.load(null, "password".toCharArray());
                 keyStore.setCertificateEntry("clientCert", clientCertificate);
                 keyStore.setKeyEntry("key", privateKey, "password".toCharArray(), new Certificate[] { clientCertificate });
@@ -584,10 +612,10 @@ public class SslConfig implements Serializable {
                 keyManagers = keyManagerFactory.getKeyManagers();
             }
 
-            final SSLContext sslContext = SSLContext.getInstance("TLS");
+            final SSLContext sslContext = provider != null ? SSLContext.getInstance("TLS", provider) : SSLContext.getInstance("TLS");
             sslContext.init(keyManagers, trustManagers, null);
             return sslContext;
-        } catch (CertificateException | IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException | UnrecoverableKeyException | InvalidKeySpecException e) {
+        } catch (CertificateException | IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException | UnrecoverableKeyException | InvalidKeySpecException | NoSuchProviderException e) {
             throw new VaultException(e);
         }
     }
@@ -606,10 +634,10 @@ public class SslConfig implements Serializable {
      */
     private KeyStore inputStreamToKeyStore(final InputStream inputStream, final String password) throws VaultException {
         try {
-            final KeyStore keyStore = KeyStore.getInstance("JKS");
+            final KeyStore keyStore = provider != null ? KeyStore.getInstance("JKS", provider) : KeyStore.getInstance("JKS");
             keyStore.load(inputStream, password == null ? null : password.toCharArray());
             return keyStore;
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
+        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | NoSuchProviderException e) {
             throw new VaultException(e);
         }
     }

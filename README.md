@@ -132,7 +132,7 @@ and the rest of the path).  However, if your secret path is prefixed, such that 
 
 SSL Config
 ----------
-If your Vault server uses a SSL certificate, then you must supply that certificate to establish connections.  Also, if 
+If your Vault server uses an SSL certificate, then you must supply that certificate to establish connections.  Also, if 
 you are using certificate-based client authentication, then you must supply a client certificate and private key that 
 have been previously registered with your Vault server.
 
@@ -148,6 +148,13 @@ class likewise using a builder pattern.
 To disable SSL certificate verification altogether, set `sslVerify(false)`.  YOU SHOULD NOT DO THIS IS A REAL
 PRODUCTION SETTING!  However, it can be useful in a development or testing server context.  If this value is 
 explicitly set to `false`, then all other SSL config is basically unused.
+
+```
+.provider(provider) // Defaults to using the default Java security provider
+```
+
+To build the SSLContext, the `SslConfig` class uses the default Java security provider. You can override this by 
+supplying the name of a custom security provider.
 
 #### Java Keystore (JKS) based config
 
@@ -179,6 +186,8 @@ client-side certificate and private key:
 NOTE:  JKS-based config trumps PEM-based config (see below).  If for some reason you build an `SslConfig` object 
 with both JKS and PEM data present, then only the JKS data will be used.  You cannot "mix-and-match", providing 
 a JKS-based truststore and PEM-based client auth data.
+
+`.sslContext(SSLContext)`           - If you want to initialize the SSLContext yourself, you can supply it directly.
 
 #### OpenSSL (PEM) based config
 
