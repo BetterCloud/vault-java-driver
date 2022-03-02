@@ -7,6 +7,7 @@ import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.util.VaultContainer;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -442,5 +443,57 @@ public class LogicalTests {
         String kVUpgradedVersion = vault.getSecretEngineVersions().get("kv-v1-Upgrade-Test/");
         Assert.assertEquals(kVOriginalVersion, "1");
         Assert.assertEquals(kVUpgradedVersion, "2");
+    }
+
+    /**
+     * Verify that value can be read several times with connection re-usage
+     *
+     * @throws VaultException
+     */
+    @Test
+    public void testReadSeveralTimesWithConnectionReUsage() throws VaultException {
+        final int readTimes = 10;
+        final String pathToWrite = "secret/hello";
+        final String pathToRead = "secret/hello";
+
+        final String value = "world";
+        final Map<String, Object> testMap = new HashMap<>();
+        testMap.put("value", value);
+
+        final Vault vault = container.getRootVault();
+        String hostport = String.format("%s.%s", container.getContainerIpAddress(), container.getMappedPort(8200));
+        Logical logical = vault.logical();
+
+        int connBefore = connStat(hostport);
+        logical.write(pathToWrite, testMap);
+        for(int i = 0; i < readTimes; i++) {
+            final String valueRead = logical.read(pathToRead).getData().get("value");
+            assertEquals(value, valueRead);
+        }
+        int connCreated = connStat(hostport) - connBefore;
+        assertTrue("Too many new connections to '" + hostport + "' created: " + connCreated, connCreated <= 1);
+    }
+
+    private int connStat(String host) {
+        ProcessBuilder pb = new ProcessBuilder();
+        pb.command("netstat");
+        pb.redirectErrorStream(true);
+
+        try {
+            Process p = pb.start();
+            InputStream inputStream = p.getInputStream();
+            String result = new String(inputStream.readAllBytes());
+            int conn = 0;
+            for (String line : result.split("\n")) {
+                if (line.matches(".*" + host + "\\s+ESTABLISHED")) {
+                    conn++;
+                    System.out.println(line);
+                }
+            }
+            return conn;
+        } catch (IOException e) {
+            System.err.println("Error executing netstat: " + e.getMessage());
+            return 0;
+        }
     }
 }

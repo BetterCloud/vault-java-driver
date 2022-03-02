@@ -30,6 +30,7 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * <p>A container for SSL-related configuration options, meant to be stored within a {@link VaultConfig} instance.</p>
@@ -46,6 +47,7 @@ public class SslConfig implements Serializable {
 
     private boolean verify;
     private transient SSLContext sslContext;
+    private transient SSLSocketFactory sslSocketFactory;
     private transient KeyStore trustStore;
     private transient KeyStore keyStore;
     private String keyStorePassword;
@@ -469,6 +471,10 @@ public class SslConfig implements Serializable {
         return sslContext;
     }
 
+    public SSLSocketFactory getSslSocketFactory() {
+        return sslSocketFactory;
+    }
+
     protected String getPemUTF8() {
         return pemUTF8;
     }
@@ -489,8 +495,10 @@ public class SslConfig implements Serializable {
         if (verify) {
             if (keyStore != null || trustStore != null) {
                 this.sslContext = buildSslContextFromJks();
+                this.sslSocketFactory = sslContext.getSocketFactory();
             } else if (pemUTF8 != null || clientPemUTF8 != null || clientKeyPemUTF8 != null) {
                 this.sslContext = buildSslContextFromPem();
+                this.sslSocketFactory = sslContext.getSocketFactory();
             }
         }
     }
