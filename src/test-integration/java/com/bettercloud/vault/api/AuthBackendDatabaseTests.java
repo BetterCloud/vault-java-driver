@@ -3,6 +3,7 @@ package com.bettercloud.vault.api;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultException;
 import com.bettercloud.vault.api.database.DatabaseRoleOptions;
+import com.bettercloud.vault.api.database.DatabaseStaticRoleOptions;
 import com.bettercloud.vault.response.DatabaseResponse;
 import com.bettercloud.vault.util.DbContainer;
 import com.bettercloud.vault.util.VaultContainer;
@@ -92,6 +93,22 @@ public class AuthBackendDatabaseTests {
         assertEquals(204, response.getRestResponse().getStatus());
 
         DatabaseResponse credsResponse = vault.database().creds("new-role");
+        assertEquals(200, credsResponse.getRestResponse().getStatus());
+
+        assertTrue(credsResponse.getCredential().getUsername().contains("new-role"));
+    }
+
+    @Test
+    public void testStaticCredentials() throws VaultException {
+        final Vault vault = container.getRootVault();
+
+        List<String> rotationStatements = new ArrayList<>();
+        rotationStatements.add("ALTER USER \"{{name}}\" WITH PASSWORD '{{password}}';");
+
+        DatabaseResponse response = vault.database().createOrUpdateStaticRole("new-role", new DatabaseStaticRoleOptions().dbName("postgres").username("test").rotationStatements(rotationStatements));
+        assertEquals(204, response.getRestResponse().getStatus());
+
+        DatabaseResponse credsResponse = vault.database().staticCreds("new-role");
         assertEquals(200, credsResponse.getRestResponse().getStatus());
 
         assertTrue(credsResponse.getCredential().getUsername().contains("new-role"));

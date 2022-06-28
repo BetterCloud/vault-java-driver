@@ -8,6 +8,7 @@ import com.bettercloud.vault.api.Seal;
 import com.bettercloud.vault.api.database.Database;
 import com.bettercloud.vault.api.mounts.Mounts;
 import com.bettercloud.vault.api.pki.Pki;
+import com.bettercloud.vault.api.transit.Transit;
 import com.bettercloud.vault.json.Json;
 import com.bettercloud.vault.json.JsonObject;
 import com.bettercloud.vault.json.JsonValue;
@@ -197,6 +198,10 @@ public class Vault {
     public Database database() { return new Database(vaultConfig); }
 
     public Database database(final String mountPath) { return new Database(vaultConfig, mountPath); }
+
+
+    public Transit transit() { return new Transit(vaultConfig); }
+    public Transit transit(final String mountPath) { return new Transit(vaultConfig, mountPath); }
 
     /**
      * Returns the implementing class for Vault's lease operations (e.g. revoke, revoke-prefix).
