@@ -29,7 +29,7 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultContainer.class);
 
-    public static final String DEFAULT_IMAGE_AND_TAG = "vault:1.1.3";
+    public static final String DEFAULT_IMAGE_AND_TAG = "vault:1.7.3";
 
     private String rootToken;
     private String unsealKey;
@@ -166,6 +166,20 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
 
         runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "pki/root/generate/internal",
                 "common_name=myvault.com", "ttl=99h");
+    }
+
+    /**
+     * Prepares the Vault server for testing of the Transit auth backend (i.e. mounts the backend and populates test data).
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void setupBackendTransit() throws IOException, InterruptedException {
+        runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
+
+        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=transit", "transit");
+        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "-path=other-transit", "transit");
+
     }
 
     /**
