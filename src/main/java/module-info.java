@@ -1,8 +1,8 @@
 module vault.java.driver {
     requires java.logging;
-    exports com.bettercloud.vault;
-    exports com.bettercloud.vault.api;
-    exports com.bettercloud.vault.json;
-    exports com.bettercloud.vault.response;
-    exports com.bettercloud.vault.rest;
+    exports io.github.jopenlibs.vault;
+    exports io.github.jopenlibs.vault.api;
+    exports io.github.jopenlibs.vault.json;
+    exports io.github.jopenlibs.vault.response;
+    exports io.github.jopenlibs.vault.rest;
 }

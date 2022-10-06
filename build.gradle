@@ -3,9 +3,10 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'checkstyle'
 
-group 'com.bettercloud'
+group 'io.github.jopenlibs'
 archivesBaseName = 'vault-java-driver'
-version '5.1.0'
+version '6.0.0-SNAPSHOT'
+
 ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 
 // This project is actually limited to Java 8 compatibility.  See below.

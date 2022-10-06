@@ -37,22 +37,22 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    implementation 'com.bettercloud:vault-java-driver:5.1.0'
+    implementation 'io.github.jopenlibs:vault-java-driver:6.0.0'
 }
 ```
 
 Maven:
 ```
 <dependency>
-    <groupId>com.bettercloud</groupId>
+    <groupId>io.github.jopenlibs</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>5.1.0</version>
+    <version>6.0.0</version>
 </dependency>
 ```
 
 Initializing a Driver Instance
 ------------------------------
-The `com.bettercloud.vault.VaultConfig` class is used to initialize a driver instance with desired settings.
+The `io.github.jopenlibs.vault.VaultConfig` class is used to initialize a driver instance with desired settings.
 In the most basic use cases, where you are only supplying a Vault server address and perhaps a root token, there
 are convenience constructor methods available:
 ```
@@ -436,4 +436,3 @@ This client driver adapts JSON parsing code from Ralf Sternberg's excellent
 [minimal-json](https://github.com/ralfstx/minimal-json) library, likewise available under the MIT License.  Package
 names have all been changed, to prevent any conflicts should you happen to be using a different version of that
 library elsewhere in your project dependencies.
-
