@@ -5,9 +5,7 @@ apply plugin: 'checkstyle'
 
 group 'io.github.jopenlibs'
 archivesBaseName = 'vault-java-driver'
-version '6.0.0-SNAPSHOT'
-
-ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
+version '5.2.0-SNAPSHOT'
 
 // This project is actually limited to Java 8 compatibility.  See below.
 sourceCompatibility = 9
@@ -68,7 +66,6 @@ task compileModuleInfoJava(type: JavaCompile) {
 compileModuleInfoJava.dependsOn compileJava
 classes.dependsOn compileModuleInfoJava
 // End of Java 9 compatibility config
-
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
@@ -141,66 +138,69 @@ artifacts {
     archives javadocJar, sourcesJar
 }
 
-signing {
-    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
-}
+if (hasProperty("publish")) {
+    signing {
+        sign configurations.archives
+    }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
+                repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
 
-            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
+                snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
 
-            pom.project {
-                name 'vault-java-driver'
-                packaging 'jar'
-                // optionally artifactId can be defined here
-                description 'Zero-dependency Java client for HashiCorp\'s Vault'
-                url 'https://github.com/jopenlibs/vault-java-driver'
-
-                scm {
-                    connection 'https://github.com/jopenlibs/vault-java-driver.git'
-                    developerConnection 'https://github.com/jopenlibs/vault-java-driver.git'
+                pom.project {
+                    name 'vault-java-driver'
+                    packaging 'jar'
+                    // optionally artifactId can be defined here
+                    description 'Zero-dependency Java client for HashiCorp\'s Vault'
                     url 'https://github.com/jopenlibs/vault-java-driver'
-                }
 
-                licenses {
-                    license {
-                        name 'MIT'
-                        url 'https://github.com/jopenlibs/vault-java-driver/blob/master/README.md'
+                    scm {
+                        connection 'https://github.com/jopenlibs/vault-java-driver.git'
+                        developerConnection 'https://github.com/jopenlibs/vault-java-driver.git'
+                        url 'https://github.com/jopenlibs/vault-java-driver'
+                    }
+
+                    licenses {
+                        license {
+                            name 'MIT'
+                            url 'https://github.com/jopenlibs/vault-java-driver/blob/master/README.md'
+                        }
+                    }
+
+                    developers {
+                        [
+                                developer {
+                                    id 'steve-perkins'
+                                    name 'Steve Perkins'
+                                    email 'steve@steveperkins.com'
+                                },
+                                developer {
+                                    id 'steve-perkins-bc'
+                                    name 'Steve Perkins'
+                                    email 'steve.perkins@bettercloud.com'
+                                },
+                                developer {
+                                    id 'jarrodcodes'
+                                    name 'Jarrod Young'
+                                    email 'jarrodsy@gmail.com'
+                                },
+                                developer {
+                                    id 'tledkov'
+                                    name 'Taras Ledkov'
+                                    email 'tledkov@apache.org'
+                                }
+                        ]
                     }
                 }
-
-                developers {[
-                    developer {
-                        id 'steve-perkins'
-                        name 'Steve Perkins'
-                        email 'steve@steveperkins.com'
-                    },
-                    developer {
-                        id 'steve-perkins-bc'
-                        name 'Steve Perkins'
-                        email 'steve.perkins@bettercloud.com'
-                    },
-                    developer {
-                        id 'jarrodcodes'
-                        name 'Jarrod Young'
-                        email 'jarrodsy@gmail.com'
-                    },
-                    developer {
-                        id 'tledkov'
-                        name 'Taras Ledkov'
-                        email 'tledkov@apache.org'
-                    }
-                ]}
             }
         }
     }
