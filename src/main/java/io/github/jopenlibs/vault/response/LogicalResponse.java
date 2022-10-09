@@ -17,7 +17,6 @@ import java.util.Map;
  * operations (e.g. read, write).
  */
 public class LogicalResponse extends VaultResponse {
-
     private Map<String, String> data = new HashMap<>();
     private List<String> listData = new ArrayList<>();
     private JsonObject dataObject = null;

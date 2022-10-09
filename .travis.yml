@@ -25,6 +25,3 @@ script:
 
 notifications:
   email: false
-
-after-script:
-  curl -s curl -s https://raw.githubusercontent.com/monperrus/gmtft/master/give-me-the-failing-tests.py | python

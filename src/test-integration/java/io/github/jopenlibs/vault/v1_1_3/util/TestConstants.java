@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.util;
+package io.github.jopenlibs.vault.v1_1_3.util;
 
 import java.io.File;
 import org.testcontainers.containers.Network;
@@ -10,7 +10,6 @@ import org.testcontainers.utility.TestEnvironment;
  * path locations for SSL artifacts.
  */
 public interface TestConstants {
-
     String POSTGRES_PASSWORD = "superpassword1";
     String POSTGRES_USER = "superuser1";
 

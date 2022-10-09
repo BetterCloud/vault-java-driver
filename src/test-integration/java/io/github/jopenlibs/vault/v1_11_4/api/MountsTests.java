@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.api;
+package io.github.jopenlibs.vault.v1_11_4.api;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultException;
@@ -8,7 +8,7 @@ import io.github.jopenlibs.vault.api.mounts.MountPayload;
 import io.github.jopenlibs.vault.api.mounts.MountType;
 import io.github.jopenlibs.vault.api.mounts.TimeToLive;
 import io.github.jopenlibs.vault.response.MountResponse;
-import io.github.jopenlibs.vault.util.VaultContainer;
+import io.github.jopenlibs.vault.v1_11_4.util.VaultContainer;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;

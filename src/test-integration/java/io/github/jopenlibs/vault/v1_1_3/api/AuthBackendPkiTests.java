@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.api;
+package io.github.jopenlibs.vault.v1_1_3.api;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultException;
@@ -6,8 +6,8 @@ import io.github.jopenlibs.vault.api.pki.CredentialFormat;
 import io.github.jopenlibs.vault.api.pki.RoleOptions;
 import io.github.jopenlibs.vault.response.PkiResponse;
 import io.github.jopenlibs.vault.rest.RestResponse;
-import io.github.jopenlibs.vault.util.SSLUtils;
-import io.github.jopenlibs.vault.util.VaultContainer;
+import io.github.jopenlibs.vault.v1_1_3.util.SSLUtils;
+import io.github.jopenlibs.vault.v1_1_3.util.VaultContainer;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;

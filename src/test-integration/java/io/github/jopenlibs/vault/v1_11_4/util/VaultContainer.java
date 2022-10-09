@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.util;
+package io.github.jopenlibs.vault.v1_11_4.util;
 
 import com.github.dockerjava.api.model.Capability;
 import io.github.jopenlibs.vault.SslConfig;
@@ -13,7 +13,6 @@ import java.net.HttpURLConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
-import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
@@ -26,10 +25,9 @@ import static org.junit.Assume.assumeTrue;
  * Sets up and exposes utilities for dealing with a Docker-hosted instance of Vault, for integration tests.
  */
 public class VaultContainer extends GenericContainer<VaultContainer> implements TestConstants, TestLifecycleAware {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultContainer.class);
 
-    public static final String DEFAULT_IMAGE_AND_TAG = "vault:1.1.3";
+    public static final String DEFAULT_IMAGE_AND_TAG = "vault:1.11.4";
 
     private String rootToken;
     private String unsealKey;
@@ -51,7 +49,7 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
                 .withCommand("/bin/sh " + CONTAINER_STARTUP_SCRIPT)
                 .withLogConsumer(new Slf4jLogConsumer(LOGGER))
                 .waitingFor(
-                        // All of the tests in this integration test suite use HTTPS connections.  However, Vault
+                        // All of the tests in this integration test suite use HTTPS connections. However, Vault
                         // is configured to run a plain HTTP listener on port 8280, purely for purposes of detecting
                         // when the Docker container is fully ready.
                         //
@@ -84,10 +82,8 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
      * @throws InterruptedException
      */
     public void initAndUnsealVault() throws IOException, InterruptedException {
-
-
         // Initialize the Vault server
-        final Container.ExecResult initResult = runCommand("vault", "operator", "init", "-ca-cert=" +
+        final ExecResult initResult = runCommand("vault", "operator", "init", "-ca-cert=" +
                 CONTAINER_CERT_PEMFILE, "-key-shares=1", "-key-threshold=1", "-format=json");
         final String stdout = initResult.getStdout().replaceAll("\\r?\\n", "");
         JsonObject initJson = Json.parse(stdout).asObject();
@@ -351,9 +347,9 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
      * @throws IOException
      * @throws InterruptedException
      */
-    private Container.ExecResult runCommand(final String... command) throws IOException, InterruptedException {
+    private ExecResult runCommand(final String... command) throws IOException, InterruptedException {
         LOGGER.info("Command: {}", String.join(" ", command));
-        final Container.ExecResult result = execInContainer(command);
+        final ExecResult result = execInContainer(command);
         final String out = result.getStdout();
         final String err = result.getStderr();
         if (out != null && !out.isEmpty()) {

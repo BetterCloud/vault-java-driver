@@ -7,7 +7,12 @@ import java.util.StringTokenizer;
 
 
 public class LogicalUtilities {
-
+    /**
+     * Prevent creation an instance of a utility class.
+     */
+    private LogicalUtilities() {
+        // No-op.
+    }
     /**
      * Convenience method to split a Vault path into its path segments.
      *

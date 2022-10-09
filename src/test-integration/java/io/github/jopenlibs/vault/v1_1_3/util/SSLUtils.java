@@ -1,6 +1,6 @@
-package io.github.jopenlibs.vault.util;
+package io.github.jopenlibs.vault.v1_1_3.util;
 
-import io.github.jopenlibs.vault.api.AuthBackendCertTests;
+import io.github.jopenlibs.vault.v1_1_3.api.AuthBackendCertTests;
 import java.io.ByteArrayOutputStream;
 import java.io.FileReader;
 import java.io.IOException;

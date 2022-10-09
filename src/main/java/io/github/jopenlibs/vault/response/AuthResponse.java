@@ -14,7 +14,6 @@ import java.util.List;
  * This class is a container for the information returned by Vault in auth backend operations.
  */
 public class AuthResponse extends VaultResponse {
-
     private Boolean renewable;
     private String authClientToken;
     private String tokenAccessor;
@@ -25,6 +24,8 @@ public class AuthResponse extends VaultResponse {
     private String userId;
     private String username;
     private String nonce;
+
+    protected JsonObject jsonResponse;
 
     /**
      * This constructor simply exposes the common base class constructor.
@@ -37,27 +38,36 @@ public class AuthResponse extends VaultResponse {
 
         try {
             final String responseJson = new String(restResponse.getBody(), StandardCharsets.UTF_8);
-            final JsonObject jsonObject = Json.parse(responseJson).asObject();
-            final JsonObject authJsonObject = jsonObject.get("auth").asObject();
+            jsonResponse = Json.parse(responseJson).asObject();
+            JsonValue authJsonVal = jsonResponse.get("auth");
+            final JsonObject authJsonObject = authJsonVal != null && !authJsonVal.isNull() ? authJsonVal.asObject() : null;
 
-            renewable = jsonObject.get("renewable").asBoolean();
-            authLeaseDuration = authJsonObject.getInt("lease_duration", 0);
-            authRenewable = authJsonObject.getBoolean("renewable", false);
-            if (authJsonObject.get("metadata") != null && !authJsonObject.get("metadata").toString().equalsIgnoreCase("null")) {
-                final JsonObject metadata = authJsonObject.get("metadata").asObject();
-                appId = metadata.getString("app-id", "");
-                userId = metadata.getString("user-id", "");
-                username = metadata.getString("username", "");
-                nonce = metadata.getString("nonce", "");
+            if (authJsonObject != null) {
+                authLeaseDuration = authJsonObject.getInt("lease_duration", 0);
+                authRenewable = authJsonObject.getBoolean("renewable", false);
+                if (authJsonObject.get("metadata") != null && !authJsonObject.get("metadata")
+                        .toString().equalsIgnoreCase("null")) {
+                    final JsonObject metadata = authJsonObject.get("metadata").asObject();
+                    appId = metadata.getString("app-id", "");
+                    userId = metadata.getString("user-id", "");
+                    username = metadata.getString("username", "");
+                    nonce = metadata.getString("nonce", "");
+                }
+
+                authClientToken = authJsonObject.getString("client_token", "");
+                tokenAccessor = authJsonObject.getString("accessor", "");
+
+                final JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();
+                authPolicies = new ArrayList<>();
+
+                for (final JsonValue authPolicy : authPoliciesJsonArray) {
+                    authPolicies.add(authPolicy.asString());
+                }
             }
-            authClientToken = authJsonObject.getString("client_token", "");
-            tokenAccessor = authJsonObject.getString("accessor", "");
-            final JsonArray authPoliciesJsonArray = authJsonObject.get("policies").asArray();
-            authPolicies = new ArrayList<>();
-            for (final JsonValue authPolicy : authPoliciesJsonArray) {
-                authPolicies.add(authPolicy.asString());
-            }
+
+            renewable = jsonResponse.get("renewable").asBoolean();
         } catch (ParseException e) {
+            // No-op.
         }
     }
 

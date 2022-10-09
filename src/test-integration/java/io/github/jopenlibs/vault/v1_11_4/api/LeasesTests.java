@@ -1,9 +1,9 @@
-package io.github.jopenlibs.vault.api;
+package io.github.jopenlibs.vault.v1_11_4.api;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultException;
 import io.github.jopenlibs.vault.response.VaultResponse;
-import io.github.jopenlibs.vault.util.VaultContainer;
+import io.github.jopenlibs.vault.v1_11_4.util.VaultContainer;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.BeforeClass;

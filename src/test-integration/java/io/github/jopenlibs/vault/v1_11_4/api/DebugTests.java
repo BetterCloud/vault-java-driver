@@ -1,9 +1,9 @@
-package io.github.jopenlibs.vault.api;
+package io.github.jopenlibs.vault.v1_11_4.api;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultException;
 import io.github.jopenlibs.vault.response.HealthResponse;
-import io.github.jopenlibs.vault.util.VaultContainer;
+import io.github.jopenlibs.vault.v1_11_4.util.VaultContainer;
 import java.io.IOException;
 import junit.framework.TestCase;
 import org.junit.Before;
@@ -20,7 +20,6 @@ import static junit.framework.TestCase.assertTrue;
  * <p>Integration tests for the debug-related operations on the Vault HTTP API's.</p>
  */
 public class DebugTests {
-
     @ClassRule
     public static final VaultContainer container = new VaultContainer();
 
@@ -33,7 +32,7 @@ public class DebugTests {
 
     @Before
     public void setup() throws VaultException {
-        vault = container.getRootVault();
+        vault = container.getVault();
     }
 
     @Test

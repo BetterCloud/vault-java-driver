@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.util;
+package io.github.jopenlibs.vault.v1_1_3.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

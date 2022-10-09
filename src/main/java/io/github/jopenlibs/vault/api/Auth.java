@@ -8,12 +8,15 @@ import io.github.jopenlibs.vault.json.JsonObject;
 import io.github.jopenlibs.vault.response.AuthResponse;
 import io.github.jopenlibs.vault.response.LogicalResponse;
 import io.github.jopenlibs.vault.response.LookupResponse;
+import io.github.jopenlibs.vault.response.UnwrapResponse;
+import io.github.jopenlibs.vault.response.WrapResponse;
 import io.github.jopenlibs.vault.rest.Rest;
 import io.github.jopenlibs.vault.rest.RestResponse;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -308,36 +311,39 @@ public class Auth {
                 // Parse parameters to JSON
                 final JsonObject jsonObject = Json.object();
 
-                if (tokenRequest.id != null) jsonObject.add("id", tokenRequest.id.toString());
-                if (tokenRequest.polices != null && !tokenRequest.polices.isEmpty()) {
-                    jsonObject.add("policies", Json.array(tokenRequest.polices.toArray(new String[tokenRequest.polices.size()])));//NOPMD
+                if (tokenRequest.getId() != null) jsonObject.add("id", tokenRequest.getId().toString());
+                if (tokenRequest.getPolices() != null && !tokenRequest.getPolices().isEmpty()) {
+                    jsonObject.add(
+                            "policies",
+                            Json.array(tokenRequest.getPolices().toArray(new String[0]))
+                    ); //NOPMD
                 }
-                if (tokenRequest.meta != null && !tokenRequest.meta.isEmpty()) {
+                if (tokenRequest.getMeta() != null && !tokenRequest.getMeta().isEmpty()) {
                     final JsonObject metaMap = Json.object();
-                    for (final Map.Entry<String, String> entry : tokenRequest.meta.entrySet()) {
+                    for (final Map.Entry<String, String> entry : tokenRequest.getMeta().entrySet()) {
                         metaMap.add(entry.getKey(), entry.getValue());
                     }
                     jsonObject.add("meta", metaMap);
                 }
-                if (tokenRequest.noParent != null) jsonObject.add("no_parent", tokenRequest.noParent);
-                if (tokenRequest.noDefaultPolicy != null)
-                    jsonObject.add("no_default_policy", tokenRequest.noDefaultPolicy);
-                if (tokenRequest.ttl != null) jsonObject.add("ttl", tokenRequest.ttl);
-                if (tokenRequest.displayName != null) jsonObject.add("display_name", tokenRequest.displayName);
-                if (tokenRequest.numUses != null) jsonObject.add("num_uses", tokenRequest.numUses);
-                if (tokenRequest.renewable != null) jsonObject.add("renewable", tokenRequest.renewable);
-                if (tokenRequest.type != null) jsonObject.add("type", tokenRequest.type);
-                if (tokenRequest.explicitMaxTtl != null) jsonObject.add("explicit_max_ttl", tokenRequest.explicitMaxTtl);
-                if (tokenRequest.period != null) jsonObject.add("period", tokenRequest.period);
-                if (tokenRequest.entityAlias != null) jsonObject.add("entity_alias", tokenRequest.entityAlias);
+                if (tokenRequest.getNoParent() != null) jsonObject.add("no_parent", tokenRequest.getNoParent());
+                if (tokenRequest.getNoDefaultPolicy() != null)
+                    jsonObject.add("no_default_policy", tokenRequest.getNoDefaultPolicy());
+                if (tokenRequest.getTtl() != null) jsonObject.add("ttl", tokenRequest.getTtl());
+                if (tokenRequest.getDisplayName() != null) jsonObject.add("display_name", tokenRequest.getDisplayName());
+                if (tokenRequest.getNumUses() != null) jsonObject.add("num_uses", tokenRequest.getNumUses());
+                if (tokenRequest.getRenewable() != null) jsonObject.add("renewable", tokenRequest.getRenewable());
+                if (tokenRequest.getType() != null) jsonObject.add("type", tokenRequest.getType());
+                if (tokenRequest.getExplicitMaxTtl() != null) jsonObject.add("explicit_max_ttl", tokenRequest.getExplicitMaxTtl());
+                if (tokenRequest.getPeriod() != null) jsonObject.add("period", tokenRequest.getPeriod());
+                if (tokenRequest.getEntityAlias() != null) jsonObject.add("entity_alias", tokenRequest.getEntityAlias());
                 final String requestJson = jsonObject.toString();
 
                 final StringBuilder urlBuilder = new StringBuilder(config.getAddress())//NOPMD
                         .append("/v1/auth/")
                         .append(mount)
                         .append("/create");
-                if (tokenRequest.role != null) {
-                    urlBuilder.append("/").append(tokenRequest.role);
+                if (tokenRequest.getRole() != null) {
+                    urlBuilder.append("/").append(tokenRequest.getRole());
                 }
                 final String url = urlBuilder.toString();
 
@@ -1502,18 +1508,27 @@ public class Auth {
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      * @see #unwrap(String)
      */
-    public AuthResponse unwrap() throws VaultException {
+    public UnwrapResponse unwrap() throws VaultException {
         return unwrap(null);
     }
 
     /**
-     * <p>Returns the original response inside the given wrapped auth token. This method is useful if you need to unwrap
-     * a token, while being already authenticated. Do NOT authenticate in vault with your wrapping token, since it will
-     * both fail authentication and invalidate the wrapping token at the same time. See {@link #unwrap()} if you need to
-     * do that without being authenticated.</p>
+     * <p>Provide access to the {@code /sys/wrapping/unwrap} endpoint.</p>
+     *
+     * <p>Returns the original response inside the given wrapping token. Unlike simply reading
+     * {@code cubbyhole/response} (which is deprecated), this endpoint provides additional
+     * validation checks on the token, returns the original value on the wire rather than
+     * a JSON string representation of it, and ensures that the response is properly audit-logged.</p>
+     *
+     * <p> This endpoint can be used by using a wrapping token as the client token in the API call,
+     * in which case the token parameter is not required; or, a different token with permissions
+     * to access this endpoint can make the call and pass in the wrapping token in
+     * the token parameter. Do not use the wrapping token in both locations;
+     * this will cause the wrapping token to be revoked but the value to be unable to be looked up,
+     * as it will basically be a double-use of the token!</p>
      *
      * <p>In the example below, {@code authToken} is NOT your wrapped token, and should have unwrapping permissions.
-     * The unwrapped token in {@code unwrappedToken}. Example usage:</p>
+     * The unwrapped data in {@link UnwrapResponse#getData()}. Example usage:</p>
      *
      * <blockquote>
      * <pre>{@code
@@ -1521,18 +1536,30 @@ public class Auth {
      * final String wrappingToken = "...";
      * final VaultConfig config = new VaultConfig().address(...).token(authToken).build();
      * final Vault vault = new Vault(config);
-     * final AuthResponse response = vault.auth().unwrap(wrappingToken);
-     * final String unwrappedToken = response.getAuthClientToken();
+     *
+     * final WrapResponse wrapResponse = vault.auth().wrap(
+     *                 // Data to wrap
+     *                 new JsonObject()
+     *                         .add("foo", "bar")
+     *                         .add("zoo", "zar"),
+     *
+     *                 // TTL of the response-wrapping token
+     *                 60
+     *         );
+     *
+     * final UnwrapResponse unwrapResponse = vault.auth().unwrap(wrapResponse.getToken());
+     * final JsonObject unwrappedData = response.getData(); // original data
      * }</pre>
      * </blockquote>
      *
-     * @param wrappedToken Specifies the wrapping token ID, do NOT also put this in your {@link VaultConfig#token},
-     *                     if token is {@code null}, this method will unwrap the auth token in {@link VaultConfig#token}
+     * @param wrappedToken Specifies the wrapping token ID, do NOT also put this in your {@link VaultConfig#getToken()},
+     *                     if token is {@code null}, this method will unwrap the auth token in {@link VaultConfig#getToken()}
      * @return The response information returned from Vault
      * @throws VaultException If any error occurs, or unexpected response received from Vault
+     * @see #wrap(JsonObject, int)
      * @see #unwrap()
      */
-    public AuthResponse unwrap(final String wrappedToken) throws VaultException {
+    public UnwrapResponse unwrap(final String wrappedToken) throws VaultException {
         int retryCount = 0;
         while (true) {
             try {
@@ -1567,7 +1594,7 @@ public class Auth {
                 if (!mimeType.equals("application/json")) {
                     throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
                 }
-                return new AuthResponse(restResponse, retryCount);
+                return new UnwrapResponse(restResponse, retryCount);
             } catch (final Exception e) {
                 // If there are retries to perform, then pause for the configured interval and then execute the
                 // loop again...
@@ -1589,4 +1616,114 @@ public class Auth {
         }
     }
 
+    /**
+     * <p>Provide access to the {@code /sys/wrapping/wrap} endpoint.</p>
+     *
+     * <p>This provides a powerful mechanism for information sharing in many environments.
+     * In the types of scenarios, often the best practical option is to provide cover
+     * for the secret information, be able to detect malfeasance (interception, tampering),
+     * and limit lifetime of the secret's exposure.
+     * Response wrapping performs all three of these duties:</p>
+     *
+     * <ul>
+     *     <li>It provides cover by ensuring that the value being transmitted across the wire is
+     *     not the actual secret but a reference to such a secret, namely the response-wrapping token.
+     *     Information stored in logs or captured along the way do not directly see the sensitive information.
+     *     </li>
+     *     <li>It provides malfeasance detection by ensuring that only a single party can ever
+     *     unwrap the token and see what's inside. A client receiving a token that cannot be unwrapped
+     *     can trigger an immediate security incident. In addition, a client can inspect
+     *     a given token before unwrapping to ensure that its origin is from the expected
+     *     location in Vault.
+     *     </li>
+     *     <li>It limits the lifetime of secret exposure because the response-wrapping token has
+     *     a lifetime that is separate from the wrapped secret (and often can be much shorter),
+     *     so if a client fails to come up and unwrap the token, the token can expire very quickly.
+     *     </li>
+     * </ul>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final String authToken = "...";
+     * final String wrappingToken = "...";
+     * final VaultConfig config = new VaultConfig().address(...).token(authToken).build();
+     * final Vault vault = new Vault(config);
+     *
+     * final WrapResponse wrapResponse = vault.auth().wrap(
+     *                 // Data to wrap
+     *                 new JsonObject()
+     *                         .add("foo", "bar")
+     *                         .add("zoo", "zar"),
+     *
+     *                 // TTL of the response-wrapping token
+     *                 60
+     *         );
+     *
+     * final UnwrapResponse unwrapResponse = vault.auth().unwrap(wrapResponse.getToken());
+     * final JsonObject unwrappedData = response.getData(); // original data
+     * }</pre>
+     * </blockquote>
+     *
+     * @param jsonObject User data to wrap.
+     * @param ttlInSec Wrap TTL in seconds
+     * @return The response information returned from Vault
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     * @see #unwrap(String)
+     */
+    public WrapResponse wrap(final JsonObject jsonObject, int ttlInSec) throws VaultException {
+        Objects.requireNonNull(jsonObject);
+
+        int retryCount = 0;
+        while (true) {
+            try {
+                // Parse parameters to JSON
+                final String requestJson = jsonObject.toString();
+                final String url = config.getAddress() + "/v1/sys/wrapping/wrap";
+
+                // HTTP request to Vault
+                final RestResponse restResponse = new Rest()
+                        .url(url)
+                        .header("X-Vault-Token", config.getToken())
+                        .header("X-Vault-Wrap-TTL", Integer.toString(ttlInSec))
+                        .header("X-Vault-Namespace", this.nameSpace)
+                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
+                        .connectTimeoutSeconds(config.getOpenTimeout())
+                        .readTimeoutSeconds(config.getReadTimeout())
+                        .sslVerification(config.getSslConfig().isVerify())
+                        .sslContext(config.getSslConfig().getSslContext())
+                        .post();
+
+                // Validate restResponse
+                if (restResponse.getStatus() != 200) {
+                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus()
+                            + "\nResponse body: " + new String(restResponse.getBody(), StandardCharsets.UTF_8),
+                            restResponse.getStatus());
+                }
+
+                final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+                if (!mimeType.equals("application/json")) {
+                    throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
+                }
+
+                return new WrapResponse(restResponse, retryCount);
+            } catch (final Exception e) {
+                // If there are retries to perform, then pause for the configured interval and then execute the
+                // loop again...
+                if (retryCount < config.getMaxRetries()) {
+                    retryCount++;
+                    try {
+                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
+                        Thread.sleep(retryIntervalMilliseconds);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (e instanceof VaultException) {
+                    // ... otherwise, give up.
+                    throw (VaultException) e;
+                } else {
+                    throw new VaultException(e);
+                }
+            }
+        }
+    }
 }

@@ -1,11 +1,12 @@
-package io.github.jopenlibs.vault.api;
+package io.github.jopenlibs.vault.v1_11_4.api;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultException;
+import io.github.jopenlibs.vault.api.Auth.TokenRequest;
 import io.github.jopenlibs.vault.json.Json;
 import io.github.jopenlibs.vault.response.AuthResponse;
 import io.github.jopenlibs.vault.response.LookupResponse;
-import io.github.jopenlibs.vault.util.VaultContainer;
+import io.github.jopenlibs.vault.v1_11_4.util.VaultContainer;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -23,13 +24,13 @@ import static org.junit.Assert.assertTrue;
  * Integration tests for the token auth backend.
  */
 public class AuthBackendTokenTests {
-
     @ClassRule
     public static final VaultContainer container = new VaultContainer();
 
     @BeforeClass
     public static void setupClass() throws IOException, InterruptedException {
         container.initAndUnsealVault();
+        container.setupBackendAppRole();
     }
 
     /**
@@ -40,7 +41,7 @@ public class AuthBackendTokenTests {
         final Vault vault = container.getRootVault();
 
         final AuthResponse response = vault.auth().createToken(
-            new Auth.TokenRequest()
+            new TokenRequest()
             .id(UUID.randomUUID())
             .polices(Arrays.asList("policy"))
             .noParent(true)
@@ -52,7 +53,6 @@ public class AuthBackendTokenTests {
             .type("service")
             .explicitMaxTtl("2h")
             .period("2h")
-            .entityAlias("entityId")
         );
         final String token = response.getAuthClientToken();
         final String accessor = response.getTokenAccessor();
@@ -72,7 +72,7 @@ public class AuthBackendTokenTests {
     public void testRenewSelf() throws VaultException {
         // Generate a client token
         final Vault authVault = container.getRootVault();
-        final AuthResponse createResponse = authVault.auth().createToken(new Auth.TokenRequest().ttl("1h"));
+        final AuthResponse createResponse = authVault.auth().createToken(new TokenRequest().ttl("1h"));
         final String token = createResponse.getAuthClientToken();
 
         assertNotNull(token);
@@ -105,7 +105,7 @@ public class AuthBackendTokenTests {
     public void testLookupSelf() throws VaultException {
         // Generate a client token
         final Vault authVault = container.getRootVault();
-        final AuthResponse createResponse = authVault.auth().createToken(new Auth.TokenRequest().ttl("1h"));
+        final AuthResponse createResponse = authVault.auth().createToken(new TokenRequest().ttl("1h"));
         final String token = createResponse.getAuthClientToken();
 
         assertNotNull(token);
@@ -127,7 +127,7 @@ public class AuthBackendTokenTests {
     public void testRevokeSelf() throws VaultException {
         // Generate a client token
         final Vault authVault = container.getRootVault();
-        final AuthResponse createResponse = authVault.auth().createToken(new Auth.TokenRequest().ttl("1h"));
+        final AuthResponse createResponse = authVault.auth().createToken(new TokenRequest().ttl("1h"));
         final String token = createResponse.getAuthClientToken();
 
         assertNotNull(token);

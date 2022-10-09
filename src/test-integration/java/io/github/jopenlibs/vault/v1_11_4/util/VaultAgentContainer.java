@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.util;
+package io.github.jopenlibs.vault.v1_11_4.util;
 
 import com.github.dockerjava.api.model.Capability;
 import io.github.jopenlibs.vault.Vault;
@@ -17,7 +17,8 @@ import org.testcontainers.lifecycle.TestLifecycleAware;
 import static org.junit.Assume.assumeTrue;
 import static org.testcontainers.utility.MountableFile.forHostPath;
 
-public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> implements TestConstants, TestLifecycleAware {
+public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> implements
+        TestConstants, TestLifecycleAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultAgentContainer.class);
 
@@ -27,7 +28,7 @@ public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> i
     public VaultAgentContainer(
             Path roleId,
             Path secretId) {
-        super("vault:1.2.1");
+        super("vault:1.11.4");
         this.withNetwork(CONTAINER_NETWORK)
                 .withNetworkAliases("agent")
                 .withClasspathResourceMapping("/agent.hcl", AGENT_CONFIG_FILE, BindMode.READ_ONLY)
@@ -45,8 +46,8 @@ public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> i
     /**
      * Constructs an instance of the Vault driver, using sensible defaults.
      *
-     * @return
-     * @throws VaultException
+     * @return Vault client instance.
+     * @throws VaultException On error.
      */
     public Vault getVault() throws VaultException {
         final VaultConfig config =
@@ -71,8 +72,7 @@ public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> i
         return String.format("http://%s:%d", getContainerIpAddress(), getMappedPort(8100));
     }
 
-    @Override
-    public void beforeTest(TestDescription description) {
+    @Override public void beforeTest(TestDescription description) {
         assumeTrue(DOCKER_AVAILABLE);
     }
 }

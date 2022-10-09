@@ -67,7 +67,6 @@ task compileModuleInfoJava(type: JavaCompile) {
 
 compileModuleInfoJava.dependsOn compileJava
 classes.dependsOn compileModuleInfoJava
-
 // End of Java 9 compatibility config
 
 
@@ -137,15 +136,6 @@ if (!hasProperty('ossrhUsername')) {
 if (!hasProperty('ossrhPassword')) {
     ext.ossrhPassword = ''
 }
-if (!hasProperty('nexusUrl')) {
-    ext.nexusUrl = ''
-}
-if (!hasProperty('nexusUsername')) {
-    ext.nexusUsername = ''
-}
-if (!hasProperty('nexusPassword')) {
-    ext.nexusPassword = ''
-}
 
 artifacts {
     archives javadocJar, sourcesJar
@@ -161,15 +151,12 @@ uploadArchives {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
                 authentication(userName: ossrhUsername, password: ossrhPassword)
             }
 
-//            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-//                authentication(userName: ossrhUsername, password: ossrhPassword)
-//            }
-            snapshotRepository(url: nexusUrl) {
-                authentication(userName: nexusUsername, password: nexusPassword)
+            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
             }
 
             pom.project {
@@ -177,18 +164,18 @@ uploadArchives {
                 packaging 'jar'
                 // optionally artifactId can be defined here
                 description 'Zero-dependency Java client for HashiCorp\'s Vault'
-                url 'https://github.com/BetterCloud/vault-java-driver'
+                url 'https://github.com/jopenlibs/vault-java-driver'
 
                 scm {
-                    connection 'https://github.com/BetterCloud/vault-java-driver.git'
-                    developerConnection 'https://github.com/BetterCloud/vault-java-driver.git'
-                    url 'https://github.com/BetterCloud/vault-java-driver'
+                    connection 'https://github.com/jopenlibs/vault-java-driver.git'
+                    developerConnection 'https://github.com/jopenlibs/vault-java-driver.git'
+                    url 'https://github.com/jopenlibs/vault-java-driver'
                 }
 
                 licenses {
                     license {
                         name 'MIT'
-                        url 'https://github.com/BetterCloud/vault-java-driver/blob/master/README.md'
+                        url 'https://github.com/jopenlibs/vault-java-driver/blob/master/README.md'
                     }
                 }
 
@@ -207,6 +194,11 @@ uploadArchives {
                         id 'jarrodcodes'
                         name 'Jarrod Young'
                         email 'jarrodsy@gmail.com'
+                    },
+                    developer {
+                        id 'tledkov'
+                        name 'Taras Ledkov'
+                        email 'tledkov@apache.org'
                     }
                 ]}
             }
