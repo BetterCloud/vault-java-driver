@@ -1,13 +1,13 @@
 package io.github.jopenlibs.vault.vault.mock;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.function.Predicate;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 
 public class AuthRequestValidatingMockVault extends MockVault {
-    private Predicate<HttpServletRequest> validator;
+    private final Predicate<HttpServletRequest> validator;
 
 
     public AuthRequestValidatingMockVault(Predicate<HttpServletRequest> validator) {

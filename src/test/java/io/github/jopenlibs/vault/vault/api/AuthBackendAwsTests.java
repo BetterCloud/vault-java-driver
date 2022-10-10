@@ -7,8 +7,8 @@ import io.github.jopenlibs.vault.json.JsonObject;
 import io.github.jopenlibs.vault.response.AuthResponse;
 import io.github.jopenlibs.vault.vault.VaultTestUtils;
 import io.github.jopenlibs.vault.vault.mock.AuthRequestValidatingMockVault;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.function.Predicate;
-import javax.servlet.http.HttpServletRequest;
 import org.eclipse.jetty.server.Server;
 import org.junit.Test;
 

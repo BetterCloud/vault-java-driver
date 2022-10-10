@@ -52,9 +52,9 @@ public class WrapResponse extends VaultResponse {
     }
 
     /**
-     * Get response-wrapped token
+     * Get response-wrapped token.
      *
-     * @return response-wrapped token
+     * @return response-wrapped token.
      */
     public String getToken() {
         return token;
@@ -73,7 +73,11 @@ public class WrapResponse extends VaultResponse {
         return accessor;
     }
 
-    /** */
+    /**
+     * Get wrapped token TTL.
+     *
+     * @return Wrapped token TTL.
+     */
     public int getTtl() {
         return ttl;
     }

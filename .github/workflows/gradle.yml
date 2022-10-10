@@ -1,6 +1,6 @@
 name: CI
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build:
@@ -8,7 +8,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        java: [9, 11, 12]
+        java: [11]
         os: [ubuntu-latest, windows-latest]
         include:
           # TODO(casz) remove once https://github.com/testcontainers/testcontainers-java/pull/1780 is available
@@ -22,4 +22,10 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: Build with Gradle
-        run: ./gradlew build ${{ matrix.tasks }} -s --info
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: |
+            build
+            ${{ matrix.tasks }}
+            -s
+            --info

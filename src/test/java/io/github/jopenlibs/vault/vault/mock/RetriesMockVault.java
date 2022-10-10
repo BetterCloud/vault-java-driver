@@ -1,8 +1,8 @@
 package io.github.jopenlibs.vault.vault.mock;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 
 /**
@@ -43,9 +43,9 @@ import org.eclipse.jetty.server.Request;
  */
 public class RetriesMockVault extends MockVault {
 
-    private int failureCount ;
-    private int mockStatus;
-    private String mockResponse;
+    private final int mockStatus;
+    private final String mockResponse;
+    private int failureCount;
 
     public RetriesMockVault(final int failureCount, final int mockStatus, final String mockResponse) {
         this.failureCount = failureCount;

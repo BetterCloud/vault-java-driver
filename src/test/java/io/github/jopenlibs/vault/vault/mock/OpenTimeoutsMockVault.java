@@ -1,9 +1,9 @@
 package io.github.jopenlibs.vault.vault.mock;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 
 /**
@@ -52,9 +52,9 @@ import org.eclipse.jetty.server.Request;
  */
 public class OpenTimeoutsMockVault extends MockVault {
 
-    private int delaySeconds;
-    private int mockStatus;
-    private String mockResponse;
+    private final int delaySeconds;
+    private final int mockStatus;
+    private final String mockResponse;
 
     public OpenTimeoutsMockVault(final int delaySeconds, final int mockStatus, final String mockResponse) {
         this.delaySeconds = delaySeconds;
@@ -70,7 +70,7 @@ public class OpenTimeoutsMockVault extends MockVault {
             final HttpServletResponse response
     ) throws IOException, ServletException {
         try {
-            Thread.sleep(delaySeconds * 1000);
+            Thread.sleep((long) delaySeconds * 1000);
             response.setContentType("application/json");
             baseRequest.setHandled(true);
             System.out.println("OpenTimeoutsMockVault is sending an HTTP " + mockStatus + " code, with expected" +

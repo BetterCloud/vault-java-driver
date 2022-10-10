@@ -2,10 +2,10 @@ package io.github.jopenlibs.vault.vault.mock;
 
 import io.github.jopenlibs.vault.json.Json;
 import io.github.jopenlibs.vault.json.JsonObject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Enumeration;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 
 /**
@@ -52,6 +52,7 @@ public class EchoInputMockVault extends MockVault {
                 .append(request.getRequestURI())
                 .append(request.getQueryString() == null || request.getQueryString().isEmpty() ? "" : "?" +
                         request.getQueryString());
+
         final String mockResponse = Json.object()
                 .add("method", request.getMethod())
                 .add("URL", url.toString())
