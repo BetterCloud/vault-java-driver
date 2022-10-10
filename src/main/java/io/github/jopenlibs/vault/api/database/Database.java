@@ -2,6 +2,7 @@ package io.github.jopenlibs.vault.api.database;
 
 import io.github.jopenlibs.vault.VaultConfig;
 import io.github.jopenlibs.vault.VaultException;
+import io.github.jopenlibs.vault.api.OperationsBase;
 import io.github.jopenlibs.vault.json.Json;
 import io.github.jopenlibs.vault.json.JsonObject;
 import io.github.jopenlibs.vault.response.DatabaseResponse;
@@ -13,12 +14,13 @@ import java.util.List;
 /**
  * <p>The implementing class for operations on Vault's database backend.</p>
  *
- * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of <code>Vault</code>
- * in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code> method for usage examples.</p>
+ * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of
+ * <code>Vault</code>
+ * in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code> method for
+ * usage examples.</p>
  */
-public class Database {
+public class Database extends OperationsBase {
 
-    private final VaultConfig config;
     private final String mountPath;
     private String nameSpace;
 
@@ -28,22 +30,28 @@ public class Database {
     }
 
     /**
-     * Constructor for use when the Database backend is mounted on the default path (i.e. <code>/v1/database</code>).
+     * Constructor for use when the Database backend is mounted on the default path (i.e.
+     * <code>/v1/database</code>).
      *
-     * @param config A container for the configuration settings needed to initialize a <code>Vault</code> driver instance
+     * @param config A container for the configuration settings needed to initialize a
+     * <code>Vault</code> driver instance
      */
     public Database(final VaultConfig config) {
         this(config, "database");
     }
 
     /**
-     * Constructor for use when the Database backend is mounted on some non-default custom path (e.g. <code>/v1/db123</code>).
+     * Constructor for use when the Database backend is mounted on some non-default custom path
+     * (e.g. <code>/v1/db123</code>).
      *
-     * @param config    A container for the configuration settings needed to initialize a <code>Vault</code> driver instance
-     * @param mountPath The path on which your Vault Database backend is mounted, without the <code>/v1/</code> prefix (e.g. <code>"root-ca"</code>)
+     * @param config A container for the configuration settings needed to initialize a
+     * <code>Vault</code> driver instance
+     * @param mountPath The path on which your Vault Database backend is mounted, without the
+     * <code>/v1/</code> prefix (e.g. <code>"root-ca"</code>)
      */
     public Database(final VaultConfig config, final String mountPath) {
-        this.config = config;
+        super(config);
+
         this.mountPath = mountPath;
         if (this.config.getNameSpace() != null && !this.config.getNameSpace().isEmpty()) {
             this.nameSpace = this.config.getNameSpace();
@@ -52,10 +60,11 @@ public class Database {
 
     /**
      * <p>Operation to create or update an role using the Database Secret engine.
-     * Relies on an authentication token being present in the <code>VaultConfig</code> instance.</p>
+     * Relies on an authentication token being present in the <code>VaultConfig</code>
+     * instance.</p>
      *
-     * <p>This version of the method accepts a <code>DatabaseRoleOptions</code> parameter, containing optional settings
-     * for the role creation operation.  Example usage:</p>
+     * <p>This version of the method accepts a <code>DatabaseRoleOptions</code> parameter,
+     * containing optional settings for the role creation operation.  Example usage:</p>
      *
      * <blockquote>
      * <pre>{@code
@@ -72,58 +81,44 @@ public class Database {
      * </blockquote>
      *
      * @param roleName A name for the role to be created or updated
-     * @param options  Optional settings for the role to be created or updated (e.g. db_name, ttl, etc)
+     * @param options Optional settings for the role to be created or updated (e.g. db_name, ttl,
+     * etc)
      * @return A container for the information returned by Vault
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
-    public DatabaseResponse createOrUpdateRole(final String roleName, final DatabaseRoleOptions options) throws VaultException {
-        int retryCount = 0;
-        while (true) {
-            try {
-                final String requestJson = roleOptionsToJson(options);
+    public DatabaseResponse createOrUpdateRole(final String roleName,
+            final DatabaseRoleOptions options) throws VaultException {
+        return retry(attempt -> {
+            final String requestJson = roleOptionsToJson(options);
 
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
-                        .header("X-Vault-Token", config.getToken())
-                        .header("X-Vault-Namespace", this.nameSpace)
-                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
+            final RestResponse restResponse = new Rest()//NOPMD
+                    .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath,
+                            roleName))
+                    .header("X-Vault-Token", config.getToken())
+                    .header("X-Vault-Namespace", this.nameSpace)
+                    .body(requestJson.getBytes(StandardCharsets.UTF_8))
+                    .connectTimeoutSeconds(config.getOpenTimeout())
+                    .readTimeoutSeconds(config.getReadTimeout())
+                    .sslVerification(config.getSslConfig().isVerify())
+                    .sslContext(config.getSslConfig().getSslContext())
+                    .post();
 
-                // Validate restResponse
-                if (restResponse.getStatus() != 204) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
-                }
-                return new DatabaseResponse(restResponse, retryCount);
-            } catch (Exception e) {
-                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+            // Validate restResponse
+            if (restResponse.getStatus() != 204) {
+                throw new VaultException(
+                        "Vault responded with HTTP status code: " + restResponse.getStatus(),
+                        restResponse.getStatus());
             }
-        }
+            return new DatabaseResponse(restResponse, attempt);
+        });
     }
 
     /**
-     * <p>Operation to retrieve an role using the Database backend.  Relies on an authentication token being present in
-     * the <code>VaultConfig</code> instance.</p>
+     * <p>Operation to retrieve an role using the Database backend.  Relies on an authentication
+     * token being present in the <code>VaultConfig</code> instance.</p>
      *
-     * <p>The role information will be populated in the <code>roleOptions</code> field of the <code>DatabaseResponse</code>
-     * return value.  Example usage:</p>
+     * <p>The role information will be populated in the <code>roleOptions</code> field of the
+     * <code>DatabaseResponse</code> return value.  Example usage:</p>
      *
      * <blockquote>
      * <pre>{@code
@@ -140,52 +135,35 @@ public class Database {
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public DatabaseResponse getRole(final String roleName) throws VaultException {
-        int retryCount = 0;
-        while (true) {
-            // Make an HTTP request to Vault
-            try {
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
-                        .header("X-Vault-Token", config.getToken())
-                        .header("X-Vault-Namespace", this.nameSpace)
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .get();
+        return retry(attempt -> {
+            final RestResponse restResponse = new Rest()//NOPMD
+                    .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath,
+                            roleName))
+                    .header("X-Vault-Token", config.getToken())
+                    .header("X-Vault-Namespace", this.nameSpace)
+                    .connectTimeoutSeconds(config.getOpenTimeout())
+                    .readTimeoutSeconds(config.getReadTimeout())
+                    .sslVerification(config.getSslConfig().isVerify())
+                    .sslContext(config.getSslConfig().getSslContext())
+                    .get();
 
-                // Validate response
-                if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
-                }
-                return new DatabaseResponse(restResponse, retryCount);
-            } catch (Exception e) {
-                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+            // Validate response
+            if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
+                throw new VaultException(
+                        "Vault responded with HTTP status code: " + restResponse.getStatus(),
+                        restResponse.getStatus());
             }
-        }
+            return new DatabaseResponse(restResponse, attempt);
+        });
     }
 
     /**
      * <p>Operation to revike  a certificate in the vault using the Database backend.
-     * Relies on an authentication token being present in
-     * the <code>VaultConfig</code> instance.</p>
+     * Relies on an authentication token being present in the <code>VaultConfig</code>
+     * instance.</p>
      *
-     * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will be thrown if
-     * the role does not exist, or if any other problem occurs.  Example usage:</p>
+     * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will
+     * be thrown if the role does not exist, or if any other problem occurs.  Example usage:</p>
      *
      * <blockquote>
      * <pre>{@code
@@ -202,57 +180,41 @@ public class Database {
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public DatabaseResponse revoke(final String serialNumber) throws VaultException {
-        int retryCount = 0;
-        while (true) {
+        return retry(attempt -> {
             // Make an HTTP request to Vault
             JsonObject jsonObject = new JsonObject();
             if (serialNumber != null) {
                 jsonObject.add("serial_number", serialNumber);
             }
             final String requestJson = jsonObject.toString();
-            try {
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(String.format("%s/v1/%s/revoke", config.getAddress(), this.mountPath))
-                        .header("X-Vault-Token", config.getToken())
-                        .header("X-Vault-Namespace", this.nameSpace)
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .body(requestJson.getBytes(StandardCharsets.UTF_8))
-                        .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .post();
 
-                // Validate response
-                if (restResponse.getStatus() != 200) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
-                }
-                return new DatabaseResponse(restResponse, retryCount);
-            } catch (Exception e) {
-                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+            final RestResponse restResponse = new Rest()//NOPMD
+                    .url(String.format("%s/v1/%s/revoke", config.getAddress(), this.mountPath))
+                    .header("X-Vault-Token", config.getToken())
+                    .header("X-Vault-Namespace", this.nameSpace)
+                    .connectTimeoutSeconds(config.getOpenTimeout())
+                    .readTimeoutSeconds(config.getReadTimeout())
+                    .body(requestJson.getBytes(StandardCharsets.UTF_8))
+                    .sslVerification(config.getSslConfig().isVerify())
+                    .sslContext(config.getSslConfig().getSslContext())
+                    .post();
+
+            // Validate response
+            if (restResponse.getStatus() != 200) {
+                throw new VaultException(
+                        "Vault responded with HTTP status code: " + restResponse.getStatus(),
+                        restResponse.getStatus());
             }
-        }
+            return new DatabaseResponse(restResponse, attempt);
+        });
     }
 
     /**
-     * <p>Operation to delete an role using the Database backend.  Relies on an authentication token being present in
-     * the <code>VaultConfig</code> instance.</p>
+     * <p>Operation to delete an role using the Database backend.  Relies on an authentication
+     * token being present in the <code>VaultConfig</code> instance.</p>
      *
-     * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will be thrown if
-     * the role does not exist, or if any other problem occurs.  Example usage:</p>
+     * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will
+     * be thrown if the role does not exist, or if any other problem occurs.  Example usage:</p>
      *
      * <blockquote>
      * <pre>{@code
@@ -269,51 +231,36 @@ public class Database {
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public DatabaseResponse deleteRole(final String roleName) throws VaultException {
-        int retryCount = 0;
-        while (true) {
-            // Make an HTTP request to Vault
-            try {
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath, roleName))
-                        .header("X-Vault-Token", config.getToken())
-                        .header("X-Vault-Namespace", this.nameSpace)
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .delete();
+        return retry(attempt -> {
+            final RestResponse restResponse = new Rest()//NOPMD
+                    .url(String.format("%s/v1/%s/roles/%s", config.getAddress(), this.mountPath,
+                            roleName))
+                    .header("X-Vault-Token", config.getToken())
+                    .header("X-Vault-Namespace", this.nameSpace)
+                    .connectTimeoutSeconds(config.getOpenTimeout())
+                    .readTimeoutSeconds(config.getReadTimeout())
+                    .sslVerification(config.getSslConfig().isVerify())
+                    .sslContext(config.getSslConfig().getSslContext())
+                    .delete();
 
-                // Validate response
-                if (restResponse.getStatus() != 204) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
-                }
-                return new DatabaseResponse(restResponse, retryCount);
-            } catch (Exception e) {
-                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+            // Validate response
+            if (restResponse.getStatus() != 204) {
+                throw new VaultException(
+                        "Vault responded with HTTP status code: " + restResponse.getStatus(),
+                        restResponse.getStatus());
             }
-        }
+            return new DatabaseResponse(restResponse, attempt);
+        });
     }
 
     /**
      * <p>Operation to generate a new set of credentials using the Database backend.
      *
-     * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will be thrown if
-     * the role does not exist, or if any other problem occurs.  Credential information will be populated in the
-     * <code>credential</code> field of the <code>DatabaseResponse</code> return value.  Example usage:</p>
+     * <p>A successful operation will return a 204 HTTP status.  A <code>VaultException</code> will
+     * be thrown if the role does not exist, or if any other problem occurs.  Credential information
+     * will be populated in the
+     * <code>credential</code> field of the <code>DatabaseResponse</code> return value.  Example
+     * usage:</p>
      *
      * <blockquote>
      * <pre>{@code
@@ -330,44 +277,30 @@ public class Database {
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
     public DatabaseResponse creds(final String roleName) throws VaultException {
-        int retryCount = 0;
-        while (true) {
-            try {
-                final RestResponse restResponse = new Rest()//NOPMD
-                        .url(String.format("%s/v1/%s/creds/%s", config.getAddress(), this.mountPath, roleName))
-                        .header("X-Vault-Token", config.getToken())
-                        .header("X-Vault-Namespace", this.nameSpace)
-                        .connectTimeoutSeconds(config.getOpenTimeout())
-                        .readTimeoutSeconds(config.getReadTimeout())
-                        .sslVerification(config.getSslConfig().isVerify())
-                        .sslContext(config.getSslConfig().getSslContext())
-                        .get();
+        return retry(attempt -> {
+            final RestResponse restResponse = new Rest()//NOPMD
+                    .url(String.format("%s/v1/%s/creds/%s", config.getAddress(), this.mountPath,
+                            roleName))
+                    .header("X-Vault-Token", config.getToken())
+                    .header("X-Vault-Namespace", this.nameSpace)
+                    .connectTimeoutSeconds(config.getOpenTimeout())
+                    .readTimeoutSeconds(config.getReadTimeout())
+                    .sslVerification(config.getSslConfig().isVerify())
+                    .sslContext(config.getSslConfig().getSslContext())
+                    .get();
 
-                // Validate response
-                if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
-                    String body = restResponse.getBody() != null ? new String(restResponse.getBody()) : "(no body)";
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus() + " " + body, restResponse.getStatus());
-                }
-
-                return new DatabaseResponse(restResponse, retryCount);
-            } catch (Exception e) {
-                // If there are retries to perform, then pause for the configured interval and then execute the loop again...
-                if (retryCount < config.getMaxRetries()) {
-                    retryCount++;
-                    try {
-                        final int retryIntervalMilliseconds = config.getRetryIntervalMilliseconds();
-                        Thread.sleep(retryIntervalMilliseconds);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (e instanceof VaultException) {
-                    // ... otherwise, give up.
-                    throw (VaultException) e;
-                } else {
-                    throw new VaultException(e);
-                }
+            // Validate response
+            if (restResponse.getStatus() != 200 && restResponse.getStatus() != 404) {
+                String body =
+                        restResponse.getBody() != null ? new String(restResponse.getBody())
+                                : "(no body)";
+                throw new VaultException(
+                        "Vault responded with HTTP status code: " + restResponse.getStatus()
+                                + " " + body, restResponse.getStatus());
             }
-        }
+
+            return new DatabaseResponse(restResponse, attempt);
+        });
     }
 
     private String roleOptionsToJson(final DatabaseRoleOptions options) {
@@ -377,10 +310,14 @@ public class Database {
             addJsonFieldIfNotNull(jsonObject, "db_name", options.getDbName());
             addJsonFieldIfNotNull(jsonObject, "default_ttl", options.getDefaultTtl());
             addJsonFieldIfNotNull(jsonObject, "max_ttl", options.getMaxTtl());
-            addJsonFieldIfNotNull(jsonObject, "creation_statements", joinList(options.getCreationStatements()));
-            addJsonFieldIfNotNull(jsonObject, "revocation_statements", joinList(options.getRevocationStatements()));
-            addJsonFieldIfNotNull(jsonObject, "rollback_statements", joinList(options.getRollbackStatements()));
-            addJsonFieldIfNotNull(jsonObject, "renew_statements", joinList(options.getRenewStatements()));
+            addJsonFieldIfNotNull(jsonObject, "creation_statements",
+                    joinList(options.getCreationStatements()));
+            addJsonFieldIfNotNull(jsonObject, "revocation_statements",
+                    joinList(options.getRevocationStatements()));
+            addJsonFieldIfNotNull(jsonObject, "rollback_statements",
+                    joinList(options.getRollbackStatements()));
+            addJsonFieldIfNotNull(jsonObject, "renew_statements",
+                    joinList(options.getRenewStatements()));
         }
 
         return jsonObject.toString();
@@ -396,7 +333,8 @@ public class Database {
         return result;
     }
 
-    private JsonObject addJsonFieldIfNotNull(final JsonObject jsonObject, final String name, final Object value) {
+    private JsonObject addJsonFieldIfNotNull(final JsonObject jsonObject, final String name,
+            final Object value) {
         if (value == null) {
             return jsonObject;
         }

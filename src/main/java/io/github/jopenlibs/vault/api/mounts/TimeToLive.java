@@ -1,5 +1,6 @@
 package io.github.jopenlibs.vault.api.mounts;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,7 +31,8 @@ public class TimeToLive {
     }
 
     private TimeToLive(final int ttl, final TimeUnit unit) {
-        if (unit == null) throw new NullPointerException("unit is null");
+        Objects.requireNonNull(unit, "unit is null");
+
         this.ttl = ttl;
         this.unit = unit;
     }
