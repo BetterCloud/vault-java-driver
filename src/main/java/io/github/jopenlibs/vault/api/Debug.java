@@ -101,6 +101,7 @@ public class Debug extends OperationsBase {
                     .url(config.getAddress() + "/v1/" + path)
                     .header("X-Vault-Token", config.getToken())
                     .header("X-Vault-Namespace", this.nameSpace)
+                    .header("X-Vault-Request", "true")
                     .connectTimeoutSeconds(config.getOpenTimeout())
                     .readTimeoutSeconds(config.getReadTimeout())
                     .sslVerification(config.getSslConfig().isVerify())

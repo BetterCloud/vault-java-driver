@@ -255,6 +255,7 @@ public class Vault {
                     .url(vaultConfig.getAddress() + "/v1/sys/mounts")
                     .header("X-Vault-Token", vaultConfig.getToken())
                     .header("X-Vault-Namespace", this.vaultConfig.getNameSpace())
+                    .header("X-Vault-Request", "true")
                     .connectTimeoutSeconds(vaultConfig.getOpenTimeout())
                     .readTimeoutSeconds(vaultConfig.getReadTimeout())
                     .sslVerification(vaultConfig.getSslConfig().isVerify())

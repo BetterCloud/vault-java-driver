@@ -49,6 +49,7 @@ public class Mounts extends OperationsBase {
             final RestResponse restResponse = new Rest()//NOPMD
                     .url(String.format("%s/v1/sys/mounts", config.getAddress()))
                     .header("X-Vault-Token", config.getToken())
+                    .header("X-Vault-Request", "true")
                     .connectTimeoutSeconds(config.getOpenTimeout())
                     .readTimeoutSeconds(config.getReadTimeout())
                     .sslVerification(config.getSslConfig().isVerify())
@@ -117,6 +118,7 @@ public class Mounts extends OperationsBase {
             final RestResponse restResponse = new Rest()//NOPMD
                     .url(String.format("%s/v1/sys/mounts/%s", config.getAddress(), path))
                     .header("X-Vault-Token", config.getToken())
+                    .header("X-Vault-Request", "true")
                     .body(requestJson.getBytes(StandardCharsets.UTF_8))
                     .connectTimeoutSeconds(config.getOpenTimeout())
                     .readTimeoutSeconds(config.getReadTimeout())
@@ -165,6 +167,7 @@ public class Mounts extends OperationsBase {
             final RestResponse restResponse = new Rest()//NOPMD
                     .url(String.format("%s/v1/sys/mounts/%s", config.getAddress(), path))
                     .header("X-Vault-Token", config.getToken())
+                    .header("X-Vault-Request", "true")
                     .connectTimeoutSeconds(config.getOpenTimeout())
                     .readTimeoutSeconds(config.getReadTimeout())
                     .sslVerification(config.getSslConfig().isVerify())
@@ -212,6 +215,7 @@ public class Mounts extends OperationsBase {
             final RestResponse restResponse = new Rest()//NOPMD
                     .url(String.format("%s/v1/sys/mounts/%s/tune", config.getAddress(), path))
                     .header("X-Vault-Token", config.getToken())
+                    .header("X-Vault-Request", "true")
                     .connectTimeoutSeconds(config.getOpenTimeout())
                     .readTimeoutSeconds(config.getReadTimeout())
                     .sslVerification(config.getSslConfig().isVerify())
@@ -274,6 +278,7 @@ public class Mounts extends OperationsBase {
             final RestResponse restResponse = new Rest()//NOPMD
                     .url(String.format("%s/v1/sys/mounts/%s/tune", config.getAddress(), path))
                     .header("X-Vault-Token", config.getToken())
+                    .header("X-Vault-Request", "true")
                     .body(requestJson.getBytes(StandardCharsets.UTF_8))
                     .connectTimeoutSeconds(config.getOpenTimeout())
                     .readTimeoutSeconds(config.getReadTimeout())
