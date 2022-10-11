@@ -37,7 +37,7 @@ The driver is available from Maven Central, for all modern Java build systems.
 Gradle:
 ```
 dependencies {
-    implementation 'io.github.jopenlibs:vault-java-driver:6.0.0'
+    implementation 'io.github.jopenlibs:vault-java-driver:5.2.0'
 }
 ```
 
@@ -46,7 +46,7 @@ Maven:
 <dependency>
     <groupId>io.github.jopenlibs</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>6.0.0</version>
+    <version>5.2.0</version>
 </dependency>
 ```
 
@@ -262,7 +262,7 @@ final LogicalResponse response = vault.withRetries(5, 1000)
 
 API Reference (Javadocs)
 ------------------------
-Full [Javadoc documentation](http://bettercloud.github.io/vault-java-driver/javadoc/).
+Full [Javadoc documentation](https://jopenlibs.github.io/vault-java-driver/javadoc).
 
 Version History
 ---------------

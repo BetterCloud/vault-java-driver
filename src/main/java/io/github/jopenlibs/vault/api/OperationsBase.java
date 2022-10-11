@@ -48,6 +48,8 @@ public abstract class OperationsBase {
          *
          * @param attempt Number of current attempt.
          * @return Operation response.
+         *
+         * @throws Exception When an error occurs during operation execution.
          */
         T run(int attempt) throws Exception;
     }
