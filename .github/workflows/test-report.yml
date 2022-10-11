@@ -13,7 +13,7 @@ jobs:
           artifact: test-results            # artifact name
           name: Tests vault-java-driver     # Name of the check run which will be created
           path: '**/*.xml'                  # Path to test results (inside artifact .zip)
-          reporter: jest-junit
+          reporter: java-junit
           list-suites: 'all'
           list-tests: 'all'
 
