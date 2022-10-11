@@ -29,3 +29,8 @@ jobs:
             ${{ matrix.tasks }}
             -s
             --info
+      - uses: actions/upload-artifact@v3  # upload test results
+        if: success() || failure()        # run this step even if previous step failed
+        with:
+          name: test-results
+          path: build/test-results/

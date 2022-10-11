@@ -108,6 +108,9 @@ task unitTest(type: Test) {
     testLogging {
         events "passed", "skipped", "failed"
     }
+
+    reports.html.enabled = false
+    reports.junitXml.enabled = true
 }
 
 task integrationTest(type: Test) {
@@ -116,6 +119,9 @@ task integrationTest(type: Test) {
     testLogging {
         events "passed", "skipped", "failed"
     }
+
+    reports.html.enabled = false
+    reports.junitXml.enabled = true
 }
 
 //
