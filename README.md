@@ -11,6 +11,12 @@ alike, without causing conflicts with any other dependency.
 NOTE:  Although the binary artifact produced by the project is backwards-compatible with Java 8, you do need 
        JDK 9 or higher to modify or build the source code of this library itself.
 
+
+Fork explanation
+-------------------------------
+BetterCloud's [vault-java-driver](https://github.com/BetterCloud/vault-java-driver) is one of the most commonly used Java clients for Hashicorp, but has had no activity or releases since December 2019. The project is not maintaining [by author](https://github.com/BetterCloud/vault-java-driver/pull/245#issuecomment-954066376).
+
+
 This Change
 -----------
 
@@ -271,6 +277,12 @@ Note that changes to the major version (i.e. the first number) represent possibl
 may require modifications in your code to migrate.  Changes to the minor version (i.e. the second number)
 should represent non-breaking changes.  The third number represents any very minor bugfix patches.
 
+* **5.2.0**:  This release contains the following updates:
+  * Move code packages and maven groupdId from `com.bettercloud` to `io.github.jopenlibs`. [(PR #2)](https://github.com/jopenlibs/vault-java-driver/pull/2)
+  * Fix and refactoring data wrapping, add integration tests with the last Vault version (vault 1.11.4). [(PR #4)](https://github.com/jopenlibs/vault-java-driver/pull/4),  [(PR #17)](https://github.com/jopenlibs/vault-java-driver/pull/17)
+  * Upgrade tests dependencies. [(PR #11)](https://github.com/jopenlibs/vault-java-driver/pull/11)
+  * Port the [patch of Ian Ferguson](https://github.com/BetterCloud/vault-java-driver/pull/229/files)  that includes `X-Vault-Request: true` header on all requests to work with Vault Agent's w/ require_request_header set to true. [(PR #16)](https://github.com/jopenlibs/vault-java-driver/pull/16)
+  
 * **5.1.0**:  This release contains the following updates:
   * Supports path prefixes when using K/V engine V2.  [(PR #189)](https://github.com/BetterCloud/vault-java-driver/pull/189)
   * Fixes issues with bulk requests in the transit API.  [(PR #195)](https://github.com/BetterCloud/vault-java-driver/pull/195)
@@ -413,7 +425,7 @@ License
 -------
 The MIT License (MIT)
 
-Copyright (c) 2016-2019 BetterCloud
+Copyright (c) 2016-2019 BetterCloud \
 Copyright (c) 2022 Java Open Source Libraries Organization (jopenlibs.github.io)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
