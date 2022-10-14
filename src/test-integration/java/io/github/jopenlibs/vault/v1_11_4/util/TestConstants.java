@@ -34,6 +34,7 @@ public interface TestConstants {
 
     String AGENT_CONFIG_FILE = "/home/vault/agent.hcl";
     String APPROLE_POLICY_FILE = "/home/vault/approlePolicy.hcl";
+    String ALLOW_REWRAP_POLICY_FILE = "/home/vault/allowRewrapPolicy.hcl";
 
     Network CONTAINER_NETWORK = Network.newNetwork();
     boolean DOCKER_AVAILABLE = TestEnvironment.dockerApiAtLeast("1.10");

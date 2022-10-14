@@ -45,6 +45,7 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
                 .withClasspathResourceMapping("/config.json", CONTAINER_CONFIG_FILE, BindMode.READ_ONLY)
                 .withClasspathResourceMapping("/libressl.conf", CONTAINER_OPENSSL_CONFIG_FILE, BindMode.READ_ONLY)
                 .withClasspathResourceMapping("/approlePolicy.hcl", APPROLE_POLICY_FILE, BindMode.READ_ONLY)
+                .withClasspathResourceMapping("/allowRewrapPolicy.hcl", ALLOW_REWRAP_POLICY_FILE, BindMode.READ_ONLY)
                 .withFileSystemBind(SSL_DIRECTORY, CONTAINER_SSL_DIRECTORY, BindMode.READ_WRITE)
                 .withCreateContainerCmdModifier(command -> command.withCapAdd(Capability.IPC_LOCK))
                 .withExposedPorts(8200, 8280)
@@ -130,6 +131,31 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
         runCommand("vault", "auth", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "userpass");
         runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "auth/userpass/users/" + USER_ID,
                 "password=" + PASSWORD);
+    }
+
+    /**
+     * Prepares the Vault server for testing of the Username and Password auth backend (i.e. mounts
+     * the backend and populates test data) and allow /sys/wrapping/rewrap endpoint.
+     */
+    public void setupUserPassWithAllowRewrap() throws IOException, InterruptedException {
+        runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
+
+        runCommand("vault", "policy", "write",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+                "allow_rewrap", ALLOW_REWRAP_POLICY_FILE
+        );
+
+        runCommand("vault", "auth", "enable",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+                "userpass"
+        );
+
+        runCommand("vault", "write",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+                "auth/userpass/users/" + USER_ID,
+                "password=" + PASSWORD,
+                "policies=allow_rewrap"
+        );
     }
 
     /**
