@@ -11,7 +11,8 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * <p>The implementing class for operations on REST endpoints, under the "Leases" section of the
- * Vault HTTP API docs (https://www.vaultproject.io/docs/http/index.html).</p>
+ * Vault HTTP API docs (<a href="https://www.vaultproject.io/docs/http/index.html">
+ *     https://www.vaultproject.io/docs/http/index.html</a>).</p>
  *
  * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of
  * <code>Vault</code> in a DSL-style builder pattern.  See the Javadoc comments of each
@@ -51,22 +52,18 @@ public class Leases extends OperationsBase {
      */
     public VaultResponse revoke(final String leaseId) throws VaultException {
         return retry(attempt -> {
-            /**
-             * 2019-03-21
-             * Changed the Lease revoke url due to invalid path.  Vault deprecated the original
-             * path (/v1/sys/revoke) in favor of a new leases mount point (/v1/sys/leases/revoke)
-             * https://github.com/hashicorp/vault/blob/master/CHANGELOG.md#080-august-9th-2017
-             */
+            final String requestJson = Json.object().add("lease_id", leaseId).toString();
             final RestResponse restResponse = new Rest()//NOPMD
-                    .url(config.getAddress() + "/v1/sys/leases/revoke/" + leaseId)
+                    .url(config.getAddress() + "/v1/sys/leases/revoke")
                     .header("X-Vault-Token", config.getToken())
                     .header("X-Vault-Namespace", this.nameSpace)
                     .header("X-Vault-Request", "true")
+                    .body(requestJson.getBytes(StandardCharsets.UTF_8))
                     .connectTimeoutSeconds(config.getOpenTimeout())
                     .readTimeoutSeconds(config.getReadTimeout())
                     .sslVerification(config.getSslConfig().isVerify())
                     .sslContext(config.getSslConfig().getSslContext())
-                    .put();
+                    .post();
 
             // Validate response
             if (restResponse.getStatus() != 204) {
@@ -98,7 +95,7 @@ public class Leases extends OperationsBase {
     public VaultResponse revokePrefix(final String prefix) throws VaultException {
         return retry(attempt -> {
             final RestResponse restResponse = new Rest()//NOPMD
-                    .url(config.getAddress() + "/v1/sys/revoke-prefix/" + prefix)
+                    .url(config.getAddress() + "/v1/sys/leases/revoke-prefix/" + prefix)
                     .header("X-Vault-Token", config.getToken())
                     .header("X-Vault-Namespace", this.nameSpace)
                     .header("X-Vault-Request", "true")
@@ -106,7 +103,7 @@ public class Leases extends OperationsBase {
                     .readTimeoutSeconds(config.getReadTimeout())
                     .sslVerification(config.getSslConfig().isVerify())
                     .sslContext(config.getSslConfig().getSslContext())
-                    .put();
+                    .post();
 
             // Validate response
             if (restResponse.getStatus() != 204) {
@@ -140,7 +137,7 @@ public class Leases extends OperationsBase {
     public VaultResponse revokeForce(final String prefix) throws VaultException {
         return retry(attempt -> {
             final RestResponse restResponse = new Rest()//NOPMD
-                    .url(config.getAddress() + "/v1/sys/revoke-force/" + prefix)
+                    .url(config.getAddress() + "/v1/sys/leases/revoke-force/" + prefix)
                     .header("X-Vault-Token", config.getToken())
                     .header("X-Vault-Namespace", this.nameSpace)
                     .header("X-Vault-Request", "true")
@@ -148,7 +145,7 @@ public class Leases extends OperationsBase {
                     .readTimeoutSeconds(config.getReadTimeout())
                     .sslVerification(config.getSslConfig().isVerify())
                     .sslContext(config.getSslConfig().getSslContext())
-                    .put();
+                    .post();
 
             // Validate response
             if (restResponse.getStatus() != 204) {
@@ -188,7 +185,7 @@ public class Leases extends OperationsBase {
         return retry(attempt -> {
             final String requestJson = Json.object().add("increment", increment).toString();
             final RestResponse restResponse = new Rest()//NOPMD
-                    .url(config.getAddress() + "/v1/sys/renew/" + leaseId)
+                    .url(config.getAddress() + "/v1/sys/leases/renew/" + leaseId)
                     .header("X-Vault-Token", config.getToken())
                     .header("X-Vault-Namespace", this.nameSpace)
                     .header("X-Vault-Request", "true")

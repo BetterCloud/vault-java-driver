@@ -2,35 +2,33 @@ package io.github.jopenlibs.vault.v1_11_4.api;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultException;
+import io.github.jopenlibs.vault.api.database.DatabaseRoleOptions;
+import io.github.jopenlibs.vault.response.DatabaseResponse;
 import io.github.jopenlibs.vault.response.VaultResponse;
+import io.github.jopenlibs.vault.v1_11_4.util.DbContainer;
 import io.github.jopenlibs.vault.v1_11_4.util.VaultContainer;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 
 /**
- * <p>Integration tests for the basic (i.e. "sys") Vault API operations.</p>
+ * <p>Integration tests for the leases (i.e. "sys/leases") Vault API operations.</p>
  *
- * <p>Unfortunately, it's not really possible to fully test these endpoints with the current integration testing
- * strategy.  The "generic" backend, used by the dev server, does not issue leases at all.  You CAN obtain leases
- * by using the PKI backend, but those aren't renewable:</p>
- *
- * <p>https://github.com/hashicorp/vault/issues/877</p>
- *
- * <p>Therefore, these revocation tests are basically just testing that the Vault server returns a 204 status
- * code.  Which isn't much of a test, since Vault routinely returns 204 even if you pass a non-existent lease ID.</p>
- *
- * <p>In the future, we may be shifting to an integration testing approach that uses a "real" Vault server
- * instance, running in a Docker container (see: https://github.com/BetterCloud/vault-java-driver/pull/25).  At
- * that time, these tests should be re-visited and better implemented.</p>
- *
- * TODO:  Revisit, now that we're using testcontainers
+ * According to the Vault documentation, it is possible to use a dynamic secret like database to
+ * test these methods
  */
 public class LeasesTests {
+
+    @ClassRule
+    public static final DbContainer dbContainer = new DbContainer();
 
     @ClassRule
     public static final VaultContainer container = new VaultContainer();
@@ -40,6 +38,7 @@ public class LeasesTests {
     @BeforeClass
     public static void setupClass() throws IOException, InterruptedException {
         container.initAndUnsealVault();
+        container.setupBackendDatabase(DbContainer.hostname);
     }
 
     @Before
@@ -47,22 +46,61 @@ public class LeasesTests {
         vault = container.getRootVault();
     }
 
+    public DatabaseResponse generateCredentials() throws VaultException {
+        List<String> creationStatements = new ArrayList<>();
+        creationStatements.add(
+                "CREATE USER \"{{name}}\" WITH PASSWORD '{{password}}';"
+                        + "GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";");
+
+        DatabaseResponse databaseResponse = vault.database().createOrUpdateRole("new-role",
+                new DatabaseRoleOptions().dbName("postgres")
+                        .creationStatements(creationStatements));
+        assertEquals(204, databaseResponse.getRestResponse().getStatus());
+
+        DatabaseResponse credsResponse = vault.database().creds("new-role");
+        assertEquals(200, credsResponse.getRestResponse().getStatus());
+
+        assertTrue(credsResponse.getCredential().getUsername().contains("new-role"));
+
+        return credsResponse;
+    }
+
     @Test
     public void testRevoke() throws VaultException {
-        final VaultResponse response = vault.leases().revoke("sys/revoke-prefix/dummy");
+        DatabaseResponse credsResponse = this.generateCredentials();
+
+        final VaultResponse response = vault.leases().revoke(credsResponse.getLeaseId());
         assertEquals(204, response.getRestResponse().getStatus());
     }
 
     @Test
     public void testRevokePrefix() throws VaultException {
-        final VaultResponse response = vault.leases().revokePrefix("sys/revoke-prefix/dummy");
+        DatabaseResponse credsResponse = this.generateCredentials();
+
+        String prefix = Arrays.stream(credsResponse.getLeaseId().split("([^/]+)$"))
+                .map(str -> str.substring(0, str.length() - 1)).findFirst().get();
+
+        final VaultResponse response = vault.leases().revokePrefix(prefix);
         assertEquals(204, response.getRestResponse().getStatus());
     }
 
     @Test
     public void testRevokeForce() throws VaultException {
-        final VaultResponse response = vault.leases().revokeForce("sys/revoke-prefix/dummy");
+        DatabaseResponse credsResponse = this.generateCredentials();
+
+        String prefix = Arrays.stream(credsResponse.getLeaseId().split("([^/]+)$"))
+                .map(str -> str.substring(0, str.length() - 1)).findFirst().get();
+
+        final VaultResponse response = vault.leases().revokeForce(prefix);
         assertEquals(204, response.getRestResponse().getStatus());
     }
 
+    @Test
+    public void testRenew() throws VaultException {
+        DatabaseResponse credsResponse = this.generateCredentials();
+
+        final VaultResponse response = vault.leases().renew(credsResponse.getLeaseId(),
+                credsResponse.getLeaseDuration());
+        assertEquals(200, response.getRestResponse().getStatus());
+    }
 }

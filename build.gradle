@@ -203,6 +203,11 @@ if (hasProperty("publish")) {
                                     id 'tledkov'
                                     name 'Taras Ledkov'
                                     email 'tledkov@apache.org'
+                                },
+                                developer {
+                                    id 'henryx'
+                                    name 'Enrico Bianchi'
+                                    email 'enrico.bianchi@gmail.com'
                                 }
                         ]
                     }
