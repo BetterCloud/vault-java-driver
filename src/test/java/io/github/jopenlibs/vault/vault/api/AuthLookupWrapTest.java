@@ -37,7 +37,8 @@ public class AuthLookupWrapTest {
 
     @Test
     public void should_lookup_wrap_use_url_sys_wrapping_lookup() throws Exception {
-        VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("wrapped").build();
+        VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999")
+                .token("wrapped").build();
         Vault vault = new Vault(vaultConfig);
         LogicalResponse response = vault.auth().lookupWrap();
 

@@ -51,7 +51,8 @@ public class JsonParser_Test {
         });
 
         assertEquals(0, exception.getOffset());
-        assertThat(exception.getMessage(), StringStartsWith.startsWith("Unexpected end of input at"));
+        assertThat(exception.getMessage(),
+                StringStartsWith.startsWith("Unexpected end of input at"));
     }
 
     @Test
@@ -450,13 +451,15 @@ public class JsonParser_Test {
     }
 
     private static void assertParseException(int offset, String message, final String json) {
-        ParseException exception = assertException(ParseException.class, (Runnable) () -> parse(json));
+        ParseException exception = assertException(ParseException.class,
+                (Runnable) () -> parse(json));
         assertEquals(offset, exception.getOffset());
         assertThat(exception.getMessage(), StringStartsWith.startsWith(message + " at"));
     }
 
     private static void assertParseException(int offset, int line, int column, final String json) {
-        ParseException exception = assertException(ParseException.class, (Runnable) () -> parse(json));
+        ParseException exception = assertException(ParseException.class,
+                (Runnable) () -> parse(json));
         assertEquals("offset", offset, exception.getOffset());
         assertEquals("line", line, exception.getLine());
         assertEquals("column", column, exception.getColumn());

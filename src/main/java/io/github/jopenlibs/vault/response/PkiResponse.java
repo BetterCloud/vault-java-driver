@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 /**
- * This class is a container for the information returned by Vault in PKI backend API
- * operations (e.g. create/delete roles, issue credentials).
+ * This class is a container for the information returned by Vault in PKI backend API operations
+ * (e.g. create/delete roles, issue credentials).
  */
 public class PkiResponse extends LogicalResponse {
 
@@ -38,13 +38,14 @@ public class PkiResponse extends LogicalResponse {
 
     /**
      * <p>Generates a <code>RoleOptions</code> object from the response data returned by PKI
-     * backend REST calls, for those calls which do return role data
-     * (e.g. <code>getRole(String roleName)</code>).</p>
+     * backend REST calls, for those calls which do return role data (e.g. <code>getRole(String
+     * roleName)</code>).</p>
      *
      * <p>If the response data does not contain role information, then this method will
      * return <code>null</code>.</p>
      *
-     * @param data The <code>"data"</code> object from a Vault JSON response, converted into Java key-value pairs.
+     * @param data The <code>"data"</code> object from a Vault JSON response, converted into Java
+     * key-value pairs.
      * @return A container for role options
      */
     private RoleOptions buildRoleOptionsFromData(final Map<String, String> data) {
@@ -95,13 +96,14 @@ public class PkiResponse extends LogicalResponse {
     }
 
     /**
-     * <p>Generates a <code>Credential</code> object from the response data returned by PKI backend REST calls, for
-     * those calls which do return role data (e.g. <code>issue(...)</code>).</p>
+     * <p>Generates a <code>Credential</code> object from the response data returned by PKI backend
+     * REST calls, for those calls which do return role data (e.g. <code>issue(...)</code>).</p>
      *
-     * <p>If the response data does not contain credential information, then this method will return
-     * <code>null</code>.</p>
+     * <p>If the response data does not contain credential information, then this method will
+     * return <code>null</code>.</p>
      *
-     * @param data The <code>"data"</code> object from a Vault JSON response, converted into Java key-value pairs.
+     * @param data The <code>"data"</code> object from a Vault JSON response, converted into Java
+     * key-value pairs.
      * @return A container for credential data
      */
     private Credential buildCredentialFromData(final Map<String, String> data) {
@@ -128,8 +130,8 @@ public class PkiResponse extends LogicalResponse {
 
     /**
      * <p>Used to determine whether a String value contains a "true" or "false" value.  The problem
-     * with <code>Boolean.parseBoolean()</code> is that it swallows null values and returns them
-     * as <code>false</code> rather than <code>null</code>.</p>
+     * with <code>Boolean.parseBoolean()</code> is that it swallows null values and returns them as
+     * <code>false</code> rather than <code>null</code>.</p>
      *
      * @param input A string, which can be <code>null</code>
      * @return A true or false value if the input can be parsed as such, or else <code>null</code>.
@@ -143,7 +145,8 @@ public class PkiResponse extends LogicalResponse {
     }
 
     /**
-     * <p>Used to convert a comma-separated values string into a <code>List</code> of <code>String</code> values.</p>
+     * <p>Used to convert a comma-separated values string into a <code>List</code> of
+     * <code>String</code> values.</p>
      *
      * @param input A string in CSV format
      * @return A <code>List</code> with one <code>String</code> per comma-separated value
@@ -164,7 +167,8 @@ public class PkiResponse extends LogicalResponse {
      * <p>Used to convert a String to an object Long, if possble.</p>
      *
      * @param input A String which should represent a numeric (i.e. Long) value
-     * @return A Long representation of the input String, or else null if the input cannot be converted to a Long
+     * @return A Long representation of the input String, or else null if the input cannot be
+     * converted to a Long
      */
     private Long parseLong(final String input) {
         try {

@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import org.eclipse.jetty.server.Request;
 
 public class AuthRequestValidatingMockVault extends MockVault {
+
     private final Predicate<HttpServletRequest> validator;
 
 
@@ -16,9 +17,9 @@ public class AuthRequestValidatingMockVault extends MockVault {
 
     @Override
     public void handle(String target,
-                       Request baseRequest,
-                       HttpServletRequest request,
-                       HttpServletResponse response) throws IOException {
+            Request baseRequest,
+            HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
         response.setContentType("application/json");
         baseRequest.setHandled(true);
         if (validator.test(request)) {

@@ -30,22 +30,22 @@ import java.io.Writer;
 @SuppressWarnings("PMD")
 public abstract class WriterConfig {
 
-  /**
-   * Write JSON in its minimal form, without any additional whitespace. This is the default.
-   */
-  public static final WriterConfig MINIMAL = new WriterConfig() {
-    @Override
-    JsonWriter createWriter(Writer writer) {
-      return new JsonWriter(writer);
-    }
-  };
+    /**
+     * Write JSON in its minimal form, without any additional whitespace. This is the default.
+     */
+    public static final WriterConfig MINIMAL = new WriterConfig() {
+        @Override
+        JsonWriter createWriter(Writer writer) {
+            return new JsonWriter(writer);
+        }
+    };
 
-  /**
-   * Write JSON in pretty-print, with each value on a separate line and an indentation of two
-   * spaces.
-   */
-  public static WriterConfig PRETTY_PRINT = PrettyPrint.indentWithSpaces(2);
+    /**
+     * Write JSON in pretty-print, with each value on a separate line and an indentation of two
+     * spaces.
+     */
+    public static WriterConfig PRETTY_PRINT = PrettyPrint.indentWithSpaces(2);
 
-  abstract JsonWriter createWriter(Writer writer);
+    abstract JsonWriter createWriter(Writer writer);
 
 }

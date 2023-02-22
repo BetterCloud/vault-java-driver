@@ -23,18 +23,21 @@ import static junit.framework.TestCase.assertTrue;
 public class VaultConfigTests {
 
     /**
-     * <p>The code used by <code>VaultConfig</code> to load environment variables is encapsulated within an inner
-     * class, so that a mock version of that environment loader can be used by unit tests.</p>
+     * <p>The code used by <code>VaultConfig</code> to load environment variables is encapsulated
+     * within an inner class, so that a mock version of that environment loader can be used by unit
+     * tests.</p>
      *
-     * <p>This mock implementation of <code>VaultConfig.EnvironmentLoader</code> allows unit tests to declare values
-     * that should be returned for a given environment variable name.  The actual environment is never used.</p>
+     * <p>This mock implementation of <code>VaultConfig.EnvironmentLoader</code> allows unit tests
+     * to declare values that should be returned for a given environment variable name.  The actual
+     * environment is never used.</p>
      *
-     * <p>The <code>VAULT_TOKEN</code> variable gets special treatment.  If a value cannot be found in the environment,
-     * then {@link EnvironmentLoader} looks for a <code>.vault-token</code> file in
-     * the user's home directory.  So this mock has a second constructor which allows you to pass a directory path,
-     * to serve as a mock "home directory" for testing.</p>
+     * <p>The <code>VAULT_TOKEN</code> variable gets special treatment.  If a value cannot be found
+     * in the environment, then {@link EnvironmentLoader} looks for a <code>.vault-token</code> file
+     * in the user's home directory.  So this mock has a second constructor which allows you to pass
+     * a directory path, to serve as a mock "home directory" for testing.</p>
      */
     class MockEnvironmentLoader extends EnvironmentLoader {
+
         final Map<String, String> overrides;
         final String mockHomeDirectory;
 
@@ -49,11 +52,12 @@ public class VaultConfigTests {
         }
 
         /**
-         * Declare a variable and value to be available in the mock "environment".  This method may be called
-         * repeatedly, to populate multiple variables.  This method should be called prior to passing the object
-         * instance to a <code>VaultConfig</code> constructor, or calling the <code>build()</code> method on that class.
+         * Declare a variable and value to be available in the mock "environment".  This method may
+         * be called repeatedly, to populate multiple variables.  This method should be called prior
+         * to passing the object instance to a <code>VaultConfig</code> constructor, or calling the
+         * <code>build()</code> method on that class.
          *
-         * @param name  Mock environment variable name
+         * @param name Mock environment variable name
          * @param value Mock environment variable value
          */
         private void override(final String name, final String value) {
@@ -68,7 +72,8 @@ public class VaultConfigTests {
                     value = overrides.get("VAULT_TOKEN");
                 } else {
                     try {
-                        final byte[] bytes = Files.readAllBytes(Paths.get(mockHomeDirectory).resolve(".vault-token"));
+                        final byte[] bytes = Files.readAllBytes(
+                                Paths.get(mockHomeDirectory).resolve(".vault-token"));
                         value = new String(bytes, StandardCharsets.UTF_8).trim();
                     } catch (IOException e) {
                     }
@@ -82,10 +87,8 @@ public class VaultConfigTests {
     }
 
     /**
-     * Test creating a new <code>VaultConfig</code> via its constructor, passing address and token values and ensuring
-     * that they're later accessible.
-     *
-     * @throws VaultException
+     * Test creating a new <code>VaultConfig</code> via its constructor, passing address and token
+     * values and ensuring that they're later accessible.
      */
     @Test
     public void testConfigConstructor() throws VaultException {
@@ -95,10 +98,8 @@ public class VaultConfigTests {
     }
 
     /**
-     * Test creating a new <code>VaultConfig</code> via its constructor, ensuring that addresses are normalized to
-     * not have a trailing slash.
-     *
-     * @throws VaultException
+     * Test creating a new <code>VaultConfig</code> via its constructor, ensuring that addresses are
+     * normalized to not have a trailing slash.
      */
     @Test
     public void testConfigConstructor_NormalizesAddress() throws VaultException {
@@ -107,10 +108,9 @@ public class VaultConfigTests {
     }
 
     /**
-     * Test creating a new <code>VaultConfig</code> via its constructor, passing null address and token values AND
-     * having them unavailable in the environment variables too.  This should cause initialization failure.
-     *
-     * @throws VaultException
+     * Test creating a new <code>VaultConfig</code> via its constructor, passing null address and
+     * token values AND having them unavailable in the environment variables too.  This should cause
+     * initialization failure.
      */
     @Test(expected = VaultException.class)
     public void testConfigConstructor_FailToLoad() throws VaultException {
@@ -118,10 +118,8 @@ public class VaultConfigTests {
     }
 
     /**
-     * Test creating a <code>VaultConfig</code> instance via its builder pattern, explicitly specifying address and
-     * token values.
-     *
-     * @throws VaultException
+     * Test creating a <code>VaultConfig</code> instance via its builder pattern, explicitly
+     * specifying address and token values.
      */
     @Test
     public void testConfigBuilder() throws VaultException {
@@ -141,10 +139,8 @@ public class VaultConfigTests {
     }
 
     /**
-     * Test creating a <code>VaultConfig</code> instance via its builder pattern, forcing it to look to the environment
-     * variables for address and token values.
-     *
-     * @throws VaultException
+     * Test creating a <code>VaultConfig</code> instance via its builder pattern, forcing it to look
+     * to the environment variables for address and token values.
      */
     @Test
     public void testConfigBuilder_LoadFromEnv() throws VaultException {
@@ -191,7 +187,8 @@ public class VaultConfigTests {
                 .build();
 
         final String expected = "-----BEGIN CERTIFICATE-----MIIDhjCCAm6gAwIBAgIES40FSTANBgkqhkiG9w0BAQsFADBrMQswCQYDVQQGEwJVUzERMA8GA1UECBMIQW55c3RhdGUxEDAOBgNVBAcTB0FueXRvd24xETAPBgNVBAoTCFRlc3QgT3JnMRAwDgYDVQQLEwdUZXN0IE9VMRIwEAYDVQQDEwlUZXN0IFVzZXIwHhcNMTYwMjE2MTcwNDQ3WhcNMTYwNTE2MTcwNDQ3WjBrMQswCQYDVQQGEwJVUzERMA8GA1UECBMIQW55c3RhdGUxEDAOBgNVBAcTB0FueXRvd24xETAPBgNVBAoTCFRlc3QgT3JnMRAwDgYDVQQLEwdUZXN0IE9VMRIwEAYDVQQDEwlUZXN0IFVzZXIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCHNAd93WjoDl7EYddxqpAd9FGoyvFA0900tmLJWmD3YPXhkOkXO38E//tS9KkXD39tDsDwHxw53iF1SmzgrHvzJzQvGjR5rvp7KjMhv/wlpED2E4FR/q2WigoXVtzpOwc4fk4PizBZV4fkSOtiQA0LEoQochw8wp7OI1tzE5iISKggD0N9EOJUzwQIcAgkAdaYEP9Fd2YMgTJAiHSakOgQowKQQGmIbKg0YWici9tiojwNCuNlcp1kBEUi4odO6BxRs8RKk6McvHCu1+2SSlxctGGU8kFKsF92/sULxvHAOovYspKdBJfw2f088Hnfw3jSgaWWQNB+oilVsfECx1BPAgMBAAGjMjAwMA8GA1UdEQQIMAaHBH8AAAEwHQYDVR0OBBYEFHuppZEESxlasbK5aq4LvF/IhtseMA0GCSqGSIb3DQEBCwUAA4IBAQBK9g8sWk6jCPekk2VjK6aKYIs4BB79xsaj41hdjoMwVRSelSpsmJE34/Vflqy+SBrf59czvk/UqJIYSrHRx7M0hpfIChmqqNEj5NKY+MFBuOTt4r/Wv3tbBTf2CMs4hLnkevhleNLxJhAjvh7r52U+uE8l6O11dsQRVXOSGnwdnvInVTs1ilxdTQh680DEU0q26P3o36N3Oxxgls2ZC3ExnLJnOofhj01l6cYhI06RtFPzJtv5sICCkYGMDKSIsWUndmurZjLAjsAKPT/RePeqyW0dKY5ZjtC+YAg5i3O0DLhERsDZECIp56oqsYxATuoHVzbjorM2ua2pUcuIR0p3-----END CERTIFICATE-----";
-        final String actual = config.getSslConfig().getPemUTF8().replaceAll(System.lineSeparator(), "");
+        final String actual = config.getSslConfig().getPemUTF8()
+                .replaceAll(System.lineSeparator(), "");
         assertEquals(actual, expected);
     }
 
@@ -206,10 +203,9 @@ public class VaultConfigTests {
     }
 
     /**
-     * Test creating a <code>VaultConfig</code> instance via its builder pattern, with no address no token values
-     * passed OR available in the environment.  This should cause initialization failure.
-     *
-     * @throws VaultException
+     * Test creating a <code>VaultConfig</code> instance via its builder pattern, with no address no
+     * token values passed OR available in the environment.  This should cause initialization
+     * failure.
      */
     @Test(expected = VaultException.class)
     public void testConfigBuilder_FailToLoad() throws VaultException {
@@ -219,9 +215,12 @@ public class VaultConfigTests {
     @SuppressWarnings("CharsetObjectCanBeUsed") // Requires Java 10 and above
     @Test
     public void testConfigBuilder_LoadTokenFromHomedir() throws IOException, VaultException {
-        final String mockHomeDirectory = System.getProperty("java.io.tmpdir") + File.separatorChar + UUID.randomUUID().toString();
+        final String mockHomeDirectory =
+                System.getProperty("java.io.tmpdir") + File.separatorChar + UUID.randomUUID()
+                        .toString();
         assertTrue(new File(mockHomeDirectory).mkdirs());
-        final File mockTokenFile = new File(mockHomeDirectory + File.separatorChar + ".vault-token");
+        final File mockTokenFile = new File(
+                mockHomeDirectory + File.separatorChar + ".vault-token");
         assertTrue(mockTokenFile.createNewFile());
         final PrintWriter out = new PrintWriter(mockTokenFile, "UTF-8");
         out.println("d24e2469-298a-6c64-6a71-5b47c9ba459a");
@@ -252,7 +251,8 @@ public class VaultConfigTests {
 
     @Test
     public void testConfigBuilder_WithNamespace() throws VaultException {
-        VaultConfig vaultConfig = new VaultConfig().nameSpace("namespace").address("address").build();
+        VaultConfig vaultConfig = new VaultConfig().nameSpace("namespace").address("address")
+                .build();
         Assert.assertEquals(vaultConfig.getNameSpace(), "namespace");
     }
 }

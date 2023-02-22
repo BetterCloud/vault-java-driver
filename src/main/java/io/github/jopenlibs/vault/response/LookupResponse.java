@@ -11,7 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class is a container for the information returned by Vault in lookup operations on auth backends.
+ * This class is a container for the information returned by Vault in lookup operations on auth
+ * backends.
  */
 public class LookupResponse extends VaultResponse {
 
@@ -34,7 +35,7 @@ public class LookupResponse extends VaultResponse {
      * This constructor simply exposes the common base class constructor.
      *
      * @param restResponse The raw HTTP response from Vault.
-     * @param retries      The number of retry attempts that occurred during the API call (can be zero).
+     * @param retries The number of retry attempts that occurred during the API call (can be zero).
      */
     public LookupResponse(final RestResponse restResponse, final int retries) {
         super(restResponse, retries);
@@ -54,7 +55,8 @@ public class LookupResponse extends VaultResponse {
             if (lastRenewalTimeJsonValue != null) {
                 lastRenewalTime = lastRenewalTimeJsonValue.asLong();
             }
-            if (dataJsonObject.get("metadata") != null && !dataJsonObject.get("metadata").toString().equalsIgnoreCase("null")) {
+            if (dataJsonObject.get("metadata") != null && !dataJsonObject.get("metadata").toString()
+                    .equalsIgnoreCase("null")) {
                 final JsonObject metadata = dataJsonObject.get("metadata").asObject();
                 username = metadata.getString("username", "");
             }

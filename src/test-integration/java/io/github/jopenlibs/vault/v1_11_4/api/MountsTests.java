@@ -22,7 +22,9 @@ import org.junit.rules.ExpectedException;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/** Integration tests for for operations on Vault's <code>/v1/sys/mounts/*</code> REST endpoints. */
+/**
+ * Integration tests for for operations on Vault's <code>/v1/sys/mounts/*</code> REST endpoints.
+ */
 public class MountsTests {
 
     @ClassRule
@@ -58,7 +60,8 @@ public class MountsTests {
                 .maxLeaseTtl(TimeToLive.of(12, TimeUnit.HOURS))
                 .description("description for pki engine");
 
-        final MountResponse response = vault.mounts().enable("pki-itest-path-1", MountType.PKI, payload);
+        final MountResponse response = vault.mounts()
+                .enable("pki-itest-path-1", MountType.PKI, payload);
 
         TestCase.assertEquals(204, response.getRestResponse().getStatus());
     }
@@ -171,7 +174,8 @@ public class MountsTests {
                 .defaultLeaseTtl(TimeToLive.of(12, TimeUnit.HOURS))
                 .maxLeaseTtl(TimeToLive.of(12, TimeUnit.HOURS));
 
-        final MountResponse tuneResponse = vault.mounts().tune("pki-predefined-path-2", tunePayload);
+        final MountResponse tuneResponse = vault.mounts()
+                .tune("pki-predefined-path-2", tunePayload);
 
         TestCase.assertEquals(204, tuneResponse.getRestResponse().getStatus());
 

@@ -29,7 +29,8 @@ public class AuthBackendAwsTests {
                 return false;
             }
         };
-        final AuthRequestValidatingMockVault mockVault = new AuthRequestValidatingMockVault(isValidEc2IdRequest);
+        final AuthRequestValidatingMockVault mockVault = new AuthRequestValidatingMockVault(
+                isValidEc2IdRequest);
 
         final Server server = VaultTestUtils.initHttpMockVault(mockVault);
         server.start();
@@ -70,7 +71,8 @@ public class AuthBackendAwsTests {
                 return false;
             }
         };
-        final AuthRequestValidatingMockVault mockVault = new AuthRequestValidatingMockVault(isValidEc2pkcs7Request);
+        final AuthRequestValidatingMockVault mockVault = new AuthRequestValidatingMockVault(
+                isValidEc2pkcs7Request);
 
         final Server server = VaultTestUtils.initHttpMockVault(mockVault);
         server.start();
@@ -110,7 +112,8 @@ public class AuthBackendAwsTests {
                     requestBody.getString("iam_request_headers", "").equals("headers");
         };
 
-        final AuthRequestValidatingMockVault mockVault = new AuthRequestValidatingMockVault(isValidEc2IamRequest);
+        final AuthRequestValidatingMockVault mockVault = new AuthRequestValidatingMockVault(
+                isValidEc2IamRequest);
 
         final Server server = VaultTestUtils.initHttpMockVault(mockVault);
         server.start();

@@ -12,12 +12,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        java: [11]
-        os: [ubuntu-latest, windows-latest]
+        java: [ 11 ]
+        os: [ ubuntu-latest, windows-latest ]
         include:
           # TODO(casz) remove once https://github.com/testcontainers/testcontainers-java/pull/1780 is available
-        - os: 'ubuntu-latest'
-          tasks: 'integrationTest'
+          - os: 'ubuntu-latest'
+            tasks: 'integrationTest'
 
     steps:
       - uses: actions/checkout@v1

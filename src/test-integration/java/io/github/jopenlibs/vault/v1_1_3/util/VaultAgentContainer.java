@@ -17,7 +17,8 @@ import org.testcontainers.lifecycle.TestLifecycleAware;
 import static org.junit.Assume.assumeTrue;
 import static org.testcontainers.utility.MountableFile.forHostPath;
 
-public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> implements TestConstants, TestLifecycleAware {
+public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> implements
+        TestConstants, TestLifecycleAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultAgentContainer.class);
 
@@ -44,9 +45,6 @@ public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> i
 
     /**
      * Constructs an instance of the Vault driver, using sensible defaults.
-     *
-     * @return
-     * @throws VaultException
      */
     public Vault getVault() throws VaultException {
         final VaultConfig config =
@@ -59,11 +57,11 @@ public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> i
     }
 
     /**
-     * The Docker container uses bridged networking.  Meaning that Vault listens on port 8200 inside the container,
-     * but the tests running on the host machine cannot reach that port directly.  Instead, the Vault connection
-     * config has to use a port that is mapped to the container's port 8200.  There is no telling what the mapped
-     * port will be until runtime, so this method is necessary to build a Vault connection URL with the appropriate
-     * values.
+     * The Docker container uses bridged networking.  Meaning that Vault listens on port 8200 inside
+     * the container, but the tests running on the host machine cannot reach that port directly.
+     * Instead, the Vault connection config has to use a port that is mapped to the container's port
+     * 8200.  There is no telling what the mapped port will be until runtime, so this method is
+     * necessary to build a Vault connection URL with the appropriate values.
      *
      * @return The URL of the Vault instance
      */

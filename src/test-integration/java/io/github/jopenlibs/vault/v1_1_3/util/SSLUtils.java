@@ -52,8 +52,9 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 
 /**
- * Static utility methods for generating client-side SSL certs and keys, for tests that use Vault's TLS Certificate
- * auth backend.  Right now, all such code is isolated to {@link AuthBackendCertTests}.
+ * Static utility methods for generating client-side SSL certs and keys, for tests that use Vault's
+ * TLS Certificate auth backend.  Right now, all such code is isolated to
+ * {@link AuthBackendCertTests}.
  */
 public class SSLUtils implements TestConstants {
 
@@ -61,18 +62,18 @@ public class SSLUtils implements TestConstants {
     }
 
     /**
-     * <p>Constructs a Java truststore in JKS format, containing the Vault server certificate, so that Vault clients
-     * configured with this JKS will trust that certificate.</p>
+     * <p>Constructs a Java truststore in JKS format, containing the Vault server certificate, so
+     * that Vault clients configured with this JKS will trust that certificate.</p>
      *
-     * <p>Also constructs a JKS keystore, with a client certificate to use for authentication with Vault's TLS
-     * Certificate auth backend.  Stores this cert as a PEM file as well, so that can be registered with Vault
-     * as a recognized certificate in {@link VaultContainer#setupBackendCert(String)}.</p>
+     * <p>Also constructs a JKS keystore, with a client certificate to use for authentication with
+     * Vault's TLS Certificate auth backend.  Stores this cert as a PEM file as well, so that can be
+     * registered with Vault as a recognized certificate in
+     * {@link VaultContainer#setupBackendCert(String)}.</p>
      *
      * <p>This method must be called AFTER {@link VaultContainer#initAndUnsealVault()}, and BEFORE
      * {@link VaultContainer#setupBackendCert(String)}.</p>
      *
      * @throws IOException When certificate was not created
-     * @return
      */
     public static HashMap<String, Object> createClientCertAndKey() throws IOException {
 
@@ -105,7 +106,8 @@ public class SSLUtils implements TestConstants {
         };
     }
 
-    private static KeyStore getClientTrustStore(X509Certificate vaultCertificate) throws IOException {
+    private static KeyStore getClientTrustStore(X509Certificate vaultCertificate)
+            throws IOException {
         final KeyStore trustStore = emptyStore();
         try {
             trustStore.setCertificateEntry("cert", vaultCertificate);
@@ -118,7 +120,8 @@ public class SSLUtils implements TestConstants {
     private static KeyStore getClientKeystore(KeyPair keyPair, X509Certificate clientCertificate) {
         try {
             final KeyStore keyStore = emptyStore();
-            keyStore.setKeyEntry("privatekey", keyPair.getPrivate(), PASSWORD.toCharArray(), new Certificate[]{clientCertificate});
+            keyStore.setKeyEntry("privatekey", keyPair.getPrivate(), PASSWORD.toCharArray(),
+                    new Certificate[]{clientCertificate});
             keyStore.setCertificateEntry("cert", clientCertificate);
             return keyStore;
         } catch (KeyStoreException | IOException e) {
@@ -153,7 +156,8 @@ public class SSLUtils implements TestConstants {
      */
     private static KeyPair generateKeyPair() throws IOException {
         try {
-            final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", new BouncyCastleProvider());
+            final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA",
+                    new BouncyCastleProvider());
             keyPairGenerator.initialize(4096);
             KeyPair keyPair = keyPairGenerator.genKeyPair();
             if (keyPair == null) {
@@ -166,7 +170,8 @@ public class SSLUtils implements TestConstants {
     }
 
     /**
-     * See http://www.programcreek.com/java-api-examples/index.php?api=org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder
+     * See
+     * http://www.programcreek.com/java-api-examples/index.php?api=org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder
      *
      * @param keyPair The RSA keypair with which to generate the certificate
      * @return An X509 certificate
@@ -182,20 +187,26 @@ public class SSLUtils implements TestConstants {
                 SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded())
         );
 
-        final GeneralNames subjectAltNames = new GeneralNames(new GeneralName(GeneralName.iPAddress, "127.0.0.1"));
+        final GeneralNames subjectAltNames = new GeneralNames(
+                new GeneralName(GeneralName.iPAddress, "127.0.0.1"));
         try {
-            certificateBuilder.addExtension(Extension.subjectAlternativeName, false, subjectAltNames);
+            certificateBuilder.addExtension(Extension.subjectAlternativeName, false,
+                    subjectAltNames);
         } catch (CertIOException e) {
             e.printStackTrace();
             return null;
         }
 
-        final AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1WithRSAEncryption");
-        final AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
-        final BcContentSignerBuilder signerBuilder = new BcRSAContentSignerBuilder(sigAlgId, digAlgId);
+        final AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(
+                "SHA1WithRSAEncryption");
+        final AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(
+                sigAlgId);
+        final BcContentSignerBuilder signerBuilder = new BcRSAContentSignerBuilder(sigAlgId,
+                digAlgId);
         final X509CertificateHolder x509CertificateHolder;
         try {
-            final AsymmetricKeyParameter keyp = PrivateKeyFactory.createKey(keyPair.getPrivate().getEncoded());
+            final AsymmetricKeyParameter keyp = PrivateKeyFactory.createKey(
+                    keyPair.getPrivate().getEncoded());
             final ContentSigner signer = signerBuilder.build(keyp);
             x509CertificateHolder = certificateBuilder.build(signer);
         } catch (IOException | OperatorCreationException e) {
@@ -208,7 +219,8 @@ public class SSLUtils implements TestConstants {
             certificate = new JcaX509CertificateConverter().getCertificate(x509CertificateHolder);
             certificate.checkValidity(new Date());
             certificate.verify(keyPair.getPublic());
-        } catch (CertificateException | SignatureException | InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException e) {
+        } catch (CertificateException | SignatureException | InvalidKeyException |
+                 NoSuchAlgorithmException | NoSuchProviderException e) {
             e.printStackTrace();
             return null;
         }
@@ -217,7 +229,8 @@ public class SSLUtils implements TestConstants {
     }
 
     /**
-     * See https://stackoverflow.com/questions/3313020/write-x509-certificate-into-pem-formatted-string-in-java
+     * See
+     * https://stackoverflow.com/questions/3313020/write-x509-certificate-into-pem-formatted-string-in-java
      *
      * @param certificate An X509 certificate
      * @return String certificate  in pem format
@@ -238,9 +251,10 @@ public class SSLUtils implements TestConstants {
     }
 
     /**
-     * See https://stackoverflow.com/questions/3313020/write-x509-certificate-into-pem-formatted-string-in-java
+     * See
+     * https://stackoverflow.com/questions/3313020/write-x509-certificate-into-pem-formatted-string-in-java
      *
-     * @param key      An RSA private key
+     * @param key An RSA private key
      * @return String private key in pem format
      */
     private static String privateKeyToPem(final PrivateKey key) {
@@ -254,21 +268,21 @@ public class SSLUtils implements TestConstants {
     }
 
     /**
-     * @param CN Common Name, is X.509 speak for the name that distinguishes
-     *           the Certificate best, and ties it to your Organization
+     * @param CN Common Name, is X.509 speak for the name that distinguishes the Certificate best,
+     * and ties it to your Organization
      * @param OU Organizational unit
-     * @param O  Organization NAME
-     * @param L  Location
-     * @param S  State
-     * @param C  Country
-     * @return
-     * @throws Exception
+     * @param O Organization NAME
+     * @param L Location
+     * @param S State
+     * @param C Country
      */
     public static String generatePKCS10(KeyPair kp, String CN, String OU, String O,
-                                        String L, String S, String C) throws IOException, OperatorCreationException {
-        X500Principal subject = new X500Principal(String.format("C=%s, ST=%s, L=%s, O=%s, OU=%s, CN=%S", C, S, L, O, OU, CN));
+            String L, String S, String C) throws IOException, OperatorCreationException {
+        X500Principal subject = new X500Principal(
+                String.format("C=%s, ST=%s, L=%s, O=%s, OU=%s, CN=%S", C, S, L, O, OU, CN));
         ContentSigner signGen = new JcaContentSignerBuilder("SHA256withRSA").build(kp.getPrivate());
-        PKCS10CertificationRequestBuilder builder = new JcaPKCS10CertificationRequestBuilder(subject, kp.getPublic());
+        PKCS10CertificationRequestBuilder builder = new JcaPKCS10CertificationRequestBuilder(
+                subject, kp.getPublic());
         PKCS10CertificationRequest csr = builder.build(signGen);
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             try (Writer osWriter = new OutputStreamWriter(output)) {
@@ -287,7 +301,8 @@ public class SSLUtils implements TestConstants {
             // Loading creates the store, can't do anything with it until it's loaded
             ks.load(null, PASSWORD.toCharArray());
             return ks;
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
+        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException |
+                 IOException e) {
             throw new IOException("Cannot create empty keystore.", e);
         }
     }

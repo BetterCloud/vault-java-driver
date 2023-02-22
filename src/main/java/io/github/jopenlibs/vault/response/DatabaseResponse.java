@@ -26,7 +26,7 @@ public class DatabaseResponse extends LogicalResponse {
 
     /**
      * @param restResponse The raw HTTP response from Vault.
-     * @param retries      The number of retry attempts that occurred during the API call (can be zero).
+     * @param retries The number of retry attempts that occurred during the API call (can be zero).
      */
     public DatabaseResponse(RestResponse restResponse, int retries) {
         super(restResponse, retries, Logical.logicalOperations.authentication);
@@ -34,15 +34,20 @@ public class DatabaseResponse extends LogicalResponse {
         roleOptions = buildRoleOptionsFromData(this.getData(), this.getDataObject());
     }
 
-    private DatabaseRoleOptions buildRoleOptionsFromData(final Map<String, String> data, final JsonObject jsonObject) {
+    private DatabaseRoleOptions buildRoleOptionsFromData(final Map<String, String> data,
+            final JsonObject jsonObject) {
         if (data == null || data.size() == 0) {
             return null;
         }
 
-        final List<String> creationStatements = extractFromJsonArray(safeGetJsonArray(jsonObject, "creation_statements"));
-        final List<String> renewStatements = extractFromJsonArray(safeGetJsonArray(jsonObject, "renew_statements"));
-        final List<String> revocationStatements = extractFromJsonArray(safeGetJsonArray(jsonObject, "revocation_statements"));
-        final List<String> rollbackStatements = extractFromJsonArray(safeGetJsonArray(jsonObject, "rollback_statements"));
+        final List<String> creationStatements = extractFromJsonArray(
+                safeGetJsonArray(jsonObject, "creation_statements"));
+        final List<String> renewStatements = extractFromJsonArray(
+                safeGetJsonArray(jsonObject, "renew_statements"));
+        final List<String> revocationStatements = extractFromJsonArray(
+                safeGetJsonArray(jsonObject, "revocation_statements"));
+        final List<String> rollbackStatements = extractFromJsonArray(
+                safeGetJsonArray(jsonObject, "rollback_statements"));
 
         final String dbName = data.get("db_name");
         final String defaultTtl = data.get("default_ttl");
@@ -79,7 +84,8 @@ public class DatabaseResponse extends LogicalResponse {
     }
 
     private JsonArray safeGetJsonArray(JsonObject source, String key) {
-        if (source == null || source.get(key) == null || source.get(key) == null || !source.get(key).isArray()) {
+        if (source == null || source.get(key) == null || source.get(key) == null || !source.get(key)
+                .isArray()) {
             return new JsonArray();
         }
 

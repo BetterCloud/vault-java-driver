@@ -39,7 +39,8 @@ public class AuthLookupTest {
 
     @Test
     public void should_lookup_self_use_url_auth_token_lookup_self() throws Exception {
-        VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("token").build();
+        VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("token")
+                .build();
         Vault vault = new Vault(vaultConfig);
         LookupResponse response = vault.auth().lookupSelf();
 
@@ -48,7 +49,8 @@ public class AuthLookupTest {
         // Request URL should contain auth/token/lookup-self
         assertEquals(Optional.empty(), vaultServer.getRequestBody());
         assertEquals("token", vaultServer.getRequestHeaders().get("X-Vault-Token"));
-        assertEquals("http://127.0.0.1:8999/v1/auth/token/lookup-self", vaultServer.getRequestUrl());
+        assertEquals("http://127.0.0.1:8999/v1/auth/token/lookup-self",
+                vaultServer.getRequestUrl());
 
         // Assert response should have the accessor
         assertEquals("accessor", response.getAccessor());
@@ -56,7 +58,8 @@ public class AuthLookupTest {
 
     @Test
     public void should_lookup_self_with_param_use_url_auth_mount_lookup_self() throws Exception {
-        VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("token").build();
+        VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("token")
+                .build();
         Vault vault = new Vault(vaultConfig);
         LookupResponse response = vault.auth().lookupSelf("mount");
 
@@ -65,7 +68,8 @@ public class AuthLookupTest {
         // Request URL should contain auth/mount/lookup-self
         assertEquals(Optional.empty(), vaultServer.getRequestBody());
         assertEquals("token", vaultServer.getRequestHeaders().get("X-Vault-Token"));
-        assertEquals("http://127.0.0.1:8999/v1/auth/mount/lookup-self", vaultServer.getRequestUrl());
+        assertEquals("http://127.0.0.1:8999/v1/auth/mount/lookup-self",
+                vaultServer.getRequestUrl());
 
         // Assert response should have the accessor
         assertEquals("accessor", response.getAccessor());

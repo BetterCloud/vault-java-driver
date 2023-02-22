@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>A container for options returned by mounts endpoints on the Secret Engine backend. This class is
- * meant for use with a builder pattern style.  Example usage:</p>
+ * <p>A container for options returned by mounts endpoints on the Secret Engine backend. This class
+ * is meant for use with a builder pattern style.  Example usage:</p>
  *
- * <p>Most of the time this will be wrapped inside <code>Mount</code> object rather than directly sent to Vault backend
- * or back to the user.</p>
+ * <p>Most of the time this will be wrapped inside <code>Mount</code> object rather than directly
+ * sent to Vault backend or back to the user.</p>
  *
  * <blockquote>
  * <pre>{@code
@@ -21,6 +21,7 @@ import java.util.List;
  * </blockquote>
  */
 public class MountConfig implements Serializable {
+
     private static final long serialVersionUID = 839595627039704093L;
 
     private Integer defaultLeaseTtl;

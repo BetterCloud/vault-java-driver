@@ -58,13 +58,11 @@ public class DebugTests {
     }
 
     /**
-     * <p>Altering the default HTTP status codes with optional parameters can cause Vault to return an empty JSON
-     * payload, depending on which replacement HTTP status code you specify.</p>
+     * <p>Altering the default HTTP status codes with optional parameters can cause Vault to return
+     * an empty JSON payload, depending on which replacement HTTP status code you specify.</p>
      *
-     * <p>For example... Vault still returns a valid JSON payload when you change activeCode to 212 (see test above),
-     * but returns an empty payload when you set it to use 204.</p>
-     *
-     * @throws VaultException
+     * <p>For example... Vault still returns a valid JSON payload when you change activeCode to 212
+     * (see test above), but returns an empty payload when you set it to use 204.</p>
      */
     @Test
     public void testHealth_WonkyActiveCode() throws VaultException {

@@ -11,8 +11,7 @@ import java.util.Set;
 
 /**
  * <p>The implementing class for operations on REST endpoints, under the "Debug" section of the
- * Vault HTTP API
- * docs (https://www.vaultproject.io/docs/http/index.html).</p>
+ * Vault HTTP API docs (https://www.vaultproject.io/docs/http/index.html).</p>
  *
  * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of
  * <code>Vault</code> in a DSL-style builder pattern.  See the Javadoc comments of each
@@ -67,14 +66,12 @@ public class Debug extends OperationsBase {
      * optional parameters.</p>
      *
      * <p>WARNING:  In testing, we've found that changing the default HTTP status codes can result
-     * in the operation
-     * succeeding, but returning an empty JSON payload in the response.  For example, this seems to
-     * happen when you set <code>activeCode</code> to 204, but not for 212 (the regular default is
-     * 200).  When this happens, the
+     * in the operation succeeding, but returning an empty JSON payload in the response.  For
+     * example, this seems to happen when you set <code>activeCode</code> to 204, but not for 212
+     * (the regular default is 200).  When this happens, the
      * <code>HealthResponse</code> return object will have <code>null</code> values in most of its
-     * fields, and you
-     * will need to check <code>HealthReponse.getRestResponse().getStatus()</code> to determine the
-     * result of the operation.</p>
+     * fields, and you will need to check <code>HealthReponse.getRestResponse().getStatus()</code>
+     * to determine the result of the operation.</p>
      *
      * @param standbyOk (optional) Indicates that being a standby should still return the active
      * status code instead of the standby code

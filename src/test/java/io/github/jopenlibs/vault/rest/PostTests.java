@@ -15,8 +15,6 @@ public class PostTests {
 
     /**
      * Verify a basic POST request, with no parameters or headers.
-     *
-     * @throws RestException
      */
     @Test
     public void testPost_Plain() throws RestException {
@@ -33,10 +31,8 @@ public class PostTests {
 
     /**
      * Verify a POST request that has no query string on the base URL, but does have additional
-     * parameters passed.  The base URL should remain unmodified, and the parameters should be
-     * sent with the request body.
-     *
-     * @throws RestException
+     * parameters passed.  The base URL should remain unmodified, and the parameters should be sent
+     * with the request body.
      */
     @Test
     public void testPost_InsertParams() throws RestException {
@@ -58,15 +54,14 @@ public class PostTests {
         final JsonObject form = jsonObject.get("form").asObject();
         assertEquals("bar", form.getString("foo", null));
         assertEquals("oranges", form.getString("apples", null));
-        assertEquals("this parameter has whitespace in its name and value", form.getString("multi part", null));
+        assertEquals("this parameter has whitespace in its name and value",
+                form.getString("multi part", null));
     }
 
     /**
-     * Verify a POST request that already has a query string on the base URL, but also has additional
-     * parameters passed.  The base URL should remain unmodified, and the parameters should be
-     * sent with the request body.
-     *
-     * @throws RestException
+     * Verify a POST request that already has a query string on the base URL, but also has
+     * additional parameters passed.  The base URL should remain unmodified, and the parameters
+     * should be sent with the request body.
      */
     @Test
     public void testPost_UpdateParams() throws RestException {
@@ -87,7 +82,8 @@ public class PostTests {
         final JsonObject form = jsonObject.get("form").asObject();
         assertEquals("bar", form.getString("foo", null));
         assertEquals("oranges", form.getString("apples", null));
-        assertEquals("this parameter has whitespace in its name and value", form.getString("multi part", null));
+        assertEquals("this parameter has whitespace in its name and value",
+                form.getString("multi part", null));
     }
 
     /**
@@ -95,8 +91,6 @@ public class PostTests {
      *
      * <p>Note that even though our header names are all lowercase, the round-trip process
      * converts them to camel case (e.g. <code>two-part</code> to <code>Two-Part</code>).</p>
-     *
-     * @throws RestException
      */
     @Test
     public void testPost_WithHeaders() throws RestException {
@@ -123,8 +117,6 @@ public class PostTests {
      *
      * <p>Note that even though our header names are all lowercase, the round-trip process
      * converts them to camel case (e.g. <code>two-part</code> to <code>Two-Part</code>).</p>
-     *
-     * @throws RestException
      */
     @Test
     public void testPost_WithOptionalHeaders() throws RestException {
@@ -146,8 +138,8 @@ public class PostTests {
         assertEquals("white", headers.getString("Black", null));
         assertEquals("night", headers.getString("Day", null));
         assertEquals("Header value", headers.getString("Two-Part", null));
-        assertNull(headers.getString( "I am null", null));
-        assertNull(headers.getString( "I am empty", null));
+        assertNull(headers.getString("I am null", null));
+        assertNull(headers.getString("I am empty", null));
     }
 
 

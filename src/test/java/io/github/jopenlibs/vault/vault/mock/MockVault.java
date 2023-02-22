@@ -14,12 +14,13 @@ import static io.github.jopenlibs.vault.vault.VaultTestUtils.readRequestBody;
 import static io.github.jopenlibs.vault.vault.VaultTestUtils.readRequestHeaders;
 
 /**
- * <p>This class is used to mock out a Vault server in unit tests involving retry logic. As it extends Jetty's
- * <code>AbstractHandler</code>, it can be passed to an embedded Jetty server and respond to actual (albeit
- * localhost) HTTP requests.</p>
+ * <p>This class is used to mock out a Vault server in unit tests involving retry logic. As it
+ * extends Jetty's
+ * <code>AbstractHandler</code>, it can be passed to an embedded Jetty server and respond to actual
+ * (albeit localhost) HTTP requests.</p>
  *
- * <p>This basic version simply responds to requests with a pre-determined HTTP status code and response body.
- * Example usage:</p>
+ * <p>This basic version simply responds to requests with a pre-determined HTTP status code and
+ * response body. Example usage:</p>
  *
  * <blockquote>
  * <pre>{@code
@@ -66,7 +67,8 @@ public class MockVault extends AbstractHandler {
         requestUrl = request.getRequestURL().toString();
         response.setContentType("application/json");
         baseRequest.setHandled(true);
-        System.out.println("MockVault is sending an HTTP " + mockStatus + " code, with expected success payload...");
+        System.out.println("MockVault is sending an HTTP " + mockStatus
+                + " code, with expected success payload...");
         response.setStatus(mockStatus);
         if (mockResponse != null) {
             response.getWriter().println(mockResponse);

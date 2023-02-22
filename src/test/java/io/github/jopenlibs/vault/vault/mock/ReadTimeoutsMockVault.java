@@ -7,10 +7,10 @@ import java.io.IOException;
 import org.eclipse.jetty.server.Request;
 
 /**
- * <p>This class is used to mock out a Vault server in unit tests involving read timeouts (i.e. delays between an
- * HTTP(S) connection being successfully established, and downloading of all data being complete).  As it extends
- * Jetty's <code>AbstractHandler</code>, it can be passed to an embedded Jetty server and respond to actual (albeit
- * localhost) HTTP requests.</p>
+ * <p>This class is used to mock out a Vault server in unit tests involving read timeouts (i.e.
+ * delays between an HTTP(S) connection being successfully established, and downloading of all data
+ * being complete). As it extends Jetty's <code>AbstractHandler</code>, it can be passed to an
+ * embedded Jetty server and respond to actual (albeit localhost) HTTP requests.</p>
  *
  * <p>The basic usage pattern is as follows:</p>
  *
@@ -59,7 +59,8 @@ public class ReadTimeoutsMockVault extends MockVault {
     private final int mockStatus;
     private final String mockResponse;
 
-    public ReadTimeoutsMockVault(final int delaySeconds, final int mockStatus, final String mockResponse) {
+    public ReadTimeoutsMockVault(final int delaySeconds, final int mockStatus,
+            final String mockResponse) {
         this.delaySeconds = delaySeconds;
         this.mockStatus = mockStatus;
         this.mockResponse = mockResponse;

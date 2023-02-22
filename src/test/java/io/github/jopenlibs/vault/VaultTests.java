@@ -20,7 +20,8 @@ public class VaultTests {
         VaultConfig vaultConfig = new VaultConfig();
         Vault vault = new Vault(vaultConfig);
         Assert.assertNotNull(vault);
-        Assert.assertEquals(String.valueOf(2), vault.logical().getEngineVersionForSecretPath("*").toString());
+        Assert.assertEquals(String.valueOf(2),
+                vault.logical().getEngineVersionForSecretPath("*").toString());
     }
 
     @Test
@@ -28,7 +29,8 @@ public class VaultTests {
         VaultConfig vaultConfig = new VaultConfig();
         Vault vault = new Vault(vaultConfig, 1);
         Assert.assertNotNull(vault);
-        Assert.assertEquals(String.valueOf(1), vault.logical().getEngineVersionForSecretPath("*").toString());
+        Assert.assertEquals(String.valueOf(1),
+                vault.logical().getEngineVersionForSecretPath("*").toString());
     }
 
     @Test
@@ -76,8 +78,10 @@ public class VaultTests {
         VaultConfig vaultConfig = new VaultConfig().secretsEnginePathMap(engineKVMap);
         Vault vault = new Vault(vaultConfig, false, 1);
         Assert.assertNotNull(vault);
-        Assert.assertEquals(String.valueOf(1), vault.logical().getEngineVersionForSecretPath("/hello").toString());
-        Assert.assertEquals(String.valueOf(1), vault.logical().getEngineVersionForSecretPath("notInMap").toString());
+        Assert.assertEquals(String.valueOf(1),
+                vault.logical().getEngineVersionForSecretPath("/hello").toString());
+        Assert.assertEquals(String.valueOf(1),
+                vault.logical().getEngineVersionForSecretPath("notInMap").toString());
     }
 
     @Test
@@ -88,13 +92,16 @@ public class VaultTests {
         Assert.assertNotNull(vaultConfig);
         Vault vault = new Vault(vaultConfig, true, 2);
         Assert.assertNotNull(vault);
-        Assert.assertEquals(String.valueOf(1), vault.logical().getEngineVersionForSecretPath("kv-v1").toString());
-        Assert.assertEquals(String.valueOf(2), vault.logical().getEngineVersionForSecretPath("notInMap").toString());
+        Assert.assertEquals(String.valueOf(1),
+                vault.logical().getEngineVersionForSecretPath("kv-v1").toString());
+        Assert.assertEquals(String.valueOf(2),
+                vault.logical().getEngineVersionForSecretPath("notInMap").toString());
     }
 
     @Test
     public void testConfigBuiler_WithInvalidRequestAsNonError() throws Exception {
-        final MockVault mockVault = new MockVault(403, "{\"errors\":[\"preflight capability check returned 403, please ensure client's policies grant access to path \"path/that/does/not/exist/\"]}");
+        final MockVault mockVault = new MockVault(403,
+                "{\"errors\":[\"preflight capability check returned 403, please ensure client's policies grant access to path \"path/that/does/not/exist/\"]}");
         final Server server = VaultTestUtils.initHttpMockVault(mockVault);
         server.start();
 

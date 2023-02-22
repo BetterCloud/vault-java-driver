@@ -14,10 +14,10 @@ public class CredentialTests {
         credential.privateKey("privateKey");
         credential.serialNumber("serialNumber");
         credential.privateKeyType("privateKeyType");
-        Assert.assertEquals(credential.getCertificate(),"certificate");
-        Assert.assertEquals(credential.getIssuingCa(),"issuingCa");
-        Assert.assertEquals(credential.getPrivateKey(),"privateKey");
-        Assert.assertEquals(credential.getSerialNumber(),"serialNumber");
-        Assert.assertEquals(credential.getPrivateKeyType(),"privateKeyType");
+        Assert.assertEquals(credential.getCertificate(), "certificate");
+        Assert.assertEquals(credential.getIssuingCa(), "issuingCa");
+        Assert.assertEquals(credential.getPrivateKey(), "privateKey");
+        Assert.assertEquals(credential.getSerialNumber(), "serialNumber");
+        Assert.assertEquals(credential.getPrivateKeyType(), "privateKeyType");
     }
 }

@@ -10,7 +10,8 @@ import org.testcontainers.lifecycle.TestLifecycleAware;
 
 import static org.junit.Assume.assumeTrue;
 
-public class DbContainer extends GenericContainer<DbContainer> implements TestConstants, TestLifecycleAware {
+public class DbContainer extends GenericContainer<DbContainer> implements TestConstants,
+        TestLifecycleAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DbContainer.class);
 

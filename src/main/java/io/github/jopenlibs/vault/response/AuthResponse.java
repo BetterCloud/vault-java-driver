@@ -14,6 +14,7 @@ import java.util.List;
  * This class is a container for the information returned by Vault in auth backend operations.
  */
 public class AuthResponse extends VaultResponse {
+
     private Boolean renewable;
     private String authClientToken;
     private String tokenAccessor;
@@ -31,7 +32,7 @@ public class AuthResponse extends VaultResponse {
      * This constructor simply exposes the common base class constructor.
      *
      * @param restResponse The raw HTTP response from Vault.
-     * @param retries      The number of retry attempts that occurred during the API call (can be zero).
+     * @param retries The number of retry attempts that occurred during the API call (can be zero).
      */
     public AuthResponse(final RestResponse restResponse, final int retries) {
         super(restResponse, retries);
@@ -40,7 +41,8 @@ public class AuthResponse extends VaultResponse {
             final String responseJson = new String(restResponse.getBody(), StandardCharsets.UTF_8);
             jsonResponse = Json.parse(responseJson).asObject();
             JsonValue authJsonVal = jsonResponse.get("auth");
-            final JsonObject authJsonObject = authJsonVal != null && !authJsonVal.isNull() ? authJsonVal.asObject() : null;
+            final JsonObject authJsonObject =
+                    authJsonVal != null && !authJsonVal.isNull() ? authJsonVal.asObject() : null;
 
             if (authJsonObject != null) {
                 authLeaseDuration = authJsonObject.getInt("lease_duration", 0);
@@ -103,7 +105,11 @@ public class AuthResponse extends VaultResponse {
         return userId;
     }
 
-    public String getNonce() { return nonce; }
+    public String getNonce() {
+        return nonce;
+    }
 
-    public String getTokenAccessor() { return tokenAccessor; }
+    public String getTokenAccessor() {
+        return tokenAccessor;
+    }
 }

@@ -9,12 +9,12 @@ import io.github.jopenlibs.vault.rest.RestResponse;
 import java.nio.charset.StandardCharsets;
 
 /**
- * <p>The implementing class for operations on REST endpoints, under the "seal/unseal/seal-status" section of the Vault HTTP API
- * docs (https://www.vaultproject.io/api/system/index.html).</p>
+ * <p>The implementing class for operations on REST endpoints, under the "seal/unseal/seal-status"
+ * section of the Vault HTTP API docs (https://www.vaultproject.io/api/system/index.html).</p>
  *
  * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of
- * <code>Vault</code> in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code>
- * method for usage examples.</p>
+ * <code>Vault</code> in a DSL-style builder pattern.  See the Javadoc comments of each
+ * <code>public</code> method for usage examples.</p>
  */
 public class Seal {
 
@@ -57,7 +57,9 @@ public class Seal {
 
                 // Validate restResponse
                 if (restResponse.getStatus() != 204) {
-                    throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+                    throw new VaultException(
+                            "Vault responded with HTTP status code: " + restResponse.getStatus(),
+                            restResponse.getStatus());
                 }
                 return;
             } catch (Exception e) {
@@ -95,8 +97,9 @@ public class Seal {
     /**
      * <p>Enter a single master key share to progress the unsealing of the Vault.</p>
      *
-     * @param key   Single master key share
-     * @param reset Specifies if previously-provided unseal keys are discarded and the unseal process is reset
+     * @param key Single master key share
+     * @param reset Specifies if previously-provided unseal keys are discarded and the unseal
+     * process is reset
      * @return The response information returned from Vault
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
@@ -105,7 +108,8 @@ public class Seal {
         while (true) {
             try {
                 // HTTP request to Vault
-                final String requestJson = Json.object().add("key", key).add("reset", reset).toString();
+                final String requestJson = Json.object().add("key", key).add("reset", reset)
+                        .toString();
                 final RestResponse restResponse = new Rest()//NOPMD
                         .url(config.getAddress() + "/v1/sys/unseal")
                         .header("X-Vault-Namespace", this.nameSpace)
@@ -182,13 +186,18 @@ public class Seal {
         }
     }
 
-    private SealResponse getSealResponse(final int retryCount, final RestResponse restResponse) throws VaultException {
+    private SealResponse getSealResponse(final int retryCount, final RestResponse restResponse)
+            throws VaultException {
         if (restResponse.getStatus() != 200) {
-            throw new VaultException("Vault responded with HTTP status code: " + restResponse.getStatus(), restResponse.getStatus());
+            throw new VaultException(
+                    "Vault responded with HTTP status code: " + restResponse.getStatus(),
+                    restResponse.getStatus());
         }
-        final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+        final String mimeType =
+                restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
         if (!mimeType.equals("application/json")) {
-            throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
+            throw new VaultException("Vault responded with MIME type: " + mimeType,
+                    restResponse.getStatus());
         }
         return new SealResponse(restResponse, retryCount);
     }

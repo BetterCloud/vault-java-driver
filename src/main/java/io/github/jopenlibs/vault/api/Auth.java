@@ -24,9 +24,8 @@ import java.util.UUID;
  * <p>The implementing class for operations on Vault's <code>/v1/auth/*</code> REST endpoints.</p>
  *
  * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of
- * <code>Vault</code>
- * in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code> method for
- * usage examples.</p>
+ * <code>Vault</code> in a DSL-style builder pattern.  See the Javadoc comments of each
+ * <code>public</code> method for usage examples.</p>
  *
  * @see Vault#auth()
  */
@@ -1343,13 +1342,16 @@ public class Auth extends OperationsBase {
      * </blockquote>
      *
      * @param wrappedToken Wrapped token.
-     * @param inBody When {@code true} the token value placed in the body request: {@code {"token": "$wrappedToken"}},
-     *      otherwise, set the token into header: {@code "X-Vault-Token: $wrappedToken"}.
+     * @param inBody When {@code true} the token value placed in the body request:
+     * {@code {"token": "$wrappedToken"}}, otherwise, set the token into header:
+     * {@code "X-Vault-Token: $wrappedToken"}.
      * @return The response information returned from Vault
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      */
-    public LogicalResponse lookupWrap(final String wrappedToken, boolean inBody) throws VaultException {
-        final String requestJson = inBody ? Json.object().add("token", wrappedToken).toString() : null;
+    public LogicalResponse lookupWrap(final String wrappedToken, boolean inBody)
+            throws VaultException {
+        final String requestJson =
+                inBody ? Json.object().add("token", wrappedToken).toString() : null;
 
         return retry(attempt -> {
             // HTTP request to Vault
@@ -1561,8 +1563,9 @@ public class Auth extends OperationsBase {
      * @param wrappedToken Specifies the wrapping token ID, do NOT also put this in your
      * {@link VaultConfig#getToken()}, if token is {@code null}, this method will unwrap the auth
      * token in {@link VaultConfig#getToken()}
-     * @param inBody When {@code true} the token value placed in the body request: {@code {"token": "$wrappedToken"}},
-     *      otherwise, set the token into header: {@code "X-Vault-Token: $wrappedToken"}.
+     * @param inBody When {@code true} the token value placed in the body request:
+     * {@code {"token": "$wrappedToken"}}, otherwise, set the token into header:
+     * {@code "X-Vault-Token: $wrappedToken"}.
      * @return The response information returned from Vault
      * @throws VaultException If any error occurs, or unexpected response received from Vault
      * @see #wrap(JsonObject, int)
@@ -1681,7 +1684,7 @@ public class Auth extends OperationsBase {
             // HTTP request to Vault
             final RestResponse restResponse = new Rest()
                     .url(url)
-                    .header("X-Vault-Token",  config.getToken())
+                    .header("X-Vault-Token", config.getToken())
                     .header("X-Vault-Wrap-TTL", Integer.toString(ttlInSec))
                     .header("X-Vault-Namespace", this.nameSpace)
                     .header("X-Vault-Request", "true")

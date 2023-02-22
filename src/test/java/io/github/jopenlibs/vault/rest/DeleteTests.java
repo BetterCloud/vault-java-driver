@@ -14,7 +14,8 @@ import static org.junit.Assert.assertNull;
 public class DeleteTests {
 
     /**
-     * <p>The REST client should refuse to handle any HTTP verb if the base URL has not already been set.</p>
+     * <p>The REST client should refuse to handle any HTTP verb if the base URL has not already
+     * been set.</p>
      */
     @Test(expected = RestException.class)
     public void testFailsOnNoUrl() throws RestException {
@@ -24,12 +25,12 @@ public class DeleteTests {
     /**
      * <p>Verify a basic DELETE request, with no parameters or headers.</p>
      *
-     * <p>Unfortunately, the "httpbin.org" service that we're using for all of the other REST-layer unit
-     * tests does not support the DELETE verb.  So we have to use a self-contained Jetty instance for
-     * these tests.</p>
+     * <p>Unfortunately, the "httpbin.org" service that we're using for all of the other REST-layer
+     * unit tests does not support the DELETE verb.  So we have to use a self-contained Jetty
+     * instance for these tests.</p>
      *
-     * @throws RestException
-     * @throws UnsupportedEncodingException If there's a problem shutting down the Jetty test server
+     * @throws UnsupportedEncodingException If there's a problem shutting down the Jetty test
+     * server
      */
     @Test
     public void testDelete_Plain() throws Exception {
@@ -47,8 +48,6 @@ public class DeleteTests {
 
     /**
      * <p>Verify a DELETE request that sends query string parameters.</p>
-     *
-     * @throws Exception
      */
     @Test
     public void testDelete_WithParams() throws Exception {
@@ -62,15 +61,14 @@ public class DeleteTests {
                 .delete();
 
         assertEquals(204, restResponse.getStatus());
-        assertEquals(url, Json.parse(echoInputMockVault.getLastRequestDetails()).asObject().getString("URL", ""));
+        assertEquals(url, Json.parse(echoInputMockVault.getLastRequestDetails()).asObject()
+                .getString("URL", ""));
 
         VaultTestUtils.shutdownMockVault(server);
     }
 
     /**
      * <p>Verify a DELETE request that sends header values.</p>
-     *
-     * @throws Exception
      */
     @Test
     public void testDelete_WithHeaders() throws Exception {
@@ -85,7 +83,8 @@ public class DeleteTests {
                 .delete();
 
         assertEquals(204, restResponse.getStatus());
-        final JsonObject headers = Json.parse(echoInputMockVault.getLastRequestDetails()).asObject().get("headers").asObject();
+        final JsonObject headers = Json.parse(echoInputMockVault.getLastRequestDetails()).asObject()
+                .get("headers").asObject();
         assertEquals("value1", headers.getString("header1", ""));
         assertEquals("value2", headers.getString("header2", ""));
 
@@ -94,8 +93,6 @@ public class DeleteTests {
 
     /**
      * <p>Verify a DELETE request that sends header values.</p>
-     *
-     * @throws Exception
      */
     @Test
     public void testDelete_WithOptionalHeaders() throws Exception {
@@ -111,10 +108,11 @@ public class DeleteTests {
                 .delete();
 
         assertEquals(204, restResponse.getStatus());
-        final JsonObject headers = Json.parse(echoInputMockVault.getLastRequestDetails()).asObject().get("headers").asObject();
+        final JsonObject headers = Json.parse(echoInputMockVault.getLastRequestDetails()).asObject()
+                .get("headers").asObject();
         assertEquals("value1", headers.getString("header1", ""));
         assertEquals("value2", headers.getString("header2", ""));
-        assertNull(headers.getString( "I am null", null));
+        assertNull(headers.getString("I am null", null));
 
         VaultTestUtils.shutdownMockVault(server);
     }

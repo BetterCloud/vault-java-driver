@@ -14,10 +14,11 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * This class is a container for the information returned by Vault in /sys/mounts/ API
- * operations (e.g. enable/disable secret engine mountpoint, read/tune mountpoint configurations)
+ * This class is a container for the information returned by Vault in /sys/mounts/ API operations
+ * (e.g. enable/disable secret engine mountpoint, read/tune mountpoint configurations)
  */
 public class MountResponse extends LogicalResponse {
+
     private static final long serialVersionUID = -7066405243425032451L;
 
     private final Mount mount;
@@ -54,7 +55,8 @@ public class MountResponse extends LogicalResponse {
         final Boolean local = data.getBoolean("local");
         final Boolean sealWrap = data.getBoolean("seal_wrap");
 
-        if (type == null && description == null && config == null && local == null && sealWrap == null) {
+        if (type == null && description == null && config == null && local == null
+                && sealWrap == null) {
             return null;
         }
 
@@ -84,7 +86,8 @@ public class MountResponse extends LogicalResponse {
         final Boolean forceNoCache = config.getBoolean("force_no_cache");
         final String pluginName = config.getString("plugin_name");
 
-        if (defaultLeaseTtl == null && maxLeaseTtl == null && description == null && forceNoCache == null && pluginName == null) {
+        if (defaultLeaseTtl == null && maxLeaseTtl == null && description == null
+                && forceNoCache == null && pluginName == null) {
             return null;
         }
 
@@ -104,6 +107,7 @@ public class MountResponse extends LogicalResponse {
         }
 
         return StreamSupport.stream(data.spliterator(), false)
-                .collect(Collectors.toMap(Member::getName, member -> buildMount(member.getValue().asObject())));
+                .collect(Collectors.toMap(Member::getName,
+                        member -> buildMount(member.getValue().asObject())));
     }
 }

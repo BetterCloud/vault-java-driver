@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
  * Integration tests for the token auth backend.
  */
 public class AuthBackendTokenTests {
+
     @ClassRule
     public static final VaultContainer container = new VaultContainer();
 
@@ -41,18 +42,18 @@ public class AuthBackendTokenTests {
         final Vault vault = container.getRootVault();
 
         final AuthResponse response = vault.auth().createToken(
-            new TokenRequest()
-            .id(UUID.randomUUID())
-            .polices(Arrays.asList("policy"))
-            .noParent(true)
-            .noDefaultPolicy(false)
-            .ttl("1h")
-            .displayName("display name")
-            .numUses(1L)
-            .renewable(true)
-            .type("service")
-            .explicitMaxTtl("2h")
-            .period("2h")
+                new TokenRequest()
+                        .id(UUID.randomUUID())
+                        .polices(Arrays.asList("policy"))
+                        .noParent(true)
+                        .noDefaultPolicy(false)
+                        .ttl("1h")
+                        .displayName("display name")
+                        .numUses(1L)
+                        .renewable(true)
+                        .type("service")
+                        .explicitMaxTtl("2h")
+                        .period("2h")
         );
         final String token = response.getAuthClientToken();
         final String accessor = response.getTokenAccessor();
@@ -72,7 +73,8 @@ public class AuthBackendTokenTests {
     public void testRenewSelf() throws VaultException {
         // Generate a client token
         final Vault authVault = container.getRootVault();
-        final AuthResponse createResponse = authVault.auth().createToken(new TokenRequest().ttl("1h"));
+        final AuthResponse createResponse = authVault.auth()
+                .createToken(new TokenRequest().ttl("1h"));
         final String token = createResponse.getAuthClientToken();
 
         assertNotNull(token);
@@ -92,8 +94,10 @@ public class AuthBackendTokenTests {
 
         assertEquals(token, explicitToken);
 
-        final String explicitJson = new String(explicitResponse.getRestResponse().getBody(), StandardCharsets.UTF_8);
-        final long explicitLeaseDuration = Json.parse(explicitJson).asObject().get("auth").asObject().get("lease_duration").asLong();
+        final String explicitJson = new String(explicitResponse.getRestResponse().getBody(),
+                StandardCharsets.UTF_8);
+        final long explicitLeaseDuration = Json.parse(explicitJson).asObject().get("auth")
+                .asObject().get("lease_duration").asLong();
 
         assertEquals(20, explicitLeaseDuration);
     }
@@ -105,7 +109,8 @@ public class AuthBackendTokenTests {
     public void testLookupSelf() throws VaultException {
         // Generate a client token
         final Vault authVault = container.getRootVault();
-        final AuthResponse createResponse = authVault.auth().createToken(new TokenRequest().ttl("1h"));
+        final AuthResponse createResponse = authVault.auth()
+                .createToken(new TokenRequest().ttl("1h"));
         final String token = createResponse.getAuthClientToken();
 
         assertNotNull(token);
@@ -127,7 +132,8 @@ public class AuthBackendTokenTests {
     public void testRevokeSelf() throws VaultException {
         // Generate a client token
         final Vault authVault = container.getRootVault();
-        final AuthResponse createResponse = authVault.auth().createToken(new TokenRequest().ttl("1h"));
+        final AuthResponse createResponse = authVault.auth()
+                .createToken(new TokenRequest().ttl("1h"));
         final String token = createResponse.getAuthClientToken();
 
         assertNotNull(token);

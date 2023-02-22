@@ -23,7 +23,8 @@ import static java.util.stream.Collectors.toMap;
 
 /**
  * <p>Utilities used by all of the Vault-related unit test classes under
- * <code>src/test/java/io/github/jopenlibs/vault</code>, to setup and shutdown mock Vault server implementations.</p>
+ * <code>src/test/java/io/github/jopenlibs/vault</code>, to setup and shutdown mock Vault server
+ * implementations.</p>
  */
 public class VaultTestUtils {
 
@@ -39,7 +40,8 @@ public class VaultTestUtils {
     public static Server initHttpsMockVault(final MockVault mock) {
         final Server server = new Server();
         final SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
-        sslContextFactory.setKeyStorePath(VaultTestUtils.class.getResource("/keystore.jks").toExternalForm());
+        sslContextFactory.setKeyStorePath(
+                VaultTestUtils.class.getResource("/keystore.jks").toExternalForm());
         sslContextFactory.setKeyStorePassword("password");
         sslContextFactory.setKeyManagerPassword("password");
         final HttpConfiguration https = new HttpConfiguration();

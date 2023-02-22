@@ -8,8 +8,8 @@ import org.eclipse.jetty.server.Server;
 import org.junit.Test;
 
 /**
- * <p>Unit tests for the Vault driver, having no dependency on an actual Vault server instance being available.  The
- * tests in this class relate to handling network timeouts.</p>
+ * <p>Unit tests for the Vault driver, having no dependency on an actual Vault server instance
+ * being available.  The tests in this class relate to handling network timeouts.</p>
  */
 public class TimeoutTests {
 

@@ -114,7 +114,7 @@ task unitTest(type: Test) {
 }
 
 task integrationTest(type: Test) {
-    testClassesDirs= sourceSets.integrationTests.output.classesDirs
+    testClassesDirs = sourceSets.integrationTests.output.classesDirs
     classpath = sourceSets.integrationTests.runtimeClasspath
     testLogging {
         events "passed", "skipped", "failed"

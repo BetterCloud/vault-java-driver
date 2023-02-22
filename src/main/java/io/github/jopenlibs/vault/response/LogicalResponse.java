@@ -13,10 +13,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class is a container for the information returned by Vault in logical API
- * operations (e.g. read, write).
+ * This class is a container for the information returned by Vault in logical API operations (e.g.
+ * read, write).
  */
 public class LogicalResponse extends VaultResponse {
+
     private Map<String, String> data = new HashMap<>();
     private List<String> listData = new ArrayList<>();
     private JsonObject dataObject = null;
@@ -26,10 +27,11 @@ public class LogicalResponse extends VaultResponse {
 
     /**
      * @param restResponse The raw HTTP response from Vault.
-     * @param retries      The number of retry attempts that occurred during the API call (can be zero).
-     * @param operation      The operation requested.
+     * @param retries The number of retry attempts that occurred during the API call (can be zero).
+     * @param operation The operation requested.
      */
-    public LogicalResponse(final RestResponse restResponse, final int retries, final Logical.logicalOperations operation) {
+    public LogicalResponse(final RestResponse restResponse, final int retries,
+            final Logical.logicalOperations operation) {
         super(restResponse, retries);
         parseMetadataFields();
         parseResponseData(operation);
@@ -61,7 +63,8 @@ public class LogicalResponse extends VaultResponse {
 
     private void parseMetadataFields() {
         try {
-            final String jsonString = new String(getRestResponse().getBody(), StandardCharsets.UTF_8);
+            final String jsonString = new String(getRestResponse().getBody(),
+                    StandardCharsets.UTF_8);
             final JsonObject jsonObject = Json.parse(jsonString).asObject();
 
             this.leaseId = jsonObject.get("lease_id").asString();
@@ -73,7 +76,8 @@ public class LogicalResponse extends VaultResponse {
 
     private void parseResponseData(final Logical.logicalOperations operation) {
         try {
-            final String jsonString = new String(getRestResponse().getBody(), StandardCharsets.UTF_8);
+            final String jsonString = new String(getRestResponse().getBody(),
+                    StandardCharsets.UTF_8);
             JsonObject jsonObject = Json.parse(jsonString).asObject();
             if (operation.equals(Logical.logicalOperations.readV2)) {
                 jsonObject = jsonObject.get("data").asObject();
@@ -91,7 +95,8 @@ public class LogicalResponse extends VaultResponse {
                 }
             }
             // For list operations convert the array of keys to a list of values
-            if (operation.equals(Logical.logicalOperations.listV1) || operation.equals(Logical.logicalOperations.listV2)) {
+            if (operation.equals(Logical.logicalOperations.listV1) || operation.equals(
+                    Logical.logicalOperations.listV2)) {
                 if (
                         getRestResponse().getStatus() != 404
                                 && data.get("keys") != null

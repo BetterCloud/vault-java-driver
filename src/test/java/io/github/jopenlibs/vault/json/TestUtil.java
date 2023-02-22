@@ -35,14 +35,14 @@ import static org.junit.Assert.assertNotNull;
 class TestUtil {
 
     static <T extends Exception> T assertException(Class<T> type,
-                                                   String message,
-                                                   Runnable runnable) {
+            String message,
+            Runnable runnable) {
         return assertException(type, message, adapt(runnable));
     }
 
     static <T extends Exception> T assertException(Class<T> type,
-                                                   String message,
-                                                   RunnableEx runnable) {
+            String message,
+            RunnableEx runnable) {
         T exception = assertException(type, runnable);
         assertEquals("exception message", message, exception.getMessage());
         return exception;
@@ -93,6 +93,7 @@ class TestUtil {
     }
 
     public interface RunnableEx {
+
         void run() throws Exception;
     }
 

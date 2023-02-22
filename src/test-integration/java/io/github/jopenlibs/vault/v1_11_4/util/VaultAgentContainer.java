@@ -60,11 +60,11 @@ public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> i
     }
 
     /**
-     * The Docker container uses bridged networking.  Meaning that Vault listens on port 8200 inside the container,
-     * but the tests running on the host machine cannot reach that port directly.  Instead, the Vault connection
-     * config has to use a port that is mapped to the container's port 8200.  There is no telling what the mapped
-     * port will be until runtime, so this method is necessary to build a Vault connection URL with the appropriate
-     * values.
+     * The Docker container uses bridged networking.  Meaning that Vault listens on port 8200 inside
+     * the container, but the tests running on the host machine cannot reach that port directly.
+     * Instead, the Vault connection config has to use a port that is mapped to the container's port
+     * 8200.  There is no telling what the mapped port will be until runtime, so this method is
+     * necessary to build a Vault connection URL with the appropriate values.
      *
      * @return The URL of the Vault instance
      */
@@ -72,7 +72,8 @@ public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> i
         return String.format("http://%s:%d", getContainerIpAddress(), getMappedPort(8100));
     }
 
-    @Override public void beforeTest(TestDescription description) {
+    @Override
+    public void beforeTest(TestDescription description) {
         assumeTrue(DOCKER_AVAILABLE);
     }
 }

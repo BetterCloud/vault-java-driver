@@ -16,8 +16,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Unit tests for the Vault driver, having no dependency on an actual Vault server instance being available.  The
- * tests in this class relate to handling of SSL certificates and SSL verification.
+ * Unit tests for the Vault driver, having no dependency on an actual Vault server instance being
+ * available.  The tests in this class relate to handling of SSL certificates and SSL verification.
  */
 public class SSLTests {
 
@@ -88,7 +88,8 @@ public class SSLTests {
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 
-        final VaultConfig vaultConfig = new VaultConfig().address("https://127.0.0.1:9998").token("mock_token").build();
+        final VaultConfig vaultConfig = new VaultConfig().address("https://127.0.0.1:9998")
+                .token("mock_token").build();
         final Vault vault = new Vault(vaultConfig);
 
         try {
@@ -170,7 +171,8 @@ public class SSLTests {
         final Server server = VaultTestUtils.initHttpsMockVault(mockVault);
         server.start();
 
-        final BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/cert.pem")));
+        final BufferedReader in = new BufferedReader(
+                new InputStreamReader(this.getClass().getResourceAsStream("/cert.pem")));
         final StringBuilder builder = new StringBuilder();
         StringBuilder utf8 = new StringBuilder();
         String str;
@@ -246,7 +248,8 @@ public class SSLTests {
         server.start();
 
         final KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        trustStore.load(this.getClass().getResourceAsStream("/keystore.jks"), "password".toCharArray());
+        trustStore.load(this.getClass().getResourceAsStream("/keystore.jks"),
+                "password".toCharArray());
 
         final VaultConfig vaultConfig = new VaultConfig()
                 .address("https://127.0.0.1:9998")

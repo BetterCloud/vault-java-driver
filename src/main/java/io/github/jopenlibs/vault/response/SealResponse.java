@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
  * operations.
  */
 public class SealResponse extends VaultResponse {
+
     private Boolean sealed;
     private Long threshold;
     private Long numberOfShares;
@@ -20,7 +21,7 @@ public class SealResponse extends VaultResponse {
      * This constructor simply exposes the common base class constructor.
      *
      * @param restResponse The raw HTTP response from Vault.
-     * @param retries      The number of retry attempts that occurred during the API call (can be zero).
+     * @param retries The number of retry attempts that occurred during the API call (can be zero).
      */
     public SealResponse(final RestResponse restResponse, final int retries) {
         super(restResponse, retries);

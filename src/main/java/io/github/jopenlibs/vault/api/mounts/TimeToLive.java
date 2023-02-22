@@ -4,9 +4,9 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
- * <p>A container for Time To Live information sent to mounts endpoints on the Secret Engine backend as REST payload.
- * This class is meant for use with a static <code>TimeToLive.of(int, TimeUnit)</code> method pattern style.  Example
- * usage:</p>
+ * <p>A container for Time To Live information sent to mounts endpoints on the Secret Engine
+ * backend as REST payload. This class is meant for use with a static <code>TimeToLive.of(int,
+ * TimeUnit)</code> method pattern style.  Example usage:</p>
  *
  * <blockquote>
  * <pre>{@code
@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
  * </ul>
  */
 public class TimeToLive {
+
     private final int ttl;
     private final TimeUnit unit;
 

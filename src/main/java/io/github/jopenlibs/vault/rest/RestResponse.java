@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * This class contains the metadata and data that was downloaded by <code>Rest</code>
- * from an HTTP response.
+ * This class contains the metadata and data that was downloaded by <code>Rest</code> from an HTTP
+ * response.
  */
 public class RestResponse implements Serializable {
 
@@ -14,7 +14,6 @@ public class RestResponse implements Serializable {
     private byte[] body;
 
     /**
-     *
      * @param status The HTTP status code issues for the response (e.g. <code>200 == OK</code>).
      * @param mimeType The MIME type for the body contents (e.g. <code>application/json</code>).
      * @param body The binary payload of the response body.

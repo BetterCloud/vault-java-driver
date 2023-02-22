@@ -10,8 +10,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * <p>Unit tests for the Vault driver, having no dependency on an actual Vault server instance being available.  The
- * tests in this class relate to handling of retry logic.</p>
+ * <p>Unit tests for the Vault driver, having no dependency on an actual Vault server instance
+ * being available.  The tests in this class relate to handling of retry logic.</p>
  */
 public class RetryTests {
 
@@ -22,7 +22,8 @@ public class RetryTests {
         final Server server = VaultTestUtils.initHttpMockVault(retriesMockVault);
         server.start();
 
-        final VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("mock_token").engineVersion(1).build();
+        final VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999")
+                .token("mock_token").engineVersion(1).build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.withRetries(5, 100).logical().read("secret/hello");
         assertEquals(5, response.getRetries());
@@ -40,7 +41,8 @@ public class RetryTests {
         final Server server = VaultTestUtils.initHttpMockVault(retriesMockVault);
         server.start();
 
-        final VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("mock_token").build();
+        final VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999")
+                .token("mock_token").build();
         final Vault vault = new Vault(vaultConfig);
         final LogicalResponse response = vault.withRetries(5, 100).logical()
                 .write("secret/hello", new HashMap<String, Object>() {{

@@ -5,11 +5,12 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.utility.TestEnvironment;
 
 /**
- * Various constants used throughout the integration test suite, but primarily by {@link VaultContainer}
- * and {@link SSLUtils}.  Mostly username/password credentials and other Vault configuration values, and
- * path locations for SSL artifacts.
+ * Various constants used throughout the integration test suite, but primarily by
+ * {@link VaultContainer} and {@link SSLUtils}.  Mostly username/password credentials and other
+ * Vault configuration values, and path locations for SSL artifacts.
  */
 public interface TestConstants {
+
     String POSTGRES_PASSWORD = "superpassword1";
     String POSTGRES_USER = "superuser1";
 

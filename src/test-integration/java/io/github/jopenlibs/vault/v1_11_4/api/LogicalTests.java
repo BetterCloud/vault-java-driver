@@ -39,7 +39,8 @@ public class LogicalTests {
         container.setupBackendUserPass();
         container.setEngineVersions();
         final Vault vault = container.getVault();
-        final AuthResponse response = vault.auth().loginByUserPass(VaultContainer.USER_ID, VaultContainer.PASSWORD);
+        final AuthResponse response = vault.auth()
+                .loginByUserPass(VaultContainer.USER_ID, VaultContainer.PASSWORD);
         NONROOT_TOKEN = response.getAuthClientToken();
     }
 
@@ -76,7 +77,8 @@ public class LogicalTests {
         final String pathToRead = "kv-v1/hello";
 
         final String value = "world";
-        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(
+                new VaultConfig().engineVersion(1));
 
         final Map<String, Object> testMap = new HashMap<>();
         testMap.put("value", value);
@@ -89,7 +91,8 @@ public class LogicalTests {
 
 
     /**
-     * Write a secret and verify that a specific version can be read, using KV Secrets Engine version 2.
+     * Write a secret and verify that a specific version can be read, using KV Secrets Engine
+     * version 2.
      *
      * @throws VaultException On error.
      */
@@ -112,7 +115,8 @@ public class LogicalTests {
 
 
     /**
-     * Write a secret and verify that it can be read containing a null value, using KV Engine version 2.
+     * Write a secret and verify that it can be read containing a null value, using KV Engine
+     * version 2.
      *
      * @throws VaultException On error.
      */
@@ -133,7 +137,8 @@ public class LogicalTests {
     }
 
     /**
-     * Write a secret and verify that it can be read containing a null value, using KV Engine version 1.
+     * Write a secret and verify that it can be read containing a null value, using KV Engine
+     * version 1.
      *
      * @throws VaultException On error.
      */
@@ -142,7 +147,8 @@ public class LogicalTests {
         final String pathToWrite = "kv-v1/null";
         final String pathToRead = "kv-v1/null";
         final String value = null;
-        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(
+                new VaultConfig().engineVersion(1));
 
         final Map<String, Object> testMap = new HashMap<>();
         testMap.put("value", value);
@@ -154,7 +160,8 @@ public class LogicalTests {
     }
 
     /**
-     * Write a secret, and then verify that its key shows up in the list, using KV Engine version 2.
+     * Write a secret, and then verify that its key shows up in the list, using KV Engine version
+     * 2.
      *
      * @throws VaultException On error.
      */
@@ -170,13 +177,15 @@ public class LogicalTests {
     }
 
     /**
-     * Write a secret, and then verify that its key shows up in the list, using KV Engine version 1.
+     * Write a secret, and then verify that its key shows up in the list, using KV Engine version
+     * 1.
      *
      * @throws VaultException On error.
      */
     @Test
     public void testListKVEngineV1() throws VaultException {
-        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(
+                new VaultConfig().engineVersion(1));
         final Map<String, Object> testMap = new HashMap<>();
         testMap.put("value", "world");
 
@@ -209,7 +218,8 @@ public class LogicalTests {
      */
     @Test
     public void testDeleteKVEngineV1() throws VaultException {
-        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(
+                new VaultConfig().engineVersion(1));
         final Map<String, Object> testMap = new HashMap<>();
         testMap.put("value", "world");
 
@@ -220,8 +230,8 @@ public class LogicalTests {
     }
 
     /**
-     * Write a secret multiple times, and have multiple versions of the secret, and then verify that the specified version of
-     * them are successfully destroyed.
+     * Write a secret multiple times, and have multiple versions of the secret, and then verify that
+     * the specified version of them are successfully destroyed.
      *
      * @throws VaultException On error.
      */
@@ -301,7 +311,8 @@ public class LogicalTests {
     }
 
     /**
-     * Tests that the various supported data types are correctly marshaled and unmarshaled to and from Vault.
+     * Tests that the various supported data types are correctly marshaled and unmarshaled to and
+     * from Vault.
      *
      * @throws VaultException On error.
      */
@@ -314,7 +325,8 @@ public class LogicalTests {
     }
 
     /**
-     * Tests that the various supported data types are marshaled/unmarshaled to and from Vault, using KV Engine version 2.
+     * Tests that the various supported data types are marshaled/unmarshaled to and from Vault,
+     * using KV Engine version 2.
      *
      * @throws VaultException On error.
      */
@@ -327,7 +339,8 @@ public class LogicalTests {
         nameValuePairs.put("testInt", 1001);
         nameValuePairs.put("testFloat", 123.456);
         nameValuePairs.put("testString", "Hello world!");
-        nameValuePairs.put("testObject", "{ \"nestedBool\": true, \"nestedInt\": 123, \"nestedFloat\": 123.456, \"nestedString\": \"foobar\", \"nestedArray\": [\"foo\", \"bar\"], \"nestedObject\": { \"foo\": \"bar\" } }");
+        nameValuePairs.put("testObject",
+                "{ \"nestedBool\": true, \"nestedInt\": 123, \"nestedFloat\": 123.456, \"nestedString\": \"foobar\", \"nestedArray\": [\"foo\", \"bar\"], \"nestedObject\": { \"foo\": \"bar\" } }");
 
         final Vault vault = container.getRootVault();
         vault.logical().write(path, nameValuePairs);
@@ -339,7 +352,8 @@ public class LogicalTests {
     }
 
     /**
-     * Tests that the various supported data types are marshaled/unmarshaled to and from Vault, using KV Engine version 1.
+     * Tests that the various supported data types are marshaled/unmarshaled to and from Vault,
+     * using KV Engine version 1.
      *
      * @throws VaultException On error.
      */
@@ -352,9 +366,11 @@ public class LogicalTests {
         nameValuePairs.put("testInt", 1001);
         nameValuePairs.put("testFloat", 123.456);
         nameValuePairs.put("testString", "Hello world!");
-        nameValuePairs.put("testObject", "{ \"nestedBool\": true, \"nestedInt\": 123, \"nestedFloat\": 123.456, \"nestedString\": \"foobar\", \"nestedArray\": [\"foo\", \"bar\"], \"nestedObject\": { \"foo\": \"bar\" } }");
+        nameValuePairs.put("testObject",
+                "{ \"nestedBool\": true, \"nestedInt\": 123, \"nestedFloat\": 123.456, \"nestedString\": \"foobar\", \"nestedArray\": [\"foo\", \"bar\"], \"nestedObject\": { \"foo\": \"bar\" } }");
 
-        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(
+                new VaultConfig().engineVersion(1));
         vault.logical().write(path, nameValuePairs);
 
         final Map<String, String> valuesRead = vault.logical().read(path).getData();
@@ -364,7 +380,8 @@ public class LogicalTests {
     }
 
     /**
-     * Tests that the Vault KV Engine Version API call is successful when attempting to discover the KV Engine versions.
+     * Tests that the Vault KV Engine Version API call is successful when attempting to discover the
+     * KV Engine versions.
      *
      * @throws VaultException On error.
      */
@@ -437,7 +454,8 @@ public class LogicalTests {
     @Test
     public void testVaultUpgrade() throws VaultException {
         final String kvToUpgrade = "kv-v1-Upgrade-Test/";
-        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(
+                new VaultConfig().engineVersion(1));
         String kVOriginalVersion = vault.getSecretEngineVersions().get("kv-v1-Upgrade-Test/");
         vault.logical().upgrade(kvToUpgrade);
         String kVUpgradedVersion = vault.getSecretEngineVersions().get("kv-v1-Upgrade-Test/");

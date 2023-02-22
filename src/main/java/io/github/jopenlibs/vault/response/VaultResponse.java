@@ -5,10 +5,9 @@ import java.io.Serializable;
 
 /**
  * <p><code>VaultResponse</code> is a common base class for the response objects returned by
- * all API methods.  It contains the bare minimum of information common to all Vault
- * responses (e.g. the raw HTTP response, the number of retry attempts if any).  API methods
- * which return additional information will use more specialized subclasses inheriting
- * from <code>VaultResponse</code>.</p>
+ * all API methods.  It contains the bare minimum of information common to all Vault responses (e.g.
+ * the raw HTTP response, the number of retry attempts if any).  API methods which return additional
+ * information will use more specialized subclasses inheriting from <code>VaultResponse</code>.</p>
  */
 public class VaultResponse implements Serializable {
 

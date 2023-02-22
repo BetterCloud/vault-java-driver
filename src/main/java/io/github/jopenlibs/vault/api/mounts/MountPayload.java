@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>A container for options sent to mounts endpoints on the Secret Engine backend as REST payload. This class is
- * meant for use with a builder pattern style.  Example usage:</p>
+ * <p>A container for options sent to mounts endpoints on the Secret Engine backend as REST
+ * payload. This class is meant for use with a builder pattern style.  Example usage:</p>
  *
  * <blockquote>
  * <pre>{@code
@@ -20,6 +20,7 @@ import java.util.List;
  * </blockquote>
  */
 public class MountPayload implements Serializable {
+
     private static final long serialVersionUID = 839595627039704093L;
 
     private TimeToLive defaultLeaseTtl;
@@ -126,11 +127,13 @@ public class MountPayload implements Serializable {
         jsonObject.addIfNotNull("description", this.description);
 
         if (this.auditNonHmacRequestKeys != null && this.auditNonHmacRequestKeys.size() > 0) {
-            jsonObject.addIfNotNull("audit_non_hmac_request_keys", String.join(",", this.auditNonHmacRequestKeys));
+            jsonObject.addIfNotNull("audit_non_hmac_request_keys",
+                    String.join(",", this.auditNonHmacRequestKeys));
         }
 
         if (this.auditNonHmacResponseKeys != null && this.auditNonHmacResponseKeys.size() > 0) {
-            jsonObject.addIfNotNull("audit_non_hmac_response_keys", String.join(",", this.auditNonHmacResponseKeys));
+            jsonObject.addIfNotNull("audit_non_hmac_response_keys",
+                    String.join(",", this.auditNonHmacResponseKeys));
         }
 
         return jsonObject;

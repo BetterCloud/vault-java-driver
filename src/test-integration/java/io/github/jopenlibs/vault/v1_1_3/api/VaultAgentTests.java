@@ -20,6 +20,7 @@ import static org.apache.commons.io.FileUtils.writeStringToFile;
 import static org.junit.Assert.assertNotNull;
 
 public class VaultAgentTests {
+
     @ClassRule
     public static final VaultContainer container = new VaultContainer();
     @ClassRule
@@ -33,11 +34,14 @@ public class VaultAgentTests {
         container.setupBackendAppRole();
         container.setEngineVersions();
 
-        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(
+                new VaultConfig().engineVersion(1));
 
-        final LogicalResponse roleIdResponse = vault.logical().read("auth/approle/role/testrole/role-id");
+        final LogicalResponse roleIdResponse = vault.logical()
+                .read("auth/approle/role/testrole/role-id");
         String appRoleId = roleIdResponse.getData().get("role_id");
-        final LogicalResponse secretIdResponse = vault.logical().write("auth/approle/role/testrole/secret-id", null);
+        final LogicalResponse secretIdResponse = vault.logical()
+                .write("auth/approle/role/testrole/secret-id", null);
         String secretId = secretIdResponse.getData().get("secret_id");
 
         assertNotNull(appRoleId);

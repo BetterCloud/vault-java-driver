@@ -39,14 +39,13 @@ public class LogicalTests {
         container.setupBackendUserPass();
         container.setEngineVersions();
         final Vault vault = container.getVault();
-        final AuthResponse response = vault.auth().loginByUserPass(VaultContainer.USER_ID, VaultContainer.PASSWORD);
+        final AuthResponse response = vault.auth()
+                .loginByUserPass(VaultContainer.USER_ID, VaultContainer.PASSWORD);
         NONROOT_TOKEN = response.getAuthClientToken();
     }
 
     /**
      * Write a secret and verify that it can be read, using KV Secrets engine version 2.
-     *
-     * @throws VaultException
      */
     @Test
     public void testWriteAndRead() throws VaultException {
@@ -67,8 +66,6 @@ public class LogicalTests {
 
     /**
      * Write a secret and verify that it can be read, using KV Secrets engine version 1.
-     *
-     * @throws VaultException
      */
     @Test
     public void testWriteAndReadKVEngineV1() throws VaultException {
@@ -76,7 +73,8 @@ public class LogicalTests {
         final String pathToRead = "kv-v1/hello";
 
         final String value = "world";
-        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(
+                new VaultConfig().engineVersion(1));
 
         final Map<String, Object> testMap = new HashMap<>();
         testMap.put("value", value);
@@ -89,9 +87,8 @@ public class LogicalTests {
 
 
     /**
-     * Write a secret and verify that a specific version can be read, using KV Secrets Engine version 2.
-     *
-     * @throws VaultException
+     * Write a secret and verify that a specific version can be read, using KV Secrets Engine
+     * version 2.
      */
     @Test
     public void testWriteAndReadSpecificVersions() throws VaultException {
@@ -112,9 +109,8 @@ public class LogicalTests {
 
 
     /**
-     * Write a secret and verify that it can be read containing a null value, using KV Engine version 2.
-     *
-     * @throws VaultException
+     * Write a secret and verify that it can be read containing a null value, using KV Engine
+     * version 2.
      */
     @Test
     public void testWriteAndReadNull() throws VaultException {
@@ -133,16 +129,16 @@ public class LogicalTests {
     }
 
     /**
-     * Write a secret and verify that it can be read containing a null value, using KV Engine version 1.
-     *
-     * @throws VaultException
+     * Write a secret and verify that it can be read containing a null value, using KV Engine
+     * version 1.
      */
     @Test
     public void testWriteAndReadNullKVEngineV1() throws VaultException {
         final String pathToWrite = "kv-v1/null";
         final String pathToRead = "kv-v1/null";
         final String value = null;
-        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(
+                new VaultConfig().engineVersion(1));
 
         final Map<String, Object> testMap = new HashMap<>();
         testMap.put("value", value);
@@ -154,9 +150,8 @@ public class LogicalTests {
     }
 
     /**
-     * Write a secret, and then verify that its key shows up in the list, using KV Engine version 2.
-     *
-     * @throws VaultException
+     * Write a secret, and then verify that its key shows up in the list, using KV Engine version
+     * 2.
      */
     @Test
     public void testList() throws VaultException {
@@ -170,13 +165,13 @@ public class LogicalTests {
     }
 
     /**
-     * Write a secret, and then verify that its key shows up in the list, using KV Engine version 1.
-     *
-     * @throws VaultException
+     * Write a secret, and then verify that its key shows up in the list, using KV Engine version
+     * 1.
      */
     @Test
     public void testListKVEngineV1() throws VaultException {
-        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(
+                new VaultConfig().engineVersion(1));
         final Map<String, Object> testMap = new HashMap<>();
         testMap.put("value", "world");
 
@@ -187,8 +182,6 @@ public class LogicalTests {
 
     /**
      * Write a secret, and then verify that is is successfully deleted, using KV Engine version 2.
-     *
-     * @throws VaultException
      */
     @Test
     public void testDelete() throws VaultException {
@@ -204,12 +197,11 @@ public class LogicalTests {
 
     /**
      * Write a secret, and then verify that is is successfully deleted, using KV Engine version 1.
-     *
-     * @throws VaultException
      */
     @Test
     public void testDeleteKVEngineV1() throws VaultException {
-        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(
+                new VaultConfig().engineVersion(1));
         final Map<String, Object> testMap = new HashMap<>();
         testMap.put("value", "world");
 
@@ -220,10 +212,8 @@ public class LogicalTests {
     }
 
     /**
-     * Write a secret multiple times, and have multiple versions of the secret, and then verify that the specified version of
-     * them are successfully destroyed.
-     *
-     * @throws VaultException
+     * Write a secret multiple times, and have multiple versions of the secret, and then verify that
+     * the specified version of them are successfully destroyed.
      */
     @Test
     public void testDestroy() throws VaultException {
@@ -249,8 +239,6 @@ public class LogicalTests {
 
     /**
      * Tests that exception message includes errors returned by Vault
-     *
-     * @throws VaultException
      */
     @Test
     public void testReadPermissionDeniedReturnedByVault() throws VaultException {
@@ -261,8 +249,6 @@ public class LogicalTests {
 
     /**
      * Tests that exception message includes errors returned by Vault
-     *
-     * @throws VaultException
      */
     @Test
     public void testWritePermissionDeniedReturnedByVault() throws VaultException {
@@ -275,8 +261,6 @@ public class LogicalTests {
 
     /**
      * Tests that exception message includes errors returned by Vault
-     *
-     * @throws VaultException
      */
     @Test
     public void testDeleteExceptionMessageIncludesErrorsReturnedByVault() throws VaultException {
@@ -290,8 +274,6 @@ public class LogicalTests {
 
     /**
      * Tests that exception message includes errors returned by Vault
-     *
-     * @throws VaultException
      */
     @Test
     public void testListPermissionDeniedReturnedByVault() throws VaultException {
@@ -301,9 +283,8 @@ public class LogicalTests {
     }
 
     /**
-     * Tests that the various supported data types are correctly marshaled and unmarshaled to and from Vault.
-     *
-     * @throws VaultException
+     * Tests that the various supported data types are correctly marshaled and unmarshaled to and
+     * from Vault.
      */
     @Test
     public void testReadReturnedByVaultOn404() throws VaultException {
@@ -314,9 +295,8 @@ public class LogicalTests {
     }
 
     /**
-     * Tests that the various supported data types are marshaled/unmarshaled to and from Vault, using KV Engine version 2.
-     *
-     * @throws VaultException
+     * Tests that the various supported data types are marshaled/unmarshaled to and from Vault,
+     * using KV Engine version 2.
      */
     @Test
     public void testWriteAndReadAllDataTypes() throws VaultException {
@@ -327,7 +307,8 @@ public class LogicalTests {
         nameValuePairs.put("testInt", 1001);
         nameValuePairs.put("testFloat", 123.456);
         nameValuePairs.put("testString", "Hello world!");
-        nameValuePairs.put("testObject", "{ \"nestedBool\": true, \"nestedInt\": 123, \"nestedFloat\": 123.456, \"nestedString\": \"foobar\", \"nestedArray\": [\"foo\", \"bar\"], \"nestedObject\": { \"foo\": \"bar\" } }");
+        nameValuePairs.put("testObject",
+                "{ \"nestedBool\": true, \"nestedInt\": 123, \"nestedFloat\": 123.456, \"nestedString\": \"foobar\", \"nestedArray\": [\"foo\", \"bar\"], \"nestedObject\": { \"foo\": \"bar\" } }");
 
         final Vault vault = container.getRootVault();
         vault.logical().write(path, nameValuePairs);
@@ -339,9 +320,8 @@ public class LogicalTests {
     }
 
     /**
-     * Tests that the various supported data types are marshaled/unmarshaled to and from Vault, using KV Engine version 1.
-     *
-     * @throws VaultException
+     * Tests that the various supported data types are marshaled/unmarshaled to and from Vault,
+     * using KV Engine version 1.
      */
     @Test
     public void testWriteAndReadAllDataTypesKVEngineV1() throws VaultException {
@@ -352,9 +332,11 @@ public class LogicalTests {
         nameValuePairs.put("testInt", 1001);
         nameValuePairs.put("testFloat", 123.456);
         nameValuePairs.put("testString", "Hello world!");
-        nameValuePairs.put("testObject", "{ \"nestedBool\": true, \"nestedInt\": 123, \"nestedFloat\": 123.456, \"nestedString\": \"foobar\", \"nestedArray\": [\"foo\", \"bar\"], \"nestedObject\": { \"foo\": \"bar\" } }");
+        nameValuePairs.put("testObject",
+                "{ \"nestedBool\": true, \"nestedInt\": 123, \"nestedFloat\": 123.456, \"nestedString\": \"foobar\", \"nestedArray\": [\"foo\", \"bar\"], \"nestedObject\": { \"foo\": \"bar\" } }");
 
-        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(
+                new VaultConfig().engineVersion(1));
         vault.logical().write(path, nameValuePairs);
 
         final Map<String, String> valuesRead = vault.logical().read(path).getData();
@@ -364,9 +346,8 @@ public class LogicalTests {
     }
 
     /**
-     * Tests that the Vault KV Engine Version API call is successful when attempting to discover the KV Engine versions.
-     *
-     * @throws VaultException
+     * Tests that the Vault KV Engine Version API call is successful when attempting to discover the
+     * KV Engine versions.
      */
     @Test
     public void testVaultKVEnginePathsCanBeDiscovered() throws VaultException {
@@ -379,8 +360,6 @@ public class LogicalTests {
 
     /**
      * Tests that a specific version of a secret can be deleted.
-     *
-     * @throws VaultException
      */
     @Test
     public void testVaultDeleteASpecificVersion() throws VaultException {
@@ -406,8 +385,6 @@ public class LogicalTests {
 
     /**
      * Tests that a specific version of a secret can be undeleted.
-     *
-     * @throws VaultException
      */
     @Test
     public void testVaultUnDeleteASpecificVersion() throws VaultException {
@@ -431,13 +408,12 @@ public class LogicalTests {
 
     /**
      * Tests that a specific KV engine can be upgraded from Version 1 to Version 2.
-     *
-     * @throws VaultException
      */
     @Test
     public void testVaultUpgrade() throws VaultException {
         final String kvToUpgrade = "kv-v1-Upgrade-Test/";
-        final Vault vault = container.getRootVaultWithCustomVaultConfig(new VaultConfig().engineVersion(1));
+        final Vault vault = container.getRootVaultWithCustomVaultConfig(
+                new VaultConfig().engineVersion(1));
         String kVOriginalVersion = vault.getSecretEngineVersions().get("kv-v1-Upgrade-Test/");
         vault.logical().upgrade(kvToUpgrade);
         String kVUpgradedVersion = vault.getSecretEngineVersions().get("kv-v1-Upgrade-Test/");

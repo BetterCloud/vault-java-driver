@@ -7,8 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * The code used to load environment variables is encapsulated within an inner class,
- * so that a mock version of that environment loader can be used by unit tests.
+ * The code used to load environment variables is encapsulated within an inner class, so that a mock
+ * version of that environment loader can be used by unit tests.
  */
 public class EnvironmentLoader implements Serializable {
 

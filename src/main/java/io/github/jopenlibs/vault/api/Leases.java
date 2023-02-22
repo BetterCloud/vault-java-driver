@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * <p>The implementing class for operations on REST endpoints, under the "Leases" section of the
  * Vault HTTP API docs (<a href="https://www.vaultproject.io/docs/http/index.html">
- *     https://www.vaultproject.io/docs/http/index.html</a>).</p>
+ * https://www.vaultproject.io/docs/http/index.html</a>).</p>
  *
  * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of
  * <code>Vault</code> in a DSL-style builder pattern.  See the Javadoc comments of each

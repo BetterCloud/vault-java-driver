@@ -8,10 +8,11 @@ import io.github.jopenlibs.vault.rest.RestResponse;
 import java.nio.charset.StandardCharsets;
 
 /**
- * When a response is wrapped, the normal API response from Vault does not contain the original secret,
- * but rather contains a set of information related to the response-wrapping token.
+ * When a response is wrapped, the normal API response from Vault does not contain the original
+ * secret, but rather contains a set of information related to the response-wrapping token.
  */
 public class WrapResponse extends VaultResponse {
+
     private Boolean renewable;
     private String token;
     private String accessor;
@@ -23,7 +24,7 @@ public class WrapResponse extends VaultResponse {
      * Parse response-wrapping and create an instance of response.
      *
      * @param restResponse The raw HTTP response from Vault.
-     * @param retries      The number of retry attempts that occurred during the API call (can be zero).
+     * @param retries The number of retry attempts that occurred during the API call (can be zero).
      */
     public WrapResponse(final RestResponse restResponse, final int retries) {
         super(restResponse, retries);
@@ -61,11 +62,11 @@ public class WrapResponse extends VaultResponse {
     }
 
     /**
-     *  If the wrapped response is an authentication response containing a Vault token,
-     *  this is the value of the wrapped token's accessor. This is useful for orchestration
-     *  systems (such as Nomad) to be able to control the lifetime of secrets based on
-     *  their knowledge of the lifetime of jobs, without having to actually unwrap
-     *  the response-wrapping token or gain knowledge of the token ID inside
+     * If the wrapped response is an authentication response containing a Vault token, this is the
+     * value of the wrapped token's accessor. This is useful for orchestration systems (such as
+     * Nomad) to be able to control the lifetime of secrets based on their knowledge of the lifetime
+     * of jobs, without having to actually unwrap the response-wrapping token or gain knowledge of
+     * the token ID inside
      *
      * @return Wrapped Accessor.
      */

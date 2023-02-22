@@ -10,16 +10,14 @@ import org.eclipse.jetty.server.Request;
 
 /**
  * <p>This class is used for inspecting the request inputs to ensure they were properly
- * received, for use cases where the server doesn't really return much helpful
- * information.  Currently, this only includes testing DELETE calls in the low-level
- * REST library code.</p>
+ * received, for use cases where the server doesn't really return much helpful information.
+ * Currently, this only includes testing DELETE calls in the low-level REST library code.</p>
  *
  * <p>The <code>handle()</code> method simply parses detail about the request into
- * a JSON string, and returns with the response body.  Currently, we're finding that
- * this body is not being received by the requestor... which is probably a quirk of
- * the HTTP spec that needs further investigation.  For now, we're also populating
- * the details of the most recent request a member variable, so that it can be retrieved
- * that way by unit tests.</p>
+ * a JSON string, and returns with the response body.  Currently, we're finding that this body is
+ * not being received by the requestor... which is probably a quirk of the HTTP spec that needs
+ * further investigation.  For now, we're also populating the details of the most recent request a
+ * member variable, so that it can be retrieved that way by unit tests.</p>
  */
 public class EchoInputMockVault extends MockVault {
 
@@ -50,8 +48,9 @@ public class EchoInputMockVault extends MockVault {
                 .append(request.getServerName())
                 .append(request.getServerPort() == 0 ? "" : ":" + request.getServerPort())
                 .append(request.getRequestURI())
-                .append(request.getQueryString() == null || request.getQueryString().isEmpty() ? "" : "?" +
-                        request.getQueryString());
+                .append(request.getQueryString() == null || request.getQueryString().isEmpty() ? ""
+                        : "?" +
+                                request.getQueryString());
 
         final String mockResponse = Json.object()
                 .add("method", request.getMethod())

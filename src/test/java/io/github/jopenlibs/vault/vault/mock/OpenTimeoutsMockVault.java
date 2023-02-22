@@ -7,9 +7,10 @@ import java.io.IOException;
 import org.eclipse.jetty.server.Request;
 
 /**
- * <p>This class is used to mock out a Vault server in unit tests involving open timeouts (i.e. delays before an
- * HTTP(S) connection is successfully established).  As it extends Jetty's <code>AbstractHandler</code>, it can be
- * passed to an embedded Jetty server and respond to actual (albeit localhost) HTTP requests.</p>
+ * <p>This class is used to mock out a Vault server in unit tests involving open timeouts (i.e.
+ * delays before an HTTP(S) connection is successfully established).  As it extends Jetty's
+ * <code>AbstractHandler</code>, it can be passed to an embedded Jetty server and respond to actual
+ * (albeit localhost) HTTP requests.</p>
  *
  * <p>The basic usage pattern is as follows:</p>
  *
@@ -56,7 +57,8 @@ public class OpenTimeoutsMockVault extends MockVault {
     private final int mockStatus;
     private final String mockResponse;
 
-    public OpenTimeoutsMockVault(final int delaySeconds, final int mockStatus, final String mockResponse) {
+    public OpenTimeoutsMockVault(final int delaySeconds, final int mockStatus,
+            final String mockResponse) {
         this.delaySeconds = delaySeconds;
         this.mockStatus = mockStatus;
         this.mockResponse = mockResponse;
@@ -73,7 +75,8 @@ public class OpenTimeoutsMockVault extends MockVault {
             Thread.sleep((long) delaySeconds * 1000);
             response.setContentType("application/json");
             baseRequest.setHandled(true);
-            System.out.println("OpenTimeoutsMockVault is sending an HTTP " + mockStatus + " code, with expected" +
+            System.out.println("OpenTimeoutsMockVault is sending an HTTP " + mockStatus
+                    + " code, with expected" +
                     " success payload...");
             response.setStatus(mockStatus);
             if (mockResponse != null) {

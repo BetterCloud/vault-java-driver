@@ -62,7 +62,7 @@ public class WrappingTests {
 
     /**
      * Tests endpoints: /sys/wrapping/wrap, /sys/wrapping/lookup, /sys/wrapping/unwrap,
-     *  /sys/wrapping/rewrap.
+     * /sys/wrapping/rewrap.
      */
     @Test
     public void testWrappingAll() throws Exception {

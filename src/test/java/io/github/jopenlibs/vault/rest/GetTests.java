@@ -15,8 +15,8 @@ import static org.junit.Assert.assertTrue;
 public class GetTests {
 
     /**
-     * The REST client should refuse to handle any HTTP verb if the base URL has not
-     * already been set.
+     * The REST client should refuse to handle any HTTP verb if the base URL has not already been
+     * set.
      */
     @Test(expected = RestException.class)
     public void testFailsOnNoUrl() throws RestException {
@@ -25,8 +25,6 @@ public class GetTests {
 
     /**
      * Verify a basic GET request, with no parameters or headers.
-     *
-     * @throws RestException
      */
     @Test
     public void testGet_Plain() throws RestException {
@@ -41,10 +39,8 @@ public class GetTests {
 
     /**
      * Verify a GET request that has no query string on the base URL, but does have additional
-     * parameters passed.  Those additional parameters should be appended to the base URL as
-     * a query string.
-     *
-     * @throws RestException
+     * parameters passed.  Those additional parameters should be appended to the base URL as a query
+     * string.
      */
     @Test
     public void testGet_InsertParams() throws RestException {
@@ -59,23 +55,23 @@ public class GetTests {
 
         final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
-        assertEquals("https://httpbin.org/get?apples=oranges&foo=bar&multi+part=this+parameter+has+whitespace+in+its+name+and+value",
+        assertEquals(
+                "https://httpbin.org/get?apples=oranges&foo=bar&multi+part=this+parameter+has+whitespace+in+its+name+and+value",
                 jsonObject.getString("url", null));
         final JsonObject args = jsonObject.get("args").asObject();
         assertEquals("bar", args.getString("foo", null));
         assertEquals("oranges", args.getString("apples", null));
-        assertEquals("this parameter has whitespace in its name and value", args.getString("multi part", null));
+        assertEquals("this parameter has whitespace in its name and value",
+                args.getString("multi part", null));
     }
 
     /**
      * <p>Verify a GET request that has both a query string on the base URL, *and* additional
-     * parameters passed.  Those additional parameters should be appended to the query string
-     * that's already on the base URL.</p>
+     * parameters passed.  Those additional parameters should be appended to the query string that's
+     * already on the base URL.</p>
      *
      * <p>Note that the original query string is unmodified, but the additional parameters are
      * appended in an order that's sorted by their names.</p>
-     *
-     * @throws RestException
      */
     @Test
     public void testGet_UpdateParams() throws RestException {
@@ -90,13 +86,15 @@ public class GetTests {
 
         final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
-        assertEquals("https://httpbin.org/get?hot=cold&apples=oranges&foo=bar&multi+part=this+parameter+has+whitespace+in+its+name+and+value",
+        assertEquals(
+                "https://httpbin.org/get?hot=cold&apples=oranges&foo=bar&multi+part=this+parameter+has+whitespace+in+its+name+and+value",
                 jsonObject.getString("url", null));
         final JsonObject args = jsonObject.get("args").asObject();
         assertEquals("cold", args.getString("hot", null));
         assertEquals("bar", args.getString("foo", null));
         assertEquals("oranges", args.getString("apples", null));
-        assertEquals("this parameter has whitespace in its name and value", args.getString("multi part", null));
+        assertEquals("this parameter has whitespace in its name and value",
+                args.getString("multi part", null));
     }
 
     /**
@@ -104,8 +102,6 @@ public class GetTests {
      *
      * <p>Note that even though our header names are all lowercase, the round-trip process
      * converts them to camel case (e.g. <code>two-part</code> to <code>Two-Part</code>).</p>
-     *
-     * @throws RestException
      */
     @Test
     public void testGet_WithHeaders() throws RestException {
@@ -133,8 +129,6 @@ public class GetTests {
      *
      * <p>Note that even though our header names are all lowercase, the round-trip process
      * converts them to camel case (e.g. <code>two-part</code> to <code>Two-Part</code>).</p>
-     *
-     * @throws RestException
      */
     @Test
     public void testGet_WithOptionalHeaders() throws RestException {
@@ -161,8 +155,6 @@ public class GetTests {
 
     /**
      * <p>Verify that response body is retrieved when http status is error code</p>
-     *
-     * @throws RestException
      */
     @Test
     public void testGet_RetrievesResponseBodyWhenStatusIs418() throws RestException {

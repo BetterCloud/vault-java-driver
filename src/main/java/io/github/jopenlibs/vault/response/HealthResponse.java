@@ -37,7 +37,8 @@ public class HealthResponse implements Serializable {
      * @param retries The number of retry attempts that occurred during the API call (can be zero)
      * @throws VaultException If any error occurs or unexpected response is received from Vault
      */
-    public HealthResponse(final RestResponse restResponse, final int retries) throws VaultException {
+    public HealthResponse(final RestResponse restResponse, final int retries)
+            throws VaultException {
         this.restResponse = restResponse;
         this.retries = retries;
 
@@ -48,19 +49,27 @@ public class HealthResponse implements Serializable {
             throw new VaultException("Response contains a bad payload", restResponse.getStatus());
         }
         if (restResponse.getBody().length > 0) {
-            final String mimeType = restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
+            final String mimeType =
+                    restResponse.getMimeType() == null ? "null" : restResponse.getMimeType();
             if (!mimeType.equals("application/json")) {
-                throw new VaultException("Vault responded with MIME type: " + mimeType, restResponse.getStatus());
+                throw new VaultException("Vault responded with MIME type: " + mimeType,
+                        restResponse.getStatus());
             }
             try {
-                final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);//NOPMD
+                final String jsonString = new String(restResponse.getBody(),
+                        StandardCharsets.UTF_8);//NOPMD
                 final JsonObject jsonObject = Json.parse(jsonString).asObject();
-                this.initialized = jsonObject.get("initialized") == null ? null : jsonObject.get("initialized").asBoolean();
-                this.sealed = jsonObject.get("sealed") == null ? null : jsonObject.get("sealed").asBoolean();
-                this.standby = jsonObject.get("standby") == null ? null : jsonObject.get("standby").asBoolean();
-                this.serverTimeUTC = jsonObject.get("server_time_utc") == null ? null : jsonObject.get("server_time_utc").asLong();
-            } catch(final Exception e) {
-                throw new VaultException("Unable to parse JSON payload: " + e, restResponse.getStatus());
+                this.initialized = jsonObject.get("initialized") == null ? null
+                        : jsonObject.get("initialized").asBoolean();
+                this.sealed = jsonObject.get("sealed") == null ? null
+                        : jsonObject.get("sealed").asBoolean();
+                this.standby = jsonObject.get("standby") == null ? null
+                        : jsonObject.get("standby").asBoolean();
+                this.serverTimeUTC = jsonObject.get("server_time_utc") == null ? null
+                        : jsonObject.get("server_time_utc").asLong();
+            } catch (final Exception e) {
+                throw new VaultException("Unable to parse JSON payload: " + e,
+                        restResponse.getStatus());
             }
         }
     }
@@ -86,8 +95,9 @@ public class HealthResponse implements Serializable {
     }
 
     /**
-     * @return A value representing the number of milliseconds since the epoch.  With all of the changes in date API's between Java 8 and
-     * pre-Java 8, it seemed best for the library not to convert this value into any particular one.
+     * @return A value representing the number of milliseconds since the epoch.  With all of the
+     * changes in date API's between Java 8 and pre-Java 8, it seemed best for the library not to
+     * convert this value into any particular one.
      */
     public Long getServerTimeUTC() {
         return serverTimeUTC;

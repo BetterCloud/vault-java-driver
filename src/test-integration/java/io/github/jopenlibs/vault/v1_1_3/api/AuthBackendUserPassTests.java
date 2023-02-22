@@ -32,7 +32,8 @@ public class AuthBackendUserPassTests {
     @Test
     public void testLoginByUserPass() throws VaultException {
         final Vault vault = container.getVault();
-        final AuthResponse response = vault.auth().loginByUserPass(VaultContainer.USER_ID, VaultContainer.PASSWORD);
+        final AuthResponse response = vault.auth()
+                .loginByUserPass(VaultContainer.USER_ID, VaultContainer.PASSWORD);
         final String token = response.getAuthClientToken();
 
         assertNotNull(token);

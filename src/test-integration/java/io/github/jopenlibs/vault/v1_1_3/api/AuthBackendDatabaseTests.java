@@ -18,6 +18,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 public class AuthBackendDatabaseTests {
+
     @ClassRule
     public static final DbContainer dbContainer = new DbContainer();
 
@@ -36,9 +37,11 @@ public class AuthBackendDatabaseTests {
         final Vault vault = container.getRootVault();
 
         List<String> creationStatements = new ArrayList<>();
-        creationStatements.add("CREATE USER \"{{name}}\" WITH PASSWORD '{{password}}'; GRANT ALL PRIVILEGES ON DATABASE \"postgres\" to \"{{name}}\";");
+        creationStatements.add(
+                "CREATE USER \"{{name}}\" WITH PASSWORD '{{password}}'; GRANT ALL PRIVILEGES ON DATABASE \"postgres\" to \"{{name}}\";");
 
-        DatabaseRoleOptions roleToCreate = new DatabaseRoleOptions().dbName("postgres").creationStatements(creationStatements);
+        DatabaseRoleOptions roleToCreate = new DatabaseRoleOptions().dbName("postgres")
+                .creationStatements(creationStatements);
 
         DatabaseResponse response = vault.database().createOrUpdateRole("test-role", roleToCreate);
         TestCase.assertEquals(204, response.getRestResponse().getStatus());
@@ -54,11 +57,14 @@ public class AuthBackendDatabaseTests {
         final Vault vault = container.getRootVault();
 
         List<String> creationStatements = new ArrayList<>();
-        creationStatements.add("CREATE USER \"{{name}}\" WITH PASSWORD '{{password}}'; GRANT ALL PRIVILEGES ON DATABASE \"postgres\" to \"{{name}}\";");
+        creationStatements.add(
+                "CREATE USER \"{{name}}\" WITH PASSWORD '{{password}}'; GRANT ALL PRIVILEGES ON DATABASE \"postgres\" to \"{{name}}\";");
 
-        DatabaseRoleOptions roleToCreate = new DatabaseRoleOptions().dbName("postgres").creationStatements(creationStatements);
+        DatabaseRoleOptions roleToCreate = new DatabaseRoleOptions().dbName("postgres")
+                .creationStatements(creationStatements);
 
-        DatabaseResponse response = vault.database().createOrUpdateRole("delete-role", roleToCreate);
+        DatabaseResponse response = vault.database()
+                .createOrUpdateRole("delete-role", roleToCreate);
         TestCase.assertEquals(204, response.getRestResponse().getStatus());
 
         DatabaseResponse deletedRole = vault.database().deleteRole("delete-role");
@@ -87,9 +93,12 @@ public class AuthBackendDatabaseTests {
         final Vault vault = container.getRootVault();
 
         List<String> creationStatements = new ArrayList<>();
-        creationStatements.add("CREATE USER \"{{name}}\" WITH PASSWORD '{{password}}'; GRANT ALL PRIVILEGES ON DATABASE \"postgres\" to \"{{name}}\";");
+        creationStatements.add(
+                "CREATE USER \"{{name}}\" WITH PASSWORD '{{password}}'; GRANT ALL PRIVILEGES ON DATABASE \"postgres\" to \"{{name}}\";");
 
-        DatabaseResponse response = vault.database().createOrUpdateRole("new-role", new DatabaseRoleOptions().dbName("postgres").creationStatements(creationStatements));
+        DatabaseResponse response = vault.database().createOrUpdateRole("new-role",
+                new DatabaseRoleOptions().dbName("postgres")
+                        .creationStatements(creationStatements));
         TestCase.assertEquals(204, response.getRestResponse().getStatus());
 
         DatabaseResponse credsResponse = vault.database().creds("new-role");
@@ -100,8 +109,9 @@ public class AuthBackendDatabaseTests {
 
     private boolean compareRoleOptions(DatabaseRoleOptions expected, DatabaseRoleOptions actual) {
         return expected.getCreationStatements().size() == actual.getCreationStatements().size() &&
-               expected.getRenewStatements().size() == actual.getRenewStatements().size() &&
-               expected.getRevocationStatements().size() == actual.getRevocationStatements().size() &&
-               expected.getRollbackStatements().size() == actual.getRollbackStatements().size();
+                expected.getRenewStatements().size() == actual.getRenewStatements().size() &&
+                expected.getRevocationStatements().size() == actual.getRevocationStatements().size()
+                &&
+                expected.getRollbackStatements().size() == actual.getRollbackStatements().size();
     }
 }

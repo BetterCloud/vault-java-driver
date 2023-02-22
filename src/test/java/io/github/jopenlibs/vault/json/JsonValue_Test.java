@@ -36,106 +36,117 @@ import static org.mockito.Mockito.verify;
 @SuppressWarnings("PMD")
 public class JsonValue_Test {
 
-  @Test
-  public void writeTo() throws IOException {
-    JsonValue value = new JsonObject();
-    Writer writer = new StringWriter();
+    @Test
+    public void writeTo() throws IOException {
+        JsonValue value = new JsonObject();
+        Writer writer = new StringWriter();
 
-    value.writeTo(writer);
+        value.writeTo(writer);
 
-    assertEquals("{}", writer.toString());
-  }
+        assertEquals("{}", writer.toString());
+    }
 
-  @Test
-  public void writeTo_failsWithNullWriter() {
-    final JsonValue value = new JsonObject();
+    @Test
+    public void writeTo_failsWithNullWriter() {
+        final JsonValue value = new JsonObject();
 
-    TestUtil.assertException(NullPointerException.class, "writer is null", (TestUtil.RunnableEx) () ->
-            value.writeTo(null, WriterConfig.MINIMAL));
-  }
+        TestUtil.assertException(NullPointerException.class, "writer is null",
+                (TestUtil.RunnableEx) () ->
+                        value.writeTo(null, WriterConfig.MINIMAL));
+    }
 
-  @Test
-  public void writeTo_failsWithNullConfig() {
-    final JsonValue value = new JsonObject();
+    @Test
+    public void writeTo_failsWithNullConfig() {
+        final JsonValue value = new JsonObject();
 
-    TestUtil.assertException(NullPointerException.class, "config is null", (TestUtil.RunnableEx) () ->
-            value.writeTo(new StringWriter(), null));
-  }
+        TestUtil.assertException(NullPointerException.class, "config is null",
+                (TestUtil.RunnableEx) () ->
+                        value.writeTo(new StringWriter(), null));
+    }
 
-  @Test
-  public void toString_failsWithNullConfig() {
-    final JsonValue value = new JsonObject();
+    @Test
+    public void toString_failsWithNullConfig() {
+        final JsonValue value = new JsonObject();
 
-    TestUtil.assertException(NullPointerException.class, "config is null", (TestUtil.RunnableEx) () ->
-            value.toString(null));
-  }
+        TestUtil.assertException(NullPointerException.class, "config is null",
+                (TestUtil.RunnableEx) () ->
+                        value.toString(null));
+    }
 
-  @Test
-  public void writeTo_doesNotCloseWriter() throws IOException {
-    JsonValue value = new JsonObject();
-    Writer writer = spy(new StringWriter());
+    @Test
+    public void writeTo_doesNotCloseWriter() throws IOException {
+        JsonValue value = new JsonObject();
+        Writer writer = spy(new StringWriter());
 
-    value.writeTo(writer);
+        value.writeTo(writer);
 
-    verify(writer, never()).close();
-  }
+        verify(writer, never()).close();
+    }
 
-  @Test
-  public void asObject_failsOnIncompatibleType() {
-    TestUtil.assertException(UnsupportedOperationException.class, "Not an object: null", (Runnable) Json.NULL::asObject);
-  }
+    @Test
+    public void asObject_failsOnIncompatibleType() {
+        TestUtil.assertException(UnsupportedOperationException.class, "Not an object: null",
+                (Runnable) Json.NULL::asObject);
+    }
 
-  @Test
-  public void asArray_failsOnIncompatibleType() {
-    TestUtil.assertException(UnsupportedOperationException.class, "Not an array: null", (Runnable) Json.NULL::asArray);
-  }
+    @Test
+    public void asArray_failsOnIncompatibleType() {
+        TestUtil.assertException(UnsupportedOperationException.class, "Not an array: null",
+                (Runnable) Json.NULL::asArray);
+    }
 
-  @Test
-  public void asString_failsOnIncompatibleType() {
-    TestUtil.assertException(UnsupportedOperationException.class, "Not a string: null", (Runnable) Json.NULL::asString);
-  }
+    @Test
+    public void asString_failsOnIncompatibleType() {
+        TestUtil.assertException(UnsupportedOperationException.class, "Not a string: null",
+                (Runnable) Json.NULL::asString);
+    }
 
-  @Test
-  public void asInt_failsOnIncompatibleType() {
-    TestUtil.assertException(UnsupportedOperationException.class, "Not a number: null", (Runnable) Json.NULL::asInt);
-  }
+    @Test
+    public void asInt_failsOnIncompatibleType() {
+        TestUtil.assertException(UnsupportedOperationException.class, "Not a number: null",
+                (Runnable) Json.NULL::asInt);
+    }
 
-  @Test
-  public void asLong_failsOnIncompatibleType() {
-    TestUtil.assertException(UnsupportedOperationException.class, "Not a number: null", (Runnable) Json.NULL::asLong);
-  }
+    @Test
+    public void asLong_failsOnIncompatibleType() {
+        TestUtil.assertException(UnsupportedOperationException.class, "Not a number: null",
+                (Runnable) Json.NULL::asLong);
+    }
 
-  @Test
-  public void asFloat_failsOnIncompatibleType() {
-    TestUtil.assertException(UnsupportedOperationException.class, "Not a number: null", (Runnable) Json.NULL::asFloat);
-  }
+    @Test
+    public void asFloat_failsOnIncompatibleType() {
+        TestUtil.assertException(UnsupportedOperationException.class, "Not a number: null",
+                (Runnable) Json.NULL::asFloat);
+    }
 
-  @Test
-  public void asDouble_failsOnIncompatibleType() {
-    TestUtil.assertException(UnsupportedOperationException.class, "Not a number: null", (Runnable) Json.NULL::asDouble);
-  }
+    @Test
+    public void asDouble_failsOnIncompatibleType() {
+        TestUtil.assertException(UnsupportedOperationException.class, "Not a number: null",
+                (Runnable) Json.NULL::asDouble);
+    }
 
-  @Test
-  public void asBoolean_failsOnIncompatibleType() {
-    TestUtil.assertException(UnsupportedOperationException.class, "Not a boolean: null", (Runnable) Json.NULL::asBoolean);
-  }
+    @Test
+    public void asBoolean_failsOnIncompatibleType() {
+        TestUtil.assertException(UnsupportedOperationException.class, "Not a boolean: null",
+                (Runnable) Json.NULL::asBoolean);
+    }
 
-  @Test
-  public void isXxx_returnsFalseForIncompatibleType() {
-    JsonValue jsonValue = new JsonValue() {
-      @Override
-      void write(JsonWriter writer) {
-      }
-    };
+    @Test
+    public void isXxx_returnsFalseForIncompatibleType() {
+        JsonValue jsonValue = new JsonValue() {
+            @Override
+            void write(JsonWriter writer) {
+            }
+        };
 
-    assertFalse(jsonValue.isArray());
-    assertFalse(jsonValue.isObject());
-    assertFalse(jsonValue.isString());
-    assertFalse(jsonValue.isNumber());
-    assertFalse(jsonValue.isBoolean());
-    assertFalse(jsonValue.isNull());
-    assertFalse(jsonValue.isTrue());
-    assertFalse(jsonValue.isFalse());
-  }
+        assertFalse(jsonValue.isArray());
+        assertFalse(jsonValue.isObject());
+        assertFalse(jsonValue.isString());
+        assertFalse(jsonValue.isNumber());
+        assertFalse(jsonValue.isBoolean());
+        assertFalse(jsonValue.isNull());
+        assertFalse(jsonValue.isTrue());
+        assertFalse(jsonValue.isFalse());
+    }
 
 }

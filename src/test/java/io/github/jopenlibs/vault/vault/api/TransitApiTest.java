@@ -20,9 +20,9 @@ public class TransitApiTest {
     private static final String[] PLAIN_DATA = {"MU45MjIyMTM=", "MU45MjIxMTM=", "MA=="};
 
     private static final String[] CIPHER_DATA = {
-        "1jFhRYWHiddSKgEFyVRpX8ieX7UU+748NBw",
-        "1jFhRYWHiddSKgEFyVRpX8ieX7UU+748NBw",
-        "HKecXE3hnGBoAxrfgoD5U0yAvji7b5X6V1fP"
+            "1jFhRYWHiddSKgEFyVRpX8ieX7UU+748NBw",
+            "1jFhRYWHiddSKgEFyVRpX8ieX7UU+748NBw",
+            "HKecXE3hnGBoAxrfgoD5U0yAvji7b5X6V1fP"
     };
 
     private Server server;
@@ -134,7 +134,7 @@ public class TransitApiTest {
                 .add("batch_input", batchRequest);
         final JsonObject expectedResponse = new JsonObject()
                 .add("data", new JsonObject()
-                    .add("batch_results", batchResponse));
+                        .add("batch_results", batchResponse));
 
         start(expectedResponse.toString());
 

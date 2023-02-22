@@ -6,9 +6,10 @@ import java.io.IOException;
 import org.eclipse.jetty.server.Request;
 
 /**
- * <p>This class is used to mock out a Vault server in unit tests involving retry logic.  As it extends Jetty's
- * <code>AbstractHandler</code>, it can be passed to an embedded Jetty server and respond to actual (albeit localhost)
- * HTTP requests.</p>
+ * <p>This class is used to mock out a Vault server in unit tests involving retry logic.  As it
+ * extends Jetty's
+ * <code>AbstractHandler</code>, it can be passed to an embedded Jetty server and respond to actual
+ * (albeit localhost) HTTP requests.</p>
  *
  * <p>The basic usage pattern is as follows:</p>
  *
@@ -47,7 +48,8 @@ public class RetriesMockVault extends MockVault {
     private final String mockResponse;
     private int failureCount;
 
-    public RetriesMockVault(final int failureCount, final int mockStatus, final String mockResponse) {
+    public RetriesMockVault(final int failureCount, final int mockStatus,
+            final String mockResponse) {
         this.failureCount = failureCount;
         this.mockStatus = mockStatus;
         this.mockResponse = mockResponse;
@@ -67,7 +69,8 @@ public class RetriesMockVault extends MockVault {
             response.setStatus(500);
             System.out.println("RetriesMockVault is sending an HTTP 500 code, to cause a retry...");
         } else {
-            System.out.println("RetriesMockVault is sending an HTTP " + mockStatus + " code, with expected success payload...");
+            System.out.println("RetriesMockVault is sending an HTTP " + mockStatus
+                    + " code, with expected success payload...");
             response.setStatus(mockStatus);
             if (mockResponse != null) {
                 response.getWriter().println(mockResponse);

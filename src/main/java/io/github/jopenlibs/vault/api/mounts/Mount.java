@@ -3,8 +3,8 @@ package io.github.jopenlibs.vault.api.mounts;
 import java.io.Serializable;
 
 /**
- * <p>A container for options returned by mounts endpoints on the Secret Engine backend. This class is
- * meant for use with a builder pattern style.  Example usage:</p>
+ * <p>A container for options returned by mounts endpoints on the Secret Engine backend. This class
+ * is meant for use with a builder pattern style.  Example usage:</p>
  *
  * <blockquote>
  * <pre>{@code

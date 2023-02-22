@@ -21,9 +21,10 @@ import static org.junit.Assert.assertNotSame;
 /**
  * <p>Integration tests for the TLS Certificate auth backend.</p>
  *
- * <p>Note that {@link VaultContainer#getVault()} and the other convenience builders in that class construct
- * {@link Vault} instances that are configured for basic SSL only.  So in order to test client auth, test methods here
- * must manually construct <code>Vault</code> instances themselves.</p>
+ * <p>Note that {@link VaultContainer#getVault()} and the other convenience builders in that class
+ * construct {@link Vault} instances that are configured for basic SSL only.  So in order to test
+ * client auth, test methods here must manually construct <code>Vault</code> instances
+ * themselves.</p>
  */
 public class AuthBackendCertTests {
 
@@ -49,12 +50,15 @@ public class AuthBackendCertTests {
                         .readTimeout(30)
                         .sslConfig(
                                 new SslConfig()
-                                        .keyStore((KeyStore) clientCertAndKey.get("clientKeystore"), TestConstants.PASSWORD)
-                                        .trustStore((KeyStore) clientCertAndKey.get("clientTrustStore"))
+                                        .keyStore((KeyStore) clientCertAndKey.get("clientKeystore"),
+                                                TestConstants.PASSWORD)
+                                        .trustStore(
+                                                (KeyStore) clientCertAndKey.get("clientTrustStore"))
                                         .build()
                         )
                         .build();
-        final Vault vault = container.getVault(config, VaultContainer.MAX_RETRIES, VaultContainer.RETRY_MILLIS);
+        final Vault vault = container.getVault(config, VaultContainer.MAX_RETRIES,
+                VaultContainer.RETRY_MILLIS);
 
         final String token = vault.auth().loginByCert().getAuthClientToken();
 
@@ -73,11 +77,13 @@ public class AuthBackendCertTests {
                                 new SslConfig()
                                         .pemFile(new File(VaultContainer.CERT_PEMFILE))
                                         .clientPemUTF8(cert)
-                                        .clientKeyPemUTF8((String) clientCertAndKey.get("privateKey"))
+                                        .clientKeyPemUTF8(
+                                                (String) clientCertAndKey.get("privateKey"))
                                         .build()
                         )
                         .build();
-        final Vault vault = container.getVault(config, VaultContainer.MAX_RETRIES, VaultContainer.RETRY_MILLIS);
+        final Vault vault = container.getVault(config, VaultContainer.MAX_RETRIES,
+                VaultContainer.RETRY_MILLIS);
 
         final String token = vault.auth().loginByCert().getAuthClientToken();
 

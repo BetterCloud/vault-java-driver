@@ -98,7 +98,8 @@ public class AuthBackendPkiTests {
         Thread.sleep(3000);
 
         // Issue cert
-        final PkiResponse issueResponse = vault.pki().issue("testRole", "test.myvault.com", null, null, "1h", CredentialFormat.PEM);
+        final PkiResponse issueResponse = vault.pki()
+                .issue("testRole", "test.myvault.com", null, null, "1h", CredentialFormat.PEM);
         TestCase.assertNotNull(issueResponse.getCredential().getCertificate());
         TestCase.assertNotNull(issueResponse.getCredential().getPrivateKey());
         TestCase.assertNotNull(issueResponse.getCredential().getSerialNumber());
@@ -107,7 +108,8 @@ public class AuthBackendPkiTests {
     }
 
     @Test
-    public void testIssueCredentialWithCsr() throws VaultException, InterruptedException, NoSuchAlgorithmException {
+    public void testIssueCredentialWithCsr()
+            throws VaultException, InterruptedException, NoSuchAlgorithmException {
 
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
@@ -135,7 +137,8 @@ public class AuthBackendPkiTests {
         Thread.sleep(3000);
 
         // Issue cert
-        final PkiResponse issueResponse = vault.pki().issue("testRole", "test.myvault.com", null, null, "1h", CredentialFormat.PEM, csr);
+        final PkiResponse issueResponse = vault.pki()
+                .issue("testRole", "test.myvault.com", null, null, "1h", CredentialFormat.PEM, csr);
         TestCase.assertNotNull(issueResponse.getCredential().getCertificate());
         TestCase.assertNull(issueResponse.getCredential().getPrivateKey());
         TestCase.assertNotNull(issueResponse.getCredential().getSerialNumber());
@@ -158,7 +161,8 @@ public class AuthBackendPkiTests {
         TestCase.assertEquals(204, createRoleResponse.getRestResponse().getStatus());
         Thread.sleep(3000);
         // Issue cert
-        final PkiResponse issueResponse = vault.pki().issue("testRole", "test.myvault.com", null, null, "1h", CredentialFormat.PEM);
+        final PkiResponse issueResponse = vault.pki()
+                .issue("testRole", "test.myvault.com", null, null, "1h", CredentialFormat.PEM);
         TestCase.assertNotNull(issueResponse.getCredential().getSerialNumber());
         vault.pki().revoke(issueResponse.getCredential().getSerialNumber());
     }
@@ -173,33 +177,62 @@ public class AuthBackendPkiTests {
     }
 
     private boolean compareRoleOptions(final RoleOptions expected, final RoleOptions actual) {
-        if (expected.getAllowAnyName() != null && !expected.getAllowAnyName().equals(actual.getAllowAnyName()))
+        if (expected.getAllowAnyName() != null && !expected.getAllowAnyName()
+                .equals(actual.getAllowAnyName())) {
             return false;
-        if (expected.getAllowBareDomains() != null && !expected.getAllowBareDomains().equals(actual.getAllowBareDomains()))
+        }
+        if (expected.getAllowBareDomains() != null && !expected.getAllowBareDomains()
+                .equals(actual.getAllowBareDomains())) {
             return false;
+        }
         if (expected.getAllowedDomains() != null) {
             if (!expected.getAllowedDomains().containsAll(actual.getAllowedDomains())
                     || !actual.getAllowedDomains().containsAll(expected.getAllowedDomains())) {
                 return false;
             }
         }
-        if (expected.getAllowIpSans() != null && !expected.getAllowIpSans().equals(actual.getAllowIpSans()))
+        if (expected.getAllowIpSans() != null && !expected.getAllowIpSans()
+                .equals(actual.getAllowIpSans())) {
             return false;
-        if (expected.getAllowLocalhost() != null && !expected.getAllowLocalhost().equals(actual.getAllowLocalhost()))
+        }
+        if (expected.getAllowLocalhost() != null && !expected.getAllowLocalhost()
+                .equals(actual.getAllowLocalhost())) {
             return false;
-        if (expected.getAllowSubdomains() != null && !expected.getAllowSubdomains().equals(actual.getAllowSubdomains()))
+        }
+        if (expected.getAllowSubdomains() != null && !expected.getAllowSubdomains()
+                .equals(actual.getAllowSubdomains())) {
             return false;
-        if (expected.getClientFlag() != null && !expected.getClientFlag().equals(actual.getClientFlag())) return false;
-        if (expected.getCodeSigningFlag() != null && !expected.getCodeSigningFlag().equals(actual.getCodeSigningFlag()))
+        }
+        if (expected.getClientFlag() != null && !expected.getClientFlag()
+                .equals(actual.getClientFlag())) {
             return false;
-        if (expected.getEmailProtectionFlag() != null && !expected.getEmailProtectionFlag().equals(actual.getEmailProtectionFlag()))
+        }
+        if (expected.getCodeSigningFlag() != null && !expected.getCodeSigningFlag()
+                .equals(actual.getCodeSigningFlag())) {
             return false;
-        if (expected.getKeyBits() != null && !expected.getKeyBits().equals(actual.getKeyBits())) return false;
-        if (expected.getKeyType() != null && !expected.getKeyType().equals(actual.getKeyType())) return false;
-        if (expected.getMaxTtl() != null && !expected.getMaxTtl().equals(actual.getMaxTtl())) return false;
-        if (expected.getServerFlag() != null && !expected.getServerFlag().equals(actual.getServerFlag())) return false;
-        if (expected.getTtl() != null && !expected.getTtl().equals(actual.getTtl())) return false;
-        return expected.getUseCsrCommonName() == null || expected.getUseCsrCommonName().equals(actual.getUseCsrCommonName());
+        }
+        if (expected.getEmailProtectionFlag() != null && !expected.getEmailProtectionFlag()
+                .equals(actual.getEmailProtectionFlag())) {
+            return false;
+        }
+        if (expected.getKeyBits() != null && !expected.getKeyBits().equals(actual.getKeyBits())) {
+            return false;
+        }
+        if (expected.getKeyType() != null && !expected.getKeyType().equals(actual.getKeyType())) {
+            return false;
+        }
+        if (expected.getMaxTtl() != null && !expected.getMaxTtl().equals(actual.getMaxTtl())) {
+            return false;
+        }
+        if (expected.getServerFlag() != null && !expected.getServerFlag()
+                .equals(actual.getServerFlag())) {
+            return false;
+        }
+        if (expected.getTtl() != null && !expected.getTtl().equals(actual.getTtl())) {
+            return false;
+        }
+        return expected.getUseCsrCommonName() == null || expected.getUseCsrCommonName()
+                .equals(actual.getUseCsrCommonName());
     }
 
 }

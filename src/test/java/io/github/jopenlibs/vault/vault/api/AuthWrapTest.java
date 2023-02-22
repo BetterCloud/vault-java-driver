@@ -14,6 +14,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class AuthWrapTest {
+
     private static final JsonObject RESPONSE_AUTH_WRAP = new JsonObject()
             .add("renewable", false)
             .add("wrap_info", new JsonObject()
@@ -40,7 +41,8 @@ public class AuthWrapTest {
 
     @Test
     public void check_wrap_request_response() throws Exception {
-        VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999").token("wrappedToken").build();
+        VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999")
+                .token("wrappedToken").build();
         Vault vault = new Vault(vaultConfig);
 
         WrapResponse response = vault.auth().wrap(
