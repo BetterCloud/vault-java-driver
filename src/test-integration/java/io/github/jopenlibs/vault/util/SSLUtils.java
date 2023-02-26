@@ -1,6 +1,5 @@
-package io.github.jopenlibs.vault.v1_1_3.util;
+package io.github.jopenlibs.vault.util;
 
-import io.github.jopenlibs.vault.v1_1_3.api.AuthBackendCertTests;
 import java.io.ByteArrayOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -53,8 +52,7 @@ import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 
 /**
  * Static utility methods for generating client-side SSL certs and keys, for tests that use Vault's
- * TLS Certificate auth backend.  Right now, all such code is isolated to
- * {@link AuthBackendCertTests}.
+ * TLS Certificate auth backend.  Right now, all such code is isolated to `AuthBackendCertTests`.
  */
 public class SSLUtils implements TestConstants {
 
@@ -77,7 +75,7 @@ public class SSLUtils implements TestConstants {
      */
     public static HashMap<String, Object> createClientCertAndKey() throws IOException {
 
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        Security.addProvider(new BouncyCastleProvider());
         final X509CertificateHolder certificateHolder = getX509CertificateHolder();
         final X509Certificate vaultCertificate = getCertificate(certificateHolder);
 

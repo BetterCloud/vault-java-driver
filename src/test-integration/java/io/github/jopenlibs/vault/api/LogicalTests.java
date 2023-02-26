@@ -1,11 +1,11 @@
-package io.github.jopenlibs.vault.v1_11_4.api;
+package io.github.jopenlibs.vault.api;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultConfig;
 import io.github.jopenlibs.vault.VaultException;
 import io.github.jopenlibs.vault.response.AuthResponse;
 import io.github.jopenlibs.vault.response.LogicalResponse;
-import io.github.jopenlibs.vault.v1_11_4.util.VaultContainer;
+import io.github.jopenlibs.vault.util.VaultContainer;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;

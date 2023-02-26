@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.v1_11_4.util;
+package io.github.jopenlibs.vault.util;
 
 import com.github.dockerjava.api.model.Capability;
 import io.github.jopenlibs.vault.Vault;

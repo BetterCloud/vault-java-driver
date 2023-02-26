@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.v1_1_3.util;
+package io.github.jopenlibs.vault.util;
 
 import java.io.File;
 import org.testcontainers.containers.Network;

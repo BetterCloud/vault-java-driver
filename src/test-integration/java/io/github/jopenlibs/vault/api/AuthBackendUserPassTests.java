@@ -1,8 +1,9 @@
-package io.github.jopenlibs.vault.v1_1_3.api;
+package io.github.jopenlibs.vault.api;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultException;
-import io.github.jopenlibs.vault.v1_1_3.util.VaultContainer;
+import io.github.jopenlibs.vault.response.AuthResponse;
+import io.github.jopenlibs.vault.util.VaultContainer;
 import java.io.IOException;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -12,9 +13,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
 /**
- * Integration tests for the AppId auth backend.
+ * Integration tests for the Username/Password auth backend.
  */
-public class AuthBackendAppIdTests {
+public class AuthBackendUserPassTests {
 
     @ClassRule
     public static final VaultContainer container = new VaultContainer();
@@ -22,20 +23,18 @@ public class AuthBackendAppIdTests {
     @BeforeClass
     public static void setupClass() throws IOException, InterruptedException {
         container.initAndUnsealVault();
-        container.setupBackendAppId();
+        container.setupBackendUserPass();
     }
 
     /**
-     * Test Authentication with app-id auth backend
+     * Test Authentication with new userpass auth backend
      */
     @Test
-    public void testLoginByAuthId() throws VaultException {
+    public void testLoginByUserPass() throws VaultException {
         final Vault vault = container.getVault();
-        final String path = "app-id/login";
-        @SuppressWarnings("deprecation") // used for testing
-        final String token = vault.auth()
-                .loginByAppID(path, VaultContainer.APP_ID, VaultContainer.USER_ID)
-                .getAuthClientToken();
+        final AuthResponse response = vault.auth()
+                .loginByUserPass(VaultContainer.USER_ID, VaultContainer.PASSWORD);
+        final String token = response.getAuthClientToken();
 
         assertNotNull(token);
         assertNotSame("", token.trim());

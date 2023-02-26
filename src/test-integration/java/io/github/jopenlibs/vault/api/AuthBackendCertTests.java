@@ -1,12 +1,12 @@
-package io.github.jopenlibs.vault.v1_11_4.api;
+package io.github.jopenlibs.vault.api;
 
 import io.github.jopenlibs.vault.SslConfig;
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultConfig;
 import io.github.jopenlibs.vault.VaultException;
-import io.github.jopenlibs.vault.v1_11_4.util.SSLUtils;
-import io.github.jopenlibs.vault.v1_11_4.util.TestConstants;
-import io.github.jopenlibs.vault.v1_11_4.util.VaultContainer;
+import io.github.jopenlibs.vault.util.SSLUtils;
+import io.github.jopenlibs.vault.util.TestConstants;
+import io.github.jopenlibs.vault.util.VaultContainer;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyStore;

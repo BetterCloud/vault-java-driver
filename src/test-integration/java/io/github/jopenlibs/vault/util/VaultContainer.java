@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.v1_1_3.util;
+package io.github.jopenlibs.vault.util;
 
 import com.github.dockerjava.api.model.Capability;
 import io.github.jopenlibs.vault.SslConfig;
@@ -10,10 +10,10 @@ import io.github.jopenlibs.vault.json.JsonObject;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
-import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
@@ -29,10 +29,9 @@ import static org.junit.Assume.assumeTrue;
 public class VaultContainer extends GenericContainer<VaultContainer> implements TestConstants,
         TestLifecycleAware {
 
+    public static final String VAULT_DEFAULT_IMAGE = "vault";
+    public static final String VAULT_DEFAULT_TAG = "latest";
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultContainer.class);
-
-    public static final String DEFAULT_IMAGE_AND_TAG = "vault:1.1.3";
-
     private String rootToken;
     private String unsealKey;
 
@@ -59,7 +58,7 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
                 .withCommand("/bin/sh " + CONTAINER_STARTUP_SCRIPT)
                 .withLogConsumer(new Slf4jLogConsumer(LOGGER))
                 .waitingFor(
-                        // All of the tests in this integration test suite use HTTPS connections.  However, Vault
+                        // All of the tests in this integration test suite use HTTPS connections. However, Vault
                         // is configured to run a plain HTTP listener on port 8280, purely for purposes of detecting
                         // when the Docker container is fully ready.
                         //
@@ -76,7 +75,8 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
     }
 
     public VaultContainer() {
-        this(DEFAULT_IMAGE_AND_TAG);
+        this(VAULT_DEFAULT_IMAGE + ":" + Optional.ofNullable(
+                System.getenv("VAULT_VERSION")).orElse(VAULT_DEFAULT_TAG));
     }
 
     /**
@@ -90,12 +90,14 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
      * the token in a member field so it will be available to other methods.</p>
      */
     public void initAndUnsealVault() throws IOException, InterruptedException {
-
         // Initialize the Vault server
-        final Container.ExecResult initResult = runCommand("vault", "operator", "init",
-                "-ca-cert=" +
-                        CONTAINER_CERT_PEMFILE, "-key-shares=1", "-key-threshold=1",
-                "-format=json");
+        final ExecResult initResult = runCommand("vault", "operator", "init",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+                "-key-shares=1",
+                "-key-threshold=1",
+                "-format=json"
+        );
+
         final String stdout = initResult.getStdout().replaceAll("\\r?\\n", "");
         JsonObject initJson = Json.parse(stdout).asObject();
         this.unsealKey = initJson.get("unseal_keys_b64").asArray().get(0).asString();
@@ -115,12 +117,18 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
         runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
 
         runCommand("vault", "auth", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "app-id");
-        runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+
+        runCommand("vault", "write",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
                 "auth/app-id/map/app-id/" + APP_ID,
-                "display_name=" + APP_ID);
-        runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+                "display_name=" + APP_ID
+        );
+
+        runCommand("vault", "write",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
                 "auth/app-id/map/user-id/" + USER_ID,
-                "value=" + APP_ID);
+                "value=" + APP_ID
+        );
     }
 
     /**
@@ -131,9 +139,12 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
         runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
 
         runCommand("vault", "auth", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "userpass");
-        runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+
+        runCommand("vault", "write",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
                 "auth/userpass/users/" + USER_ID,
-                "password=" + PASSWORD);
+                "password=" + PASSWORD
+        );
     }
 
     /**
@@ -189,16 +200,30 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
         runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE,
                 "-path=other-pki", "pki");
 
-        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE,
-                "-path=pki-custom-path-1", "pki");
-        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE,
-                "-path=pki-custom-path-2", "pki");
-        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE,
-                "-path=pki-custom-path-3", "pki");
+        runCommand("vault", "secrets", "enable",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+                "-path=pki-custom-path-1",
+                "pki"
+        );
 
-        runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+        runCommand("vault", "secrets", "enable",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+                "-path=pki-custom-path-2",
+                "pki"
+        );
+
+        runCommand("vault", "secrets", "enable",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+                "-path=pki-custom-path-3",
+                "pki"
+        );
+
+        runCommand("vault", "write",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
                 "pki/root/generate/internal",
-                "common_name=myvault.com", "ttl=99h");
+                "common_name=myvault.com",
+                "ttl=99h"
+        );
     }
 
     /**
@@ -210,9 +235,15 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
         runCommand("sh", "-c",
                 "cat <<EOL >> " + CONTAINER_CLIENT_CERT_PEMFILE + "\n" + cert + "\nEOL");
         runCommand("vault", "auth", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "cert");
-        runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "auth/cert/certs/web",
+
+        runCommand("vault", "write",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+                "auth/cert/certs/web",
                 "display_name=web",
-                "policies=web,prod", "certificate=@" + CONTAINER_CLIENT_CERT_PEMFILE, "ttl=3600");
+                "policies=web,prod",
+                "certificate=@" + CONTAINER_CLIENT_CERT_PEMFILE,
+                "ttl=3600"
+        );
     }
 
     /**
@@ -222,26 +253,42 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
         runCommand("vault", "login", "-ca-cert=" + CONTAINER_CERT_PEMFILE, rootToken);
 
         runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE, "database");
-        runCommand("vault", "write", "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+        runCommand("vault", "write",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
                 "database/config/postgres",
                 "plugin_name=postgresql-database-plugin",
                 "allowed_roles=*",
                 "connection_url=postgresql://{{username}}:{{password}}@" + databaseIp
                         + ":5432/postgres?sslmode=disable",
                 "password=" + POSTGRES_PASSWORD,
-                "username=" + POSTGRES_USER);
+                "username=" + POSTGRES_USER
+        );
     }
 
     public void setEngineVersions() throws IOException, InterruptedException {
         // Upgrade default secrets/ Engine to V2, set a new V1 secrets path at "kv-v1/"
-        runCommand("vault", "kv", "enable-versioning", "-ca-cert=" + CONTAINER_CERT_PEMFILE,
-                "secret/");
-        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE,
-                "-path=secret", "-version=2", "kv");
-        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE,
-                "-path=kv-v1", "-version=1", "kv");
-        runCommand("vault", "secrets", "enable", "-ca-cert=" + CONTAINER_CERT_PEMFILE,
-                "-path=kv-v1-Upgrade-Test", "-version=1", "kv");
+        runCommand("vault", "kv", "enable-versioning",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+                "secret/"
+        );
+        runCommand("vault", "secrets", "enable",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+                "-path=secret",
+                "-version=2",
+                "kv"
+        );
+        runCommand("vault", "secrets", "enable",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+                "-path=kv-v1",
+                "-version=1",
+                "kv"
+        );
+        runCommand("vault", "secrets", "enable",
+                "-ca-cert=" + CONTAINER_CERT_PEMFILE,
+                "-path=kv-v1-Upgrade-Test",
+                "-version=1",
+                "kv"
+        );
     }
 
     /**
@@ -364,10 +411,10 @@ public class VaultContainer extends GenericContainer<VaultContainer> implements 
      * @param command The command to run, broken up by whitespace (e.g. "vault mount -path=pki pki"
      * becomes "vault", "mount", "-path=pki", "pki")
      */
-    private Container.ExecResult runCommand(final String... command)
+    private ExecResult runCommand(final String... command)
             throws IOException, InterruptedException {
         LOGGER.info("Command: {}", String.join(" ", command));
-        final Container.ExecResult result = execInContainer(command);
+        final ExecResult result = execInContainer(command);
         final String out = result.getStdout();
         final String err = result.getStderr();
         if (out != null && !out.isEmpty()) {

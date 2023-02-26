@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.v1_1_3.api;
+package io.github.jopenlibs.vault.api;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultException;
@@ -6,8 +6,8 @@ import io.github.jopenlibs.vault.api.pki.CredentialFormat;
 import io.github.jopenlibs.vault.api.pki.RoleOptions;
 import io.github.jopenlibs.vault.response.PkiResponse;
 import io.github.jopenlibs.vault.rest.RestResponse;
-import io.github.jopenlibs.vault.v1_1_3.util.SSLUtils;
-import io.github.jopenlibs.vault.v1_1_3.util.VaultContainer;
+import io.github.jopenlibs.vault.util.SSLUtils;
+import io.github.jopenlibs.vault.util.VaultContainer;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -88,7 +88,7 @@ public class AuthBackendPkiTests {
         // Create a role
         final PkiResponse createRoleResponse = vault.pki().createOrUpdateRole("testRole",
                 new RoleOptions()
-                        .allowedDomains(new ArrayList<String>() {{
+                        .allowedDomains(new ArrayList<>() {{
                             add("myvault.com");
                         }})
                         .allowSubdomains(true)
@@ -127,7 +127,7 @@ public class AuthBackendPkiTests {
         // Create a role
         final PkiResponse createRoleResponse = vault.pki().createOrUpdateRole("testRole",
                 new RoleOptions()
-                        .allowedDomains(new ArrayList<String>() {{
+                        .allowedDomains(new ArrayList<>() {{
                             add("myvault.com");
                         }})
                         .allowSubdomains(true)
@@ -146,14 +146,13 @@ public class AuthBackendPkiTests {
     }
 
     @Test
-    public void testRevocation()
-            throws VaultException, InterruptedException, NoSuchAlgorithmException {
+    public void testRevocation() throws VaultException, InterruptedException {
         final Vault vault = container.getRootVault();
 
         // Create a role
         final PkiResponse createRoleResponse = vault.pki().createOrUpdateRole("testRole",
                 new RoleOptions()
-                        .allowedDomains(new ArrayList<String>() {{
+                        .allowedDomains(new ArrayList<>() {{
                             add("myvault.com");
                         }})
                         .allowSubdomains(true)
