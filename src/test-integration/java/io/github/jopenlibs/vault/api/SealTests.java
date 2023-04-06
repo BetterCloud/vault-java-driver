@@ -32,7 +32,7 @@ public class SealTests {
     public void testSealStatus_returnsFalse_fromInitialUnsealedState() throws VaultException {
         // Due to the "setupClass()" static method, the Vault instance should be in an unsealed state
         // at the start of this test suite.
-        final SealResponse response = container.getVault().seal().sealStatus();
+        final SealResponse response = container.getVault().sys().seal().sealStatus();
 
         assertFalse(response.getSealed());
         assertEquals(1, response.getNumberOfShares().longValue());
@@ -43,13 +43,13 @@ public class SealTests {
     @Test
     public void testSealAndUnseal_togglesAndRestoresUnsealedState() throws VaultException {
         // Seal Vault and verify its status
-        container.getRootVault().seal().seal();
-        final SealResponse sealResponse = container.getRootVault().seal().sealStatus();
+        container.getRootVault().sys().seal().seal();
+        final SealResponse sealResponse = container.getRootVault().sys().seal().sealStatus();
         assertTrue(sealResponse.getSealed());
 
         // Unseal Vault again, and verify its status
-        container.getRootVault().seal().unseal(unsealKey);
-        final SealResponse unsealResponse = container.getRootVault().seal().sealStatus();
+        container.getRootVault().sys().seal().unseal(unsealKey);
+        final SealResponse unsealResponse = container.getRootVault().sys().seal().sealStatus();
         assertFalse(unsealResponse.getSealed());
     }
 

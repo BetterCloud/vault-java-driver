@@ -2,11 +2,11 @@ package io.github.jopenlibs.vault.api;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultException;
-import io.github.jopenlibs.vault.api.mounts.Mount;
-import io.github.jopenlibs.vault.api.mounts.MountConfig;
-import io.github.jopenlibs.vault.api.mounts.MountPayload;
-import io.github.jopenlibs.vault.api.mounts.MountType;
-import io.github.jopenlibs.vault.api.mounts.TimeToLive;
+import io.github.jopenlibs.vault.api.sys.mounts.Mount;
+import io.github.jopenlibs.vault.api.sys.mounts.MountConfig;
+import io.github.jopenlibs.vault.api.sys.mounts.MountPayload;
+import io.github.jopenlibs.vault.api.sys.mounts.MountType;
+import io.github.jopenlibs.vault.api.sys.mounts.TimeToLive;
 import io.github.jopenlibs.vault.response.MountResponse;
 import io.github.jopenlibs.vault.util.VaultContainer;
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class MountsTests {
     public void testList() throws VaultException {
         final Vault vault = container.getRootVault();
 
-        final MountResponse response = vault.mounts().list();
+        final MountResponse response = vault.sys().mounts().list();
         final Map<String, Mount> mounts = response.getMounts();
 
         assertTrue(mounts.containsKey("pki-custom-path-1/"));
@@ -60,7 +60,7 @@ public class MountsTests {
                 .maxLeaseTtl(TimeToLive.of(12, TimeUnit.HOURS))
                 .description("description for pki engine");
 
-        final MountResponse response = vault.mounts()
+        final MountResponse response = vault.sys().mounts()
                 .enable("pki-itest-path-1", MountType.PKI, payload);
 
         TestCase.assertEquals(204, response.getRestResponse().getStatus());
@@ -78,7 +78,7 @@ public class MountsTests {
                 .maxLeaseTtl(TimeToLive.of(168, TimeUnit.HOURS))
                 .description("description for pki engine");
 
-        vault.mounts().enable("pki-custom-path-1", MountType.PKI, payload);
+        vault.sys().mounts().enable("pki-custom-path-1", MountType.PKI, payload);
     }
 
     @Test
@@ -93,7 +93,7 @@ public class MountsTests {
                 .maxLeaseTtl(TimeToLive.of(30, TimeUnit.MINUTES))
                 .description("description for pki engine");
 
-        vault.mounts().enable("pki-itest-path-2", null, payload);
+        vault.sys().mounts().enable("pki-itest-path-2", null, payload);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class MountsTests {
         final MountPayload payload = new MountPayload()
                 .defaultLeaseTtl(TimeToLive.of(7, null));
 
-        vault.mounts().enable("pki-itest-path-3", MountType.PKI, payload);
+        vault.sys().mounts().enable("pki-itest-path-3", MountType.PKI, payload);
     }
 
     @Test
@@ -118,14 +118,14 @@ public class MountsTests {
         final MountPayload payload = new MountPayload()
                 .defaultLeaseTtl(TimeToLive.of(7, TimeUnit.DAYS));
 
-        vault.mounts().enable("pki-itest-path-4", MountType.PKI, payload);
+        vault.sys().mounts().enable("pki-itest-path-4", MountType.PKI, payload);
     }
 
     @Test
     public void testDisable() throws VaultException {
         final Vault vault = container.getRootVault();
 
-        final MountResponse response = vault.mounts().disable("pki-custom-path-3");
+        final MountResponse response = vault.sys().mounts().disable("pki-custom-path-3");
 
         TestCase.assertEquals(204, response.getRestResponse().getStatus());
     }
@@ -138,9 +138,9 @@ public class MountsTests {
                 .defaultLeaseTtl(TimeToLive.of(360, TimeUnit.MINUTES))
                 .maxLeaseTtl(TimeToLive.of(360, TimeUnit.MINUTES));
 
-        vault.mounts().enable("pki-predefined-path-1", MountType.PKI, payload);
+        vault.sys().mounts().enable("pki-predefined-path-1", MountType.PKI, payload);
 
-        final MountResponse response = vault.mounts().read("pki-predefined-path-1");
+        final MountResponse response = vault.sys().mounts().read("pki-predefined-path-1");
         final Mount mount = response.getMount();
         final MountConfig config = mount.getConfig();
 
@@ -157,7 +157,7 @@ public class MountsTests {
 
         final Vault vault = container.getRootVault();
 
-        vault.mounts().read("pki-non-existing-path");
+        vault.sys().mounts().read("pki-non-existing-path");
     }
 
     @Test
@@ -168,18 +168,18 @@ public class MountsTests {
                 .defaultLeaseTtl(TimeToLive.of(6, TimeUnit.HOURS))
                 .maxLeaseTtl(TimeToLive.of(6, TimeUnit.HOURS));
 
-        vault.mounts().enable("pki-predefined-path-2", MountType.PKI, enablePayload);
+        vault.sys().mounts().enable("pki-predefined-path-2", MountType.PKI, enablePayload);
 
         final MountPayload tunePayload = new MountPayload()
                 .defaultLeaseTtl(TimeToLive.of(12, TimeUnit.HOURS))
                 .maxLeaseTtl(TimeToLive.of(12, TimeUnit.HOURS));
 
-        final MountResponse tuneResponse = vault.mounts()
+        final MountResponse tuneResponse = vault.sys().mounts()
                 .tune("pki-predefined-path-2", tunePayload);
 
         TestCase.assertEquals(204, tuneResponse.getRestResponse().getStatus());
 
-        final MountResponse response = vault.mounts().read("pki-predefined-path-2");
+        final MountResponse response = vault.sys().mounts().read("pki-predefined-path-2");
         final Mount mount = response.getMount();
         final MountConfig config = mount.getConfig();
 
@@ -198,6 +198,6 @@ public class MountsTests {
                 .defaultLeaseTtl(TimeToLive.of(24, TimeUnit.HOURS))
                 .maxLeaseTtl(TimeToLive.of(24, TimeUnit.HOURS));
 
-        vault.mounts().tune("pki-non-existing-path", tunePayload);
+        vault.sys().mounts().tune("pki-non-existing-path", tunePayload);
     }
 }

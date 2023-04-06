@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.vault.api;
+package io.github.jopenlibs.vault.vault.api.sys;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultConfig;
@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class AuthUnwrapWithoutAuthResponseTest {
+public class WrappingUnwrapWithoutAuthResponseTest {
 
     private Server server;
     private MockVault vaultServer;
@@ -38,7 +38,7 @@ public class AuthUnwrapWithoutAuthResponseTest {
         VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999")
                 .token("wrappedToken").build();
         Vault vault = new Vault(vaultConfig);
-        UnwrapResponse response = vault.auth().unwrap("wrappedToken");
+        UnwrapResponse response = vault.sys().wrapping().unwrap("wrappedToken");
 
         assertEquals(200, response.getRestResponse().getStatus());
 
@@ -64,7 +64,7 @@ public class AuthUnwrapWithoutAuthResponseTest {
         VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999")
                 .token("wrappedToken").build();
         Vault vault = new Vault(vaultConfig);
-        UnwrapResponse response = vault.auth().unwrap("wrappedToken");
+        UnwrapResponse response = vault.sys().wrapping().unwrap("wrappedToken");
 
         assertEquals(200, response.getRestResponse().getStatus());
 

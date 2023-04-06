@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.vault.api;
+package io.github.jopenlibs.vault.vault.api.sys;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultConfig;
@@ -15,7 +15,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class AuthUnwrapTest {
+public class WrappingUnwrapTest {
 
     private static final JsonObject RESPONSE_AUTH_UNWRAP = new JsonObject()
             .add("renewable", false)
@@ -44,7 +44,7 @@ public class AuthUnwrapTest {
         VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999")
                 .token("wrappedToken").build();
         Vault vault = new Vault(vaultConfig);
-        AuthResponse response = vault.auth().unwrap();
+        AuthResponse response = vault.sys().wrapping().unwrap();
 
         assertEquals(200, response.getRestResponse().getStatus());
 
@@ -61,7 +61,7 @@ public class AuthUnwrapTest {
         VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999")
                 .token("authToken").build();
         Vault vault = new Vault(vaultConfig);
-        AuthResponse response = vault.auth().unwrap("wrappedToken");
+        AuthResponse response = vault.sys().wrapping().unwrap("wrappedToken");
 
         assertEquals(200, response.getRestResponse().getStatus());
 

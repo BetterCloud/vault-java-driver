@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.vault.api;
+package io.github.jopenlibs.vault.vault.api.sys;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultConfig;
@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class AuthWrapTest {
+public class WrappingWrapTest {
 
     private static final JsonObject RESPONSE_AUTH_WRAP = new JsonObject()
             .add("renewable", false)
@@ -45,7 +45,7 @@ public class AuthWrapTest {
                 .token("wrappedToken").build();
         Vault vault = new Vault(vaultConfig);
 
-        WrapResponse response = vault.auth().wrap(
+        WrapResponse response = vault.sys().wrapping().wrap(
                 new JsonObject()
                         .add("foo", "bar")
                         .add("zoo", "zar"),

@@ -8,6 +8,7 @@ import io.github.jopenlibs.vault.response.PkiResponse;
 import io.github.jopenlibs.vault.rest.RestResponse;
 import io.github.jopenlibs.vault.util.SSLUtils;
 import io.github.jopenlibs.vault.util.VaultContainer;
+import io.github.jopenlibs.vault.util.VaultVersion;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -94,7 +95,9 @@ public class AuthBackendPkiTests {
                         .allowSubdomains(true)
                         .maxTtl("9h")
         );
-        TestCase.assertEquals(204, createRoleResponse.getRestResponse().getStatus());
+        int statusCode = VaultVersion.lessThan("1.13.0") ? 204 : 200;
+        int responseCode = createRoleResponse.getRestResponse().getStatus();
+        TestCase.assertEquals(statusCode, responseCode);
         Thread.sleep(3000);
 
         // Issue cert
@@ -133,7 +136,9 @@ public class AuthBackendPkiTests {
                         .allowSubdomains(true)
                         .maxTtl("9h")
         );
-        TestCase.assertEquals(204, createRoleResponse.getRestResponse().getStatus());
+        int statusCode = VaultVersion.lessThan("1.13.0") ? 204 : 200;
+        int responseCode = createRoleResponse.getRestResponse().getStatus();
+        TestCase.assertEquals(statusCode, responseCode);
         Thread.sleep(3000);
 
         // Issue cert
@@ -158,7 +163,9 @@ public class AuthBackendPkiTests {
                         .allowSubdomains(true)
                         .maxTtl("9h")
         );
-        TestCase.assertEquals(204, createRoleResponse.getRestResponse().getStatus());
+        int statusCode = VaultVersion.lessThan("1.13.0") ? 204 : 200;
+        int responseCode = createRoleResponse.getRestResponse().getStatus();
+        TestCase.assertEquals(statusCode, responseCode);
         Thread.sleep(3000);
         // Issue cert
         final PkiResponse issueResponse = vault.pki()

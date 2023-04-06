@@ -69,7 +69,7 @@ public class LeasesTests {
     public void testRevoke() throws VaultException {
         DatabaseResponse credsResponse = this.generateCredentials();
 
-        final VaultResponse response = vault.leases().revoke(credsResponse.getLeaseId());
+        final VaultResponse response = vault.sys().leases().revoke(credsResponse.getLeaseId());
         assertEquals(204, response.getRestResponse().getStatus());
     }
 
@@ -80,7 +80,7 @@ public class LeasesTests {
         String prefix = Arrays.stream(credsResponse.getLeaseId().split("([^/]+)$"))
                 .map(str -> str.substring(0, str.length() - 1)).findFirst().get();
 
-        final VaultResponse response = vault.leases().revokePrefix(prefix);
+        final VaultResponse response = vault.sys().leases().revokePrefix(prefix);
         assertEquals(204, response.getRestResponse().getStatus());
     }
 
@@ -91,7 +91,7 @@ public class LeasesTests {
         String prefix = Arrays.stream(credsResponse.getLeaseId().split("([^/]+)$"))
                 .map(str -> str.substring(0, str.length() - 1)).findFirst().get();
 
-        final VaultResponse response = vault.leases().revokeForce(prefix);
+        final VaultResponse response = vault.sys().leases().revokeForce(prefix);
         assertEquals(204, response.getRestResponse().getStatus());
     }
 
@@ -99,7 +99,7 @@ public class LeasesTests {
     public void testRenew() throws VaultException {
         DatabaseResponse credsResponse = this.generateCredentials();
 
-        final VaultResponse response = vault.leases().renew(credsResponse.getLeaseId(),
+        final VaultResponse response = vault.sys().leases().renew(credsResponse.getLeaseId(),
                 credsResponse.getLeaseDuration());
         assertEquals(200, response.getRestResponse().getStatus());
     }

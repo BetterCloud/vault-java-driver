@@ -2,7 +2,12 @@ package io.github.jopenlibs.vault.rest;
 
 import io.github.jopenlibs.vault.json.Json;
 import io.github.jopenlibs.vault.json.JsonObject;
+import io.github.jopenlibs.vault.vault.VaultTestUtils;
+import io.github.jopenlibs.vault.vault.mock.EchoInputMockVault;
 import java.nio.charset.StandardCharsets;
+import org.eclipse.jetty.server.Server;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -13,20 +18,36 @@ import static org.junit.Assert.assertNull;
  */
 public class PostTests {
 
+    private Server server;
+    private final String URL = "http://127.0.0.1:8999/";
+
+    @Before
+    public void startServer() throws Exception {
+        EchoInputMockVault echoInputMockVault = new EchoInputMockVault(200);
+
+        this.server = VaultTestUtils.initHttpMockVault(echoInputMockVault);
+        this.server.start();
+    }
+
+    @After
+    public void stopServer() throws Exception {
+        this.server.stop();
+    }
+
     /**
      * Verify a basic POST request, with no parameters or headers.
      */
     @Test
     public void testPost_Plain() throws RestException {
         final RestResponse restResponse = new Rest()
-                .url("https://httpbin.org/post")
+                .url(this.URL)
                 .post();
         assertEquals(200, restResponse.getStatus());
         assertEquals("application/json", restResponse.getMimeType());
 
         final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
-        assertEquals("https://httpbin.org/post", jsonObject.getString("url", null));
+        assertEquals(this.URL, jsonObject.getString("URL", null));
     }
 
     /**
@@ -37,7 +58,7 @@ public class PostTests {
     @Test
     public void testPost_InsertParams() throws RestException {
         final RestResponse restResponse = new Rest()
-                .url("https://httpbin.org/post")
+                .url(this.URL)
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
                 .parameter("multi part", "this parameter has whitespace in its name and value")
@@ -47,11 +68,9 @@ public class PostTests {
 
         final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
-        assertEquals("https://httpbin.org/post", jsonObject.getString("url", null));
+        assertEquals(this.URL, jsonObject.getString("URL", null));
 
-        // Note that with a POST (as with a PUT) to this "httpbin.org" test service, parameters are returned
-        // within a JSON object called "form", unlike it's "args" counterpart when doing a GET.
-        final JsonObject form = jsonObject.get("form").asObject();
+        final JsonObject form = jsonObject.get("args").asObject();
         assertEquals("bar", form.getString("foo", null));
         assertEquals("oranges", form.getString("apples", null));
         assertEquals("this parameter has whitespace in its name and value",
@@ -66,7 +85,7 @@ public class PostTests {
     @Test
     public void testPost_UpdateParams() throws RestException {
         final RestResponse restResponse = new Rest()
-                .url("https://httpbin.org/post?hot=cold")
+                .url(this.URL + "?hot=cold")
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
                 .parameter("multi part", "this parameter has whitespace in its name and value")
@@ -76,14 +95,13 @@ public class PostTests {
 
         final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
-        assertEquals("https://httpbin.org/post?hot=cold", jsonObject.getString("url", null));
+        assertEquals(this.URL + "?hot=cold", jsonObject.getString("URL", null));
         final JsonObject args = jsonObject.get("args").asObject();
         assertEquals("cold", args.getString("hot", null));
-        final JsonObject form = jsonObject.get("form").asObject();
-        assertEquals("bar", form.getString("foo", null));
-        assertEquals("oranges", form.getString("apples", null));
+        assertEquals("bar", args.getString("foo", null));
+        assertEquals("oranges", args.getString("apples", null));
         assertEquals("this parameter has whitespace in its name and value",
-                form.getString("multi part", null));
+                args.getString("multi part", null));
     }
 
     /**
@@ -95,17 +113,17 @@ public class PostTests {
     @Test
     public void testPost_WithHeaders() throws RestException {
         final RestResponse restResponse = new Rest()
-                .url("https://httpbin.org/post")
-                .header("black", "white")
-                .header("day", "night")
-                .header("two-part", "Header value")
+                .url(this.URL)
+                .header("Black", "white")
+                .header("Day", "night")
+                .header("Two-Part", "Header value")
                 .post();
         assertEquals(200, restResponse.getStatus());
         assertEquals("application/json", restResponse.getMimeType());
 
         final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
-        assertEquals("https://httpbin.org/post", jsonObject.getString("url", null));
+        assertEquals(this.URL, jsonObject.getString("URL", null));
         final JsonObject headers = jsonObject.get("headers").asObject();
         assertEquals("white", headers.getString("Black", null));
         assertEquals("night", headers.getString("Day", null));
@@ -121,10 +139,10 @@ public class PostTests {
     @Test
     public void testPost_WithOptionalHeaders() throws RestException {
         final RestResponse restResponse = new Rest()
-                .url("https://httpbin.org/post")
-                .header("black", "white")
-                .header("day", "night")
-                .header("two-part", "Header value")
+                .url(this.URL)
+                .header("Black", "white")
+                .header("Day", "night")
+                .header("Two-Part", "Header value")
                 .header("I am null", null)
                 .header("I am empty", "")
                 .post();
@@ -133,7 +151,7 @@ public class PostTests {
 
         final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
-        assertEquals("https://httpbin.org/post", jsonObject.getString("url", null));
+        assertEquals(this.URL, jsonObject.getString("URL", null));
         final JsonObject headers = jsonObject.get("headers").asObject();
         assertEquals("white", headers.getString("Black", null));
         assertEquals("night", headers.getString("Day", null));

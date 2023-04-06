@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.vault.api;
+package io.github.jopenlibs.vault.vault.api.sys;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultConfig;
@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class AuthLookupWrapTest {
+public class WrappingLookupWrapTest {
 
     private static final JsonObject RESPONSE_AUTH_LOOKUPSELF = new JsonObject()
             .add("data", new JsonObject()
@@ -40,7 +40,7 @@ public class AuthLookupWrapTest {
         VaultConfig vaultConfig = new VaultConfig().address("http://127.0.0.1:8999")
                 .token("wrapped").build();
         Vault vault = new Vault(vaultConfig);
-        LogicalResponse response = vault.auth().lookupWrap();
+        LogicalResponse response = vault.sys().wrapping().lookupWrap();
 
         assertEquals(200, response.getRestResponse().getStatus());
 

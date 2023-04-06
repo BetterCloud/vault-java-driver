@@ -2,12 +2,13 @@ package io.github.jopenlibs.vault;
 
 import io.github.jopenlibs.vault.api.Auth;
 import io.github.jopenlibs.vault.api.Debug;
-import io.github.jopenlibs.vault.api.Leases;
 import io.github.jopenlibs.vault.api.Logical;
-import io.github.jopenlibs.vault.api.Seal;
 import io.github.jopenlibs.vault.api.database.Database;
-import io.github.jopenlibs.vault.api.mounts.Mounts;
 import io.github.jopenlibs.vault.api.pki.Pki;
+import io.github.jopenlibs.vault.api.sys.Leases;
+import io.github.jopenlibs.vault.api.sys.Seal;
+import io.github.jopenlibs.vault.api.sys.Sys;
+import io.github.jopenlibs.vault.api.sys.mounts.Mounts;
 import io.github.jopenlibs.vault.json.Json;
 import io.github.jopenlibs.vault.json.JsonObject;
 import io.github.jopenlibs.vault.json.JsonValue;
@@ -183,6 +184,16 @@ public class Vault {
     }
 
     /**
+     * Returns the implementing class for operations on Vault's <code>/v1/sys/*</code> REST
+     * endpoints
+     *
+     * @return The implementing class for Vault's auth operations.
+     */
+    public Sys sys() {
+        return new Sys(vaultConfig);
+    }
+
+    /**
      * Returns the implementing class for Vault's PKI secret backend (i.e. <code>/v1/pki/*</code>
      * REST endpoints).
      *
@@ -227,9 +238,8 @@ public class Vault {
     }
 
     /**
-     * Returns the implementing class for Vault's lease operations (e.g. revoke, revoke-prefix).
-     *
-     * @return The implementing class for Vault's lease operations (e.g. revoke, revoke-prefix).
+     * @see Sys#leases()
+     * @deprecated This method is deprecated and in future it will be removed
      */
     public Leases leases() {
         return new Leases(vaultConfig);
@@ -245,19 +255,16 @@ public class Vault {
     }
 
     /**
-     * Returns the implementing class for Vault's sys mounts operations (i.e.
-     * <code>/v1/sys/mounts/*</code> REST endpoints).
-     *
-     * @return the implementing class for Vault's sys mounts operations
+     * @see Sys#mounts()
+     * @deprecated This method is deprecated and in future it will be removed
      */
     public Mounts mounts() {
         return new Mounts(vaultConfig);
     }
 
     /**
-     * Returns the implementing class for Vault's seal operations (e.g. seal, unseal, sealStatus).
-     *
-     * @return The implementing class for Vault's seal operations (e.g. seal, unseal, sealStatus).
+     * @see Sys#seal()
+     * @deprecated This method is deprecated and in future it will be removed
      */
     public Seal seal() {
         return new Seal(vaultConfig);

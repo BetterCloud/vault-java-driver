@@ -1,9 +1,9 @@
 package io.github.jopenlibs.vault.response;
 
 import io.github.jopenlibs.vault.api.Logical;
-import io.github.jopenlibs.vault.api.mounts.Mount;
-import io.github.jopenlibs.vault.api.mounts.MountConfig;
-import io.github.jopenlibs.vault.api.mounts.MountType;
+import io.github.jopenlibs.vault.api.sys.mounts.Mount;
+import io.github.jopenlibs.vault.api.sys.mounts.MountConfig;
+import io.github.jopenlibs.vault.api.sys.mounts.MountType;
 import io.github.jopenlibs.vault.json.JsonObject;
 import io.github.jopenlibs.vault.json.JsonObject.Member;
 import io.github.jopenlibs.vault.json.JsonValue;

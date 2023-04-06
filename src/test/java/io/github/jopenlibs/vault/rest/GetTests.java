@@ -2,7 +2,12 @@ package io.github.jopenlibs.vault.rest;
 
 import io.github.jopenlibs.vault.json.Json;
 import io.github.jopenlibs.vault.json.JsonObject;
+import io.github.jopenlibs.vault.vault.VaultTestUtils;
+import io.github.jopenlibs.vault.vault.mock.EchoInputMockVault;
 import java.nio.charset.StandardCharsets;
+import org.eclipse.jetty.server.Server;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -13,6 +18,22 @@ import static org.junit.Assert.assertTrue;
  * Unit tests relating the REST client processing of GET requests.
  */
 public class GetTests {
+
+    private Server server;
+    private final String URL = "http://127.0.0.1:8999/";
+
+    @Before
+    public void startServer() throws Exception {
+        EchoInputMockVault echoInputMockVault = new EchoInputMockVault(200);
+
+        this.server = VaultTestUtils.initHttpMockVault(echoInputMockVault);
+        this.server.start();
+    }
+
+    @After
+    public void stopServer() throws Exception {
+        this.server.stop();
+    }
 
     /**
      * The REST client should refuse to handle any HTTP verb if the base URL has not already been
@@ -28,13 +49,15 @@ public class GetTests {
      */
     @Test
     public void testGet_Plain() throws RestException {
-        final RestResponse restResponse = new Rest().url("https://httpbin.org/get").get();
+        final RestResponse restResponse = new Rest()
+                .url(this.URL)
+                .get();
         assertEquals(200, restResponse.getStatus());
         assertEquals("application/json", restResponse.getMimeType());
 
         final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
-        assertEquals("https://httpbin.org/get", jsonObject.getString("url", null));
+        assertEquals("http://127.0.0.1:8999/", jsonObject.getString("URL", null));
     }
 
     /**
@@ -45,7 +68,7 @@ public class GetTests {
     @Test
     public void testGet_InsertParams() throws RestException {
         final RestResponse restResponse = new Rest()
-                .url("https://httpbin.org/get")
+                .url(this.URL)
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
                 .parameter("multi part", "this parameter has whitespace in its name and value")
@@ -56,8 +79,8 @@ public class GetTests {
         final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals(
-                "https://httpbin.org/get?apples=oranges&foo=bar&multi+part=this+parameter+has+whitespace+in+its+name+and+value",
-                jsonObject.getString("url", null));
+                "http://127.0.0.1:8999/?apples=oranges&foo=bar&multi+part=this+parameter+has+whitespace+in+its+name+and+value",
+                jsonObject.getString("URL", null));
         final JsonObject args = jsonObject.get("args").asObject();
         assertEquals("bar", args.getString("foo", null));
         assertEquals("oranges", args.getString("apples", null));
@@ -76,7 +99,7 @@ public class GetTests {
     @Test
     public void testGet_UpdateParams() throws RestException {
         final RestResponse restResponse = new Rest()
-                .url("https://httpbin.org/get?hot=cold")
+                .url(this.URL + "?hot=cold")
                 .parameter("foo", "bar")
                 .parameter("apples", "oranges")
                 .parameter("multi part", "this parameter has whitespace in its name and value")
@@ -87,8 +110,8 @@ public class GetTests {
         final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
         assertEquals(
-                "https://httpbin.org/get?hot=cold&apples=oranges&foo=bar&multi+part=this+parameter+has+whitespace+in+its+name+and+value",
-                jsonObject.getString("url", null));
+                "http://127.0.0.1:8999/?hot=cold&apples=oranges&foo=bar&multi+part=this+parameter+has+whitespace+in+its+name+and+value",
+                jsonObject.getString("URL", null));
         final JsonObject args = jsonObject.get("args").asObject();
         assertEquals("cold", args.getString("hot", null));
         assertEquals("bar", args.getString("foo", null));
@@ -106,19 +129,19 @@ public class GetTests {
     @Test
     public void testGet_WithHeaders() throws RestException {
         final RestResponse restResponse = new Rest()
-                .url("https://httpbin.org/get")
-                .header("black", "white")
-                .header("day", "night")
-                .header("two-part", "Header value")
+                .url(this.URL)
+                .header("Black", "white")
+                .header("Day", "night")
+                .header("Two-Part", "Header value")
                 .get();
         assertEquals(200, restResponse.getStatus());
         assertEquals("application/json", restResponse.getMimeType());
 
         final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
-        assertEquals("https://httpbin.org/get", jsonObject.getString("url", null));
+        assertEquals("http://127.0.0.1:8999/", jsonObject.getString("URL", null));
+
         final JsonObject headers = jsonObject.get("headers").asObject();
-        // Note that even though our header names where all-lowercase, the round trip process converts them to camel case.
         assertEquals("white", headers.getString("Black", null));
         assertEquals("night", headers.getString("Day", null));
         assertEquals("Header value", headers.getString("Two-Part", null));
@@ -133,10 +156,10 @@ public class GetTests {
     @Test
     public void testGet_WithOptionalHeaders() throws RestException {
         final RestResponse restResponse = new Rest()
-                .url("https://httpbin.org/get")
-                .header("black", "white")
-                .header("day", "night")
-                .header("two-part", "Header value")
+                .url(this.URL)
+                .header("Black", "white")
+                .header("Day", "night")
+                .header("Two-Part", "Header value")
                 .header("I am null", null)
                 .get();
         assertEquals(200, restResponse.getStatus());
@@ -144,9 +167,9 @@ public class GetTests {
 
         final String jsonString = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         final JsonObject jsonObject = Json.parse(jsonString).asObject();
-        assertEquals("https://httpbin.org/get", jsonObject.getString("url", null));
+        assertEquals("http://127.0.0.1:8999/", jsonObject.getString("URL", null));
+
         final JsonObject headers = jsonObject.get("headers").asObject();
-        // Note that even though our header names where all-lowercase, the round trip process converts them to camel case.
         assertEquals("white", headers.getString("Black", null));
         assertEquals("night", headers.getString("Day", null));
         assertEquals("Header value", headers.getString("Two-Part", null));
@@ -159,13 +182,14 @@ public class GetTests {
     @Test
     public void testGet_RetrievesResponseBodyWhenStatusIs418() throws RestException {
         final RestResponse restResponse = new Rest()
-                .url("http://httpbin.org/status/418")
+                .url(this.URL + "status/200")
                 .get();
-        assertEquals(418, restResponse.getStatus());
+        assertEquals(200, restResponse.getStatus());
 
         final String responseBody = new String(restResponse.getBody(), StandardCharsets.UTF_8);
         assertTrue("Response body is empty", responseBody.length() > 0);
-        assertTrue("Response body doesn't contain word teapot", responseBody.contains("teapot"));
+        assertTrue("Response body doesn't contain word User-Agent",
+                responseBody.contains("User-Agent"));
     }
 
 }

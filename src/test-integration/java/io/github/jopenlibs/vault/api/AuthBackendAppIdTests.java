@@ -5,7 +5,6 @@ import io.github.jopenlibs.vault.VaultException;
 import io.github.jopenlibs.vault.util.VaultContainer;
 import io.github.jopenlibs.vault.util.VaultVersion;
 import java.io.IOException;
-import java.util.Optional;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -24,24 +23,9 @@ public class AuthBackendAppIdTests {
     @ClassRule
     public static final VaultContainer container = new VaultContainer();
 
-    private static boolean checkVersion() {
-        VaultVersion accepted = new VaultVersion("1.11.6");
-        try {
-            VaultVersion current = new VaultVersion(
-                    Optional.ofNullable(System.getenv("VAULT_VERSION")).orElse("latest"));
-            if (current.compareTo(accepted) > 0) {
-                return false;
-            }
-        } catch (NumberFormatException ignored) {
-            return false;
-        }
-
-        return true;
-    }
-
     @BeforeClass
     public static void setupClass() throws IOException, InterruptedException {
-        assumeTrue(checkVersion());
+        assumeTrue(VaultVersion.lessThan("1.11.6"));
 
         container.initAndUnsealVault();
         container.setupBackendAppId();

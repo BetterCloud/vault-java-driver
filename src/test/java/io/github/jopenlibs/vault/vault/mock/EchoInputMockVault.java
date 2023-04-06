@@ -21,7 +21,7 @@ import org.eclipse.jetty.server.Request;
  */
 public class EchoInputMockVault extends MockVault {
 
-    private int mockStatus;
+    private final int mockStatus;
     private String lastRequestDetails;
 
     public EchoInputMockVault(final int mockStatus) {
@@ -36,6 +36,8 @@ public class EchoInputMockVault extends MockVault {
             final HttpServletResponse response
     ) throws IOException {
         final JsonObject headers = Json.object();
+        final JsonObject values = Json.object();
+
         final Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             final String name = headerNames.nextElement();
@@ -43,18 +45,25 @@ public class EchoInputMockVault extends MockVault {
             headers.add(name, value);
         }
 
-        final StringBuilder url = new StringBuilder(request.getScheme())
-                .append("://")
-                .append(request.getServerName())
-                .append(request.getServerPort() == 0 ? "" : ":" + request.getServerPort())
-                .append(request.getRequestURI())
-                .append(request.getQueryString() == null || request.getQueryString().isEmpty() ? ""
-                        : "?" +
-                                request.getQueryString());
+        final Enumeration<String> parameterNames = request.getParameterNames();
+        while (parameterNames.hasMoreElements()) {
+            final String name = parameterNames.nextElement();
+            final String value = request.getParameter(name);
+            values.add(name, value);
+        }
+
+        String url = request.getScheme()
+                + "://"
+                + request.getServerName()
+                + (request.getServerPort() == 0 ? "" : ":" + request.getServerPort())
+                + request.getRequestURI()
+                + (request.getQueryString() == null || request.getQueryString().isEmpty() ? ""
+                : "?" + request.getQueryString());
 
         final String mockResponse = Json.object()
                 .add("method", request.getMethod())
-                .add("URL", url.toString())
+                .add("URL", url)
+                .add("args", values)
                 .add("headers", headers)
                 .toString();
 

@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.api.mounts;
+package io.github.jopenlibs.vault.api.sys.mounts;
 
 import io.github.jopenlibs.vault.VaultConfig;
 import io.github.jopenlibs.vault.VaultException;
@@ -13,9 +13,8 @@ import java.nio.charset.StandardCharsets;
  * endpoints.</p>
  *
  * <p>This class is not intended to be constructed directly.  Rather, it is meant to used by way of
- * <code>Vault</code>
- * in a DSL-style builder pattern.  See the Javadoc comments of each <code>public</code> method for
- * usage examples.</p>
+ * <code>Vault</code>  in a DSL-style builder pattern.  See the Javadoc comments of each
+ * <code>public</code> method for usage examples.</p>
  */
 public class Mounts extends OperationsBase {
 
@@ -36,7 +35,7 @@ public class Mounts extends OperationsBase {
      * final VaultConfig config = new VaultConfig.address(...).token(...).build();
      * final Vault vault = new Vault(config);
      *
-     * final MountResponse response = vault.mounts().list();
+     * final MountResponse response = vault.sys().mounts().list();
      * final Map<String, Mount> mounts = response.getMounts();
      * }</pre>
      * </blockquote>

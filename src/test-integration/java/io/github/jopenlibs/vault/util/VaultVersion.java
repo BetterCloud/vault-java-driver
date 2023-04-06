@@ -1,5 +1,7 @@
 package io.github.jopenlibs.vault.util;
 
+import java.util.Optional;
+
 public class VaultVersion implements Comparable<VaultVersion> {
 
     private final String literal;
@@ -14,7 +16,7 @@ public class VaultVersion implements Comparable<VaultVersion> {
 
         for (int i = 0; i < split.length; i++) {
             try {
-                numbers[i] = Integer.valueOf(split[i]);
+                numbers[i] = Integer.parseInt(split[i]);
             } catch (NumberFormatException e) {
                 throw new NumberFormatException("Not a semver version");
             }
@@ -40,6 +42,26 @@ public class VaultVersion implements Comparable<VaultVersion> {
             }
         }
         return 0;
+    }
+
+    public static boolean lessThan(String version) {
+        VaultVersion accepted = new VaultVersion(version);
+        try {
+            VaultVersion current = new VaultVersion(
+                    Optional.ofNullable(System.getenv("VAULT_VERSION")).orElse("latest"));
+
+            if (current.getLiteral().equals("latest")) {
+                return false;
+            }
+
+            if (current.compareTo(accepted) >= 0) {
+                return false;
+            }
+
+            return true;
+        } catch (NumberFormatException ignored) {
+            return false;
+        }
     }
 
     @Override

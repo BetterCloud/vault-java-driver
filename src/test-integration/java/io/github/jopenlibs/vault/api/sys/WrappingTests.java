@@ -1,4 +1,4 @@
-package io.github.jopenlibs.vault.api;
+package io.github.jopenlibs.vault.api.sys;
 
 import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultException;
@@ -47,14 +47,14 @@ public class WrappingTests {
     public void testWrapUnwrap() throws Exception {
         final Vault vault = container.getVault(NONROOT_TOKEN);
 
-        WrapResponse wrapResponse = vault.auth().wrap(
+        WrapResponse wrapResponse = vault.sys().wrapping().wrap(
                 new JsonObject()
                         .add("foo", "bar")
                         .add("zoo", "zar"),
                 60
         );
 
-        UnwrapResponse unwrapResponse = vault.auth().unwrap(wrapResponse.getToken());
+        UnwrapResponse unwrapResponse = vault.sys().wrapping().unwrap(wrapResponse.getToken());
 
         assertEquals("bar", unwrapResponse.getData().get("foo").asString());
         assertEquals("zar", unwrapResponse.getData().get("zoo").asString());
@@ -68,28 +68,28 @@ public class WrappingTests {
     public void testWrappingAll() throws Exception {
         final Vault vault = container.getVault(NONROOT_TOKEN);
 
-        WrapResponse wrapResponse0 = vault.auth().wrap(
+        WrapResponse wrapResponse0 = vault.sys().wrapping().wrap(
                 new JsonObject()
                         .add("foo", "bar")
                         .add("zoo", "zar"),
                 60
         );
 
-        LogicalResponse look = vault.auth().lookupWrap(wrapResponse0.getToken());
+        LogicalResponse look = vault.sys().wrapping().lookupWrap(wrapResponse0.getToken());
 
         assertNotNull(look.getData().get("creation_time"));
         assertNotNull(look.getData().get("creation_ttl"));
         assertEquals("sys/wrapping/wrap", look.getData().get("creation_path"));
 
-        WrapResponse wrapResponse1 = vault.auth().rewrap(wrapResponse0.getToken());
+        WrapResponse wrapResponse1 = vault.sys().wrapping().rewrap(wrapResponse0.getToken());
 
         VaultException ex = assertThrows(
                 VaultException.class,
-                () -> vault.auth().unwrap(wrapResponse0.getToken())
+                () -> vault.sys().wrapping().unwrap(wrapResponse0.getToken())
         );
         assertTrue(ex.getMessage().contains("wrapping token is not valid or does not exist"));
 
-        UnwrapResponse unwrapResponse = vault.auth().unwrap(wrapResponse1.getToken());
+        UnwrapResponse unwrapResponse = vault.sys().wrapping().unwrap(wrapResponse1.getToken());
 
         assertEquals("bar", unwrapResponse.getData().get("foo").asString());
         assertEquals("zar", unwrapResponse.getData().get("zoo").asString());

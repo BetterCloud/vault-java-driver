@@ -1,7 +1,8 @@
-package io.github.jopenlibs.vault.api;
+package io.github.jopenlibs.vault.api.sys;
 
 import io.github.jopenlibs.vault.VaultConfig;
 import io.github.jopenlibs.vault.VaultException;
+import io.github.jopenlibs.vault.api.OperationsBase;
 import io.github.jopenlibs.vault.json.Json;
 import io.github.jopenlibs.vault.response.VaultResponse;
 import io.github.jopenlibs.vault.rest.Rest;
