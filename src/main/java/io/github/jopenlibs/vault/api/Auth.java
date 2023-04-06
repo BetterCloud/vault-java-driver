@@ -987,12 +987,39 @@ public class Auth extends OperationsBase {
     // TODO: Needs integration test coverage if possible
     public AuthResponse loginByJwt(final String provider, final String role, final String jwt)
             throws VaultException {
+
+        return loginByJwt(provider, role, jwt, "auth/" + provider);
+    }
+
+    /**
+     * <p>Basic login operation to authenticate to an JWT backend with custom authentication path.  Example usage:</p>
+     *
+     * <blockquote>
+     * <pre>{@code
+     * final AuthResponse response = vault.auth().loginByJwt("kubernetes", "dev", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", "custom/path");
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param provider Provider of JWT token.
+     * @param role The gcp role used for authentication
+     * @param jwt The JWT token for the role
+     * @param authPath The Authentication Path for Vault
+     * @return The auth token, with additional response metadata
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    // TODO: Needs integration test coverage if possible
+    public AuthResponse loginByJwt(final String provider, final String role, final String jwt,
+            String authPath)
+            throws VaultException {
+
         return retry(attempt -> {
             // HTTP request to Vault
             final String requestJson = Json.object().add("role", role).add("jwt", jwt)
                     .toString();
             final RestResponse restResponse = new Rest()
-                    .url(config.getAddress() + "/v1/auth/" + provider + "/login")
+                    .url(config.getAddress() + "/v1/" + authPath + "/login")
                     .header("X-Vault-Namespace", this.nameSpace)
                     .header("X-Vault-Request", "true")
                     .body(requestJson.getBytes(StandardCharsets.UTF_8))
@@ -1042,7 +1069,7 @@ public class Auth extends OperationsBase {
 
 
     /**
-     * Basic login operation to authenticate to an kubernetes backend. Example usage:
+     * Basic login operation to authenticate to a kubernetes backend. Example usage:
      *
      * <blockquote>
      *
