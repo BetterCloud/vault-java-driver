@@ -5,6 +5,7 @@ import io.github.jopenlibs.vault.Vault;
 import io.github.jopenlibs.vault.VaultConfig;
 import io.github.jopenlibs.vault.VaultException;
 import java.nio.file.Path;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
@@ -20,6 +21,8 @@ import static org.testcontainers.utility.MountableFile.forHostPath;
 public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> implements
         TestConstants, TestLifecycleAware {
 
+    public static final String VAULT_DEFAULT_IMAGE = "vault";
+    public static final String VAULT_DEFAULT_TAG = "latest";
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultAgentContainer.class);
 
     /**
@@ -28,7 +31,8 @@ public class VaultAgentContainer extends GenericContainer<VaultAgentContainer> i
     public VaultAgentContainer(
             Path roleId,
             Path secretId) {
-        super("vault:1.11.4");
+        super(VAULT_DEFAULT_IMAGE + ":" + Optional.ofNullable(
+                System.getenv("VAULT_VERSION")).orElse(VAULT_DEFAULT_TAG));
         this.withNetwork(CONTAINER_NETWORK)
                 .withNetworkAliases("agent")
                 .withClasspathResourceMapping("/agent.hcl", AGENT_CONFIG_FILE, BindMode.READ_ONLY)

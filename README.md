@@ -48,7 +48,7 @@ Gradle:
 
 ```
 dependencies {
-    implementation 'io.github.jopenlibs:vault-java-driver:5.2.0'
+    implementation 'io.github.jopenlibs:vault-java-driver:5.3.0'
 }
 ```
 
@@ -58,7 +58,7 @@ Maven:
 <dependency>
     <groupId>io.github.jopenlibs</groupId>
     <artifactId>vault-java-driver</artifactId>
-    <version>5.2.0</version>
+    <version>5.3.0</version>
 </dependency>
 ```
 
@@ -310,7 +310,12 @@ and may require modifications in your code to migrate. Changes to the minor vers
 number) should represent non-breaking changes. The third number represents any very minor bugfix
 patches.
 
-* **5.2.0**:  This release contains the following updates:
+* **5.3.0**: This release contains the following updates:
+    * Created sys namespace [PR #21](https://github.com/jopenlibs/vault-java-driver/pull/25) 
+    * Add custom Vault Authentication Path when using k8s login method [(PR #27)](https://github.com/jopenlibs/vault-java-driver/pull/27)
+    * Parametrized integration tests [(PR #21)](https://github.com/jopenlibs/vault-java-driver/pull/21) 
+    * Fix Leases section [(PR #18)](https://github.com/jopenlibs/vault-java-driver/pull/18)
+* **5.2.0**: This release contains the following updates:
     * Move code packages and maven groupdId from `com.bettercloud`
       to `io.github.jopenlibs`. [(PR #2)](https://github.com/jopenlibs/vault-java-driver/pull/2)
     * Fix and refactoring data wrapping, add integration tests with the last Vault version (vault
