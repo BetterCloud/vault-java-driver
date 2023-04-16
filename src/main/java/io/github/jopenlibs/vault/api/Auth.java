@@ -1094,6 +1094,31 @@ public class Auth extends OperationsBase {
     }
 
     /**
+     * Basic login operation to authenticate to a kubernetes backend with custom path. Example usage:
+     *
+     * <blockquote>
+     *
+     * <pre>{@code
+     * final AuthResponse response =
+     *     vault.auth().loginByKubernetes("dev", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", "customAuthPath");
+     *
+     * final String token = response.getAuthClientToken();
+     * }</pre>
+     * </blockquote>
+     *
+     * @param role The kubernetes role used for authentication
+     * @param jwt The JWT token for the role, typically read from
+     * /var/run/secrets/kubernetes.io/serviceaccount/token
+     * @param authPath The Authentication Path for Vault
+     * @return The auth token, with additional response metadata
+     * @throws VaultException If any error occurs, or unexpected response received from Vault
+     */
+    public AuthResponse loginByKubernetes(final String role, final String jwt, final String authPath)
+            throws VaultException {
+        return loginByJwt("kubernetes", role, jwt, authPath);
+    }
+
+    /**
      * <p>Basic login operation to authenticate using Vault's TLS Certificate auth backend.
      * Example usage:</p>
      *
