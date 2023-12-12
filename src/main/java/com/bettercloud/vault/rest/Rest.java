@@ -390,7 +390,6 @@ public class Rest {
             }
 
             connection.setDoOutput(true);
-            connection.setRequestProperty("Accept-Charset", "UTF-8");
 
             // If a body payload has been provided, then it takes precedence.  Otherwise, look for any additional
             // parameters to send as form field values.  Parameters sent via the base URL query string are left
